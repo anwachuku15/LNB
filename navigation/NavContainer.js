@@ -34,8 +34,6 @@ const NavContainer = props => {
     }, [isAuth])
     
     return (
-        // <MainNavigator theme={props.theme} ref={navRef}/>
-        // <AltNavigator theme={props.theme} ref={navRef}/>
         <LNBNavigator theme={props.theme} ref={navRef}/>
     )
 }

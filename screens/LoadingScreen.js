@@ -17,12 +17,15 @@ const LoadingScreen = props => {
                 if (authData) {
                     const transformedData = JSON.parse(authData)
                     const {token, userId, expDate} = transformedData
-                        if (expDate < new Date() || !token || !userId) { 
-                            props.navigation.navigate('Auth')
-                            return
-                        }
-                    const expTime = new Date(expDate).getTime()
-                    dispatch(authenticate(token, userId, expTime))
+                    if (new Date(expDate).getTime() < new Date() || !token || !userId) { 
+                        props.navigation.navigate('Auth')
+                        return
+                    }
+
+
+                    const expiresIn = new Date(expDate).getTime() - (new Date().getTime())
+                    console.log(expiresIn)
+                    dispatch(authenticate(token, userId, expiresIn))
                     db.doc(`/users/${user.uid}`)
                         .get()
                         .then(userDoc => {
@@ -34,6 +37,7 @@ const LoadingScreen = props => {
                                 props.navigation.navigate('Auth')
                             }
                         })
+                        
                 } else {
                     props.navigation.navigate('Auth')
                 }

@@ -14,7 +14,7 @@ const db = firebase.firestore()
 
 export const signup = (email, password, fname, lname ) => {
     return async dispatch => {
-        let data, userId, idToken, expTime, expDate, displayName, noImg, imageUrl
+        let data, userId, idToken, expTime, expiresIn, expDate, displayName, noImg, imageUrl
         // ---- ADD NEW USER TO FIREBASE ---- //
         try {
             data = await firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -26,6 +26,7 @@ export const signup = (email, password, fname, lname ) => {
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000
         expDate = new Date(expTime)
+        expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
         noImg = 'no-img.png'
         imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
@@ -44,14 +45,14 @@ export const signup = (email, password, fname, lname ) => {
             notifications: []
         })
         saveDataToStorage(idToken, userId, expDate)
-        dispatch(authenticate(idToken, userId, expTime))
+        dispatch(authenticate(idToken, userId, expiresIn))
         dispatch(getAuthenticatedUser(userId, email, displayName, imageUrl, '', '', '', 0, {}, [], []))
     }
 }
 
 export const login = (email, password) => {
     return async dispatch => {
-        let data, userId, idToken, expTime, expDate, displayName, noImg, imageUrl
+        let data, userId, idToken, expTime, expDate, expiresIn, displayName, noImg, imageUrl
         try {
             data = await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (err) {
@@ -62,8 +63,10 @@ export const login = (email, password) => {
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000;
         expDate = new Date(expTime)
+        expiresIn = expTime - ((new Date()).getTime())
+        console.log('this is when it expires: ' + expiresIn)
         saveDataToStorage(idToken, userId, expDate)
-        dispatch(authenticate(idToken, userId, expTime))
+        dispatch(authenticate(idToken, userId, expiresIn))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
             const { userId, email, displayName, imageUrl, location, bio, website, connections, messages, likes, notifications } = userDoc.data()
@@ -72,16 +75,6 @@ export const login = (email, password) => {
     }
 }
 
-export const authenticate = (token, userId, expTime) => {
-    return dispatch => {
-        dispatch(setLogoutTimer(expTime))
-        dispatch({
-            type: AUTHENTICATE,
-            token: token,
-            userId: userId
-        })
-    }
-}
 
 export const getAuthenticatedUser = (userId, email, displayName, imageUrl, location, bio, website, connections, messages, likes, notifications) => {
     return dispatch => {
@@ -104,6 +97,16 @@ export const getAuthenticatedUser = (userId, email, displayName, imageUrl, locat
     }
 }
 
+export const authenticate = (token, userId, expiresIn) => {
+    return dispatch => {
+        dispatch(setLogoutTimer(expiresIn))
+        dispatch({
+            type: AUTHENTICATE,
+            token: token,
+            userId: userId
+        })
+    }
+}
 const saveDataToStorage = (token, userId, expDate) => {
     AsyncStorage.setItem('authData', JSON.stringify({
         token: token,

@@ -332,7 +332,7 @@ const AuthNavigator = createStackNavigator({
 })
 
 // ----- SWITCH ----- //
-const MainNavigator = createSwitchNavigator({
+const AppNavigator = createSwitchNavigator({
     Loading: LoadingScreen,
     Auth: AuthNavigator,
     App: SwipeTabNavigator
@@ -340,4 +340,4 @@ const MainNavigator = createSwitchNavigator({
 
 
 
-export default createAppContainer(MainNavigator)
+export default createAppContainer(AppNavigator)
