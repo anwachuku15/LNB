@@ -1,0 +1,16 @@
+Tabs.navigationOptions = ({navigation}) => {
+    const { routeName } = navigation.state.routes[navigation.state.index]
+    // console.log(navigation)
+    let headerTitle
+    switch (routeName) {
+        case 'Overview':
+            headerTitle='Home'
+            break
+        case 'Cart':
+            headerTitle='Cart'
+            break
+    }
+    return {
+        headerTitle: headerTitle
+    }
+}
