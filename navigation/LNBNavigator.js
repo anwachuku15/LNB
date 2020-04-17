@@ -74,7 +74,15 @@ const DirectoryStack = createStackNavigator({
                 horizontal: 300
             }
         }
-    }
+    },
+    Settings: {
+        screen: SettingsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
 }, {headerMode:'none'})
 
 const NotificationsStack = createStackNavigator({
@@ -88,7 +96,15 @@ const NotificationsStack = createStackNavigator({
                 horizontal: 300
             }
         }
-    }
+    },
+    Settings: {
+        screen: SettingsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
 }, {headerMode:'none'})
 
 const NeedsFeedStack = createStackNavigator({
@@ -102,7 +118,15 @@ const NeedsFeedStack = createStackNavigator({
                 horizontal: 300
             }
         }
-    }
+    },
+    Settings: {
+        screen: SettingsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
 }, {headerMode:'none'})
 
 const BottomTabStackContainer = createStackNavigator({
