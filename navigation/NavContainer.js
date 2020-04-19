@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { NavigationActions } from 'react-navigation'
-import MainNavigator from './MainNavigator'
-import AltNavigator from './AltNavigator'
 import LNBNavigator from './LNBNavigator'
 import { useColorScheme } from 'react-native-appearance'
 import { StatusBar } from 'react-native'

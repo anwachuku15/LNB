@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import ProductItem from '../../components/shop/ProductItem'
 import * as cartActions from '../../redux/actions/cartActions'
 import { fetchProducts } from '../../redux/actions/productsActions'
-import { logout, getUserData } from '../../redux/actions/authActions'
+import { logout, getUserData, getUser } from '../../redux/actions/authActions'
 // import {  } from '../../redux/action/authActions'
 // REACT-NATIVE
 import { Platform, TouchableOpacity, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
@@ -38,18 +38,9 @@ const HomeScreen = props => {
     }
     
 
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
-
-    const products = useSelector(state => {
-        const descending = state.products.availableProducts
-        return descending.sort((a, b) => 
-            a.id > b.id ? -1 : 1
-        )
-    })
-    const user = useSelector(state => state.auth)
-    
     const needs = useSelector(state => state.posts.allNeeds)
     const dispatch = useDispatch()
     
@@ -63,7 +54,7 @@ const HomeScreen = props => {
             setError(err.message)
         }
         setIsRefreshing(false)
-    },[dispatch, setIsLoading, setError])
+    },[dispatch, setIsRefreshing, setError])
 
 
     // NAV LISTENER
@@ -74,7 +65,7 @@ const HomeScreen = props => {
         )
         // Clean up listener when function re-runs https://reactjs.org/docs/hooks-effect.html
         return () => {
-            willFocusSub.remove()
+            willFocusSub
         }
     }, [loadPosts])
 
@@ -93,6 +84,7 @@ const HomeScreen = props => {
             </View>
         )
     }
+
     if (isLoading) {
         return (
             <View style={styles.spinner}>
@@ -105,6 +97,7 @@ const HomeScreen = props => {
     }
 
     if (!isLoading && needs.length === 0) {
+        console.log('not loading')
         return (
             <View style={styles.spinner}>
                 <Text>No needs found.</Text>
@@ -113,12 +106,11 @@ const HomeScreen = props => {
     }
 
 
-    const selectItemHandler = (id, title) => {
+    const selectUserHandler = (userId) => {
         props.navigation.navigate({
-            routeName: 'ProductDetails',
+            routeName: 'UserProfile',
             params: {
-                productId: id,
-                productTitle: title
+                userId: userId
             }
         })
     }
@@ -128,38 +120,9 @@ const HomeScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
     
-    
-    // const renderPost = (item) => {
-    //     return (
-    //         <TouchableCmp onPress={props.onSelect} useForeground>
-    //             <View style={styles.feedItem} key={item.item.id}>
-    //                 <Image source={{uri: item.item.userImage}} style={styles.avatar} />
-    //                 <View style={{flex: 1}}>
-    //                     <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-    //                         <View>
-    //                             <Text style={styles.name}>{item.item.userName}</Text>
-    //                             <Text style={styles.timestamp}>{moment(item.item.timestamp).fromNow()}</Text>
-    //                         </View>
-    //                         <Ionicons name='ios-more' size={24} color='#73788B'/>
-    //                     </View>
-    //                     <Text style={styles.post}>{item.item.body}</Text>
-    //                     {item.item.imageUrl ? (
-    //                         <Image source={{uri: item.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
-    //                     ) : (
-    //                         null
-    //                     )}
-    //                     <View style={{flexDirection: 'row', alignSelf: 'flex-end'}}>
-    //                         <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
-    //                         <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
-    //                     </View>
-    //                 </View>
-    //             </View>
-    //         </TouchableCmp>
-    //     )
-    // }
     return (
-        
         <View style={styles.screen}>
+            {/* HEADER */}
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -180,7 +143,7 @@ const HomeScreen = props => {
                 </HeaderButtons>
             </View>
 
-
+            {/* NEED POSTS */}
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
                 data={needs}
@@ -192,7 +155,9 @@ const HomeScreen = props => {
                 renderItem={itemData => (
                     <TouchableCmp onPress={props.onSelect} useForeground>
                         <View style={styles.feedItem} key={itemData.item.id}>
-                            <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
+                            <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
+                                <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
+                            </TouchableCmp>
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
                                     <View>
@@ -216,71 +181,10 @@ const HomeScreen = props => {
                     </TouchableCmp>
                 )}
             />
-        
-            {/* <FlatList
-                onRefresh={loadProducts}
-                refreshing={isRefreshing}
-                style={styles.feed}
-                data={products}
-                renderItem={itemData => (
-                    <ProductItem 
-                        image={itemData.item.imageUrl} 
-                        title={itemData.item.title}
-                        price={itemData.item.price}
-                        onSelect={() => {
-                            selectItemHandler(itemData.item.id, itemData.item.title)
-                        }}
-                    >
-                        <Button 
-                            title='View Details' 
-                            onPress={() => {
-                                selectItemHandler(itemData.item.id, itemData.item.title)
-                            }}
-                            color={Colors.coral}
-                        />
-                        <Button 
-                            title='Add to Cart' 
-                            onPress={() => {
-                                dispatch(cartActions.addToCart(itemData.item))
-                            }}
-                            color={Colors.primary}
-                        />
-                    </ProductItem>
-                )}
-            /> */}
         </View>
     )
 }
 
-// HomeScreen.navigationOptions = (navData) => {
-//     return {
-//         headerTitle: 'All Products',
-//         headerLeft: () => (
-//             <HeaderButtons HeaderButtonComponent={HeaderButton}>
-//                 <Item
-//                     title='Menu'
-//                     iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-//                     onPress={() => {
-//                         navData.navigation.toggleDrawer()
-//                     }}
-//                 />
-//             </HeaderButtons>
-//         ),
-//         headerRight: () => (
-//             <HeaderButtons HeaderButtonComponent={HeaderButton}>
-//                 <Item
-//                     title='Direct'
-//                     iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-//                     onPress={() => {
-//                         navData.navigation.navigate({
-//                             routeName: 'Cart',
-//                         })
-//                     }}
-//                 />
-//             </HeaderButtons>
-//         )
-//     }
-// }
 
 
 const styles = StyleSheet.create({

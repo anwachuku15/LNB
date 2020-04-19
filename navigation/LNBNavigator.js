@@ -29,7 +29,8 @@ import MessagesScreen from '../screens/LNB/MessagesScreen'
 import ProfileScreen from '../screens/LNB/ProfileScreen'
 import SettingsScreen from '../screens/LNB/SettingsScreen'
 import DrawerScreen from '../screens/LNB/DrawerScreen'
-import ProductDetailScreen from '../screens/shop/ProductDetailScreen'
+import EditProfileScreen from '../screens/LNB/EditProfileScreen'
+import UserProfileScreen from '../screens/LNB/UserProfileScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -48,6 +49,22 @@ const HomeStack = createStackNavigator({
     },
     Profile: {
         screen: ProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    EditProfile: {
+        screen: EditProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    UserProfile: {
+        screen: UserProfileScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -76,6 +93,14 @@ const BulletinStack = createStackNavigator({
             }
         }
     },
+    EditProfile: {
+        screen: EditProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
     Settings: {
         screen: SettingsScreen,
         navigationOptions: {
@@ -98,6 +123,14 @@ const NotificationsStack = createStackNavigator({
             }
         }
     },
+    EditProfile: {
+        screen: EditProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
     Settings: {
         screen: SettingsScreen,
         navigationOptions: {
@@ -114,6 +147,14 @@ const NeedsFeedStack = createStackNavigator({
     },
     Profile: {
         screen: ProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    EditProfile: {
+        screen: EditProfileScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300

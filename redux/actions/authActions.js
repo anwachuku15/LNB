@@ -9,10 +9,11 @@ export const AUTHENTICATE = 'AUTHENTICATE'
 // export const LOGIN = 'LOGIN'
 export const LOGOUT = 'LOGOUT'
 export const SET_USER = 'SET_USER'
+export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 
 const db = firebase.firestore()
 
-export const signup = (email, password, fname, lname ) => {
+export const signup = (email, password, fname, lname, headline) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expiresIn, expDate, displayName, noImg, imageUrl
         // ---- ADD NEW USER TO FIREBASE ---- //
@@ -35,6 +36,7 @@ export const signup = (email, password, fname, lname ) => {
             createdAt: new Date().toISOString(),
             email: email,
             displayName: displayName,
+            headline: headline,
             imageUrl: imageUrl,
             connections: 0,
             location: '',
@@ -46,7 +48,7 @@ export const signup = (email, password, fname, lname ) => {
         })
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId, expiresIn))
-        dispatch(getAuthenticatedUser(userId, email, displayName, imageUrl, '', '', '', 0, {}, [], []))
+        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, {}, [], []))
     }
 }
 
@@ -57,26 +59,29 @@ export const login = (email, password) => {
             data = await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (err) {
             console.log(err.code)
-            throw new Error('Invalid credentials. Please try again.')
+            if (err.code === 'auth/user-not-found') {
+                throw new Error('Email not found.\nPlease try again or sign up.')
+            } else {
+                throw new Error('Invalid credentials. Please try again.')
+            }
         }
         userId = data.user.uid
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000;
         expDate = new Date(expTime)
         expiresIn = expTime - ((new Date()).getTime())
-        console.log('this is when it expires: ' + expiresIn)
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId, expiresIn))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
-            const { userId, email, displayName, imageUrl, location, bio, website, connections, messages, likes, notifications } = userDoc.data()
-            dispatch(getAuthenticatedUser(userId, email, displayName, imageUrl, location, bio, website, connections, messages, likes, notifications))
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, messages, likes, notifications } = userDoc.data()
+            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, messages, likes, notifications))
         }
     }
 }
 
 
-export const getAuthenticatedUser = (userId, email, displayName, imageUrl, location, bio, website, connections, messages, likes, notifications) => {
+export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, messages, likes, notifications) => {
     return dispatch => {
         dispatch({
             type: SET_USER,
@@ -84,6 +89,7 @@ export const getAuthenticatedUser = (userId, email, displayName, imageUrl, locat
                 userId: userId,
                 email: email,
                 displayName: displayName,
+                headline: headline,
                 imageUrl: imageUrl,
                 location: location,
                 bio: bio,
@@ -94,6 +100,40 @@ export const getAuthenticatedUser = (userId, email, displayName, imageUrl, locat
             likes: likes,
             notifications: notifications
         })
+    }
+}
+
+export const getUser = (userId) => {
+    return async dispatch => {
+        let userData
+        try {
+            userData = await db.doc(`/users/${userId}`).get()
+        } catch (err) {
+            throw err
+        }
+
+        if (userData.exists) {
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, messages, likes, notifications } = userData.data()
+            dispatch({
+                type: SET_SELECTED_USER,
+                selectedUser: {
+                    credentials: {
+                        userId: userId,
+                        email: email,
+                        displayName: displayName,
+                        headline: headline,
+                        imageUrl: imageUrl,
+                        location: location,
+                        bio: bio,
+                        website: website
+                    },
+                    connections: connections,
+                    messages: messages,
+                    likes: likes,
+                    notifications: notifications
+                }
+            })
+        }
     }
 }
 

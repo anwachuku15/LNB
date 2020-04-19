@@ -12,7 +12,6 @@ export const SET_PRODUCTS = 'SET_PRODUCTS'
 export const fetchProducts = () => {
     return async (dispatch, getState) => {
         const userId = getState().auth.userId
-
         try {
             const res = await fetch('https://reactnative-ac7bd.firebaseio.com/products.json')
             if(!res.ok) {
@@ -32,7 +31,6 @@ export const fetchProducts = () => {
                     // new Date(resDate[key].date)
                 ))
             }
-            
             dispatch({
                 type: SET_PRODUCTS,
                 products: loadedProducts,

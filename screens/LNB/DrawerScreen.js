@@ -28,7 +28,7 @@ const DrawerScreen = props => {
     }
 
     const user = useSelector(state => state.auth)
-
+    // console.log(user)
     return (
         <View style={styles.container}>
             <View style={styles.top}>
@@ -44,8 +44,8 @@ const DrawerScreen = props => {
                     <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
                       <Text style={{...styles.viewProfile, ...{color:Colors.primary}}}>View Profile</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('Settings')}>
-                      <Text style={{...styles.settings, ...{color:Colors.primary}}}>Settings</Text>
+                    <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
+                      <Text style={{...styles.editProfile, ...{color:Colors.primary}}}>Edit Profile</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -98,14 +98,14 @@ const DrawerScreen = props => {
                     <Text style={{...styles.text, ...{color:text}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.list} onPress={() => {}}>
+                <TouchableOpacity style={styles.list} onPress={() => props.navigation.navigate('Settings')}>
                     <View>
-                        <MaterialCommunityIcons
+                        <Ionicons
                             style={styles.icon}
-                            name="arrow-top-right"
-                            size={20}
+                            name="ios-cog"
+                            size={23}
                             color="rgb(136, 153, 166)"/>
-                        <Text style={{...styles.text, ...{color:text}}}> Edit Profile </Text>
+                        <Text style={{...styles.text, ...{color:text}}}> Settings </Text>
                     </View>
                 </TouchableOpacity>
             </ScrollView>
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
       top: 10,
       // fontWeight: 'bold'
     },
-    settings:{
+    editProfile:{
       color: "white",
       position: 'absolute',
       right: 30,

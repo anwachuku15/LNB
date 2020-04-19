@@ -1,5 +1,5 @@
 import * as firebase from 'firebase'
-import { AUTHENTICATE, LOGOUT, SET_USER } from '../actions/authActions'
+import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
 
@@ -30,6 +30,12 @@ export default (state = initialState, action) => {
                 messages: action.messages,
                 likes: action.likes,
                 notifications: action.notifications
+            }
+        }
+        case SET_SELECTED_USER: {
+            return {
+                ...state,
+                selectedUser: action.selectedUser
             }
         }
         case LOGOUT: {

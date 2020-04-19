@@ -10,7 +10,7 @@ import {
 
 } from 'react-native'
 import { useColorScheme } from 'react-native-appearance'
-import Card from '../UI/Card'
+import Card from './Card'
 import Colors from '../../constants/Colors'
 
 
@@ -35,7 +35,7 @@ const Post = props => {
         <View style={styles.feedItem}>
             <Image source={post.avatar} style={styles.avatar} />
         </View>
-        // <Card style={styles.product}>
+        // <Card style={styles.post}>
         //     <View style={styles.touchable}>
         //         <TouchableCmp onPress={props.onSelect} useForeground>
         //             <View>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
 })
 
 // const styles = StyleSheet.create({
-//     product: {
+//     post: {
 //         height: 300,
 //         margin: 20,
 //     },

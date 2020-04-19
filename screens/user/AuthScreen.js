@@ -60,16 +60,16 @@ const AuthScreen = props => {
         inputValues: {
             fname: '',
             lname: '',
+            headline: '',
             email: '',
-            password: '',
-            confirmPassword: ''
+            password: ''
         }, 
         inputValidities: {
             fname: false,
             lname: false,
+            headline: false,
             email: false,
-            password: false,
-            confirmPassword: false
+            password: false
         }, 
         formIsValid: false,
     })
@@ -91,7 +91,8 @@ const AuthScreen = props => {
                 formState.inputValues.email, 
                 formState.inputValues.password, 
                 formState.inputValues.fname, 
-                formState.inputValues.lname
+                formState.inputValues.lname,
+                fomrState.inputValues.headline
             )
         } else {
             action = login(formState.inputValues.email, formState.inputValues.password)
@@ -159,6 +160,19 @@ const AuthScreen = props => {
                             initialValue=''
                         />
                     ) : (null)}
+                    {isSignup ? (
+                        <Input
+                            id='title' 
+                            placeholder='Headline (Entrepreneur, designer, etc.)' 
+                            keyboardType='default'
+                            secureTextEntry
+                            required 
+                            minLength={3} 
+                            autoCapitalize='words'
+                            onInputChange={inputChangeHandler}
+                            initialValue=''
+                        />
+                    ) : (null)}
                     <Input 
                         id='email' 
                         placeholder='Email' 
@@ -182,21 +196,6 @@ const AuthScreen = props => {
                         onInputChange={inputChangeHandler}
                         initialValue=''
                     />
-                    {isSignup ? (
-                        <Input
-                            confirmPassword 
-                            id='confirmPassword' 
-                            placeholder='Confirm Password' 
-                            keyboardType='default'
-                            secureTextEntry
-                            required 
-                            minLength={8} 
-                            autoCapitalize='none' 
-                            errorText='Make sure passwords match' 
-                            onInputChange={inputChangeHandler}
-                            initialValue=''
-                        />
-                    ) : (null)}
                     <View style={styles.buttonContainer}>
                         {/* <Button 
                             title={isSignup ? 'Sign Up' : 'Login'}

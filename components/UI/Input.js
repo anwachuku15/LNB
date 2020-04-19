@@ -70,9 +70,6 @@ const Input = props => {
         if (props.password) {
             enteredpassword = text
         }
-        if (props.confirmPassword && text !== enteredpassword) {
-            isValid = false
-        }
         if (props.min != null && +text < props.min) {
             isValid = false;
         }
