@@ -25,19 +25,20 @@ class Fire {
         }
     }
 
-    addPost = async ({post, localUri}) => {
+    addPost = async ({userName, body, localUri}) => {
         let remoteUri
         if (localUri) {
             remoteUri = await this.uploadPhotoAsyn(localUri)
             return new Promise((res, rej) => {
                 firebase.firestore().collection('posts').add({
-                    post,
+                    userName,
+                    body,
                     uid: this.uid,
                     timestamp: moment(this.timestamp).toISOString(),
                     image: remoteUri
                 })
                 .then(ref => {
-                    console.log(this.uid)
+                    console.log(ref)
                     res(ref)
                 })
                 .catch(err => {
@@ -47,7 +48,8 @@ class Fire {
         } else {
             return new Promise((res, rej) => {
                 firebase.firestore().collection('posts').add({
-                    post,
+                    userName,
+                    body,
                     uid: this.uid,
                     timestamp: moment(this.timestamp).toISOString()
                 })

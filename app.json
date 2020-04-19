@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "HelloWorld",
-    "slug": "shopping",
+    "slug": "leavenormalbehind",
     "platforms": [
       "ios",
       "android",
@@ -9,11 +9,11 @@
     ],
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/lnb.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/lnb.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

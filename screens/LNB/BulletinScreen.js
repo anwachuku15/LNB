@@ -16,7 +16,7 @@ import HeaderButton from '../../components/UI/HeaderButton'
 
 let themeColor
 let text
-const DirectoryScreen = props => {
+const BulletinScreen = props => {
     const scheme = useColorScheme()
 
     const productId = props.navigation.getParam('productId')
@@ -43,7 +43,7 @@ const DirectoryScreen = props => {
                         onPress={() => {props.navigation.toggleDrawer()}}
                     />
                 </HeaderButtons>
-                <Text style={styles.headerTitle}>Directory</Text>
+                <Text style={styles.headerTitle}>Bulletin</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Direct'
@@ -55,16 +55,16 @@ const DirectoryScreen = props => {
                 </HeaderButtons>
             </View>
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Member Directory</Text>
+                <Text style={{color:text}}>Bulletin</Text>
             </View>
         </View>
     )
 }
 
 
-DirectoryScreen.navigationOptions = (navData) => {
+BulletinScreen.navigationOptions = (navData) => {
     return {
-        headerTitle: 'Member Directory'
+        headerTitle: 'Bulletin'
     }
 }
 
@@ -91,4 +91,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default DirectoryScreen
+export default BulletinScreen

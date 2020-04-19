@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
 import { Platform, View, Button, SafeAreaView, StyleSheet, Image, Text, ScrollView, TouchableOpacity} from 'react-native'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { createAppContainer, createSwitchNavigator } from 'react-navigation'
 import { createStackNavigator, } from 'react-navigation-stack'
 import { createDrawerNavigator, DrawerNavigatorItems,} from 'react-navigation-drawer'
@@ -17,10 +17,11 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../components/UI/HeaderButton'
 
 import HomeScreen from '../screens/LNB/HomeScreen'
-import { Ionicons, FontAwesome } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons'
+
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
-import DirectoryScreen from '../screens/LNB/DirectoryScreen'
+import BulletinScreen from '../screens/LNB/BulletinScreen'
 import NeedsFeedScreen from '../screens/LNB/NeedsFeedScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
@@ -63,9 +64,9 @@ const HomeStack = createStackNavigator({
     },
 }, {headerMode:'none'})
 
-const DirectoryStack = createStackNavigator({
-    Directory: {
-        screen: DirectoryScreen,
+const BulletinStack = createStackNavigator({
+    Bulletin: {
+        screen: BulletinScreen,
     },
     Profile: {
         screen: ProfileScreen,
@@ -149,14 +150,14 @@ const BottomTabStackContainer = createStackNavigator({
                                 : 'Home'
             }
         },
-        Directory: {
-            screen: DirectoryStack,
+        Bulletin: {
+            screen: BulletinStack,
             navigationOptions: {
-                tabBarLabel: 'Directory',
+                tabBarLabel: 'Bulletin',
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <Ionicons 
-                            name={Platform.OS ==='android' ? 'md-people' : 'ios-people'}
+                        <MaterialCommunityIcons 
+                            name='bulletin-board'
                             size={25} 
                             color={tabInfo.tintColor}
                         />
@@ -164,8 +165,8 @@ const BottomTabStackContainer = createStackNavigator({
                 },
                 tabBarColor: Colors.secondaryColor,
                 tabBarLabel: Platform.OS === 'android' 
-                                ? <Text style={{fontFamily: 'open-sans-bold'}}>Directory</Text>
-                                : 'Directory'
+                                ? <Text style={{fontFamily: 'open-sans-bold'}}>Bulletin</Text>
+                                : 'Bulletin'
             }
         },
         Post: {
@@ -260,7 +261,7 @@ const DrawerNav = createDrawerNavigator({
         screen: BottomTabStackContainer,
     },
 }, {
-    edgeWidth: 400,
+    edgeWidth: 200,
     drawerWidth: 320,
     contentOptions: {
         activeTintColor: Colors.primary

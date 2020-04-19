@@ -24,7 +24,7 @@ import EditProductScreen from '../screens/user/EditProductScreen'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
-import DirectoryScreen from '../screens/LNB/DirectoryScreen'
+import BulletinScreen from '../screens/LNB/BulletinScreen'
 import NeedsFeedScreen from '../screens/LNB/NeedsFeedScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
@@ -125,9 +125,9 @@ const AuthNavigator = createStackNavigator({
     defaultNavigationOptions: defaultNavOptions
 })
 
-const Directory = createStackNavigator({
-    Directory: {
-        screen: DirectoryScreen
+const Bulletin = createStackNavigator({
+    Bulletin: {
+        screen: BulletinScreen
     }
 }, {
     defaultNavigationOptions: defaultNavOptions
@@ -221,8 +221,8 @@ const tabScreenConfig = {
                             : 'Home'
         }
     },
-    Directory: {
-        screen: Directory,
+    Bulletin: {
+        screen: Bulletin,
         navigationOptions: {
             tabBarLabel: 'Directory',
             tabBarIcon: (tabInfo) => {

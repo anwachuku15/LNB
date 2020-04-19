@@ -14,17 +14,19 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { Ionicons } from '@expo/vector-icons'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Card from '../../components/LNB/Card'
 import { db } from '../../Firebase/Fire'
 import '@firebase/firestore'
 import Fire from '../../Firebase/Firebase'
+import { fetchNeeds } from '../../redux/actions/postsActions'
+import moment from 'moment'
+
 
 let themeColor
 let text
 
 const HomeScreen = props => {
-    
-    // console.log(Fire.shared.uid()
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         themeColor = 'black'
@@ -36,60 +38,58 @@ const HomeScreen = props => {
     }
     
 
-
     const [isLoading, setIsLoading] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
-    // const products = useSelector(state => state.products.availableProducts)
+
     const products = useSelector(state => {
         const descending = state.products.availableProducts
         return descending.sort((a, b) => 
             a.id > b.id ? -1 : 1
         )
     })
-
     const user = useSelector(state => state.auth)
-
+    
+    const needs = useSelector(state => state.posts.allNeeds)
     const dispatch = useDispatch()
     
-    const loadProducts = useCallback(async () => {
+    const loadPosts = useCallback(async () => {
         setError(null)
         setIsRefreshing(true)
         try {
-            await dispatch(fetchProducts())
+            await dispatch(fetchNeeds())
         } catch (err){
+            console.log(err)
             setError(err.message)
         }
         setIsRefreshing(false)
     },[dispatch, setIsLoading, setError])
 
+
     // NAV LISTENER
     useEffect(() => {
         const willFocusSub = props.navigation.addListener(
-            'willFocus', 
-            loadProducts
+            'willFocus',
+            loadPosts
         )
         // Clean up listener when function re-runs https://reactjs.org/docs/hooks-effect.html
         return () => {
             willFocusSub.remove()
         }
-    }, [loadProducts])
+    }, [loadPosts])
 
     useEffect(() => {
         setIsLoading(true)
-        loadProducts().then(() => {
+        loadPosts().then(() => {
             setIsLoading(false)
         })
-        // return () => {
-        //     loadProducts.remove()
-        // }
-    }, [dispatch, loadProducts])
-
+    }, [dispatch, loadPosts])
+    
     if (error) {
         return (
             <View style={styles.spinner}>
                 <Text>An error occured</Text>
-                <Button title='try again' onPress={loadProducts} color={Colors.primary}/>
+                <Button title='try again' onPress={loadPosts} color={Colors.primary}/>
             </View>
         )
     }
@@ -104,10 +104,10 @@ const HomeScreen = props => {
         )
     }
 
-    if (!isLoading && products.length === 0) {
+    if (!isLoading && needs.length === 0) {
         return (
             <View style={styles.spinner}>
-                <Text>No products found.</Text>
+                <Text>No needs found.</Text>
             </View>
         )
     }
@@ -128,50 +128,45 @@ const HomeScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
     
-    const renderPost = (item) => {
-        return (
-            
-            // <Card style={styles.feedItem}>
-            //     <View style={styles.touchable}>
-                    <TouchableCmp onPress={props.onSelect} useForeground>
-                        <View style={styles.feedItem}>
-                            <Image source={{uri: item.item.imageUrl}} style={styles.avatar} />
-                            <View style={{flex: 1}}>
-                                <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                                    <View>
-                                        <Text style={styles.name}>{item.item.title}</Text>
-                                        <Text style={styles.timestamp}>{item.item.price}</Text>
-                                    </View>
-                                    <Ionicons name='ios-more' size={24} color='#73788B'/>
-                                </View>
-                                <Text style={styles.post}>{item.item.description}</Text>
-                                {/* <Image source={{uri: item.item.imageUrl}} style={styles.postImage} resizeMode='cover' /> */}
-                                <Image source={{uri: user.credentials.imageUrl}} style={styles.postImage} resizeMode='cover'/>
-                                <View style={{flexDirection: 'row', alignSelf: 'flex-end'}}>
-                                    <Ionicons name='ios-heart-empty' size={24} color='#73788B' style={{marginRight: 16}} />
-                                    <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableCmp>
-            //     </View>
-            // </Card>
-        )
-    }
+    
+    // const renderPost = (item) => {
+    //     return (
+    //         <TouchableCmp onPress={props.onSelect} useForeground>
+    //             <View style={styles.feedItem} key={item.item.id}>
+    //                 <Image source={{uri: item.item.userImage}} style={styles.avatar} />
+    //                 <View style={{flex: 1}}>
+    //                     <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+    //                         <View>
+    //                             <Text style={styles.name}>{item.item.userName}</Text>
+    //                             <Text style={styles.timestamp}>{moment(item.item.timestamp).fromNow()}</Text>
+    //                         </View>
+    //                         <Ionicons name='ios-more' size={24} color='#73788B'/>
+    //                     </View>
+    //                     <Text style={styles.post}>{item.item.body}</Text>
+    //                     {item.item.imageUrl ? (
+    //                         <Image source={{uri: item.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
+    //                     ) : (
+    //                         null
+    //                     )}
+    //                     <View style={{flexDirection: 'row', alignSelf: 'flex-end'}}>
+    //                         <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
+    //                         <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+    //                     </View>
+    //                 </View>
+    //             </View>
+    //         </TouchableCmp>
+    //     )
+    // }
     return (
         
         <View style={styles.screen}>
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
-                        title='Direct'
+                        title='Menu'
                         iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
                         onPress={() => {props.navigation.toggleDrawer()}}
-                        // onPress={() => {
-                            //     dispatch(logout)
-                            //     props.navigation.navigate('Auth')
-                            // }}
-                            />
+                    />
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Feed</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -187,13 +182,39 @@ const HomeScreen = props => {
 
 
             <FlatList
-                onRefresh={loadProducts}
+                keyExtractor={(item, index) => index.toString()}
+                data={needs}
+                onRefresh={loadPosts}
                 refreshing={isRefreshing}
                 style={styles.feed}
-                data={products}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
-                renderItem={itemData => renderPost(itemData)}
+                renderItem={itemData => (
+                    <TouchableCmp onPress={props.onSelect} useForeground>
+                        <View style={styles.feedItem} key={itemData.item.id}>
+                            <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
+                            <View style={{flex: 1}}>
+                                <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+                                    <View>
+                                        <Text style={styles.name}>{itemData.item.userName}</Text>
+                                        <Text style={styles.timestamp}>{moment(itemData.item.timestamp).fromNow()}</Text>
+                                    </View>
+                                    <Ionicons name='ios-more' size={24} color='#73788B'/>
+                                </View>
+                                <Text style={styles.post}>{itemData.item.body}</Text>
+                                {itemData.item.imageUrl ? (
+                                    <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
+                                ) : (
+                                    null
+                                )}
+                                <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                                    <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
+                                    <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableCmp>
+                )}
             />
         
             {/* <FlatList

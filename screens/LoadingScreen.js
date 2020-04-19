@@ -26,7 +26,7 @@ const LoadingScreen = props => {
                     const expiresIn = new Date(expDate).getTime() - (new Date().getTime())
                     console.log(expiresIn)
                     dispatch(authenticate(token, userId, expiresIn))
-                    db.doc(`/users/${user.uid}`)
+                    db.doc(`/users/${userId}`)
                         .get()
                         .then(userDoc => {
                             if (userDoc.exists) {

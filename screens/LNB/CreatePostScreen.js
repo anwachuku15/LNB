@@ -22,10 +22,12 @@ import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 import Fire from '../../Firebase/Firebase'
 import '@firebase/firestore'
+import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
 
 const CreatePostScreen = props => {
     const scheme = useColorScheme()
 
+    const userName = useSelector(state => state.auth.credentials.displayName)
     const userImage = useSelector(state => state.auth.credentials.imageUrl)
     const productId = props.navigation.getParam('productId')
     const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
@@ -38,8 +40,8 @@ const CreatePostScreen = props => {
         text = 'black'
     }
 
-
-    const [post, setPost] = useState('')
+    
+    const [body, setBody] = useState('')
     const [image, setImage] = useState()
 
     useEffect(() => {
@@ -68,38 +70,64 @@ const CreatePostScreen = props => {
         }
     }
     
-    const handlePost = () => {
-        Fire.shared
-            .addPost({
-                post: post.trim(), 
-                localUri: image
-            })
-            .then(ref => {
-                setPost('')
-                setImage(null)
-                props.navigation.goBack()
-            })
-            .catch(err => {
-                alert(err)
-                console.log(err)
-            })
+    // const handlePost = () => {
+    //     Fire.shared
+    //         .addPost({
+    //             userName: userName,
+    //             body: body.trim(), 
+    //             localUri: image
+    //         })
+    //         .then(ref => {
+    //             setBody('')
+    //             setImage(null)
+    //             props.navigation.goBack()
+    //         })
+    //         .catch(err => {
+    //             alert(err)
+    //             console.log(err)
+    //         })
+    // }
+
+    const handlePost = async () => {
+        try {
+            await dispatch(createNeed(userName, body, image))
+            setBody('')
+            setImage(null)
+            props.navigation.goBack()
+        } catch (err) {
+            alert(err)
+            console.log(err)
+        }
     }
 
-    const handlePostNoImg = () => {
-        console.log('no image')
-        Fire.shared
-            .addPost({
-                post: post.trim()
-            })
-            .then(ref => {
-                setPost('')
-                setImage(null)
-                props.navigation.goBack()
-            })
-            .catch(err => {
-                alert(err)
-                console.log(err)
-            })
+    // const handlePostNoImg = () => {
+    //     console.log('no image')
+    //     Fire.shared
+    //         .addPost({
+    //             userName: userName,
+    //             body: body.trim()
+    //         })
+    //         .then(ref => {
+    //             setBody('')
+    //             setImage(null)
+    //             props.navigation.goBack()
+    //         })
+    //         .catch(err => {
+    //             alert(err)
+    //             console.log(err)
+    //         })
+    // }
+
+    const handlePostNoImg = async () => {
+        try {
+            await dispatch(createNeedNoImg(userName, body, ''))
+            setBody('')
+            setImage(null)
+            props.navigation.goBack()
+        } catch (err) {
+            alert(err)
+            console.log(err)
+        }
     }
 
 
@@ -110,6 +138,7 @@ const CreatePostScreen = props => {
                 <TouchableOpacity onPress={()=>props.navigation.goBack()}>
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>
                 </TouchableOpacity>
+                <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
                 <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost}>
                     <Text style={{fontWeight:'500', color:text}}>Post</Text>
                 </TouchableOpacity>
@@ -122,12 +151,12 @@ const CreatePostScreen = props => {
                     multiline={true} 
                     numberOfLines={4} 
                     style={{flex:1, color:text}}
-                    placeholder={'What\'s up?'}
+                    placeholder={'What do you need?'}
                     placeholderTextColor={'#838383'}
                     onChangeText={text => {
-                        setPost(text)
+                        setBody(text)
                     }}
-                    value={post}
+                    value={body}
                 />
             </View>
 

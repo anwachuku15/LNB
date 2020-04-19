@@ -42,36 +42,28 @@ const DrawerScreen = props => {
               </TouchableOpacity>
                 <View>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
-                      <Text style={{...styles.viewProfile, ...{color:text}}}>View Profile</Text>
+                      <Text style={{...styles.viewProfile, ...{color:Colors.primary}}}>View Profile</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Settings')}>
-                      <Text style={{...styles.settings, ...{color:text}}}>Settings</Text>
+                      <Text style={{...styles.settings, ...{color:Colors.primary}}}>Settings</Text>
                     </TouchableOpacity>
                 </View>
             </View>
 
             <ScrollView>
                 <TouchableOpacity 
-                    onPress={() => {
-                        props.navigation.navigate('Profile')
-                    }}
-                    style={{...styles.list, ...styles.firstList}}
+                  onPress={() => {props.navigation.navigate('Profile')}}
+                  style={{...styles.list, ...styles.firstList}}
                 >
-                    <View>
-                        <FontAwesome
-                            style={styles.icon}
-                            name='user-o'
-                            size={20}
-                            color='rgb(136, 153, 166)'
-                        />
-                        {/* <MaterialIcons
-                            style={styles.icon}
-                            name='person'
-                            size={20}
-                            color='rgb(136, 153, 166)'
-                        /> */}
-                        <Text style={{...styles.text, ...{color:text}}}> Profile </Text>
-                    </View>
+                  <View>
+                      <FontAwesome
+                          style={styles.icon}
+                          name='user-o'
+                          size={20}
+                          color='rgb(136, 153, 166)'
+                      />
+                      <Text style={{...styles.text, ...{color:text}}}> Profile </Text>
+                  </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>{}} style={styles.list}>
                     <View>
@@ -79,40 +71,41 @@ const DrawerScreen = props => {
                         <Text style={{...styles.text, ...{color:text}}}> Events </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.list}>
+                <TouchableOpacity style={styles.list} onPress={() => props.navigation.navigate('Profile')}>
                     <View>
-                    <FontAwesome
+                    <MaterialIcons
                         style={styles.icon}
-                        name='bookmark-o'
-                        size={20}
+                        name='group'
+                        size={23}
                         color="rgb(136, 153, 166)"/>
-                    <Text onPress={() => props.navigation.navigate('Profile')} style={{...styles.text, ...{color:text}}}> Bookmarks </Text>
+                    <Text style={{...styles.text, ...{color:text}}}> Network </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[
-                    styles.list, {
-                    borderBottomWidth: 0.3,
-                    borderBottomColor: 'black'
-                    }
-                ]}>
+                  onPress={() => {}}
+                  style={[
+                  styles.list, {
+                  borderBottomWidth: 0.3,
+                  borderBottomColor: 'black'
+                  }]}
+                >
                     <View>
                     <Ionicons
                         style={styles.icon}
                         name='md-analytics'
                         size={20}
                         color="rgb(136, 153, 166)"/>
-                    <Text onPress={() => props.navigation.navigate('Profile')} style={{...styles.text, ...{color:text}}}> Moments </Text>
+                    <Text style={{...styles.text, ...{color:text}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.list}>
+                <TouchableOpacity style={styles.list} onPress={() => {}}>
                     <View>
                         <MaterialCommunityIcons
                             style={styles.icon}
                             name="arrow-top-right"
                             size={20}
                             color="rgb(136, 153, 166)"/>
-                        <Text onPress={() => props.navigation.navigate('Profile')} style={{...styles.text, ...{color:text}}}> Twitter Ads </Text>
+                        <Text style={{...styles.text, ...{color:text}}}> Edit Profile </Text>
                     </View>
                 </TouchableOpacity>
             </ScrollView>

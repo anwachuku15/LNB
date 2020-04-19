@@ -74,7 +74,6 @@ export const createProduct = (title, description, imageUrl, price) => { //id giv
             ownerId: userId
         })
 
-        
         dispatch({
             type: CREATE_PRODUCT,
             productData: {
