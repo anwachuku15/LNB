@@ -1,5 +1,5 @@
 import * as firebase from 'firebase'
-import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER } from '../actions/authActions'
+import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_CONNECT_REQUEST } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
 
@@ -9,6 +9,7 @@ const initialState = {
     userId: null,
     credentials: {},
     connections: null,
+    pendingConnections: [],
     messages: {},
     likes: [],
     notifications: []
@@ -27,6 +28,7 @@ export default (state = initialState, action) => {
                 ...state,
                 credentials: action.credentials,
                 connections: action.connections,
+                pendingConnections: action.pendingConnections,
                 messages: action.messages,
                 likes: action.likes,
                 notifications: action.notifications

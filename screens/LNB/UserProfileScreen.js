@@ -20,7 +20,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
-import { logout, getUser } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, disconnect } from '../../redux/actions/authActions'
 import moment from 'moment'
 
 const db = firebase.firestore()
@@ -107,7 +107,12 @@ const UserProfileScreen = props => {
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
     }
-    
+
+    // if (user) {
+    //     if (!user.pendingConnections.indexOf(firebase.auth().currentUser.uid)) {
+    //         console.log('user requested connection')
+    //     }
+    // }
     return (
         <View style={styles.screen}>
             {user && (
@@ -134,23 +139,51 @@ const UserProfileScreen = props => {
                 </View>
                 
                 {/* PROFILE HEADER */}
-                <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1}}>
-                    <View style={{marginTop:40, paddingHorizontal:20, alignItems:'flex-start', flexDirection:'row'}}>
+                <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingBottom:5}}>
+                    <View style={{paddingHorizontal:20, alignItems:'flex-start', flexDirection:'row'}}>
                         <View style={{flexDirection:'column', width:'40%'}}>
                             <View style={styles.avatarContainer}>
                                 <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
                             </View>
                             <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
                             <Text style={styles.infoTitle}>{user.credentials.headline}</Text>
+                            <View>
+                                {user.pendingConnections.indexOf(firebase.auth().currentUser.uid) !== 0 ? (
+                                    <TouchableCmp onPress={() => {dispatch(connectReq(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.primary,}}}>
+                                        <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connect</Text>
+                                    </TouchableCmp>
+                                 ) : (
+                                    <TouchableCmp onPress={() => {dispatch(disconnect(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
+                                        <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
+                                    </TouchableCmp>
+                                 )}
+                                
+                            </View>
                         </View>
 
-                        <View style={{width:'60%', alignSelf:'center'}}>
-                            <Text style={styles.infoTitle}>Skillset</Text>
-                            <Text style={{color:text}}>{user.credentials.bio}</Text>
+                        <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
+                            <View style={{flex: 3}}>
+                                <Text style={styles.infoTitle}>Skillset</Text>
+                                <Text style={{color:text}}>{user.credentials.bio}</Text>
+                            </View>
+                            <View style={{flex:1, flexDirection:'row', justifyContent:'space-between', }}>
+                                <View style={{alignItems:'center'}}>
+                                    <Text style={styles.infoValue}>{userPosts.length}</Text>
+                                    <Text style={styles.infoTitle}>Needs</Text>
+                                </View>
+                                <View style={{alignItems:'center'}}>
+                                    <Text style={styles.infoValue}>{user.connections}</Text>
+                                    <Text style={styles.infoTitle}>Connections</Text>
+                                </View>
+                                <View style={{alignItems:'center'}}>
+                                    <Text style={styles.infoValue}>{user.credentials.location}</Text>
+                                    <Text style={styles.infoTitle}>Location</Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
 
-                    <View style={styles.infoContainer}>
+                    {/* <View style={styles.infoContainer}>
                         <View style={styles.info}>
                             <Text style={styles.infoValue}>{userPosts.length}</Text>
                             <Text style={styles.infoTitle}>Needs</Text>
@@ -163,7 +196,7 @@ const UserProfileScreen = props => {
                             <Text style={styles.infoValue}>{user.credentials.location}</Text>
                             <Text style={styles.infoTitle}>Location</Text>
                         </View>
-                    </View>
+                    </View> */}
                 </View>
 
 
@@ -258,10 +291,18 @@ const styles = StyleSheet.create({
         borderRadius: 68
     },
     name: {
-        marginTop: 24,
+        marginTop: 6,
         fontSize: 16,
         fontWeight: '600',
         fontFamily: 'open-sans-bold'
+    },
+    connectButton: {
+        height: 24,
+        width: '75%',
+        marginVertical: 10,
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderRadius: 50
     },
     infoContainer: {
         flexDirection: 'row',
@@ -275,12 +316,12 @@ const styles = StyleSheet.create({
     },
     infoValue: {
         color: Colors.primary,
-        fontSize: 16,
-        fontWeight: '300'
+        fontSize: 12,
+        fontWeight: '500'
     },
     infoTitle: {
         color: '#C3C5CD',
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '500',
         marginTop: 4
     },

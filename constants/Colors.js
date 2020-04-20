@@ -19,5 +19,6 @@ export default {
     raspberry: '#FF006E',
     green: '#03CEA4',
     brownsand: '#F0A868',
-    coral: '#F28482'
+    coral: '#F28482',
+    disabled: '#ACACAC'
 }

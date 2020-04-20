@@ -161,7 +161,9 @@ const HomeScreen = props => {
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
                                     <View>
-                                        <Text style={styles.name}>{itemData.item.userName}</Text>
+                                        <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
+                                            <Text style={styles.name}>{itemData.item.userName}</Text>
+                                        </TouchableCmp>
                                         <Text style={styles.timestamp}>{moment(itemData.item.timestamp).fromNow()}</Text>
                                     </View>
                                     <Ionicons name='ios-more' size={24} color='#73788B'/>
