@@ -24,7 +24,7 @@ import Fire from '../../Firebase/Firebase'
 import '@firebase/firestore'
 import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
 
-const CreatePostScreen = props => {
+const CreateCommentScreen = props => {
     const scheme = useColorScheme()
 
     const userName = useSelector(state => state.auth.credentials.displayName)
@@ -83,7 +83,6 @@ const CreatePostScreen = props => {
         }
     }
 
-
     const handlePostNoImg = async () => {
         try {
             await dispatch(createNeedNoImg(userName, body, ''))
@@ -104,9 +103,9 @@ const CreatePostScreen = props => {
                 <TouchableOpacity onPress={()=>props.navigation.goBack()}>
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>
                 </TouchableOpacity>
-                <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
+                <Text style={{color:text, fontFamily:'open-sans-bold'}}>Reply to user</Text>
                 <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost}>
-                    <Text style={{fontWeight:'500', color:text}}>Post</Text>
+                    <Text style={{fontWeight:'500', color:text}}>Reply</Text>
                 </TouchableOpacity>
             </View>
 
@@ -117,7 +116,7 @@ const CreatePostScreen = props => {
                     multiline={true} 
                     numberOfLines={4} 
                     style={{flex:1, color:text}}
-                    placeholder={'What do you need?'}
+                    placeholder={'Leave a reply'}
                     placeholderTextColor={'#838383'}
                     onChangeText={text => {
                         setBody(text)
@@ -147,9 +146,9 @@ const CreatePostScreen = props => {
 }
 
 
-CreatePostScreen.navigationOptions = (navData) => {
+CreateCommentScreen.navigationOptions = (navData) => {
     return {
-        headerTitle: 'Create a Post'
+        headerTitle: 'Leave a Comment'
     }
 }
 
@@ -161,7 +160,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: 32,
-        paddingVertical: 12,
+        paddingVertical:12,
         borderBottomWidth: 1,
         borderBottomColor: Colors.primary
     },
@@ -182,4 +181,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default CreatePostScreen
+export default CreateCommentScreen

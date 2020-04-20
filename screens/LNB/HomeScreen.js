@@ -174,7 +174,9 @@ const HomeScreen = props => {
                                 )}
                                 <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
                                     <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
-                                    <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+                                    <TouchableCmp onPress={() => {props.navigation.navigate('Comment')}}>
+                                        <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+                                    </TouchableCmp>
                                 </View>
                             </View>
                         </View>

@@ -46,7 +46,6 @@ const UserProfileScreen = props => {
 
     const userId = props.navigation.getParam('userId')
     const user = useSelector(state => state.auth.selectedUser)
-    console.log(user)
     const userPosts = useSelector(state => state.posts.allNeeds.filter(need => need.uid === userId))
     
     const loadUser = useCallback(async () => {
@@ -113,28 +112,29 @@ const UserProfileScreen = props => {
         <View style={styles.screen}>
             {user && (
             <View>
+                {/* HEADER */}
                 <View style={styles.header}>
-                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                            <Item
-                                title='Direct'
-                                iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                                onPress={() => {props.navigation.goBack()}}
-                            />
-                        </HeaderButtons>
-                        <Text style={styles.headerTitle}>{user.credentials.displayName}</Text>
-                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                            <Item
-                                title='Direct'
-                                iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                                onPress={() => {
-                                    props.navigation.navigate('Messages')
-                                }}
-                            />
-                        </HeaderButtons>
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        <Item
+                            title='Direct'
+                            iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                            onPress={() => {props.navigation.goBack()}}
+                        />
+                    </HeaderButtons>
+                    <Text style={styles.headerTitle}>{user.credentials.displayName}</Text>
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        <Item
+                            title='Direct'
+                            iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
+                            onPress={() => {
+                                props.navigation.navigate('Messages')
+                            }}
+                        />
+                    </HeaderButtons>
                 </View>
                 
+                {/* PROFILE HEADER */}
                 <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1}}>
-
                     <View style={{marginTop:40, paddingHorizontal:20, alignItems:'flex-start', flexDirection:'row'}}>
                         <View style={{flexDirection:'column', width:'40%'}}>
                             <View style={styles.avatarContainer}>
@@ -164,9 +164,10 @@ const UserProfileScreen = props => {
                             <Text style={styles.infoTitle}>Location</Text>
                         </View>
                     </View>
-
                 </View>
 
+
+                {/* USER NEEDS */}
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
                     data={userPosts}
@@ -204,7 +205,7 @@ const UserProfileScreen = props => {
                         </TouchableCmp>
                     )}
                 />
-
+            
             </View>
             )}
         </View>

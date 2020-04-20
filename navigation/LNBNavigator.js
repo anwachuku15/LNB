@@ -22,7 +22,7 @@ import { Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icon
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import BulletinScreen from '../screens/LNB/BulletinScreen'
-import NeedsFeedScreen from '../screens/LNB/NeedsFeedScreen'
+import NeedsFeedScreen from '../screens/LNB/ConnectScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
 import MessagesScreen from '../screens/LNB/MessagesScreen'
@@ -31,6 +31,7 @@ import SettingsScreen from '../screens/LNB/SettingsScreen'
 import DrawerScreen from '../screens/LNB/DrawerScreen'
 import EditProfileScreen from '../screens/LNB/EditProfileScreen'
 import UserProfileScreen from '../screens/LNB/UserProfileScreen'
+import CreateCommentScreen from '../screens/LNB/CreateCommentScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -79,7 +80,14 @@ const HomeStack = createStackNavigator({
             }
         }
     },
-}, {headerMode:'none'})
+    Comment: {
+        screen: CreateCommentScreen
+    }
+}, {
+    headerMode:'none',
+})
+
+
 
 const BulletinStack = createStackNavigator({
     Bulletin: {
@@ -170,6 +178,18 @@ const NeedsFeedStack = createStackNavigator({
         }
     },
 }, {headerMode:'none'})
+
+const HomeNav = createStackNavigator({
+    Home: {
+        screen: HomeStack
+    },
+    commentModal: {
+        screen: CreateCommentScreen
+    }
+}, {
+    headerMode: 'none',
+    mode: 'modal'
+})
 
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({

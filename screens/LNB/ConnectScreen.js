@@ -16,7 +16,7 @@ import HeaderButton from '../../components/UI/HeaderButton'
 
 let themeColor
 let text
-const NeedsFeedScreen = props => {
+const ConnectScreen = props => {
     const scheme = useColorScheme()
 
     const productId = props.navigation.getParam('productId')
@@ -44,7 +44,7 @@ const NeedsFeedScreen = props => {
                         onPress={() => {props.navigation.toggleDrawer()}}
                     />
                 </HeaderButtons>
-                <Text style={styles.headerTitle}>Needs Feed</Text>
+                <Text style={styles.headerTitle}>Connect</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Direct'
@@ -56,7 +56,7 @@ const NeedsFeedScreen = props => {
                 </HeaderButtons>
             </View>
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Needs Feed</Text>
+                <Text style={{color:text}}>Connect</Text>
             </View>
             
         </View>
@@ -66,7 +66,7 @@ const NeedsFeedScreen = props => {
 }
 
 
-NeedsFeedScreen.navigationOptions = (navData) => {
+ConnectScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Needs'
     }
@@ -92,4 +92,4 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
 })
-export default NeedsFeedScreen
+export default ConnectScreen
