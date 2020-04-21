@@ -9,7 +9,8 @@ import {
     Button, 
     ScrollView,
     FlatList,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert
 } from 'react-native'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -20,7 +21,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
-import { logout, getUser, connectReq, disconnect, confirmConnect } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect } from '../../redux/actions/authActions'
 import moment from 'moment'
 
 
@@ -84,7 +85,6 @@ const UserProfileScreen = props => {
         loadUser().then(() => {
             setIsLoading(false)
         })
-
         // const connectButton = !connected && !accept && !requested ? setConnect(true) : setConnect(false)
        
         const acceptButton = db.doc(`/users/${firebase.auth().currentUser.uid}`).onSnapshot(snapshot => {
@@ -129,6 +129,36 @@ const UserProfileScreen = props => {
         // firestore()
     }, [dispatch, loadUser])
     
+
+    const disconnectHandler = (authId, selectedUserId) => {
+        Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + user.credentials.displayName + '?', [
+            {
+                text: 'No',
+                style: 'cancel'
+            },
+            {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: () => {dispatch(disconnect(authId, selectedUserId))}
+            }
+        ])
+    }
+
+    const unrequestHandler = (authId, selectedUserId) => {
+        Alert.alert('Remove Request', 'Are you sure you want to remove your pending request?', [
+            {
+                text: 'Keep',
+                style: 'cancel'
+            },
+            {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => {dispatch(unrequest(authId, selectedUserId))}
+            }
+        ])
+    }
+
+
     if (error) {
         return (
             <View style={styles.spinner}>
@@ -210,7 +240,7 @@ const UserProfileScreen = props => {
                                         </TouchableCmp>
                                     )}
                                     {requested && (
-                                        <TouchableCmp onPress={() => {dispatch(disconnect(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
+                                        <TouchableCmp onPress={() => {unrequestHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
                                             <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
                                         </TouchableCmp>
                                     )}
@@ -227,7 +257,7 @@ const UserProfileScreen = props => {
                                         </TouchableCmp>
                                     )}
                                     {connected && (
-                                        <TouchableCmp onPress={() => {dispatch(disconnect(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
+                                        <TouchableCmp onPress={() => {disconnectHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
                                             <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
                                         </TouchableCmp>
                                     )}

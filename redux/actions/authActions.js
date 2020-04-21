@@ -12,7 +12,7 @@ export const LOGOUT = 'LOGOUT'
 export const SET_USER = 'SET_USER'
 export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
-
+export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
 
 const db = firebase.firestore()
 
@@ -212,12 +212,16 @@ export const connectReq = (authId, authName, selectedUserId) => {
 export const confirmConnect = (authId, authName, selectedUserId, selectedUserName) => {
     return async (dispatch, getState) => {
         let authPendingState = getState().auth.pendingConnections
-        const authPendingData = await (await db.doc(`/users/${authId}`).get()).data().pendingConnections
-        const index = authPendingData.indexOf(selectedUserId)
+        const authData = await (await db.doc(`/users/${authId}`).get()).data()
+        const index = authData.pendingConnections.indexOf(selectedUserId)
         console.log(index)
-        authPendingData.splice(index, 1)
+        authData.pendingConnections.splice(index, 1)
         db.doc(`/users/${authId}`).set(
-            {pendingConnections: authPendingData},
+            {pendingConnections: authData.pendingConnections},
+            {merge: true}
+        )
+        db.doc(`/users/${authId}`).set(
+            {connections: authData.connections + 1},
             {merge: true}
         )
         
@@ -227,19 +231,164 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
         } else {
             connectionId = selectedUserId + authId
         }
+
         db.doc(`/connections/${connectionId}`).set({
             requestedBy: selectedUserId,
             acceptedBy: authId,
             timestamp: new Date().toISOString()
-        }).then(async () => {
-            const pushToken = (await db.doc(`/users/${selectedUserId}`).get()).data().pushToken
-            sendConnectionNotification(authName, pushToken)
+        })
+        .then(async () => {
+            const selectedUserData = (await db.doc(`/users/${selectedUserId}`).get()).data()
+            db.doc(`/users/${selectedUserId}`).set(
+                {connections: selectedUserData.connections + 1},
+                {merge: true}
+            )
+
+            sendConnectionNotification(authName, selectedUserData.pushToken)
             dispatch({
                 type: SET_PENDING_CONNECTIONS,
                 pendingConnections: authPendingState
             })
+
+            dispatch({
+                type: SET_USER,
+                credentials: {
+                    userId: authId,
+                    email: authData.email,
+                    displayName: authName,
+                    headline: authData.headline,
+                    imageUrl: authData.imageUrl,
+                    location: authData.location,
+                    bio: authData.bio,
+                    website: authData.website
+                },
+                connections: authData.connections + 1,
+                pendingConnections: authData.pendingConnections
+            })
+            dispatch({
+                type: SET_SELECTED_USER,
+                selectedUser: {
+                    credentials: {
+                        userId: selectedUserData.userId,
+                        email: selectedUserData.email,
+                        displayName: selectedUserName,
+                        headline: selectedUserData.headline,
+                        imageUrl: selectedUserData.imageUrl,
+                        location: selectedUserData.location,
+                        bio: selectedUserData.bio,
+                        website: selectedUserData.website
+                    },
+                    connections: selectedUserData.connections + 1,
+                    pendingConnections: selectedUserData.pendingConnections,
+                    messages: selectedUserData.messages,
+                    likes: selectedUserData.likes,
+                    notifications: selectedUserData.notifications
+                }
+            })
         })
 
+    }
+}
+
+export const disconnect = (authId, selectedUserId) => {
+    return async dispatch => {
+        if (authId < selectedUserId) {
+            db.doc(`/connections/${authId+selectedUserId}`).delete()
+            
+        } else {
+            db.doc(`/connections/${selectedUserId+authId}`).delete()
+        }
+        const authData = await (await db.doc(`/users/${authId}`).get()).data()
+        const selectedUserData = await (await db.doc(`/users/${selectedUserId}`).get()).data()
+
+        await db.doc(`/users/${authId}`).set(
+            {connections: authData.connections - 1},
+            {merge: true}
+        )
+        await db.doc(`/users/${selectedUserId}`).set(
+            {connections: selectedUserData.connections - 1},
+            {merge: true}
+        )
+
+        dispatch({
+            type: SET_USER,
+            credentials: {
+                userId: authId,
+                email: authData.email,
+                displayName: authData.displayName,
+                headline: authData.headline,
+                imageUrl: authData.imageUrl,
+                location: authData.location,
+                bio: authData.bio,
+                website: authData.website
+            },
+            connections: authData.connections,
+            pendingConnections: authData.pendingConnections
+        })
+        dispatch({
+            type: SET_SELECTED_USER,
+            selectedUser: {
+                credentials: {
+                    userId: selectedUserData.userId,
+                    email: selectedUserData.email,
+                    displayName: selectedUserData.displayName,
+                    headline: selectedUserData.headline,
+                    imageUrl: selectedUserData.imageUrl,
+                    location: selectedUserData.location,
+                    bio: selectedUserData.bio,
+                    website: selectedUserData.website
+                },
+                connections: selectedUserData.connections,
+                pendingConnections: selectedUserData.pendingConnections,
+                messages: selectedUserData.messages,
+                likes: selectedUserData.likes,
+                notifications: selectedUserData.notifications
+            }
+        })
+    }
+}
+
+export const unrequest = (authId, selectedUserId) => {
+    return async dispatch => {
+        const userData = await db.doc(`/users/${selectedUserId}`).get()
+        let userPendingReq = userData.data().pendingConnections
+        if (userPendingReq.indexOf(authId) > -1) {
+            userPendingReq.splice(userPendingReq.indexOf(authId), 1)
+            const pending = {
+                pendingConnections: userPendingReq
+            }
+            db.doc(`/users/${selectedUserId}`)
+                .update(pending)
+                .then(() => {
+                    db.doc(`/users/${selectedUserId}`).get()
+                        .then(doc => {
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications } = doc.data()
+                            dispatch({
+                                type: SET_SELECTED_USER,
+                                selectedUser: {
+                                    credentials: {
+                                        userId: userId,
+                                        email: email,
+                                        displayName: displayName,
+                                        headline: headline,
+                                        imageUrl: imageUrl,
+                                        location: location,
+                                        bio: bio,
+                                        website: website
+                                    },
+                                    connections: connections,
+                                    pendingConnections: pendingConnections,
+                                    messages: messages,
+                                    likes: likes,
+                                    notifications: notifications
+                                }
+                            })
+                        })
+                })
+                .catch(err => {
+                    console.error(err)
+                })
+        }
     }
 }
 
@@ -269,7 +418,7 @@ const sendConnectionNotification = (authName, pushToken) => {
         body: JSON.stringify({
             to: pushToken,
             sound: 'default',
-            title: 'New Connect Request',
+            title: 'New Connection',
             body: 'You are now connected with ' + authName + '.'
         })
     })
@@ -323,51 +472,7 @@ const sendConnectionNotification = (authName, pushToken) => {
 
 
 
-export const disconnect = (authId, selectedUserId) => {
-    return async dispatch => {
-        const userData = await db.doc(`/users/${selectedUserId}`).get()
-        let userPendingReq = userData.data().pendingConnections
-        
-        if (userPendingReq.indexOf(authId) > -1) {
-            userPendingReq.splice(userPendingReq.indexOf(authId), 1)
-            const pending = {
-                pendingConnections: userPendingReq
-            }
-            db.doc(`/users/${selectedUserId}`)
-                .update(pending)
-                .then(() => {
-                    db.doc(`/users/${selectedUserId}`).get()
-                        .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications } = doc.data()
-                            dispatch({
-                                type: SET_SELECTED_USER,
-                                selectedUser: {
-                                    credentials: {
-                                        userId: userId,
-                                        email: email,
-                                        displayName: displayName,
-                                        headline: headline,
-                                        imageUrl: imageUrl,
-                                        location: location,
-                                        bio: bio,
-                                        website: website
-                                    },
-                                    isConnected: false,
-                                    connections: connections,
-                                    pendingConnections: pendingConnections,
-                                    messages: messages,
-                                    likes: likes,
-                                    notifications: notifications
-                                }
-                            })
-                        })
-                })
-                .catch(err => {
-                    console.error(err)
-                })
-        }
-    }
-}
+
 
 
 
