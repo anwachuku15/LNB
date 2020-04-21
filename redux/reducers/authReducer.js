@@ -1,5 +1,5 @@
 import * as firebase from 'firebase'
-import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_CONNECT_REQUEST } from '../actions/authActions'
+import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_PENDING_CONNECTIONS } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
 
@@ -28,16 +28,19 @@ export default (state = initialState, action) => {
                 ...state,
                 credentials: action.credentials,
                 connections: action.connections,
-                pendingConnections: action.pendingConnections,
-                messages: action.messages,
-                likes: action.likes,
-                notifications: action.notifications
+                pendingConnections: action.pendingConnections
             }
         }
         case SET_SELECTED_USER: {
             return {
                 ...state,
                 selectedUser: action.selectedUser
+            }
+        }
+        case SET_PENDING_CONNECTIONS: {
+            return {
+                ...state,
+                pendingConnections: action.pendingConnections
             }
         }
         case LOGOUT: {

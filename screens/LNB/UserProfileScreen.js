@@ -20,8 +20,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
-import { logout, getUser, connectReq, disconnect } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, disconnect, confirmConnect } from '../../redux/actions/authActions'
 import moment from 'moment'
+
 
 const db = firebase.firestore()
 
@@ -42,12 +43,21 @@ const UserProfileScreen = props => {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
 
+    
+    const [connect, setConnect] = useState(false)
+    const [accept, setAccept] = useState(false)
+    const [requested, setRequested] = useState(false)
+    const [connected, setConnected] = useState(false)
+
     const dispatch = useDispatch()
 
     const userId = props.navigation.getParam('userId')
     const user = useSelector(state => state.auth.selectedUser)
+    const authUser = useSelector(state => state.auth)
+    const authName = useSelector(state => state.auth.credentials.displayName)
     const userPosts = useSelector(state => state.posts.allNeeds.filter(need => need.uid === userId))
-    
+    const pendingConnections = useSelector(state => state.auth.pendingConnections)
+    // console.log(pendingConnections)
     const loadUser = useCallback(async () => {
         setError(null)
         try {
@@ -68,12 +78,55 @@ const UserProfileScreen = props => {
         }
     }, [dispatch, loadUser])
 
+    
     useEffect(() => {
         setIsLoading(true)
         loadUser().then(() => {
             setIsLoading(false)
-            
         })
+
+        // const connectButton = !connected && !accept && !requested ? setConnect(true) : setConnect(false)
+       
+        const acceptButton = db.doc(`/users/${firebase.auth().currentUser.uid}`).onSnapshot(snapshot => {
+            const authPendings = snapshot.data().pendingConnections
+            if (authPendings.indexOf(userId) > -1) {
+                setAccept(true)
+            } else {
+                setAccept(false)
+            }
+        })
+        const requestedButton = db.doc(`/users/${userId}`).onSnapshot(snapshot => {
+            const selectedUserPendings = snapshot.data().pendingConnections
+            if(selectedUserPendings.indexOf(firebase.auth().currentUser.uid) > -1) {
+                // setConnectButton(false)
+                setRequested(true)
+            } else {
+                setRequested(false)
+            }
+        })
+        const connectedButton = authUser.userId < userId ? db.doc(`/connections/${authUser.userId+userId}`)
+                                                            .onSnapshot(snapshot => {
+                                                                if (snapshot.exists) {
+                                                                    setConnected(true)
+                                                                    setAccept(false)
+                                                                    setRequested(false)
+                                                                } else {
+                                                                    setConnected(false)
+                                                                }
+                                                            })
+                                                        : db.doc(`/connections/${userId+authUser.userId}`)
+                                                            .onSnapshot(snapshot => {
+                                                                if (snapshot.exists) {
+                                                                    setConnected(true)
+                                                                    setAccept(false)
+                                                                    setRequested(false)
+                                                                } else {
+                                                                    setConnected(false)
+                                                                }
+                                                            })
+        
+        
+        // firestore()
     }, [dispatch, loadUser])
     
     if (error) {
@@ -108,11 +161,8 @@ const UserProfileScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
 
-    // if (user) {
-    //     if (!user.pendingConnections.indexOf(firebase.auth().currentUser.uid)) {
-    //         console.log('user requested connection')
-    //     }
-    // }
+    
+
     return (
         <View style={styles.screen}>
             {user && (
@@ -147,18 +197,48 @@ const UserProfileScreen = props => {
                             </View>
                             <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
                             <Text style={styles.infoTitle}>{user.credentials.headline}</Text>
-                            <View>
-                                {user.pendingConnections.indexOf(firebase.auth().currentUser.uid) !== 0 ? (
-                                    <TouchableCmp onPress={() => {dispatch(connectReq(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.primary,}}}>
-                                        <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connect</Text>
+                            {userId !== firebase.auth().currentUser.uid ? (
+                                <View>
+                                    {accept && (
+                                        <TouchableCmp 
+                                            onPress={() => {
+                                                dispatch(confirmConnect(firebase.auth().currentUser.uid, authName, userId, user.credentials.displayName))
+                                                setAccept(false)
+                                            }} 
+                                            style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
+                                            <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
+                                        </TouchableCmp>
+                                    )}
+                                    {requested && (
+                                        <TouchableCmp onPress={() => {dispatch(disconnect(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
+                                            <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
+                                        </TouchableCmp>
+                                    )}
+                                    {/* {user.pendingConnections.indexOf(firebase.auth().currentUser.uid) === -1 && !accept && ( */}
+                                    {!connected && !requested && !accept && ( 
+                                        <TouchableCmp 
+                                            style={{...styles.connectButton, ...{borderColor: Colors.bluesea}}}
+                                            onPress={() => {
+                                                dispatch(connectReq(firebase.auth().currentUser.uid, authName, userId))
+                                                setRequested(true)
+                                            }} 
+                                        >
+                                            <Text style={{color:Colors.bluesea, fontSize:14, alignSelf:'center'}}>Connect</Text>
+                                        </TouchableCmp>
+                                    )}
+                                    {connected && (
+                                        <TouchableCmp onPress={() => {dispatch(disconnect(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
+                                            <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
+                                        </TouchableCmp>
+                                    )}
+                                </View>
+                            ) : (
+                                <View>
+                                    <TouchableCmp onPress={() => props.navigation.navigate('EditProfile')} style={{...styles.connectButton, ...{borderColor: Colors.orange}}}>
+                                        <Text style={{color:Colors.orange, fontSize:14, alignSelf:'center'}}>Edit Profile</Text>
                                     </TouchableCmp>
-                                 ) : (
-                                    <TouchableCmp onPress={() => {dispatch(disconnect(firebase.auth().currentUser.uid, userId))}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
-                                        <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
-                                    </TouchableCmp>
-                                 )}
-                                
-                            </View>
+                                </View>
+                            ) }
                         </View>
 
                         <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
@@ -182,21 +262,7 @@ const UserProfileScreen = props => {
                             </View>
                         </View>
                     </View>
-
-                    {/* <View style={styles.infoContainer}>
-                        <View style={styles.info}>
-                            <Text style={styles.infoValue}>{userPosts.length}</Text>
-                            <Text style={styles.infoTitle}>Needs</Text>
-                        </View>
-                        <View style={styles.info}>
-                            <Text style={styles.infoValue}>{user.connections}</Text>
-                            <Text style={styles.infoTitle}>Connections</Text>
-                        </View>
-                        <View style={styles.info}>
-                            <Text style={styles.infoValue}>{user.credentials.location}</Text>
-                            <Text style={styles.infoTitle}>Location</Text>
-                        </View>
-                    </View> */}
+                    
                 </View>
 
 

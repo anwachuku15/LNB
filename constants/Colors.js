@@ -20,5 +20,7 @@ export default {
     green: '#03CEA4',
     brownsand: '#F0A868',
     coral: '#F28482',
-    disabled: '#ACACAC'
+    disabled: '#ACACAC',
+    blue: '#00A6ED',
+    bluesea: '#5ADBFF'
 }

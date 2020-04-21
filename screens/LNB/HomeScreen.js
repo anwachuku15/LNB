@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import firebase from 'firebase'
+// EXPO
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import ProductItem from '../../components/shop/ProductItem'
@@ -8,7 +12,7 @@ import { fetchProducts } from '../../redux/actions/productsActions'
 import { logout, getUserData, getUser } from '../../redux/actions/authActions'
 // import {  } from '../../redux/action/authActions'
 // REACT-NATIVE
-import { Platform, TouchableOpacity, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
+import { Platform, Vibration, TouchableOpacity, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
@@ -16,12 +20,12 @@ import { useColorScheme } from 'react-native-appearance'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Card from '../../components/LNB/Card'
-import { db } from '../../Firebase/Fire'
 import '@firebase/firestore'
 import Fire from '../../Firebase/Firebase'
 import { fetchNeeds } from '../../redux/actions/postsActions'
 import moment from 'moment'
 
+const db = firebase.firestore()
 
 let themeColor
 let text
@@ -37,6 +41,61 @@ const HomeScreen = props => {
         text = 'black'
     }
     
+
+
+    // PUSH NOTIFICATIONS
+    useEffect(() => {
+        registerForPushNotificationsAsync()
+
+        // return () => {
+        //     registerForPushNotificationsAsync.remove()
+        // }
+    }, [registerForPushNotificationsAsync])
+
+    const registerForPushNotificationsAsync = async () => {
+        if (Constants.isDevice) {
+            const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+            let finalStatus = status;
+            if (status !== 'granted') {
+                const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+                finalStatus = status;
+            }
+            if (finalStatus !== 'granted') {
+                alert('Failed to get push token for push notification!');
+                return;
+            }
+            try {
+                let token = await Notifications.getExpoPushTokenAsync();
+                // console.log(token);
+                db.doc(`/users/${firebase.auth().currentUser.uid}`)
+                    .set(
+                        {pushToken: token},
+                        {merge: true}
+                    )
+
+            } catch (err) {
+                console.log('error: ' + err)
+            }
+        } else {
+            alert('Must use physical device for Push Notifications');
+        }
+
+        // ANDROID --> FIREBASE?
+        if (Platform.OS === 'android') {
+            Notifications.createChannelAndroidAsync('default', {
+                name: 'default',
+                sound: true,
+                priority: 'max',
+                vibrate: [0, 250, 250, 250],
+            });
+        }
+    };
+
+ 
+
+
+
+
 
     const [isLoading, setIsLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
