@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { 
+    AppState,
     Platform,
     TouchableOpacity,
     View, 
@@ -49,6 +50,7 @@ const UserProfileScreen = props => {
     const [accept, setAccept] = useState(false)
     const [requested, setRequested] = useState(false)
     const [connected, setConnected] = useState(false)
+    const [connections, setConnections] = useState(0)
 
     const dispatch = useDispatch()
 
@@ -85,8 +87,11 @@ const UserProfileScreen = props => {
         loadUser().then(() => {
             setIsLoading(false)
         })
-        // const connectButton = !connected && !accept && !requested ? setConnect(true) : setConnect(false)
-       
+        const connectionsSnapshot = db.doc(`/users/${firebase.auth().currentUser.uid}`).onSnapshot(snapshot => {
+            const currentConnections = snapshot.data().connections
+            setConnections(currentConnections)
+        })
+
         const acceptButton = db.doc(`/users/${firebase.auth().currentUser.uid}`).onSnapshot(snapshot => {
             const authPendings = snapshot.data().pendingConnections
             if (authPendings.indexOf(userId) > -1) {
@@ -210,10 +215,8 @@ const UserProfileScreen = props => {
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
                             title='Direct'
-                            iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                            onPress={() => {
-                                props.navigation.navigate('Messages')
-                            }}
+                            iconName={firebase.auth().currentUser.uid === userId ? (Platform.OS==='android' ? 'md-settings' : 'ios-settings') : Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                            onPress={() => {firebase.auth().currentUser.uid === userId ? props.navigation.navigate('EditProfile') : {}}}
                         />
                     </HeaderButtons>
                 </View>
@@ -261,14 +264,20 @@ const UserProfileScreen = props => {
                                             <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
                                         </TouchableCmp>
                                     )}
+                                    <View>
+                                        <TouchableCmp style={{...styles.connectButton, ...{borderColor: Colors.blue}}}>
+                                            <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text>
+                                        </TouchableCmp>
+                                    </View>
                                 </View>
-                            ) : (
-                                <View>
-                                    <TouchableCmp onPress={() => props.navigation.navigate('EditProfile')} style={{...styles.connectButton, ...{borderColor: Colors.orange}}}>
-                                        <Text style={{color:Colors.orange, fontSize:14, alignSelf:'center'}}>Edit Profile</Text>
-                                    </TouchableCmp>
-                                </View>
-                            ) }
+                            ) : (null
+                                // <View>
+                                //     <TouchableCmp onPress={() => props.navigation.navigate('EditProfile')} style={{...styles.connectButton, ...{borderColor: Colors.orange}}}>
+                                //         <Text style={{color:Colors.orange, fontSize:14, alignSelf:'center'}}>Edit Profile</Text>
+                                //     </TouchableCmp>
+                                // </View>
+                            )}
+                            
                         </View>
 
                         <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
@@ -282,7 +291,7 @@ const UserProfileScreen = props => {
                                     <Text style={styles.infoTitle}>Needs</Text>
                                 </View>
                                 <View style={{alignItems:'center'}}>
-                                    <Text style={styles.infoValue}>{user.connections}</Text>
+                                    <Text style={styles.infoValue}>{connections}</Text>
                                     <Text style={styles.infoTitle}>Connections</Text>
                                 </View>
                                 <View style={{alignItems:'center'}}>
@@ -395,7 +404,7 @@ const styles = StyleSheet.create({
     connectButton: {
         height: 24,
         width: '75%',
-        marginVertical: 10,
+        marginVertical: 5,
         justifyContent: 'center',
         borderWidth: 2,
         borderRadius: 50

@@ -13,15 +13,15 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+// import { messaging } from 'firebase'
 
 
 const MessagesScreen = props => {
     const scheme = useColorScheme()
 
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
     const dispatch = useDispatch()
     
+    // const send = messaging
 
     const colorScheme = useColorScheme()
     let text

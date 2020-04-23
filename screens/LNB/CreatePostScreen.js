@@ -44,11 +44,21 @@ const CreatePostScreen = props => {
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
 
-    useEffect(() => {
-        getPhotoPermission()
-    }, [getPhotoPermission])
+    // useEffect(() => {
+    //     getPhotoPermission()
+    // }, [getPhotoPermission])
 
-    const getPhotoPermission = async () => {
+    // const getPhotoPermission = async () => {
+    //     if (Constants.platform.ios) {
+    //         const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+
+    //         if(status != 'granted') {
+    //             alert('We need permission to access your camera roll')
+    //         }
+    //     }
+    // }
+
+    const pickImage = async () => {
         if (Constants.platform.ios) {
             const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
 
@@ -56,9 +66,6 @@ const CreatePostScreen = props => {
                 alert('We need permission to access your camera roll')
             }
         }
-    }
-
-    const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,

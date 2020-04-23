@@ -13,9 +13,46 @@ export const SET_USER = 'SET_USER'
 export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
 export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
+export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
+export const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
+
 
 const db = firebase.firestore()
 
+// AUTH UTILS
+export const authenticate = (token, userId, expiresIn) => {
+    return dispatch => {
+        dispatch(setLogoutTimer(expiresIn))
+        dispatch({
+            type: AUTHENTICATE,
+            token: token,
+            userId: userId
+        })
+    }
+}
+let timer
+const setLogoutTimer = exp => {
+    return dispatch => {
+        timer = setTimeout(() => {
+            dispatch(logout())
+        }, exp)
+    }
+}
+const clearLogoutTimer = () => {
+    if (timer) {
+        clearTimeout(timer)
+    }
+}
+const saveDataToStorage = (token, userId, expDate) => {
+    AsyncStorage.setItem('authData', JSON.stringify({
+        token: token,
+        userId: userId,
+        expDate: expDate.toISOString()
+    }))
+}
+
+
+// SIGNUP + LOGIN + LOGOUT
 export const signup = (email, password, fname, lname, headline) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expiresIn, expDate, displayName, noImg, imageUrl
@@ -55,7 +92,6 @@ export const signup = (email, password, fname, lname, headline) => {
         dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, [], []))
     }
 }
-
 export const login = (email, password) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expDate, expiresIn, displayName, noImg, imageUrl
@@ -79,11 +115,18 @@ export const login = (email, password) => {
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications } = userDoc.data()
+            
             dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications))
         }
     }
 }
+export const logout = () => {
+    clearLogoutTimer()
+    AsyncStorage.removeItem('authData')
+    return {type: LOGOUT }
+}
 
+// SET USER ACTIONS
 export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications) => {
     return async dispatch => {
         dispatch({
@@ -99,13 +142,13 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                 website: website
             },
             connections: connections,
-            pendingConnections: pendingConnections
+            pendingConnections: pendingConnections,
+            messages: messages,
+            likes: likes,
+            notifications: notifications
         })
-        
-        
     }
 }
-
 export const getUser = (userId) => {
     return async (dispatch, getState) => {
         let userData, authId, connectionId
@@ -148,7 +191,7 @@ export const getUser = (userId) => {
     }
 }
 
-
+// CONNECT ACTIONS & NOTIFICATIONS
 export const connectReq = (authId, authName, selectedUserId) => {
     return async dispatch => {
 
@@ -194,11 +237,12 @@ export const connectReq = (authId, authName, selectedUserId) => {
                                     senderId: authId
                                 }
                             })
-                        }).then(async () => {
+                        })
+                        .then(async () => {
                             
                             const pushToken = (await db.doc(`/users/${selectedUserId}`).get()).data().pushToken
                             if (pushToken) {
-                                sendRequestNotification(authName, pushToken)
+                                sendRequestNotification(authId, authName, selectedUserId, pushToken)
                             }
                         })
                 })
@@ -208,13 +252,34 @@ export const connectReq = (authId, authName, selectedUserId) => {
         }
     }
 }
-
+const sendRequestNotification = (authId, authName, selectedUserId, pushToken) => {
+    db.collection('notifications').add({
+        timestamp: new Date().toISOString(),
+        type: 'connection request',
+        recipientId: selectedUserId,
+        senderId: authId,
+        read: false
+    })
+    let res = fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            to: pushToken,
+            sound: 'default',
+            title: 'New Connect Request',
+            body: authName + ' wants to connect.'
+        })
+    })
+}
 export const confirmConnect = (authId, authName, selectedUserId, selectedUserName) => {
     return async (dispatch, getState) => {
         let authPendingState = getState().auth.pendingConnections
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
+        
         const index = authData.pendingConnections.indexOf(selectedUserId)
-        console.log(index)
         authData.pendingConnections.splice(index, 1)
         db.doc(`/users/${authId}`).set(
             {pendingConnections: authData.pendingConnections},
@@ -224,7 +289,13 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             {connections: authData.connections + 1},
             {merge: true}
         )
-        
+
+        const selectedUserData = (await db.doc(`/users/${selectedUserId}`).get()).data()
+        db.doc(`/users/${selectedUserId}`).set(
+            {connections: selectedUserData.connections + 1},
+            {merge: true}
+        )
+
         let connectionId
         if (authId < selectedUserId) {
             connectionId = authId + selectedUserId
@@ -237,59 +308,96 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             acceptedBy: authId,
             timestamp: new Date().toISOString()
         })
-        .then(async () => {
-            const selectedUserData = (await db.doc(`/users/${selectedUserId}`).get()).data()
-            db.doc(`/users/${selectedUserId}`).set(
-                {connections: selectedUserData.connections + 1},
-                {merge: true}
-            )
 
-            sendConnectionNotification(authName, selectedUserData.pushToken)
+        dispatch({
+            type: SET_SELECTED_USER,
+            selectedUser: {
+                credentials: {
+                    userId: selectedUserData.userId,
+                    email: selectedUserData.email,
+                    displayName: selectedUserName,
+                    headline: selectedUserData.headline,
+                    imageUrl: selectedUserData.imageUrl,
+                    location: selectedUserData.location,
+                    bio: selectedUserData.bio,
+                    website: selectedUserData.website
+                },
+                connections: selectedUserData.connections + 1,
+                pendingConnections: selectedUserData.pendingConnections,
+                messages: selectedUserData.messages,
+                likes: selectedUserData.likes,
+                notifications: selectedUserData.notifications
+            }
+        })
+        sendConnectionNotification(authId, authName, selectedUserId, selectedUserData.pushToken)
             dispatch({
                 type: SET_PENDING_CONNECTIONS,
                 pendingConnections: authPendingState
             })
-
-            dispatch({
-                type: SET_USER,
-                credentials: {
-                    userId: authId,
-                    email: authData.email,
-                    displayName: authName,
-                    headline: authData.headline,
-                    imageUrl: authData.imageUrl,
-                    location: authData.location,
-                    bio: authData.bio,
-                    website: authData.website
-                },
-                connections: authData.connections + 1,
-                pendingConnections: authData.pendingConnections
-            })
-            dispatch({
-                type: SET_SELECTED_USER,
-                selectedUser: {
-                    credentials: {
-                        userId: selectedUserData.userId,
-                        email: selectedUserData.email,
-                        displayName: selectedUserName,
-                        headline: selectedUserData.headline,
-                        imageUrl: selectedUserData.imageUrl,
-                        location: selectedUserData.location,
-                        bio: selectedUserData.bio,
-                        website: selectedUserData.website
-                    },
-                    connections: selectedUserData.connections + 1,
-                    pendingConnections: selectedUserData.pendingConnections,
-                    messages: selectedUserData.messages,
-                    likes: selectedUserData.likes,
-                    notifications: selectedUserData.notifications
-                }
-            })
-        })
+        
 
     }
 }
+const sendConnectionNotification = (authId, authName, selectedUserId, pushToken) => {
+    db.collection('notifications').add({
+        timestamp: new Date().toISOString(),
+        type: 'new connection',
+        recipientId: selectedUserId,
+        senderId: authId
+    })
+    let res = fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            to: pushToken,
+            sound: 'default',
+            title: 'New Connection',
+            body: 'You are now connected with ' + authName + '.'
+        })
+    })
+}
+export const setNotifications = (type, recipientId, senderId, timestamp, read) => {
+    return (dispatch, getState) => {
+        dispatch({
+            type: SET_NOTIFICATIONS,
+            notification: {
+                type: type,
+                recipientId: recipientId,
+                senderId: senderId,
+                timestamp: timestamp,
+                read: read
+            }
+        })
+    }
+}
 
+export const removeNotification = (type, recipientId, senderId, timestamp, read) => {
+    return (dispatch, getState) => {
+        const thisNotification = getState().auth.notifications
+        console.log(thisNotification)
+        dispatch({
+            type: REMOVE_NOTIFICATION,
+            // notification: {
+            //     type: type,
+            //     recipientId: recipientId,
+            //     senderId: senderId,
+            //     timestamp: timestamp,
+            //     read: read
+            // }
+        })
+    }
+}
+
+
+
+        
+  
+
+
+// DISCONNECT + UNREQUEST
 export const disconnect = (authId, selectedUserId) => {
     return async dispatch => {
         if (authId < selectedUserId) {
@@ -350,6 +458,14 @@ export const disconnect = (authId, selectedUserId) => {
 
 export const unrequest = (authId, selectedUserId) => {
     return async dispatch => {
+        const notification = await db.collection('notifications')
+            .where('recipientId', '==', selectedUserId)
+            .where('senderId', '==', authId)
+            .where('type','==','connection request')
+            .limit(1)
+            .get()
+        notification.docs[0].ref.delete()
+        
         const userData = await db.doc(`/users/${selectedUserId}`).get()
         let userPendingReq = userData.data().pendingConnections
         if (userPendingReq.indexOf(authId) > -1) {
@@ -392,83 +508,6 @@ export const unrequest = (authId, selectedUserId) => {
     }
 }
 
-const sendRequestNotification = (authName, pushToken) => {
-    let res = fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            to: pushToken,
-            sound: 'default',
-            title: 'New Connect Request',
-            body: authName + ' wants to connect.'
-        })
-    })
-}
-
-const sendConnectionNotification = (authName, pushToken) => {
-    let res = fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            to: pushToken,
-            sound: 'default',
-            title: 'New Connection',
-            body: 'You are now connected with ' + authName + '.'
-        })
-    })
-}
-
-// export const connectReq = (authId, authName, selectedUserId) => {
-//     return async dispatch => {
-//         const userData = await db.doc(`/users/${selectedUserId}`).get()
-//         let userPendingReq = userData.data().pendingConnections
-        
-//         if (userPendingReq.indexOf(authId) === -1) {
-//             userPendingReq.push(authId)
-//             const pending = {
-//                 pendingConnections: userPendingReq
-//             }
-//             db.doc(`/users/${selectedUserId}`)
-//                 .update(pending)
-//                 .then(() => {
-//                     db.doc(`/users/${selectedUserId}`).get()
-//                         .then(doc => {
-//                             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications, pushToken } = doc.data()
-//                             dispatch({
-//                                 type: SET_SELECTED_USER,
-//                                 selectedUser: {
-//                                     credentials: {
-//                                         userId: userId,
-//                                         email: email,
-//                                         displayName: displayName,
-//                                         headline: headline,
-//                                         imageUrl: imageUrl,
-//                                         location: location,
-//                                         bio: bio,
-//                                         website: website
-//                                     },
-//                                     connections: connections,
-//                                     pendingConnections: pendingConnections,
-//                                     messages: messages,
-//                                     likes: likes,
-//                                     notifications: notifications
-//                                 }
-//                             })
-//                             sendRequestNotification(authName, authId, selectedUserId, pushToken)
-//                         })
-//                 })
-//                 .catch(err => {
-//                     console.error(err)
-//                 })
-//         }
-//     }
-// }
 
 
 
@@ -476,45 +515,7 @@ const sendConnectionNotification = (authName, pushToken) => {
 
 
 
-export const authenticate = (token, userId, expiresIn) => {
-    return dispatch => {
-        dispatch(setLogoutTimer(expiresIn))
-        dispatch({
-            type: AUTHENTICATE,
-            token: token,
-            userId: userId
-        })
-    }
-}
-const saveDataToStorage = (token, userId, expDate) => {
-    AsyncStorage.setItem('authData', JSON.stringify({
-        token: token,
-        userId: userId,
-        expDate: expDate.toISOString()
-    }))
-}
 
-let timer
-
-const setLogoutTimer = exp => {
-    return dispatch => {
-        timer = setTimeout(() => {
-            dispatch(logout())
-        }, exp)
-    }
-}
-
-const clearLogoutTimer = () => {
-    if (timer) {
-        clearTimeout(timer)
-    }
-}
-
-export const logout = () => {
-    clearLogoutTimer()
-    AsyncStorage.removeItem('authData')
-    return {type: LOGOUT }
-}
 
 
 

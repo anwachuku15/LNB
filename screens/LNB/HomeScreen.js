@@ -9,10 +9,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import ProductItem from '../../components/shop/ProductItem'
 import * as cartActions from '../../redux/actions/cartActions'
 import { fetchProducts } from '../../redux/actions/productsActions'
-import { logout, getUserData, getUser } from '../../redux/actions/authActions'
+import { logout, getUserData, getUser, setNotifications } from '../../redux/actions/authActions'
 // import {  } from '../../redux/action/authActions'
 // REACT-NATIVE
-import { Platform, Vibration, TouchableOpacity, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
+import { AppState, Platform, Vibration, TouchableOpacity, TouchableNativeFeedback, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
@@ -41,12 +41,24 @@ const HomeScreen = props => {
         text = 'black'
     }
     
+    const [appState, setAppState] = useState(AppState.currentState)
+    useEffect(() => {
+        AppState.addEventListener('change', _handleAppStateChange)
+        return () => {
+            AppState.removeEventListener('change', _handleAppStateChange)
+        }
+    },[])
 
+    const _handleAppStateChange = nextAppState => {
+        if ((appState === 'inactive' || 'background') && nextAppState === 'active') {
+            console.log('App has come to the foreground')
+        }
+        setAppState(nextAppState)
+    }
 
     // PUSH NOTIFICATIONS
     useEffect(() => {
         registerForPushNotificationsAsync()
-
         // return () => {
         //     registerForPushNotificationsAsync.remove()
         // }
@@ -77,7 +89,7 @@ const HomeScreen = props => {
                 console.log('error: ' + err)
             }
         } else {
-            alert('Must use physical device for Push Notifications');
+            // alert('Must use physical device for Push Notifications');
         }
 
         // ANDROID --> FIREBASE?
@@ -133,6 +145,18 @@ const HomeScreen = props => {
         loadPosts().then(() => {
             setIsLoading(false)
         })
+        // const notificationUpdate = async () => db.collection(`/notifications`).onSnapshot(snapshot => {
+        //     if (!snapshot.empty) {
+        //         snapshot.docs.forEach(doc => {
+        //             if (doc.data().recipientId === firebase.auth().currentUser.uid && doc.data().type === 'connection request') {
+        //                 dispatch(setNotifications(doc.data().type, firebase.auth().currentUser.uid, doc.data().senderId, doc.data().timestamp, doc.data().read))
+        //                 console.log('dispatched')
+        //             }
+        //         })
+        //     }
+        // })
+        // notificationUpdate()
+        
     }, [dispatch, loadPosts])
     
     if (error) {

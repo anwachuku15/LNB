@@ -1,5 +1,5 @@
 import * as firebase from 'firebase'
-import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_PENDING_CONNECTIONS, SET_NEW_CONNECTION } from '../actions/authActions'
+import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_PENDING_CONNECTIONS, SET_NEW_CONNECTION, SET_NOTIFICATIONS } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
 
@@ -28,7 +28,8 @@ export default (state = initialState, action) => {
                 ...state,
                 credentials: action.credentials,
                 connections: action.connections,
-                pendingConnections: action.pendingConnections
+                pendingConnections: action.pendingConnections,
+                notifications: action.notifications
             }
         }
         case SET_SELECTED_USER: {
@@ -41,6 +42,29 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 pendingConnections: action.pendingConnections
+            }
+        }
+        case SET_NOTIFICATIONS: {
+            console.log(state.notifications.lastIndexOf(action.notification))
+            state.notifications.push(action.notification)
+            const updatedNotifications = state.notifications
+            return {
+                ...state,
+                notifications: updatedNotifications
+            }
+        }
+        // case REMOVE_NOTIFICATION: {
+        //     return {
+        //         ...state,
+        //         notifications: 
+        //     }
+        // }
+
+
+        case SET_NEW_CONNECTION: {
+            return {
+                ...state,
+                connections: action.connections
             }
         }
         case LOGOUT: {

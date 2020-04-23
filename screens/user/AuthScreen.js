@@ -131,7 +131,7 @@ const AuthScreen = props => {
     }
 
     return (
-        <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={50} style={styles.screen}>
+        <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.OS === 'android' ? -200 : 50} style={styles.screen}>
             <Image source={require('../../assets/lnb.png')} resizeMode='contain' style={{maxWidth: '35%', maxHeight: '15%', marginBottom:20, marginTop: -100 }}/>
             <Card style={styles.authContainer}>
                 <ScrollView>
