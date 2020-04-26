@@ -15,25 +15,6 @@ const firebaseConfig = {
 admin.initializeApp(firebaseConfig)
 const db = admin.firestore()
 
-// exports.createRequestNotification = functions
-//     .firestore
-//     .document('notification/{id}')
-//     .onCreate((snapshot) => {
-//         return db.doc(`/users/${snapshot.data().recipientId}`)
-//             .get()
-//             .then(doc => {
-//                 if (doc.exists) {
-//                     return db.collection(`/notifications/`).add({
-//                         timestamp: new Date().toISOString,
-//                         recipientId: snapshot.data().recipientId,
-//                         senderId: snapshot.data().senderId,
-//                         type: 'connection request',
-//                         notificationId: doc.id
-//                     });
-//                 }
-//             })
-//             .catch(err => {
-//                 console.error(err)
-//             })
-//     })
-
+// exports.onUserImageChange = functions
+//   .firestore
+//   .document('/users/')

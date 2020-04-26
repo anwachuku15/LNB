@@ -17,6 +17,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Colors from '../../constants/Colors'
 import { useSelector } from 'react-redux'
 
+import firebase from 'firebase'
 
 let text
 const DrawerScreen = props => {
@@ -32,7 +33,16 @@ const DrawerScreen = props => {
     return (
         <View style={styles.container}>
             <View style={styles.top}>
-              <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
+              <TouchableOpacity 
+                onPress={() => 
+                  props.navigation.navigate({
+                    routeName: 'UserProfile',
+                    params: {
+                      userId: firebase.auth().currentUser.uid
+                    }
+                  })
+                }
+              >
                 <Image 
                     source={{uri: user.credentials.imageUrl}}
                     style={styles.photo}
@@ -41,7 +51,16 @@ const DrawerScreen = props => {
                 {/* <Text style={{...styles.userHandle, ...{color:text}}}>Andrew Nwachuku</Text> */}
               </TouchableOpacity>
                 <View>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
+                    <TouchableOpacity 
+                      onPress={() => 
+                        props.navigation.navigate({
+                          routeName: 'UserProfile',
+                          params: {
+                            userId: firebase.auth().currentUser.uid
+                          }
+                        })
+                      }
+                    >
                       <Text style={{...styles.viewProfile, ...{color:Colors.primary}}}>View Profile</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
@@ -52,7 +71,14 @@ const DrawerScreen = props => {
 
             <ScrollView>
                 <TouchableOpacity 
-                  onPress={() => {props.navigation.navigate('Profile')}}
+                  onPress={() => 
+                    props.navigation.navigate({
+                      routeName: 'UserProfile',
+                      params: {
+                        userId: firebase.auth().currentUser.uid
+                      }
+                    })
+                  }
                   style={{...styles.list, ...styles.firstList}}
                 >
                   <View>
@@ -71,7 +97,17 @@ const DrawerScreen = props => {
                         <Text style={{...styles.text, ...{color:text}}}> Events </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.list} onPress={() => props.navigation.navigate('Profile')}>
+                <TouchableOpacity 
+                  style={styles.list} 
+                  onPress={() => 
+                    props.navigation.navigate({
+                      routeName: 'UserProfile',
+                      params: {
+                        userId: firebase.auth().currentUser.uid
+                      }
+                    })
+                  }
+                >
                     <View>
                     <MaterialIcons
                         style={styles.icon}

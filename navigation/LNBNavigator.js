@@ -32,6 +32,8 @@ import DrawerScreen from '../screens/LNB/DrawerScreen'
 import EditProfileScreen from '../screens/LNB/EditProfileScreen'
 import UserProfileScreen from '../screens/LNB/UserProfileScreen'
 import CreateCommentScreen from '../screens/LNB/CreateCommentScreen'
+import ChatScreen from '../screens/LNB/ChatScreen'
+
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -66,6 +68,14 @@ const HomeStack = createStackNavigator({
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    ChatScreen: {
+        screen: ChatScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -191,6 +201,8 @@ const HomeNav = createStackNavigator({
     mode: 'modal'
 })
 
+
+
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
         Home: {
@@ -295,7 +307,8 @@ const BottomTabStackContainer = createStackNavigator({
             }
         },
         tabBarOptions: {
-            activeTintColor: Colors.primary
+            activeTintColor: Colors.primary,
+            keyboardHidesTabBar: false,
         }
     }),
     postModal: {
@@ -308,11 +321,27 @@ const BottomTabStackContainer = createStackNavigator({
 
 
 const MessagesStack = createStackNavigator({
-    Messages: {
-        screen: MessagesScreen
+    MessagesScreen: {
+        screen: MessagesScreen,
+    },
+    ChatScreen: {
+        screen: ChatScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    UserProfile: {
+        screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
     }
 }, {
-    defaultNavigationOptions: defaultNavOptions
+    headerMode: 'none'
 })
 
 
@@ -359,10 +388,11 @@ BottomTabStackContainer.navigationOptions = ({navigation}) => {
     }
 }
 
-// Disable swipe to Messages if the Drawer or Post Modal is open
+// Disable swipe to Messages if the Drawer or Post Modal is open or if HomeStack is past home page
 DrawerNav.navigationOptions = ({navigation}) => {
+    console.log()
     let swipeEnabled = true
-    if (navigation.state.isDrawerOpen || navigation.state.routes[0].routes.length > 1) {
+    if (navigation.state.isDrawerOpen || navigation.state.routes[0].routes.length > 1 || navigation.state.routes[0].routes[0].routes[0].index > 0) {
         swipeEnabled = false
     } else {
         swipeEnabled = true
@@ -382,9 +412,19 @@ const SwipeTabNavigator = createMaterialTopTabNavigator({
     }
 }, {
     tabBarOptions: {
-        style: {height: 0}
+        style: {height: 0},
     }
 })
+
+MessagesStack.navigationOptions = ({navigation}) => {
+    let swipeEnabled = true
+    if (navigation.state.index > 0) {
+        swipeEnabled = false
+    }
+    return {
+        swipeEnabled
+    }
+}
 
 
 const AuthNavigator = createStackNavigator({

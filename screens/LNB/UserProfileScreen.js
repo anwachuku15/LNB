@@ -265,7 +265,17 @@ const UserProfileScreen = props => {
                                         </TouchableCmp>
                                     )}
                                     <View>
-                                        <TouchableCmp style={{...styles.connectButton, ...{borderColor: Colors.blue}}}>
+                                        <TouchableCmp
+                                            onPress={() => {
+                                                props.navigation.navigate({
+                                                    routeName: 'ChatScreen',
+                                                    params: {
+                                                        selectedUserId: userId
+                                                    }
+                                                }
+                                            )}}
+                                            style={{...styles.connectButton, ...{borderColor: Colors.blue}}}
+                                        >
                                             <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text>
                                         </TouchableCmp>
                                     </View>
