@@ -22,7 +22,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setNotifications } from '../../redux/actions/authActions'
 import moment from 'moment'
 
 
@@ -130,9 +130,12 @@ const UserProfileScreen = props => {
                                                                 }
                                                             })
         
-        
-        // firestore()
+        connectionsSnapshot
+        acceptButton
+        connectedButton
+        requestedButton
     }, [dispatch, loadUser])
+    
     
 
     const disconnectHandler = (authId, selectedUserId) => {

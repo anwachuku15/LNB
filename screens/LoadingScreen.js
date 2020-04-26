@@ -29,8 +29,8 @@ const LoadingScreen = props => {
                         .get()
                         .then(userDoc => {
                             if (userDoc.exists) {
-                                const {userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications} = userDoc.data()
-                                dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes, notifications))
+                                const {userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes} = userDoc.data()
+                                dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes))
                                 props.navigation.navigate('App')
                             } else {
                                 props.navigation.navigate('Auth')

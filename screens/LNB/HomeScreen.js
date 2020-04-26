@@ -6,22 +6,15 @@ import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import ProductItem from '../../components/shop/ProductItem'
-import * as cartActions from '../../redux/actions/cartActions'
-import { fetchProducts } from '../../redux/actions/productsActions'
-import { logout, getUserData, getUser, setNotifications } from '../../redux/actions/authActions'
-// import {  } from '../../redux/action/authActions'
 // REACT-NATIVE
-import { AppState, Platform, Vibration, TouchableOpacity, TouchableNativeFeedback, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
+import { AppState, Platform, TouchableOpacity, TouchableNativeFeedback, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import Card from '../../components/LNB/Card'
 import '@firebase/firestore'
-import Fire from '../../Firebase/Firebase'
 import { fetchNeeds } from '../../redux/actions/postsActions'
 import moment from 'moment'
 
@@ -48,7 +41,6 @@ const HomeScreen = props => {
             AppState.removeEventListener('change', _handleAppStateChange)
         }
     },[])
-
     const _handleAppStateChange = nextAppState => {
         if ((appState === 'inactive' || 'background') && nextAppState === 'active') {
             console.log('App has come to the foreground')
@@ -63,7 +55,6 @@ const HomeScreen = props => {
         //     registerForPushNotificationsAsync.remove()
         // }
     }, [registerForPushNotificationsAsync])
-
     const registerForPushNotificationsAsync = async () => {
         if (Constants.isDevice) {
             const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
@@ -113,9 +104,10 @@ const HomeScreen = props => {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
     const needs = useSelector(state => state.posts.allNeeds)
+    // const notifications = useSelector(state => state.auth.notifications)
     const dispatch = useDispatch()
     
-    const loadPosts = useCallback(async () => {
+    const loadData = useCallback(async () => {
         setError(null)
         setIsRefreshing(true)
         try {
@@ -127,43 +119,30 @@ const HomeScreen = props => {
         setIsRefreshing(false)
     },[dispatch, setIsRefreshing, setError])
 
-
     // NAV LISTENER
     useEffect(() => {
         const willFocusSub = props.navigation.addListener(
             'willFocus',
-            loadPosts
+            loadData
         )
         // Clean up listener when function re-runs https://reactjs.org/docs/hooks-effect.html
         return () => {
             willFocusSub
         }
-    }, [loadPosts])
+    }, [loadData])
 
     useEffect(() => {
         setIsLoading(true)
-        loadPosts().then(() => {
+        loadData().then(() => {
             setIsLoading(false)
         })
-        // const notificationUpdate = async () => db.collection(`/notifications`).onSnapshot(snapshot => {
-        //     if (!snapshot.empty) {
-        //         snapshot.docs.forEach(doc => {
-        //             if (doc.data().recipientId === firebase.auth().currentUser.uid && doc.data().type === 'connection request') {
-        //                 dispatch(setNotifications(doc.data().type, firebase.auth().currentUser.uid, doc.data().senderId, doc.data().timestamp, doc.data().read))
-        //                 console.log('dispatched')
-        //             }
-        //         })
-        //     }
-        // })
-        // notificationUpdate()
-        
-    }, [dispatch, loadPosts])
+    }, [dispatch, loadData])
     
     if (error) {
         return (
             <View style={styles.spinner}>
                 <Text>An error occured</Text>
-                <Button title='try again' onPress={loadPosts} color={Colors.primary}/>
+                <Button title='try again' onPress={loadData} color={Colors.primary}/>
             </View>
         )
     }
@@ -230,7 +209,7 @@ const HomeScreen = props => {
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
                 data={needs}
-                onRefresh={loadPosts}
+                onRefresh={loadData}
                 refreshing={isRefreshing}
                 style={styles.feed}
                 showsVerticalScrollIndicator={false}
@@ -245,9 +224,12 @@ const HomeScreen = props => {
                                 <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
                                     <View>
                                         <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
-                                            <Text style={styles.name}>{itemData.item.userName}</Text>
+                                            <Text style={styles.name}>
+                                                {itemData.item.userName}
+                                                <Text style={styles.timestamp}>  ·  {moment(itemData.item.timestamp).fromNow()}</Text>
+                                            </Text>
                                         </TouchableCmp>
-                                        <Text style={styles.timestamp}>{moment(itemData.item.timestamp).fromNow()}</Text>
+                                        {/* <Text style={styles.timestamp}>{moment(itemData.item.timestamp).fromNow()}</Text> */}
                                     </View>
                                     <Ionicons name='ios-more' size={24} color='#73788B'/>
                                 </View>
@@ -332,7 +314,7 @@ const styles = StyleSheet.create({
         color: "#454D65",
     },
     timestamp: {
-        fontSize: 11,
+        fontSize: 14,
         color: '#C4C6CE',
         marginTop: 4
     },

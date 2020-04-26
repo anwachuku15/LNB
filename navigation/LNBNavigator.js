@@ -33,7 +33,7 @@ import EditProfileScreen from '../screens/LNB/EditProfileScreen'
 import UserProfileScreen from '../screens/LNB/UserProfileScreen'
 import CreateCommentScreen from '../screens/LNB/CreateCommentScreen'
 import ChatScreen from '../screens/LNB/ChatScreen'
-
+import NotificationIcon from '../components/LNB/NotificationIcon'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -265,11 +265,7 @@ const BottomTabStackContainer = createStackNavigator({
             navigationOptions: {
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <Ionicons 
-                            name={Platform.OS==='android' ? 'md-notifications-outline' : 'ios-notifications-outline'} 
-                            size={25} 
-                            color={tabInfo.tintColor}
-                        />
+                        <NotificationIcon tabInfo={tabInfo} />
                     )
                 },
                 tabBarColor: Colors.primaryColor,
