@@ -10,6 +10,7 @@ export const CREATE_NEED_NOIMG = 'CREATE_NEED_NOIMG'
 export const DELETE_NEED = 'DELETE_NEED'
 export const SET_NEEDS = 'SET_NEEDS'
 // export const SET_NEED = 'SET_NEED'
+export const LIKE_NEED = 'LIKE_NEED'
 
 // export const fetchNeeds = () => {
 //     return async (dispatch, getState) => {
@@ -179,8 +180,7 @@ export const createNeedNoImg = (userName, body) => {
             }
         })
     }
-} 
-
+}
 
 const uploadPhotoAsyn = async uri => {
     const path = `photos/${this.uid}/${Date.now()}.jpg`
@@ -204,3 +204,55 @@ const uploadPhotoAsyn = async uri => {
         )
     })
 }
+
+export const likeNeed = (needId) => {
+    return async (dispatch, getState) => {
+        const likeDocument = db
+            .collection('likes')
+            .where('uid','==',firebase.auth().currentUser.uid)
+            .where('needId', '==', needId)
+            .limit(1)
+        const needDocument = db.doc(`/needs/${needId}`)
+        
+        let needData
+        needDocument.get()
+            .then(doc => {
+                if (doc.exists) {
+                    needData = doc.data()
+                    needData.id = doc.id
+                    return likeDocument.get()
+                } else {
+                    return res.status(404).json({error: 'Post does not exist'})
+                }
+            })
+            .then(data => {
+                if (data.empty) {
+                    return db.collection('likes').add({
+                        needId: needId,
+                        uid: firebase.auth().currentUser.uid,
+                        userName: getState().auth.credentials.displayName,
+                        userImage: getState().auth.credentials.imageUrl,
+                        timestamp: new Date().toISOString()
+                    })
+                    .then(() => {
+                        dispatch({
+                            type: LIKE_NEED,
+                            needData: needData 
+                        })
+                        needData.likeCount++
+                        return needDocument.update({ likeCount: needData.likeCount })
+                    })
+                } else {
+                    // unlike 
+                }
+            })
+            .catch(err => {
+                console.error(err)
+            })
+    }
+}
+
+
+
+
+

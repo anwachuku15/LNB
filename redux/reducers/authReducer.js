@@ -1,5 +1,5 @@
 import * as firebase from 'firebase'
-import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_PENDING_CONNECTIONS, SET_NEW_CONNECTION, SET_NOTIFICATIONS, MARK_NOTIFICATIONS_READ } from '../actions/authActions'
+import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_PENDING_CONNECTIONS, SET_NEW_CONNECTION, SET_LIKES, SET_NOTIFICATIONS, MARK_NOTIFICATIONS_READ } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
 
@@ -29,6 +29,7 @@ export default (state = initialState, action) => {
                 credentials: action.credentials,
                 connections: action.connections,
                 pendingConnections: action.pendingConnections,
+                likes: action.likes,
                 notifications: action.notifications
             }
         }
@@ -42,6 +43,12 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 pendingConnections: action.pendingConnections
+            }
+        }
+        case SET_LIKES: {
+            return {
+                ...state,
+                likes: action.likes
             }
         }
         case SET_NOTIFICATIONS: {

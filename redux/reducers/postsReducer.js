@@ -1,5 +1,5 @@
 import Fire from '../../Firebase/Firebase'
-import { CREATE_NEED, SET_NEEDS, CREATE_NEED_NOIMG } from '../actions/postsActions'
+import { CREATE_NEED, SET_NEEDS, CREATE_NEED_NOIMG, LIKE_NEED } from '../actions/postsActions'
 import Need from '../../models/need-model'
 
 
@@ -51,6 +51,13 @@ export default (state = initialState, action) => {
                 userNeeds: state.userNeeds.concat(newNeedNoImg)
             }
         
+        case LIKE_NEED:
+            let index = state.allNeeds.findIndex(need => need.id === action.needData.id)
+            state.allNeeds[index] = action.needData
+            return {
+                ...state
+            }
+            
         default:
             return state
     }

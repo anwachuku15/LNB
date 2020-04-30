@@ -29,7 +29,7 @@ const DrawerScreen = props => {
     }
 
     const user = useSelector(state => state.auth)
-    // console.log(user)
+    
     return (
         <View style={styles.container}>
             <View style={styles.top}>

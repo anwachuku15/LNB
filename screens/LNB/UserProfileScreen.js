@@ -22,7 +22,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setNotifications } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setNotifications, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
 
 
@@ -65,6 +65,7 @@ const UserProfileScreen = props => {
         setError(null)
         try {
             await dispatch(getUser(userId))
+            dispatch(setLikes())
         } catch (err) {
             console.log(err)
             setError(err.message)
@@ -171,7 +172,7 @@ const UserProfileScreen = props => {
         return (
             <View style={styles.spinner}>
                 <Text>An error occured</Text>
-                <Button title='try again' onPress={loadProducts} color={Colors.primary}/>
+                <Button title='try again' onPress={() => {}} color={Colors.primary}/>
             </View>
         )
     }

@@ -15,8 +15,10 @@ import { useColorScheme } from 'react-native-appearance'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import '@firebase/firestore'
-import { fetchNeeds } from '../../redux/actions/postsActions'
+import { fetchNeeds, likeNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
+import NeedActions from '../../components/LNB/NeedActions'
+import { setLikes } from '../../redux/actions/authActions';
 
 const db = firebase.firestore()
 
@@ -34,6 +36,7 @@ const HomeScreen = props => {
         text = 'black'
     }
     
+    // APP SETTINGS
     const [appState, setAppState] = useState(AppState.currentState)
     useEffect(() => {
         AppState.addEventListener('change', _handleAppStateChange)
@@ -47,7 +50,6 @@ const HomeScreen = props => {
         }
         setAppState(nextAppState)
     }
-
     // PUSH NOTIFICATIONS
     useEffect(() => {
         registerForPushNotificationsAsync()
@@ -94,12 +96,7 @@ const HomeScreen = props => {
         }
     };
 
- 
-
-
-
-
-
+    // SCREEN SETTINGS/UI/FUNCTIONS
     const [isLoading, setIsLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
@@ -112,6 +109,7 @@ const HomeScreen = props => {
         setIsRefreshing(true)
         try {
             await dispatch(fetchNeeds())
+            dispatch(setLikes())
         } catch (err){
             console.log(err)
             setError(err.message)
@@ -138,6 +136,17 @@ const HomeScreen = props => {
         })
     }, [dispatch, loadData])
     
+
+    const selectUserHandler = (userId) => {
+        props.navigation.navigate({
+            routeName: 'UserProfile',
+            params: {
+                userId: userId
+            }
+        })
+    }
+
+
     if (error) {
         return (
             <View style={styles.spinner}>
@@ -167,19 +176,15 @@ const HomeScreen = props => {
         )
     }
 
-
-    const selectUserHandler = (userId) => {
-        props.navigation.navigate({
-            routeName: 'UserProfile',
-            params: {
-                userId: userId
-            }
-        })
-    }
+   
 
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
+    }
+
+    const commentButtonHandler = () => {
+        props.navigation.navigate('Comment')
     }
     
     return (
@@ -229,7 +234,6 @@ const HomeScreen = props => {
                                                 <Text style={styles.timestamp}>  ·  {moment(itemData.item.timestamp).fromNow()}</Text>
                                             </Text>
                                         </TouchableCmp>
-                                        {/* <Text style={styles.timestamp}>{moment(itemData.item.timestamp).fromNow()}</Text> */}
                                     </View>
                                     <Ionicons name='ios-more' size={24} color='#73788B'/>
                                 </View>
@@ -239,12 +243,21 @@ const HomeScreen = props => {
                                 ) : (
                                     null
                                 )}
-                                <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
-                                    <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
-                                    <TouchableCmp onPress={() => {props.navigation.navigate('Comment')}}>
-                                        <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+                                {/* <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                                    <TouchableCmp onPress={() => {dispatch(likeNeed(itemData.item.id))}}>
+                                        <View style={{flexDirection:'row'}}>
+                                            <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 7}} />
+                                            <Text style={{color:Colors.disabled, alignSelf:'center'}}>{itemData.item.likeCount}</Text>
+                                        </View>
                                     </TouchableCmp>
-                                </View>
+                                    <TouchableCmp onPress={() => {props.navigation.navigate('Comment')}}>
+                                        <View style={{flexDirection:'row'}}>
+                                            <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 7}} />
+                                            {itemData.item.commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{itemData.item.commentCount}</Text>}
+                                        </View>
+                                    </TouchableCmp>
+                                </View> */}
+                                <NeedActions needId={itemData.item.id} leaveComment={commentButtonHandler}/>
                             </View>
                         </View>
                     </TouchableCmp>

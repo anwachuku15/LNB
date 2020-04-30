@@ -13,6 +13,7 @@ export const SET_USER = 'SET_USER'
 export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
 export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
+export const SET_LIKES = 'SET_LIKES'
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
 export const MARK_NOTIFICATIONS_READ = 'MARK_NOTIFICATIONS_READ'
 export const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
@@ -84,12 +85,11 @@ export const signup = (email, password, fname, lname, headline) => {
             location: '',
             bio: '',
             website: '',
-            messages: {},
-            likes: []
+            messages: {}
         })
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId, expiresIn))
-        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, []))
+        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}))
     }
 }
 export const login = (email, password) => {
@@ -114,9 +114,9 @@ export const login = (email, password) => {
         dispatch(authenticate(idToken, userId, expiresIn))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes } = userDoc.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = userDoc.data()
             
-            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes))
+            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages))
         }
     }
 }
@@ -127,7 +127,7 @@ export const logout = () => {
 }
 
 // SET USER ACTIONS
-export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes) => {
+export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages) => {
     return async dispatch => {
         dispatch({
             type: SET_USER,
@@ -144,11 +144,12 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
             connections: connections,
             pendingConnections: pendingConnections,
             messages: messages,
-            likes: likes,
+            likes: [],
             notifications: []
         })
     }
 }
+
 export const getUser = (userId) => {
     return async (dispatch, getState) => {
         let userData, authId, connectionId
@@ -165,7 +166,7 @@ export const getUser = (userId) => {
         }
 
         if (userData.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes } = userData.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = userData.data()
             // console.log(isConnected)
             dispatch({
                 type: SET_SELECTED_USER,
@@ -183,7 +184,7 @@ export const getUser = (userId) => {
                     connections: connections,
                     pendingConnections: pendingConnections,
                     messages: messages,
-                    likes: likes
+                    // likes: likes
                 }
             })
         }
@@ -207,7 +208,7 @@ export const connectReq = (authId, authName, selectedUserId) => {
                 .then(() => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes } = doc.data()
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = doc.data()
                             dispatch({
                                 type: SET_SELECTED_USER,
                                 selectedUser: {
@@ -224,7 +225,7 @@ export const connectReq = (authId, authName, selectedUserId) => {
                                     connections: connections,
                                     pendingConnections: pendingConnections,
                                     messages: messages,
-                                    likes: likes
+                                    // likes: likes
                                 }
                             })
 
@@ -325,7 +326,7 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                 connections: selectedUserData.connections + 1,
                 pendingConnections: selectedUserData.pendingConnections,
                 messages: selectedUserData.messages,
-                likes: selectedUserData.likes
+                // likes: selectedUserData.likes
             }
         })
         sendConnectionNotification(authId, authName, selectedUserId, selectedUserData.pushToken)
@@ -359,6 +360,19 @@ const sendConnectionNotification = (authId, authName, selectedUserId, pushToken)
             body: 'You are now connected with ' + authName + '.'
         })
     })
+}
+
+export const setLikes = () => {
+    return async dispatch => {
+        const likes = []
+        await (await db.collection('likes').where('uid', '==', firebase.auth().currentUser.uid).get()).forEach(doc => {
+            likes.push(doc.data())
+        })
+        dispatch({
+            type: SET_LIKES,
+            likes: likes
+        })
+    }
 }
 
 
@@ -481,7 +495,7 @@ export const disconnect = (authId, selectedUserId) => {
                 connections: selectedUserData.connections,
                 pendingConnections: selectedUserData.pendingConnections,
                 messages: selectedUserData.messages,
-                likes: selectedUserData.likes
+                // likes: selectedUserData.likes
             }
         })
     }
@@ -509,7 +523,7 @@ export const unrequest = (authId, selectedUserId) => {
                 .then(() => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, likes } = doc.data()
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = doc.data()
                             dispatch({
                                 type: SET_SELECTED_USER,
                                 selectedUser: {
@@ -526,7 +540,7 @@ export const unrequest = (authId, selectedUserId) => {
                                     connections: connections,
                                     pendingConnections: pendingConnections,
                                     messages: messages,
-                                    likes: likes
+                                    // likes: likes
                                 }
                             })
                         })
