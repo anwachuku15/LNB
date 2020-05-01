@@ -1,4 +1,4 @@
-import Fire from './Firebase/Fire'
+// import Fire from './Firebase/Fire'
 import React, { useEffect } from 'react';
 import { AppearanceProvider, useColorScheme } from 'react-native-appearance'
 import { StatusBar, } from 'react-native'

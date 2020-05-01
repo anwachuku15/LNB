@@ -1,6 +1,6 @@
 import config from '../../Firebase/Fire'
 import firebase from 'firebase'
-import '@firebase/firestore'
+// import '@firebase/firestore'
 import moment from 'moment'
 import Need from '../../models/need-model'
 const db = firebase.firestore()

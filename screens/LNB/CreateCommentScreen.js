@@ -21,7 +21,7 @@ import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 import Fire from '../../Firebase/Firebase'
-import '@firebase/firestore'
+// import '@firebase/firestore'
 import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
 
 const CreateCommentScreen = props => {

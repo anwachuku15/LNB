@@ -4,9 +4,9 @@ import { authenticate, getAuthenticatedUser } from '../redux/actions/authActions
 import { StyleSheet, View, ActivityIndicator, AsyncStorage } from 'react-native'
 import Colors from '../constants/Colors'
 import * as firebase from 'firebase'
-import { db } from '../Firebase/Firebase'
+// import { db } from '../Firebase/Firebase'
 
-
+const db = firebase.firestore()
 const LoadingScreen = props => {
     const dispatch = useDispatch()
     

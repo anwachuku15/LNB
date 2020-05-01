@@ -1,5 +1,5 @@
 // import firebase from 'firebase'
-import '@firebase/firestore'
+// import '@firebase/firestore'
 import { db } from '../../Firebase/Fire'
 
 import Product from "../../models/product-model"

@@ -34,6 +34,7 @@ import UserProfileScreen from '../screens/LNB/UserProfileScreen'
 import CreateCommentScreen from '../screens/LNB/CreateCommentScreen'
 import ChatScreen from '../screens/LNB/ChatScreen'
 import NotificationIcon from '../components/LNB/NotificationIcon'
+import PostDetailScreen from '../screens/LNB/PostDetailScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -49,6 +50,14 @@ export const defaultNavOptions = {
 const HomeStack = createStackNavigator({
     Home: {
         screen: HomeScreen
+    },
+    PostDetail: {
+        screen: PostDetailScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
     },
     Profile: {
         screen: ProfileScreen,

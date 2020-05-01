@@ -15,7 +15,7 @@ import {
     Platform
 } from 'react-native'
 // REDUX
-import { getUser } from '../../redux/actions/authActions'
+import { getUser, setLastReadMessage } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -24,7 +24,7 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import { GiftedChat } from 'react-native-gifted-chat'
 import firebase, { firestore } from 'firebase'
 import { Ionicons } from '@expo/vector-icons'
-
+import moment from 'moment'
 const db = firebase.firestore()
 
 let themeColor
@@ -44,7 +44,7 @@ const ChatScreen = props => {
     const uid = firebase.auth().currentUser.uid
     const authUser = useSelector(state => state.auth)
     const user = useSelector(state => state.auth.selectedUser)
-
+    const selectedUserId = props.navigation.getParam('selectedUserId')
     const chatId = uid < user.credentials.userId ? 
                    uid+user.credentials.userId : 
                    user.credentials.userId+uid
@@ -55,6 +55,7 @@ const ChatScreen = props => {
     
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
+    
     
     useEffect(() => {
         const createChat = async () => {
@@ -95,6 +96,17 @@ const ChatScreen = props => {
             updateChat()
         }
     }, [])
+
+    // UNMOUNT!!!!!
+    let readTimestamp 
+    useEffect(() => {
+        return () => {
+            readTimestamp = new Date().toISOString()
+            dispatch(setLastReadMessage(chatId, selectedUserId, readTimestamp))
+        }
+    }, [readTimestamp])
+
+    
 
     const sendMessage = async (chatId, content) => {
         const messageData = {

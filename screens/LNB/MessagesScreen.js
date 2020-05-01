@@ -20,7 +20,6 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import firebase from 'firebase'
-import { set } from 'react-native-reanimated'
 import moment from 'moment'
 
 const db = firebase.firestore()
@@ -130,7 +129,8 @@ const MessagesScreen = props => {
             })
         }}>
             <ListItem
-                containerStyle={{backgroundColor:background}}
+                // containerStyle={{backgroundColor:background}}
+                containerStyle={{backgroundColor:'rgba(251, 188, 4, 0.4)'}}
                 title={
                     <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                         <Text style={{color:text, fontSize: 16}}>{item.chatWith.name}</Text>

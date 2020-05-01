@@ -1,6 +1,6 @@
 import * as firebase from 'firebase'
-import '@firebase/firestore'
-import '@firebase/functions'
+// import '@firebase/firestore'
+// import '@firebase/functions'
 import {config} from '../../Firebase/Fire'
 import {AsyncStorage} from 'react-native'
 import jwtDecode from 'jwt-decode'
@@ -17,6 +17,7 @@ export const SET_LIKES = 'SET_LIKES'
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
 export const MARK_NOTIFICATIONS_READ = 'MARK_NOTIFICATIONS_READ'
 export const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
+export const LAST_READ_TIMESTAMP = 'LAST_READ_TIMESTAMP'
 
 
 const db = firebase.firestore()
@@ -417,6 +418,75 @@ export const markNotificationsAsRead = () => {
     }
 }
 
+export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
+    return async dispatch => {
+        
+        // if (firebase.auth().currentUser.uid < selectedUserId) {
+        //     await db.collection('chats').doc(`${chatId}`).set(
+        //         {lastReadUser1: {
+        //             uid: firebase.auth().currentUser.uid,
+        //             timestamp: readTimestamp
+        //         }},
+        //         {merge: true}
+        //     )
+        // } else if (selectedUserId < firebase.auth().currentUser.uid) {
+        //     await db.collection('chats').doc(`${chatId}`).set(
+        //         {lastReadUser2: {
+        //             uid: firebase.auth().currentUser.uid,
+        //             timestamp: readTimestamp
+        //         }},
+        //         {merge: true}
+        //     )
+        // }
+        const uid = firebase.auth().currentUser.uid
+        if (uid < selectedUserId) {
+            await db.collection('chats').doc(`${chatId}`).set(
+                {lastRead: {
+                    user1: {
+                        uid: uid,
+                        timestamp: readTimestamp
+                    }
+                }},
+                {merge: true}
+            )
+            db.doc(`chats/${chatId}`)
+                .get()
+                .then(doc => {
+                    dispatch({
+                        type: LAST_READ_TIMESTAMP,
+                        lastReadMessage: {
+                            uid: doc.data().lastRead.user1.uid,
+                            timestamp: doc.data().lastRead.user1.timestamp 
+                        }
+                    })
+                })
+        } else if (selectedUserId < uid) {
+            await db.collection('chats').doc(`${chatId}`).set(
+                {lastRead: {
+                    user2: {
+                        uid: uid,
+                        timestamp: readTimestamp
+                    }
+                }},
+                {merge: true}
+            )
+            db.doc(`chats/${chatId}`)
+                .get()
+                .then(doc => {
+                    dispatch({
+                        type: LAST_READ_TIMESTAMP,
+                        lastReadMessage: {
+                            uid: doc.data().lastRead.user1.uid,
+                            timestamp: doc.data().lastRead.user1.timestamp 
+                        }
+                    })
+                })
+        }
+        
+        
+        
+    }
+}
 
 
 

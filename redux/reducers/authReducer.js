@@ -1,5 +1,16 @@
 import * as firebase from 'firebase'
-import { AUTHENTICATE, LOGOUT, SET_USER, SET_SELECTED_USER, SET_PENDING_CONNECTIONS, SET_NEW_CONNECTION, SET_LIKES, SET_NOTIFICATIONS, MARK_NOTIFICATIONS_READ } from '../actions/authActions'
+import { 
+    AUTHENTICATE, 
+    LOGOUT, 
+    SET_USER, 
+    SET_SELECTED_USER, 
+    SET_PENDING_CONNECTIONS, 
+    SET_NEW_CONNECTION, 
+    SET_LIKES, 
+    SET_NOTIFICATIONS, 
+    MARK_NOTIFICATIONS_READ,
+    LAST_READ_TIMESTAMP
+} from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
 
@@ -12,7 +23,8 @@ const initialState = {
     pendingConnections: [],
     messages: {},
     likes: [],
-    notifications: []
+    notifications: [],
+    lastReadMessages: []
 }
 
 export default (state = initialState, action) => {
@@ -73,6 +85,12 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 connections: action.connections
+            }
+        }
+        case LAST_READ_TIMESTAMP: {
+            return {
+                ...state,
+                lastReadMessages: action.lastReadMessage
             }
         }
         case LOGOUT: {

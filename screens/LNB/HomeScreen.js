@@ -12,9 +12,8 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { Ionicons } from '@expo/vector-icons'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import '@firebase/firestore'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+// import '@firebase/firestore'
 import { fetchNeeds, likeNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions'
@@ -220,7 +219,14 @@ const HomeScreen = props => {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
                 renderItem={itemData => (
-                    <TouchableCmp onPress={props.onSelect} useForeground>
+                    <TouchableCmp onPress={() => {
+                        props.navigation.navigate({
+                            routeName: 'PostDetail',
+                            params: {
+                                needId: itemData.item.id
+                            }
+                        })
+                    }} useForeground>
                         <View style={styles.feedItem} key={itemData.item.id}>
                             <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
                                 <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
@@ -243,20 +249,6 @@ const HomeScreen = props => {
                                 ) : (
                                     null
                                 )}
-                                {/* <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
-                                    <TouchableCmp onPress={() => {dispatch(likeNeed(itemData.item.id))}}>
-                                        <View style={{flexDirection:'row'}}>
-                                            <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 7}} />
-                                            <Text style={{color:Colors.disabled, alignSelf:'center'}}>{itemData.item.likeCount}</Text>
-                                        </View>
-                                    </TouchableCmp>
-                                    <TouchableCmp onPress={() => {props.navigation.navigate('Comment')}}>
-                                        <View style={{flexDirection:'row'}}>
-                                            <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 7}} />
-                                            {itemData.item.commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{itemData.item.commentCount}</Text>}
-                                        </View>
-                                    </TouchableCmp>
-                                </View> */}
                                 <NeedActions needId={itemData.item.id} leaveComment={commentButtonHandler}/>
                             </View>
                         </View>
