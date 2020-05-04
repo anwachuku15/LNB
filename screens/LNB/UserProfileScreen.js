@@ -187,13 +187,7 @@ const UserProfileScreen = props => {
         )
     }
 
-    if (!isLoading && userPosts.length === 0) {
-        return (
-            <View style={styles.spinner}>
-                <Text>This user hasn't posted any needs.</Text>
-            </View>
-        )
-    }
+    
 
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
@@ -318,46 +312,50 @@ const UserProfileScreen = props => {
                     
                 </View>
 
-
                 {/* USER NEEDS */}
-                <FlatList
-                    keyExtractor={(item, index) => index.toString()}
-                    data={userPosts}
-                    // onRefresh={loadPosts}
-                    // refreshing={isRefreshing}
-                    style={styles.feed}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={itemData => (
-                        <TouchableCmp onPress={props.onSelect} useForeground>
-                            <View style={styles.feedItem} key={itemData.item.id}>
-                                <TouchableCmp onPress={() => {}}>
-                                    <Image source={{uri: itemData.item.userImage}} style={styles.postAvatar} />
-                                </TouchableCmp>
-                                <View style={{flex: 1}}>
-                                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                                        <View>
-                                            <Text style={styles.postName}>{itemData.item.userName}</Text>
-                                            <Text style={styles.postTimestamp}>{moment(itemData.item.timestamp).fromNow()}</Text>
+                {!isLoading && userPosts.length === 0 ? (
+                    <View style={{justifyContent:'center', alignItems:'center'}}>
+                        <Text>This user hasn't posted any needs.</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        keyExtractor={(item, index) => index.toString()}
+                        data={userPosts}
+                        // onRefresh={loadPosts}
+                        // refreshing={isRefreshing}
+                        style={styles.feed}
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={itemData => (
+                            <TouchableCmp onPress={props.onSelect} useForeground>
+                                <View style={styles.feedItem} key={itemData.item.id}>
+                                    <TouchableCmp onPress={() => {}}>
+                                        <Image source={{uri: itemData.item.userImage}} style={styles.postAvatar} />
+                                    </TouchableCmp>
+                                    <View style={{flex: 1}}>
+                                        <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+                                            <View>
+                                                <Text style={styles.postName}>{itemData.item.userName}</Text>
+                                                <Text style={styles.postTimestamp}>{moment(itemData.item.timestamp).fromNow()}</Text>
+                                            </View>
+                                            <Ionicons name='ios-more' size={24} color='#73788B'/>
                                         </View>
-                                        <Ionicons name='ios-more' size={24} color='#73788B'/>
-                                    </View>
-                                    <Text style={styles.post}>{itemData.item.body}</Text>
-                                    {itemData.item.imageUrl ? (
-                                        <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
-                                    ) : (
-                                        null
-                                    )}
-                                    <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
-                                        <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
-                                        <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+                                        <Text style={styles.post}>{itemData.item.body}</Text>
+                                        {itemData.item.imageUrl ? (
+                                            <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
+                                        ) : (
+                                            null
+                                        )}
+                                        <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                                            <MaterialCommunityIcons name='thumb-up-outline' size={24} color='#73788B' style={{marginRight: 16}} />
+                                            <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{marginRight: 16}} />
+                                        </View>
                                     </View>
                                 </View>
-                            </View>
-                        </TouchableCmp>
+                            </TouchableCmp>
+                        )}
+                    />
                     )}
-                />
-            
             </View>
             )}
         </View>

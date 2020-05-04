@@ -1,5 +1,19 @@
 import React, { useState, useReducer, useCallback, useEffect } from 'react'
-import { ScrollView, Alert, Platform, View, Text, TextInput, Image, TouchableOpacity, KeyboardAvoidingView, StyleSheet, Button, ActivityIndicator} from 'react-native'
+import { 
+    ScrollView, 
+    Alert, 
+    Platform, 
+    View, 
+    Text, 
+    TextInput, 
+    Image, 
+    TouchableOpacity, 
+    TouchableNativeFeedback,
+    KeyboardAvoidingView, 
+    StyleSheet, 
+    Button, 
+    ActivityIndicator
+} from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,6 +24,10 @@ import Card from '../../components/UI/Card'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import * as firebase from 'firebase'
+import { Ionicons } from '@expo/vector-icons'
+
+import UserPermissions from '../../util/UserPermissions'
+import * as ImagePicker from 'expo-image-picker'
 
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
 // FORM VALIDATION REDUCER
@@ -52,7 +70,7 @@ const AuthScreen = props => {
     const [isSignup, setIsSignup] = useState(false)
     const [error, setError] = useState()
     const [isLoading, setIsLoading] = useState(false)
-
+    const [profilePic, setProfilePic] = useState()
     const dispatch = useDispatch()
     
      // FORM REDUCER - INITIAL STATE
@@ -92,7 +110,8 @@ const AuthScreen = props => {
                 formState.inputValues.password, 
                 formState.inputValues.fname, 
                 formState.inputValues.lname,
-                fomrState.inputValues.headline
+                formState.inputValues.headline,
+                profilePic
             )
         } else {
             action = login(formState.inputValues.email, formState.inputValues.password)
@@ -118,6 +137,19 @@ const AuthScreen = props => {
             })
             
     }, [dispatchFormState])
+
+    const chooseProfilePicture = async () => {
+        UserPermissions.getCameraPermission()
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4,3]
+        })
+        if(!result.cancelled) {
+            setProfilePic(result.uri)
+        } 
+    }
     
     const colorScheme = useColorScheme()
     let switchButton
@@ -130,9 +162,33 @@ const AuthScreen = props => {
         switchButton = Colors.pastel
     }
 
+    let TouchableCmp = TouchableOpacity
+    if (Platform.OS === 'android' && Platform.Version >= 21) {
+        TouchableCmp = TouchableNativeFeedback
+    }
+
     return (
         <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.OS === 'android' ? -200 : 50} style={styles.screen}>
-            <Image source={require('../../assets/lnb.png')} resizeMode='contain' style={{maxWidth: '35%', maxHeight: '15%', marginBottom:20, marginTop: -100 }}/>
+            {isSignup ? (
+                <TouchableCmp 
+                    onPress={chooseProfilePicture}
+                    style={styles.avatarContainer} 
+                >
+                    <Image source={{uri: profilePic}} style={styles.avatar}/>
+                    <Ionicons 
+                        name='ios-camera'
+                        size={30}
+                        color={Colors.disabled}
+                        style={{marginTop: 6, marginLeft: 2}}
+                    />
+                </TouchableCmp>
+            ) : (
+                <Image 
+                    source={require('../../assets/lnb.png')} 
+                    resizeMode='contain' 
+                    style={{maxWidth: '35%', maxHeight: '15%', marginBottom:20, marginTop: -100 }}
+                /> 
+            )}
             <Card style={styles.authContainer}>
                 <ScrollView>
                     {isSignup ? (
@@ -165,11 +221,11 @@ const AuthScreen = props => {
                             id='title' 
                             placeholder='Headline (Entrepreneur, designer, etc.)' 
                             keyboardType='default'
-                            secureTextEntry
                             required 
+                            errorText='Please enter your headline'
                             minLength={3} 
                             autoCapitalize='words'
-                            onInputChange={inputChangeHandler}
+                            onInputChange   ={inputChangeHandler}
                             initialValue=''
                         />
                     ) : (null)}
@@ -197,13 +253,8 @@ const AuthScreen = props => {
                         initialValue=''
                     />
                     <View style={styles.buttonContainer}>
-                        {/* <Button 
-                            title={isSignup ? 'Sign Up' : 'Login'}
-                            color={Colors.primary}
-                            onPress={authHandler}
-                        /> */}
                         <TouchableOpacity style={{...styles2.button, ...{marginTop: 10}}} onPress={authHandler}>
-                            {isSignup ? (<Text style={{color:text, fontWeight:'500', fontFamily:'open-sans-bold'}}>Sign Up</Text>)
+                            {isSignup ? (<Text style={{color:text, fontWeight:'500'}}>Sign Up</Text>)
                                         : (<Text style={{color:text, fontWeight:'500'}}>Login</Text>)
                             }
                         </TouchableOpacity>
@@ -212,66 +263,27 @@ const AuthScreen = props => {
                         {isLoading ? (
                             <ActivityIndicator size='small' color={Colors.primary} />
                         ) : ( 
-                            <Button 
-                                title={`Switch to ${isSignup ? 'Login' : 'Sign Up'}`} 
-                                color={switchButton}
+                            <TouchableCmp 
                                 onPress={() => {
                                     setIsSignup(!isSignup)
                                     logout()
-                                }}
-                                // setIsSignup(prevState => !prevState)
-                            />
+                                }} 
+                                style={{alignSelf: 'center', marginTop: 10}}>
+                                {isSignup ? (
+                                    <Text style={{color:'#414959', fontSize: 13}}>
+                                        Returning LNB Member? <Text style={{fontWeight:'500', color:Colors.primary}}>Log In</Text>
+                                    </Text>
+                                ) : (
+                                    <Text style={{color:'#414959', fontSize: 13}}>
+                                        New LNB Member? <Text style={{fontWeight:'500', color:Colors.primary}}>Sign Up</Text>
+                                    </Text>
+                                )}
+                            </TouchableCmp>
                         )}
                     </View>
                 </ScrollView>
             </Card>
         </KeyboardAvoidingView>
-
-        // <View style={styles2.screen}>
-        //     <Text style={styles2.greeting}>Welcome Back</Text>
-
-        //     <View style={styles2.errMessage}>
-        //         <Text>Error</Text>
-        //     </View>
-
-        //     <View style={styles2.form}>
-        //         <View>
-        //             <Text style={styles2.inputTitle}>Email Address</Text>
-        //             <TextInput style={styles2.input} autoCapitalize='none'/>
-        //         </View>
-        //         <View style={{marginTop:32}}>
-        //             <Text style={styles2.inputTitle}>Password</Text>
-        //             <TextInput style={styles2.input} secureTextEntry autoCapitalize='none'/>
-        //         </View>
-        //     </View>
-
-        //     {isSignup ? (
-        //         <View>
-        //             <TouchableOpacity style={styles2.button}>
-        //                 <Text style={{color:text, fontWeight:'500'}}>Sign In</Text>
-        //             </TouchableOpacity>
-
-        //             <TouchableOpacity style={{alignSelf: 'center', marginTop:32}} onPress={() => {setIsSignup(!isSignup)}}>
-        //                 <Text style={{color:text, fontSize:13}}>
-        //                     New LNB Member? <Text style={{fontWeight: '500', color: Colors.primary}}>Sign Up</Text>
-        //                 </Text>
-        //             </TouchableOpacity>
-        //         </View>
-        //     ) : (
-        //         <View>
-        //             <TouchableOpacity style={styles2.button}>
-        //                 <Text style={{color:text, fontWeight:'500'}}>Sign Up</Text>
-        //             </TouchableOpacity>
-
-        //             <TouchableOpacity style={{alignSelf: 'center', marginTop:32}} onPress={() => {setIsSignup(!isSignup)}}>
-        //                 <Text style={{color:text, fontSize:13}}>
-        //                     Returning LNB Member? <Text style={{fontWeight: '500', color: Colors.primary}}>Sign In</Text>
-        //                 </Text>
-        //             </TouchableOpacity>
-        //         </View>
-        //         )
-        //     }
-        // </View>
     )
 }
 
@@ -283,12 +295,24 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        
+        alignItems: 'center'
     },
-    gradient: {
-        // width: '100%',
-        // height: '100%',
+    avatarContainer: {
+        // flex: 1,
+        width: 100,
+        height: 100,
+        backgroundColor: '#E1E2E6',
+        borderRadius: 50,
+        marginTop: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20
+    },
+    avatar: {
+        position: 'absolute',
+        width: 100,
+        height: 100,
+        borderRadius: 50,
     },
     authContainer: {
         width: '80%',

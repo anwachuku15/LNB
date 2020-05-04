@@ -60,6 +60,8 @@ const MessagesScreen = props => {
     }
     const dispatch = useDispatch()
 
+    // const unreadThread = useSelector(state => state.auth.lastReadMessages.)
+
     const uid = firebase.auth().currentUser.uid
     const [chats, setChats] = useState()
     
@@ -91,7 +93,7 @@ const MessagesScreen = props => {
                                                                             })
                                                                         }
                                                                     } else {
-                                                                        console.log('issue')
+                                                                        console.log('no messages')
                                                                     }
                                                                 })
             userChats.sort((a,b) => {

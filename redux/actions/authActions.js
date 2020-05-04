@@ -56,7 +56,7 @@ const saveDataToStorage = (token, userId, expDate) => {
 
 
 // SIGNUP + LOGIN + LOGOUT
-export const signup = (email, password, fname, lname, headline) => {
+export const signup = (email, password, fname, lname, headline, uri) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expiresIn, expDate, displayName, noImg, imageUrl
         // ---- ADD NEW USER TO FIREBASE ---- //
@@ -73,7 +73,10 @@ export const signup = (email, password, fname, lname, headline) => {
         expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
         noImg = 'no-img.png'
-        imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+        imageUrl = uri === '' 
+                    ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+                    : uri
+        
         db.doc(`/users/${userId}`).set({
             userId: userId,
             createdAt: new Date().toISOString(),
@@ -147,6 +150,25 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
             messages: messages,
             likes: [],
             notifications: []
+        })
+        let lastReadMessages = []
+        await (await db.collection('chats').get()).docs
+        .forEach(doc => {
+            if (doc.id.includes(userId)) {
+                if (doc.data().lastRead.user1 && doc.data().lastRead.user1.uid === firebase.auth().currentUser.uid) {
+                    lastReadMessages.push({
+                        chatId: doc.id,
+                        uid: doc.data().lastRead.user1.uid,
+                        timestamp: doc.data().lastRead.user1.timestamp
+                    })
+                    dispatch({
+                        type: LAST_READ_TIMESTAMP,
+                        lastReadMessage: lastReadMessages
+                    })
+                } else if (doc.data().lastRead.user2.uid === firebase.auth().currentUser.uid) {
+
+                }
+            }
         })
     }
 }
@@ -419,7 +441,7 @@ export const markNotificationsAsRead = () => {
 }
 
 export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
-    return async dispatch => {
+    return async (dispatch, getState ) => {
         
         // if (firebase.auth().currentUser.uid < selectedUserId) {
         //     await db.collection('chats').doc(`${chatId}`).set(
@@ -452,12 +474,19 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
             db.doc(`chats/${chatId}`)
                 .get()
                 .then(doc => {
+                    let lastReadMessages = getState().auth.lastReadMessages
+                    let existingChat = lastReadMessages.find(chat => chat.chatId === chatId)
+                    if (existingChat) {
+                        lastReadMessages.splice(lastReadMessages.indexOf(existingChat), 1)
+                        lastReadMessages.push({
+                            chatId: doc.id,
+                            uid: doc.data().lastRead.user1.uid,
+                            timestamp: doc.data().lastRead.user1.timestamp
+                        })
+                    }
                     dispatch({
                         type: LAST_READ_TIMESTAMP,
-                        lastReadMessage: {
-                            uid: doc.data().lastRead.user1.uid,
-                            timestamp: doc.data().lastRead.user1.timestamp 
-                        }
+                        lastReadMessage: lastReadMessages
                     })
                 })
         } else if (selectedUserId < uid) {
@@ -473,12 +502,19 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
             db.doc(`chats/${chatId}`)
                 .get()
                 .then(doc => {
+                    let lastReadMessages = getState().auth.lastReadMessages
+                    let existingChat = lastReadMessages.find(chat => chat.chatId === chatId)
+                    if (existingChat) {
+                        lastReadMessages.splice(lastReadMessages.indexOf(existingChat), 1)
+                        lastReadMessages.push({
+                            chatId: doc.id,
+                            uid: doc.data().lastRead.user2.uid,
+                            timestamp: doc.data().lastRead.user2.timestamp
+                        })
+                    }
                     dispatch({
                         type: LAST_READ_TIMESTAMP,
-                        lastReadMessage: {
-                            uid: doc.data().lastRead.user1.uid,
-                            timestamp: doc.data().lastRead.user1.timestamp 
-                        }
+                        lastReadMessage: lastReadMessages
                     })
                 })
         }

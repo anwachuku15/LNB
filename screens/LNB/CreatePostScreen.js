@@ -21,8 +21,8 @@ import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 import Fire from '../../Firebase/Firebase'
-// import '@firebase/firestore'
 import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
+import UserPermissions from '../../util/UserPermissions'
 
 const CreatePostScreen = props => {
     const scheme = useColorScheme()
@@ -59,13 +59,7 @@ const CreatePostScreen = props => {
     // }
 
     const pickImage = async () => {
-        if (Constants.platform.ios) {
-            const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-
-            if(status != 'granted') {
-                alert('We need permission to access your camera roll')
-            }
-        }
+        UserPermissions.getCameraPermission()
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,

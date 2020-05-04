@@ -62,6 +62,7 @@ const ChatScreen = props => {
             if (!(await db.doc(`chats/${chatId}`).get()).exists) {
                 db.collection('chats').doc(`${chatId}`).set({
                     createdAt: new Date().toISOString(),
+                    id: chatId,
                     users: {
                         user1: {
                             uid: user1,
