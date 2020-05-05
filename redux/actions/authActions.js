@@ -1,6 +1,6 @@
 import * as firebase from 'firebase'
 // import '@firebase/firestore'
-// import '@firebase/functions'
+import '@firebase/functions'
 import {config} from '../../Firebase/Fire'
 import {AsyncStorage} from 'react-native'
 import jwtDecode from 'jwt-decode'
@@ -56,7 +56,7 @@ const saveDataToStorage = (token, userId, expDate) => {
 
 
 // SIGNUP + LOGIN + LOGOUT
-export const signup = (email, password, fname, lname, headline, uri) => {
+export const signup = (email, password, fname, lname, headline, localUri) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expiresIn, expDate, displayName, noImg, imageUrl
         // ---- ADD NEW USER TO FIREBASE ---- //
@@ -73,9 +73,9 @@ export const signup = (email, password, fname, lname, headline, uri) => {
         expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
         noImg = 'no-img.png'
-        imageUrl = uri === '' 
+        imageUrl = localUri === '' 
                     ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
-                    : uri
+                    : await uploadPhotoAsyn(localUri)
         
         db.doc(`/users/${userId}`).set({
             userId: userId,
@@ -213,6 +213,70 @@ export const getUser = (userId) => {
         }
     }
 }
+
+export const updateProfile = (headline, location, bio, link, uri) => {
+    return async (dispatch, getState) => {
+        let imageUrl
+        if (uri !== getState().auth.credentials.imageUrl) {
+            imageUrl = await uploadPhotoAsyn(uri)
+        } else {
+            imageUrl = uri
+        }
+        const website = link.trim() !== '' && link.trim().substring(0,4) !== 'http'
+                        ? `https://${link.trim()}`
+                        : link
+        await db.doc(`/users/${firebase.auth().currentUser.uid}`).update({
+            headline: headline,
+            location: location,
+            bio: bio,
+            website: website,
+            imageUrl: imageUrl
+        })
+        .catch(err => {
+            console.log(err)
+        }) 
+
+        const auth = getState().auth
+        dispatch(getAuthenticatedUser(
+            firebase.auth().currentUser.uid,
+            auth.credentials.email,
+            auth.credentials.displayName,
+            headline,
+            imageUrl,
+            location,
+            bio,
+            website,
+            auth.connections,
+            auth.pendingConnections,
+            auth.messages
+        ))
+    }
+}
+
+export const uploadPhotoAsyn = async uri => {
+    const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
+    return new Promise(async (res, rej) => {
+        const response = await fetch(uri)
+        const file = await response.blob()
+
+        let upload = firebase.storage().ref(path).put(file)
+
+        upload.on(
+            'state_changed', 
+            snapshot => {}, 
+            err => {
+                rej(err)
+                console.log(err)
+            },
+            async () => {
+                const url = await upload.snapshot.ref.getDownloadURL()
+                res(url)
+            }
+        )
+    })
+}
+
+
 
 // CONNECT ACTIONS & NOTIFICATIONS
 export const connectReq = (authId, authName, selectedUserId) => {
@@ -524,8 +588,6 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
     }
 }
 
-
-
 export const removeNotification = (type, recipientId, senderId, timestamp, read) => {
     return (dispatch, getState) => {
         const thisNotification = getState().auth.notifications
@@ -542,11 +604,6 @@ export const removeNotification = (type, recipientId, senderId, timestamp, read)
         })
     }
 }
-
-
-
-        
-  
 
 
 // DISCONNECT + UNREQUEST
@@ -657,8 +714,6 @@ export const unrequest = (authId, selectedUserId) => {
         }
     }
 }
-
-
 
 
 

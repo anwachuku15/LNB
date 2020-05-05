@@ -63,9 +63,9 @@ const DrawerScreen = props => {
                     >
                       <Text style={{...styles.viewProfile, ...{color:Colors.primary}}}>View Profile</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
+                    {/* <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
                       <Text style={{...styles.editProfile, ...{color:Colors.primary}}}>Edit Profile</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </View>
 

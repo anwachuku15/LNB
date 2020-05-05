@@ -95,8 +95,8 @@ const Input = props => {
     }
 
     return (
-        <View style={styles.formControl}>
-            <Text style={{...styles.label, ...{color:text}}}>{props.label}</Text>
+        <View style={props.label ? styles.formControl : styles.formControl2}>
+            {props.label && <Text style={styles.label}>{props.label}</Text>}
             <TextInput
                 {...props}
                 style={{ ...styles.input, ...{color: text}}}
@@ -120,16 +120,24 @@ const styles = StyleSheet.create({
     formControl: {
         width: '100%',
     },
-    // label: {
-    //     fontFamily: 'open-sans-bold',
-    //     marginVertical: 8
-    // },
+    formControl2: {
+        width: '100%',
+        marginVertical: 10
+    },
+    label: {
+        color: '#8A8F9E',
+        marginBottom: 5,
+        marginTop: 15,
+        fontSize: 10,
+        textTransform: 'uppercase'
+    },
     input: {
         paddingHorizontal: 2,
         paddingVertical: 5,
         borderBottomColor: Colors.primary,
         color: 'red',
-        borderBottomWidth: StyleSheet.hairlineWidth
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        // marginTop: 10
     },
     errorContainer:{
         marginVertical: 5
@@ -140,4 +148,6 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
 })
+
+
 export default Input

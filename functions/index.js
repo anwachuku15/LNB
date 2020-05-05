@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 /* eslint-disable promise/always-return */
-const functions = require('firebase-functions');
+const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const firebaseConfig = {
     apiKey: "AIzaSyBjFDet9PN8mZjani67TVYKumPfqouGQyE",
@@ -15,6 +15,37 @@ const firebaseConfig = {
 admin.initializeApp(firebaseConfig)
 const db = admin.firestore()
 
-// exports.onUserImageChange = functions
-//   .firestore
-//   .document('/users/')
+exports.onUserImageChange = functions
+  .firestore
+  .document('/users/{userId}')
+  .onUpdate((change) => {
+    console.log(change.before.data())
+    console.log(change.after.data())
+    if (change.before.data().imageUrl !== change.after.data().imageUrl) {
+      console.log('image has changed')
+      const batch = db.batch()
+      return db
+        .collection('needs')
+        .where('uid','==',change.before.data().userId)
+        .get()
+        .then((data) => {
+          data.forEach(doc => {
+            const need = db.doc(`/needs/${doc.id}`)
+            batch.update(need, { userImage: change.after.data().imageUrl })
+          })
+          return batch.commit()
+        })
+        .catch(err => console.error(err))
+    } else return true
+  })
+
+exports.onCommentCountChange = functions
+  .firestore
+  .document('/comments/{commentId}')
+  .onDelete(snapshot => {
+    return db.doc(`/needs/${snapshot.data().postId}`)
+      .update({commentCount: admin.firestore.FieldValue.increment(-1)})
+      .catch(err => {
+        console.error(err)
+      })
+  })

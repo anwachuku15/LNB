@@ -7,16 +7,31 @@ import Constants from 'expo-constants';
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 // REACT-NATIVE
-import { AppState, Platform, TouchableOpacity, TouchableNativeFeedback, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
+import { 
+    AppState, 
+    Platform, 
+    Modal, 
+    TouchableOpacity, 
+    TouchableNativeFeedback, 
+    TouchableHighlight,
+    Text, 
+    Button, 
+    FlatList, 
+    ActivityIndicator, 
+    View, 
+    StyleSheet, 
+    Image, 
+    SafeAreaView
+} from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 // import '@firebase/firestore'
-import { fetchNeeds, likeNeed } from '../../redux/actions/postsActions'
+import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
-import NeedActions from '../../components/LNB/NeedActions'
+import NeedActions from '../../components/LNB/NeedActions' 
 import { setLikes } from '../../redux/actions/authActions';
 
 const db = firebase.firestore()
@@ -99,6 +114,7 @@ const HomeScreen = props => {
     const [isLoading, setIsLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
+    const [isModalVisible, setIsModalVisible] = useState(false)
     const needs = useSelector(state => state.posts.allNeeds)
     // const notifications = useSelector(state => state.auth.notifications)
     const dispatch = useDispatch()
@@ -175,6 +191,28 @@ const HomeScreen = props => {
         )
     }
 
+    const optionsModal = (item) => (
+        <Modal
+            animationType='slide'
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={() => console.log('modal closed')}
+        >
+            <View style={styles.modalView}>
+                <View style={styles.modal}>
+                    <Text style={styles.modalText}>{item.id}</Text>
+                    <TouchableHighlight
+                        style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
+                        onPress={() => {
+                            setIsModalVisible(!isModalVisible);
+                        }}
+                    >
+                        <Text style={styles.modalButtonText}>Hide Modal</Text>
+                    </TouchableHighlight>
+                </View>
+            </View>
+        </Modal>
+    )
    
 
     let TouchableCmp = TouchableOpacity
@@ -182,8 +220,14 @@ const HomeScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
 
-    const commentButtonHandler = () => {
-        props.navigation.navigate('Comment')
+    const commentButtonHandler = (needId) => {
+        dispatch(getNeed(needId))
+        props.navigation.navigate({
+            routeName: 'Comment',
+            params: {
+                needId: needId
+            }
+        })
     }
     
     return (
@@ -210,6 +254,7 @@ const HomeScreen = props => {
             </View>
 
             {/* NEED POSTS */}
+            
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
                 data={needs}
@@ -241,7 +286,32 @@ const HomeScreen = props => {
                                             </Text>
                                         </TouchableCmp>
                                     </View>
-                                    <Ionicons name='ios-more' size={24} color='#73788B'/>
+                                    <TouchableCmp onPress={() => {
+                                        console.log(itemData.item.id)
+                                        setIsModalVisible(!isModalVisible)
+                                    }}>
+                                        <Ionicons name='ios-more' size={24} color='#73788B'/>
+                                    </TouchableCmp>
+                                    <Modal
+                                        animationType='slide'
+                                        transparent={true}
+                                        visible={isModalVisible}
+                                        onDismiss={() => {}}
+                                    >
+                                        <View style={styles.modalView}>
+                                            <View style={styles.modal}>
+                                                <Text style={styles.modalText}>what</Text>
+                                                <TouchableHighlight
+                                                    style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
+                                                    onPress={() => {
+                                                        setIsModalVisible(!isModalVisible);
+                                                    }}
+                                                >
+                                                    <Text style={styles.modalButtonText}>Hide Modal</Text>
+                                                </TouchableHighlight>
+                                            </View>
+                                        </View>
+                                    </Modal>
                                 </View>
                                 <Text style={styles.post}>{itemData.item.body}</Text>
                                 {itemData.item.imageUrl ? (
@@ -249,7 +319,7 @@ const HomeScreen = props => {
                                 ) : (
                                     null
                                 )}
-                                <NeedActions needId={itemData.item.id} leaveComment={commentButtonHandler}/>
+                                {itemData.item.id && (<NeedActions needId={itemData.item.id} leaveComment={() => commentButtonHandler(itemData.item.id)}/>)}
                             </View>
                         </View>
                     </TouchableCmp>
@@ -270,6 +340,42 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    modalView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22
+    },
+    modal: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    modalButton: {
+        backgroundColor: "#F194FF",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+    },
+    modalButtonText: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
     },
     screen: {
         flex: 1,

@@ -62,7 +62,8 @@ const MessagesScreen = props => {
 
     // const unreadThread = useSelector(state => state.auth.lastReadMessages.)
 
-    const uid = firebase.auth().currentUser.uid
+    // const uid = firebase.auth().currentUser.uid
+    const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
     
     const loadChats = useCallback(async () => {

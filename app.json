@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "LeaveNormalBehind",
-    "slug": "leavenormalbehind",
+    "name": "LNB Members",
+    "slug": "leave-normal-behind",
+    "sdkVersion": "37.0.0",
     "platforms": [
       "ios",
-      "android",
-      "web"
+      "android"
     ],
     "version": "1.0.0",
     "orientation": "portrait",

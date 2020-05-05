@@ -22,15 +22,16 @@ import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 import Fire from '../../Firebase/Firebase'
 // import '@firebase/firestore'
-import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
+import { createComment } from '../../redux/actions/postsActions'
 
 const CreateCommentScreen = props => {
     const scheme = useColorScheme()
+    const needId = props.navigation.getParam('needId')
+    const need = useSelector(state => state.posts.allNeeds.filter(need => need.id === needId))
+    const user = need[0].userName
 
     const userName = useSelector(state => state.auth.credentials.displayName)
     const userImage = useSelector(state => state.auth.credentials.imageUrl)
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
     const dispatch = useDispatch()
 
     let text
@@ -73,7 +74,7 @@ const CreateCommentScreen = props => {
 
     const handlePost = async () => {
         try {
-            await dispatch(createNeed(userName, body, image))
+            await dispatch(createComment(needId, body, image))
             setBody('')
             setImage(null)
             props.navigation.goBack()
@@ -83,17 +84,6 @@ const CreateCommentScreen = props => {
         }
     }
 
-    const handlePostNoImg = async () => {
-        try {
-            await dispatch(createNeedNoImg(userName, body, ''))
-            setBody('')
-            setImage(null)
-            props.navigation.goBack()
-        } catch (err) {
-            alert(err)
-            console.log(err)
-        }
-    }
 
 
     return (
@@ -103,8 +93,8 @@ const CreateCommentScreen = props => {
                 <TouchableOpacity onPress={()=>props.navigation.goBack()}>
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>
                 </TouchableOpacity>
-                <Text style={{color:text, fontFamily:'open-sans-bold'}}>Reply to user</Text>
-                <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost}>
+                <Text style={{color:text, fontFamily:'open-sans-bold'}}>Reply to {user}</Text>
+                <TouchableOpacity onPress={handlePost}>
                     <Text style={{fontWeight:'500', color:text}}>Reply</Text>
                 </TouchableOpacity>
             </View>

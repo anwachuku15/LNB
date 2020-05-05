@@ -1,38 +1,165 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState, useReducer} from 'react'
 import { 
     Platform,
     View, 
     Text, 
+    TextInput,
     StyleSheet, 
     Image, 
     Button, 
-    ScrollView 
+    ScrollView,
+    TouchableOpacity,
+    TouchableNativeFeedback
 } from 'react-native'
+import Input from '../../components/UI/Input'
+import { Ionicons } from '@expo/vector-icons'
 // REDUX
+import { updateProfile } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 
+import UserPermissions from '../../util/UserPermissions'
+import * as ImagePicker from 'expo-image-picker'
+
+const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
+// FORM VALIDATION REDUCER
+const formReducer = (state, action) => {
+    if (action.type === FORM_INPUT_UPDATE) {
+
+        const updatedValues = {
+            ...state.inputValues,
+            [action.input]: action.value
+        }
+        const updatedValidities = {
+            ...state.inputValidities,
+            [action.input]: action.isValid
+        }
+        let updatedFormIsValid = true
+        for (const key in updatedValidities) {
+            updatedFormIsValid = updatedFormIsValid && updatedValidities[key]
+        }
+        
+        let newValues = {}
+        for (const key in updatedValues) {
+            newValues[key] = updatedValues[key].trimStart()
+        }
+
+        return {
+            ...state,
+            formIsValid: updatedFormIsValid,
+            inputValues: newValues,
+            inputValidities: updatedValidities,
+        }
+    }
+    return state
+}
+
+
+
 let themeColor
 let text
 const EditProfileScreen = props => {
-    const scheme = useColorScheme()
-
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
-    const dispatch = useDispatch()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState()
     
+    
+    
+    const dispatch = useDispatch()
+    const auth = useSelector(state => state.auth)
+    
+    const [profilePic, setProfilePic] = useState(auth.credentials.imageUrl)
 
-    const colorScheme = useColorScheme()
+    // FORM VALIDATION - INITIAL STATE
+    const [formState, dispatchFormState] = useReducer(formReducer, {
+        inputValues: {
+            headline: auth.credentials.headline,
+            location: auth.credentials.location,
+            bio: auth.credentials.bio,
+            website: auth.credentials.website
+        }, 
+        inputValidities: {
+            headline: true,
+            location: true,
+            bio: true,
+            website: true
+        }, 
+        formIsValid: true,
+    })
+
+    // FORM VALIDATION ACTION
+    // callback -> use effect in input componet
+    const inputChangeHandler = useCallback((inputType, inputValue, inputValidity) => {
+        dispatchFormState({
+            type: FORM_INPUT_UPDATE,
+            value: inputValue,
+            input: inputType,
+            isValid: inputValidity,
+        })
+    }, [dispatchFormState])
+
+    useEffect(() => {
+        if (error) {
+            Alert.alert(
+                'Error', 
+                error, 
+                [{text: 'Okay', style: 'cancel'}]
+            )
+        }
+    }, [error])
+
+    const chooseProfilePicture = async () => {
+        UserPermissions.getCameraPermission()
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4,3]
+        })
+        if(!result.cancelled) {
+            setProfilePic(result.uri)
+        } 
+    }
+
+    const submitHandler = useCallback(async () => {
+        if (!formState.formIsValid) {
+            Alert.alert('Invalid Information', 'Please check for errors', [
+                { text: 'Okay' }
+            ])
+            return
+        }
+        setError(null)
+        setIsLoading(true)
+        try {
+            console.log(formState.inputValues.location)
+            await dispatch(updateProfile(
+                formState.inputValues.headline,
+                formState.inputValues.location,
+                formState.inputValues.bio,
+                formState.inputValues.website,
+                profilePic
+            ))
+            props.navigation.goBack()
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch, formState, profilePic])
+
+    const scheme = useColorScheme()
     let text
-    if (colorScheme === 'dark') {
+    if (scheme === 'dark') {
         themeColor = 'black'
         text = 'white'
     } else {
         themeColor = 'white'
         text = 'black'
+    }
+
+    let TouchableCmp = TouchableOpacity
+    if (Platform.OS === 'android' && Platform.Version >= 21) {
+        TouchableCmp = TouchableNativeFeedback
     }
     return (
         
@@ -48,14 +175,97 @@ const EditProfileScreen = props => {
                 <Text style={styles.headerTitle}>Edit Profile</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                        onPress={() => {}}
+                        title='Save'
+                        iconName={Platform.OS==='android' ? 'md-checkmark' : 'ios-checkmark-circle-outline'}
+                        onPress={submitHandler}
                     />
                 </HeaderButtons>
             </View>
-            <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Edit Profile</Text>
+            
+            <View style={{flex:1, justifyContent: 'flex-start'}}>
+                <TouchableCmp 
+                    onPress={chooseProfilePicture}
+                    style={styles.avatarContainer} 
+                >
+                    <Image source={{uri: profilePic}} style={styles.avatar}/>
+                    <Ionicons 
+                        name='ios-camera'
+                        size={30}
+                        color={Colors.disabled}
+                        style={{marginTop: 6, marginLeft: 2}}
+                    />
+                </TouchableCmp>
+                <View style={styles.form}>
+                    <View>
+                        <Input
+                            id='headline'
+                            label='Headline'
+                            errorText='Please enter a valid headline'
+                            keyboardType='default'
+                            autoCapitalize='sentences'
+                            autoCorrect
+                            returnKeyType='next'
+                            onInputChange={inputChangeHandler}
+                            initialValue={auth.credentials.headline}
+                            initiallyValid={!!auth.credentials}
+                            required
+                        />
+
+                        <Input
+                            id='location'
+                            label='Location'
+                            errorText='Please enter a valid location'
+                            keyboardType='default'
+                            autoCapitalize='sentences'
+                            autoCorrect
+                            returnKeyType='next'
+                            onInputChange={inputChangeHandler}
+                            initialValue={auth.credentials.location}
+                            initiallyValid={!!auth.credentials}
+                            required
+                        />
+
+                        <Input
+                            id='bio'
+                            label='Bio'
+                            errorText='Please enter a valid bio'
+                            keyboardType='default'
+                            autoCapitalize='sentences'
+                            autoCorrect
+                            returnKeyType='next'
+                            onInputChange={inputChangeHandler}
+                            initialValue={auth.credentials.bio}
+                            initiallyValid={!!auth.credentials}
+                            required
+                            multiline
+                            numberOfLines={3}
+                        />
+
+                        <Input
+                            id='website'
+                            website
+                            label='Website'
+                            errorText='Please enter a valid website'
+                            keyboardType='default'
+                            autoCapitalize='none'
+                            autoCorrect
+                            returnKeyType='next'
+                            onInputChange={inputChangeHandler}
+                            initialValue={auth.credentials.website}
+                            initiallyValid={!!auth.credentials}
+                            required
+                        />
+
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity 
+                                style={{...styles.button, ...{marginTop: 20}}} 
+                                onPress={submitHandler}
+                            >
+                                <Text style={{color:text, fontWeight:'500'}}>Save Changes</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </View>
             
         </View>
@@ -98,5 +308,37 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '500'
     },
+    avatarContainer: {
+        width: 100,
+        height: 100,
+        backgroundColor: '#E1E2E6',
+        borderRadius: 50,
+        marginTop: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        marginBottom: 20
+    },
+    avatar: {
+        position: 'absolute',
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },
+    form: {
+        marginBottom: 48,
+        marginHorizontal: 30
+    },
+    buttonContainer: {
+        marginTop: 10
+    },
+    button: {
+        marginHorizontal: 30,
+        backgroundColor: Colors.primary,
+        borderRadius: 4,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+    }
 })
 export default EditProfileScreen

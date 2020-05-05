@@ -72,7 +72,8 @@ const HomeStack = createStackNavigator({
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
-            }
+            },
+            
         }
     },
     UserProfile: {
@@ -120,14 +121,6 @@ const BulletinStack = createStackNavigator({
             }
         }
     },
-    EditProfile: {
-        screen: EditProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
     Settings: {
         screen: SettingsScreen,
         navigationOptions: {
@@ -144,14 +137,6 @@ const NotificationsStack = createStackNavigator({
     },
     Profile: {
         screen: ProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
-    EditProfile: {
-        screen: EditProfileScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -180,14 +165,6 @@ const NeedsFeedStack = createStackNavigator({
             }
         }
     },
-    EditProfile: {
-        screen: EditProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
     Settings: {
         screen: SettingsScreen,
         navigationOptions: {
@@ -197,19 +174,6 @@ const NeedsFeedStack = createStackNavigator({
         }
     },
 }, {headerMode:'none'})
-
-const HomeNav = createStackNavigator({
-    Home: {
-        screen: HomeStack
-    },
-    commentModal: {
-        screen: CreateCommentScreen
-    }
-}, {
-    headerMode: 'none',
-    mode: 'modal'
-})
-
 
 
 const BottomTabStackContainer = createStackNavigator({
@@ -395,7 +359,6 @@ BottomTabStackContainer.navigationOptions = ({navigation}) => {
 
 // Disable swipe to Messages if the Drawer or Post Modal is open or if HomeStack is past home page
 DrawerNav.navigationOptions = ({navigation}) => {
-    console.log()
     let swipeEnabled = true
     if (navigation.state.isDrawerOpen || navigation.state.routes[0].routes.length > 1 || navigation.state.routes[0].routes[0].routes[0].index > 0) {
         swipeEnabled = false
@@ -406,6 +369,7 @@ DrawerNav.navigationOptions = ({navigation}) => {
         swipeEnabled
     }
 }
+
 
 
 const SwipeTabNavigator = createMaterialTopTabNavigator({

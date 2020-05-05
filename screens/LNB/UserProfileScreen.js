@@ -24,6 +24,7 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
 import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setNotifications, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
+import { fetchNeeds } from '../../redux/actions/postsActions'
 
 
 const db = firebase.firestore()
@@ -63,14 +64,16 @@ const UserProfileScreen = props => {
     // console.log(pendingConnections)
     const loadUser = useCallback(async () => {
         setError(null)
+        setIsRefreshing(true)
         try {
             await dispatch(getUser(userId))
+            dispatch(fetchNeeds())
             dispatch(setLikes())
         } catch (err) {
             console.log(err)
             setError(err.message)
         }
-        // setIsRefreshing(false)
+        setIsRefreshing(false)
     }, [dispatch, setIsLoading, setError])
     
     useEffect(() => {
@@ -194,7 +197,47 @@ const UserProfileScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
 
-    
+    let websiteIcon
+    if (user) {    
+        websiteIcon =   <View>
+                            {user.credentials.website.includes('linkedin.com') && (
+                                <TouchableCmp onPress={() => {}} style={{}}>
+                                    <MaterialCommunityIcons 
+                                        name='linkedin-box' 
+                                        size={24}
+                                        color='#2867B2'
+                                    />
+                                </TouchableCmp>
+                            )}
+                            {user.credentials.website.includes('instagram.com') && (
+                                <TouchableCmp onPress={() => {}} style={{}}>
+                                    <MaterialCommunityIcons 
+                                        name='instagram' 
+                                        size={24}
+                                        color='#C13584'
+                                    />
+                                </TouchableCmp>
+                            )}
+                            {user.credentials.website.includes('facebook.com') && (
+                                <TouchableCmp onPress={() => {}} style={{}}>
+                                    <MaterialCommunityIcons 
+                                        name='facebook-box' 
+                                        size={24}
+                                        color='#4267B2'
+                                    />
+                                </TouchableCmp>
+                            )}
+                            {user.credentials.website.includes('twitter.com') && (
+                                <TouchableCmp onPress={() => {}} style={{}}>
+                                    <MaterialCommunityIcons 
+                                        name='twitter' 
+                                        size={24}
+                                        color='#1DA1F2'
+                                    />
+                                </TouchableCmp>
+                            )}
+                        </View>
+    }
 
     return (
         <View style={styles.screen}>
@@ -230,60 +273,59 @@ const UserProfileScreen = props => {
                             <Text style={styles.infoTitle}>{user.credentials.headline}</Text>
                             {userId !== firebase.auth().currentUser.uid ? (
                                 <View>
-                                    {accept && (
-                                        <TouchableCmp 
-                                            onPress={() => {
-                                                dispatch(confirmConnect(firebase.auth().currentUser.uid, authName, userId, user.credentials.displayName))
-                                                setAccept(false)
-                                            }} 
-                                            style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
-                                            <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
-                                        </TouchableCmp>
-                                    )}
-                                    {requested && (
-                                        <TouchableCmp onPress={() => {unrequestHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
-                                            <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
-                                        </TouchableCmp>
-                                    )}
-                                    {/* {user.pendingConnections.indexOf(firebase.auth().currentUser.uid) === -1 && !accept && ( */}
-                                    {!connected && !requested && !accept && ( 
-                                        <TouchableCmp 
-                                            style={{...styles.connectButton, ...{borderColor: Colors.bluesea}}}
-                                            onPress={() => {
-                                                dispatch(connectReq(firebase.auth().currentUser.uid, authName, userId))
-                                                setRequested(true)
-                                            }} 
-                                        >
-                                            <Text style={{color:Colors.bluesea, fontSize:14, alignSelf:'center'}}>Connect</Text>
-                                        </TouchableCmp>
-                                    )}
-                                    {connected && (
-                                        <TouchableCmp onPress={() => {disconnectHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
-                                            <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
-                                        </TouchableCmp>
-                                    )}
+                                    {websiteIcon}
                                     <View>
-                                        <TouchableCmp
-                                            onPress={() => {
-                                                props.navigation.navigate({
-                                                    routeName: 'ChatScreen',
-                                                    params: {
-                                                        selectedUserId: userId
+                                        {accept && (
+                                            <TouchableCmp 
+                                                onPress={() => {
+                                                    dispatch(confirmConnect(firebase.auth().currentUser.uid, authName, userId, user.credentials.displayName))
+                                                    setAccept(false)
+                                                }} 
+                                                style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
+                                                <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
+                                            </TouchableCmp>
+                                        )}
+                                        {requested && (
+                                            <TouchableCmp onPress={() => {unrequestHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
+                                                <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
+                                            </TouchableCmp>
+                                        )}
+                                        {/* {user.pendingConnections.indexOf(firebase.auth().currentUser.uid) === -1 && !accept && ( */}
+                                        {!connected && !requested && !accept && ( 
+                                            <TouchableCmp 
+                                                style={{...styles.connectButton, ...{borderColor: Colors.bluesea}}}
+                                                onPress={() => {
+                                                    dispatch(connectReq(firebase.auth().currentUser.uid, authName, userId))
+                                                    setRequested(true)
+                                                }} 
+                                            >
+                                                <Text style={{color:Colors.bluesea, fontSize:14, alignSelf:'center'}}>Connect</Text>
+                                            </TouchableCmp>
+                                        )}
+                                        {connected && (
+                                            <TouchableCmp onPress={() => {disconnectHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
+                                                <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
+                                            </TouchableCmp>
+                                        )}
+                                        <View>
+                                            <TouchableCmp
+                                                onPress={() => {
+                                                    props.navigation.navigate({
+                                                        routeName: 'ChatScreen',
+                                                        params: {
+                                                            selectedUserId: userId
+                                                        }
                                                     }
-                                                }
-                                            )}}
-                                            style={{...styles.connectButton, ...{borderColor: Colors.blue}}}
-                                        >
-                                            <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text>
-                                        </TouchableCmp>
+                                                )}}
+                                                style={{...styles.connectButton, ...{borderColor: Colors.blue}}}
+                                            >
+                                                <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text>
+                                            </TouchableCmp>
+                                        </View>
                                     </View>
                                 </View>
-                            ) : (null
-                                // <View>
-                                //     <TouchableCmp onPress={() => props.navigation.navigate('EditProfile')} style={{...styles.connectButton, ...{borderColor: Colors.orange}}}>
-                                //         <Text style={{color:Colors.orange, fontSize:14, alignSelf:'center'}}>Edit Profile</Text>
-                                //     </TouchableCmp>
-                                // </View>
+                            ) : (
+                                websiteIcon
                             )}
                             
                         </View>
@@ -321,8 +363,8 @@ const UserProfileScreen = props => {
                     <FlatList
                         keyExtractor={(item, index) => index.toString()}
                         data={userPosts}
-                        // onRefresh={loadPosts}
-                        // refreshing={isRefreshing}
+                        onRefresh={loadUser}
+                        refreshing={isRefreshing}
                         style={styles.feed}
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}

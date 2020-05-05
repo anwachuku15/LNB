@@ -9,8 +9,10 @@ export const CREATE_NEED = 'CREATE_NEED'
 export const CREATE_NEED_NOIMG = 'CREATE_NEED_NOIMG'
 export const DELETE_NEED = 'DELETE_NEED'
 export const SET_NEEDS = 'SET_NEEDS'
-// export const SET_NEED = 'SET_NEED'
+export const SET_NEED = 'SET_NEED'
 export const LIKE_NEED = 'LIKE_NEED'
+export const UNLIKE_NEED = 'UNLIKE_NEED'
+export const CREATE_COMMENT = 'CREATE_COMMENT'
 
 // export const fetchNeeds = () => {
 //     return async (dispatch, getState) => {
@@ -182,6 +184,71 @@ export const createNeedNoImg = (userName, body) => {
     }
 }
 
+export const createComment = (postId, body, localUri) => {
+    return async (dispatch, getState) => {
+        const uid = getState().auth.userId
+        const userName = getState().auth.credentials.displayName
+        const userImage = getState().auth.credentials.imageUrl
+        let imageUrl, commentId
+        if (localUri !== undefined) {
+            imageUrl = await uploadPhotoAsyn(localUri)
+        } else {
+            imageUrl = null
+        }
+        const timestamp = moment(Date.now()).toISOString()
+        const newComment = {
+            timestamp,
+            postId,
+            uid,
+            userName,
+            userImage,
+            body,
+            imageUrl,
+            commentCount: 0,
+            likeCount: 0
+        }
+        db.collection('comments')
+        .add(newComment)
+        .then(doc => {
+            commentId = doc.id
+        })
+        .catch(err => {
+            console.error(err)
+        })
+        dispatch({
+            type: CREATE_COMMENT,
+            commentData: {
+                id: commentId,
+                timestamp: newComment.timestamp,
+                postId: newComment.postId,
+                uid: newComment.uid,
+                userName: newComment.userName,
+                userImage: newComment.userImage,
+                body: newComment.body,
+                imageUrl: newComment.imageUrl,
+                commentCount: newComment.commentCount,
+                likeCount: newComment.likeCount
+            }
+        })
+        dispatch(getNeed(postId))
+
+    } 
+}
+
+export const getNeed = (needId) => {
+    return async dispatch => {
+        try {
+            const needData = await db.doc(`/needs/${needId}`).get()
+            dispatch({
+                type: SET_NEED,
+                need: needData.data()
+            })
+        } catch (err) {
+            throw err
+        }
+    }
+}
+
 const uploadPhotoAsyn = async uri => {
     const path = `photos/${this.uid}/${Date.now()}.jpg`
     return new Promise(async (res, rej) => {
@@ -252,7 +319,47 @@ export const likeNeed = (needId) => {
     }
 }
 
+export const unLikeNeed = (needId) => {
+    return async (dispatch, getState) => {
+        const likeDocument = db
+            .collection('likes')
+            .where('uid', '==', firebase.auth().currentUser.uid)
+            .where('needId', '==', needId)
+            .limit(1)
+        const needDocument = db.doc(`/needs/${needId}`)
 
+        let needData
+        needDocument.get()
+            .then(doc => {
+                if (doc.exists) {
+                    needData = doc.data()
+                    needData.id = doc.id
+                    return likeDocument.get()
+                } else {
+                    return res.status(404).json({error: 'Post does not exist'})
+                }
+            })
+            .then(data => {
+                if (data.empty) {
+                    return res.status(400).json({error: 'post not liked'})
+                } else {
+                    return db.doc(`/likes/${data.docs[0].id}`)
+                        .delete()
+                        .then(() => {
+                            dispatch({
+                                type: UNLIKE_NEED,
+                                needData: needData
+                            })
+                            needData.likeCount--
+                            return needDocument.update({ likeCount: needData.likeCount })
+                        })
+                }
+            })
+            .catch(err => {
+                console.error(err)
+            })
+    }
+}
 
 
 

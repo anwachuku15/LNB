@@ -1,11 +1,12 @@
 import Fire from '../../Firebase/Firebase'
-import { CREATE_NEED, SET_NEEDS, CREATE_NEED_NOIMG, LIKE_NEED } from '../actions/postsActions'
+import { CREATE_NEED, SET_NEEDS, CREATE_NEED_NOIMG, LIKE_NEED, UNLIKE_NEED, CREATE_COMMENT, SET_NEED } from '../actions/postsActions'
 import Need from '../../models/need-model'
 
 
 const initialState = {
     allNeeds: [],
-    userNeeds: []
+    userNeeds: [],
+    need: {}
 }
 
 export default (state = initialState, action) => {
@@ -14,6 +15,12 @@ export default (state = initialState, action) => {
             return {
                 allNeeds: action.allNeeds,
                 userNeeds: action.userNeeds
+            }
+        }
+        case SET_NEED: {
+            return {
+                ...state,
+                need: action.need
             }
         }
         case CREATE_NEED:
@@ -52,12 +59,26 @@ export default (state = initialState, action) => {
             }
         
         case LIKE_NEED:
+        case UNLIKE_NEED:
             let index = state.allNeeds.findIndex(need => need.id === action.needData.id)
             state.allNeeds[index] = action.needData
             return {
                 ...state
             }
-            
+        
+        case CREATE_COMMENT:
+            state.allNeeds.comments = state.allNeeds.comments !== undefined
+                                        ? [action.commentData, ...state.need.comments]
+                                        : [action.commentData]
+            let index2 = state.allNeeds.findIndex((need) => need.id === action.commentData.postId)
+            state.allNeeds[index2].commentCount++
+            console.log(state.allNeeds[index2].commentCount)
+            return {
+                ...state,
+                need: {
+                    ...state.need
+                }
+            }
         default:
             return state
     }
