@@ -80,7 +80,6 @@ const MessagesScreen = props => {
             const allChats = await (await db.collection('chats').get())
                                                                 .docs
                                                                 .forEach(doc => {
-                                                                    let num = 1
                                                                     if (doc.id.includes(uid)) {
                                                                         const messages = doc.data().messages
                                                                         const chatWithId = doc.id.replace(uid,'')
@@ -106,11 +105,10 @@ const MessagesScreen = props => {
                                                                                 lastRead: authUser === 'user1' ? doc.data().lastRead.user1.timestamp : doc.data().lastRead.user2.timestamp
                                                                             })
                                                                         }
-                                                                        console.log(num + ' chat thread(s)')
                                                                     }
                                                                 })
             userChats.sort((a,b) => {
-                a.lastMessageTimestamp > a.lastMessageTimestamp ? -1 : 1
+                a.lastMessageTimestamp > b.lastMessageTimestamp ? -1 : 1
             })
             setChats(userChats)
         } catch (err) {

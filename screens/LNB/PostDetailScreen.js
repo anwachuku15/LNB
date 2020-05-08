@@ -14,26 +14,52 @@ import { fetchNeeds, likeNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
+import { ListItem } from 'react-native-elements'
 
 const db = firebase.firestore()
 
 let themeColor
 let text
-
+let background
 const PostDetailScreen = props => {
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         themeColor = 'black'
         text = 'white'
+        background = 'black'
     } 
     if (scheme === 'light') {
         themeColor = 'white'
         text = 'black'
+        background = 'white'
     }
 
     const needId = props.navigation.getParam('needId')
     const need = useSelector(state => state.posts.allNeeds.find(need => need.id === needId))
     const dispatch = useDispatch()
+
+    const [comments, setComments] = useState()
+    const loadComments = useCallback(async () => {
+        try {
+            let postComments = []
+            const allComments = await (await db.collection('comments').orderBy('timestamp', 'desc').get())
+                                                                      .docs
+                                                                      .forEach(doc => {
+                                                                        if (doc.data().postId === needId) {
+                                                                            postComments.push(doc.data())
+                                                                        } else {
+                                                                            console.log('nothing')
+                                                                        }
+                                                                      })
+            setComments(postComments)
+        } catch (err) {
+            console.log(err)
+        }
+    }, [setComments])
+
+    useEffect(() => {
+        loadComments()
+    }, [loadComments])
 
     
 
@@ -50,6 +76,28 @@ const PostDetailScreen = props => {
     const commentButtonHandler = () => {
         props.navigation.navigate('Comment')
     }
+
+    const renderComment = ({item}) => (
+        <TouchableCmp onPress={() => {}}>
+            <ListItem 
+                containerStyle={{backgroundColor: background}}
+                title={
+                    <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                        <Text style={{color:'#454D65', fontSize: 16}}>{item.userName}</Text>
+                        <Text style={{color:Colors.disabled, fontSize: 14}}>{moment(item.timestamp).fromNow()}</Text>
+                    </View>
+                }
+                subtitle={
+                    <View style={{flexDirection:'row'}}>
+                        <Text style={{color: text}}>{item.body}</Text>
+                    </View>
+                }
+                leftAvatar={{source: {uri: item.userImage}}}
+                bottomDivider
+                topDivider
+            />
+        </TouchableCmp>
+    )
 
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
@@ -104,8 +152,15 @@ const PostDetailScreen = props => {
             </View>
 
             {/* Comments */}
-            {/* <ScrollView>
-            </ScrollView> */}
+            {comments && comments.length > 0 ? (
+                <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={comments}
+                    renderItem={renderComment}
+                />
+            ): (
+                <Text style={{color:text, alignSelf:'center'}}>No Comments</Text>
+            )}
         </View>
     )
 }

@@ -69,7 +69,7 @@ const NeedActions = props => {
         <TouchableCmp onPress={props.leaveComment}>
             <View style={{flexDirection:'row'}}>
                 <Ionicons name='ios-chatboxes' size={24} color='#73788B' style={{}} />
-                {commentCount > -1 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>}
+                {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>}
             </View>
         </TouchableCmp>
     </View>

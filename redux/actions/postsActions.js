@@ -190,6 +190,8 @@ export const createComment = (postId, body, localUri) => {
         const uid = getState().auth.userId
         const userName = getState().auth.credentials.displayName
         const userImage = getState().auth.credentials.imageUrl
+        const needDocument = db.doc(`/needs/${postId}`)
+
         let imageUrl, commentId
         if (localUri !== undefined) {
             imageUrl = await uploadPhotoAsyn(localUri)
@@ -208,10 +210,24 @@ export const createComment = (postId, body, localUri) => {
             commentCount: 0,
             likeCount: 0
         }
+        let needData
+        needDocument.get()
+            .then(doc => {
+                if (doc.exists) {
+                    needData = doc.data()
+                    needData.id = doc.id
+                }
+            })
+            .catch(err => {
+                console.log(err)
+            })
+
         db.collection('comments')
         .add(newComment)
         .then(doc => {
             commentId = doc.id
+            needData.commentCount++
+            db.doc(`/needs/${postId}`).update({ commentCount: needData.commentCount })
         })
         .catch(err => {
             console.error(err)
