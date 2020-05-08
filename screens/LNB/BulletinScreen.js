@@ -13,6 +13,7 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import MessageIcon from '../../components/LNB/MessageIcon';
 
 let themeColor
 let text
@@ -46,8 +47,8 @@ const BulletinScreen = props => {
                 <Text style={styles.headerTitle}>Bulletin</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
+                        ButtonElement={<MessageIcon/>}
+                        title='Messages'
                         onPress={() => {
                             props.navigation.navigate('Messages')
                         }}
