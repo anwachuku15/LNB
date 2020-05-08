@@ -52,7 +52,6 @@ const NotificationsScreen = props => {
     const loadNotifications = useCallback(async () => {
         try {
             await dispatch(markNotificationsAsRead())
-            await dispatch(setNotifications())
         } catch (err) {
             console.log(err)
         }

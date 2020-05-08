@@ -13,7 +13,7 @@ import {
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import { getUser } from '../../redux/actions/authActions'
+import { getUser, markMessageNotificationsAsRead } from '../../redux/actions/authActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -66,12 +66,21 @@ const MessagesScreen = props => {
     const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
     
+    const loadMessageNotifications = useCallback(async () => {
+        try {
+            await dispatch(markMessageNotificationsAsRead())
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch])
+
     const loadChats = useCallback(async () => {
         try {
             let userChats = []
             const allChats = await (await db.collection('chats').get())
                                                                 .docs
                                                                 .forEach(doc => {
+                                                                    let num = 1
                                                                     if (doc.id.includes(uid)) {
                                                                         const messages = doc.data().messages
                                                                         const chatWithId = doc.id.replace(uid,'')
@@ -93,8 +102,7 @@ const MessagesScreen = props => {
                                                                                 lastMessageTimestamp: doc.data().lastMessageTimestamp
                                                                             })
                                                                         }
-                                                                    } else {
-                                                                        console.log('no messages')
+                                                                        console.log(num + ' chat thread(s)')
                                                                     }
                                                                 })
             userChats.sort((a,b) => {
@@ -107,6 +115,12 @@ const MessagesScreen = props => {
         
     }, [setChats])
 
+    useEffect(() => {
+        const willFocusSub = props.navigation.addListener('willFocus', loadMessageNotifications)
+        return () => {
+            willFocusSub
+        }
+    }, [loadMessageNotifications])
     useEffect(() => {
         const willFocusSubscription = props.navigation.addListener('willFocus', loadChats)
         return () => {

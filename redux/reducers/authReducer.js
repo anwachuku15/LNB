@@ -8,7 +8,9 @@ import {
     SET_NEW_CONNECTION, 
     SET_LIKES, 
     SET_NOTIFICATIONS, 
+    SET_MESSAGE_NOTIFCATIONS,
     MARK_NOTIFICATIONS_READ,
+    MARK_MESSAGE_NOTIFICATIONS_READ,
     LAST_READ_TIMESTAMP
 } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
@@ -24,6 +26,7 @@ const initialState = {
     messages: {},
     likes: [],
     notifications: [],
+    messageNotifications: [],
     lastReadMessages: []
 }
 
@@ -42,7 +45,8 @@ export default (state = initialState, action) => {
                 connections: action.connections,
                 pendingConnections: action.pendingConnections,
                 likes: action.likes,
-                notifications: action.notifications
+                notifications: action.notifications,
+                messageNotifications: action.messageNotifications
             }
         }
         case SET_SELECTED_USER: {
@@ -69,18 +73,24 @@ export default (state = initialState, action) => {
                 notifications: action.notifications
             }
         }
+        case SET_MESSAGE_NOTIFCATIONS: {
+            return {
+                ...state,
+                messageNotifications: action.messageNotifications
+            }
+        }
         case MARK_NOTIFICATIONS_READ: {
             state.notifications.forEach(notification => notification.read = true)
             return {
                 ...state
             }
         }
-        // case REMOVE_NOTIFICATION: {
-        //     return {
-        //         ...state,
-        //         notifications: 
-        //     }
-        // }
+        case MARK_MESSAGE_NOTIFICATIONS_READ: {
+            state.messageNotifications.forEach(notification => notification.read = true)
+            return {
+                ...state
+            }
+        }
         case SET_NEW_CONNECTION: {
             return {
                 ...state,

@@ -5,7 +5,6 @@ import { useColorScheme } from 'react-native-appearance'
 import { useSelector, useDispatch } from 'react-redux'
 import { Ionicons } from '@expo/vector-icons'
 import firebase from 'firebase'
-import { setNotifications } from '../../redux/actions/authActions'
 
 
 const db = firebase.firestore()
@@ -31,19 +30,6 @@ const NotificationIcon = props => {
     // SET UNREAD NOTIFICATION COUNT WITH FIRESTORE LISTENER
     const [unreadCount, setUnreadCount] = useState(0)
 
-
-    // REVIEW UserProfileScreen regarding DOUBLE STATE UPDATE for setNotifications
-    useEffect(() => {
-        const unreadListener = db.collection('notifications')
-                        .where('recipientId','==',uid)
-                        .onSnapshot(snapshot => {
-                            // setUnreadCount(snapshot.docs.filter(doc => doc.data().read === false).filter(doc => doc.data().type !== 'message').length)
-                            dispatch(setNotifications())
-                        })
-        return () => {
-            unreadListener
-        }
-    },[])
     // const BadgedIcon = withBadge(unreadCount)(Icon)
 
     return (

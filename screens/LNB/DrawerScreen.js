@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   StyleSheet,
   Text,
@@ -15,9 +15,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Colors from '../../constants/Colors'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { setNotifications } from '../../redux/actions/authActions'
 
 import firebase from 'firebase'
+const db = firebase.firestore()
+
 
 let text
 const DrawerScreen = props => {
@@ -27,9 +30,22 @@ const DrawerScreen = props => {
     } else {
         text = 'black'
     }
-
+    const uid = useSelector(state => state.auth.userId)
     const user = useSelector(state => state.auth)
-    
+    const dispatch = useDispatch()
+    // useEffect(() => {
+    //   const unreadListener = db.collection('notifications')
+    //                   .where('recipientId','==',uid)
+    //                   .onSnapshot(snapshot => {
+    //                     if (snapshot.docChanges().filter(snapshot => snapshot.doc.data().recipientId === uid)) {
+    //                       dispatch(setNotifications())
+    //                     }
+    //                   })
+    //   return () => {
+    //       unreadListener
+    //   }
+    // },[])
+  
     return (
         <View style={styles.container}>
             <View style={styles.top}>

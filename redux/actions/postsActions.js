@@ -3,6 +3,7 @@ import firebase from 'firebase'
 // import '@firebase/firestore'
 import moment from 'moment'
 import Need from '../../models/need-model'
+import { setNotifications } from './authActions'
 const db = firebase.firestore()
 
 export const CREATE_NEED = 'CREATE_NEED'
@@ -282,6 +283,10 @@ export const likeNeed = (needId) => {
         const needDocument = db.doc(`/needs/${needId}`)
         
         let needData
+        let needUserId
+        const authUserId = firebase.auth().currentUser.uid
+        const authUserName = getState().auth.credentials.displayName
+        const authUserImage = getState().auth.credentials.imageUrl
         needDocument.get()
             .then(doc => {
                 if (doc.exists) {
@@ -296,9 +301,9 @@ export const likeNeed = (needId) => {
                 if (data.empty) {
                     return db.collection('likes').add({
                         needId: needId,
-                        uid: firebase.auth().currentUser.uid,
-                        userName: getState().auth.credentials.displayName,
-                        userImage: getState().auth.credentials.imageUrl,
+                        uid: authUserId,
+                        userName: authUserName,
+                        userImage: authUserImage,
                         timestamp: new Date().toISOString()
                     })
                     .then(() => {
@@ -309,6 +314,16 @@ export const likeNeed = (needId) => {
                         needData.likeCount++
                         return needDocument.update({ likeCount: needData.likeCount })
                     })
+                    .then(() => {
+                        db.doc(`/needs/${needId}`).get()
+                        .then(async (doc) => {
+                            needUserId = doc.data().uid
+                            const pushToken = (await db.doc(`/users/${needUserId}`).get()).data().pushToken
+                            if (pushToken) {
+                                sendLikeNeedNotification(needId, needUserId, pushToken, authUserId, authUserName, authUserImage)
+                            }
+                        })
+                    })
                 } else {
                     // unlike 
                 }
@@ -317,6 +332,32 @@ export const likeNeed = (needId) => {
                 console.error(err)
             })
     }
+}
+
+const sendLikeNeedNotification = (needId, recipientId, pushToken, authId, authName, authImage) => {
+    db.collection('notifications').add({
+        timestamp: new Date().toISOString(),
+        type: 'likeNeed',
+        needId,
+        recipientId,
+        senderId: authId,
+        senderName: authName,
+        senderImage: authImage,
+        read: false
+    })
+    let res = fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            to: pushToken,
+            sound: 'default',
+            title: 'New Like',
+            body: authName + ' liked one of your needs.'
+        })
+    })
 }
 
 export const unLikeNeed = (needId) => {
@@ -353,7 +394,24 @@ export const unLikeNeed = (needId) => {
                             needData.likeCount--
                             return needDocument.update({ likeCount: needData.likeCount })
                         })
+                        .catch(err => {
+                            console.log(err)
+                        })
                 }
+            })
+            .then(async () => {
+                db.collection('notifications')
+                .where('needId', '==', needId)
+                .where('senderId', '==', firebase.auth().currentUser.uid)
+                .limit(1)
+                .get()
+                .then(data => {
+                    db.doc(`/notifications/${data.docs[0].id}`)
+                    .delete()
+                    // .then(() => {
+                    //     dispatch(setNotifications())
+                    // })
+                })
             })
             .catch(err => {
                 console.error(err)

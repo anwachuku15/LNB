@@ -32,7 +32,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions' 
-import { setLikes } from '../../redux/actions/authActions';
+import { setLikes, setNotifications } from '../../redux/actions/authActions';
+import MessageIcon from '../../components/LNB/MessageIcon';
 
 const db = firebase.firestore()
 
@@ -118,7 +119,17 @@ const HomeScreen = props => {
     const needs = useSelector(state => state.posts.allNeeds)
     // const notifications = useSelector(state => state.auth.notifications)
     const dispatch = useDispatch()
-    
+    // const uid = useSelector(state => state.auth.userId)
+    // useEffect(() => {
+    //     const unreadListener = db.collection('notifications')
+    //                     .where('recipientId','==',uid)
+    //                     .onSnapshot(snapshot => {
+    //                         dispatch(setNotifications())
+    //                     })
+    //     return () => {
+    //         unreadListener
+    //     }
+    //   },[])
     const loadData = useCallback(async () => {
         setError(null)
         setIsRefreshing(true)
@@ -243,9 +254,16 @@ const HomeScreen = props => {
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Feed</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
+                    {/* <Item
+                        title='Messages'
                         iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
+                        onPress={() => {
+                            props.navigation.navigate('Messages')
+                        }}
+                    /> */}
+                    <Item
+                        ButtonElement={<MessageIcon/>}
+                        title='Messages'
                         onPress={() => {
                             props.navigation.navigate('Messages')
                         }}

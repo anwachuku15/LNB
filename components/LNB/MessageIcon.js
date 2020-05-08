@@ -5,8 +5,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { useSelector, useDispatch } from 'react-redux'
 import { Ionicons } from '@expo/vector-icons'
 import firebase from 'firebase'
-import { setNotifications } from '../../redux/actions/authActions'
-
+import Colors from '../../constants/Colors'
 
 const db = firebase.firestore()
 
@@ -22,7 +21,8 @@ const MessageIcon = props => {
     }
     const dispatch = useDispatch()
     const uid = useSelector(state => state.auth.userId)
-    const notifications = useSelector(state => state.auth.notifications)
+    const notifications = useSelector(state => state.auth.messageNotifications)
+    
     // SET UNREAD NOTIFICATION COUNT WITH STATE
     let unread = notifications.filter(notification => notification.read === false)
     const BadgedIcon = withBadge(unread.length)(Icon)
@@ -32,18 +32,7 @@ const MessageIcon = props => {
     const [unreadCount, setUnreadCount] = useState(0)
 
 
-    // REVIEW UserProfileScreen regarding DOUBLE STATE UPDATE for setNotifications
-    useEffect(() => {
-        const unreadListener = db.collection('notifications')
-                        .where('recipientId','==',uid)
-                        .onSnapshot(snapshot => {
-                            // setUnreadCount(snapshot.docs.filter(doc => doc.data().read === false).filter(doc => doc.data().type !== 'message').length)
-                            dispatch(setNotifications())
-                        })
-        return () => {
-            unreadListener
-        }
-    },[])
+   
     // const BadgedIcon = withBadge(unreadCount)(Icon)
 
     return (
@@ -52,14 +41,16 @@ const MessageIcon = props => {
             {unread && unread.length > 0 ? (
                 <BadgedIcon 
                     type='ionicon'
-                    color={props.tabInfo.tintColor}
+                    style={{marginHorizontal:11}}
+                    color={Colors.primary}
                     name={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
                 />
             ) : (
                 <Ionicons 
                     name={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'} 
-                    size={25} 
-                    color={props.tabInfo.tintColor}
+                    size={23} 
+                    color={Colors.primary}
+                    style={{marginHorizontal:11}}
                 />
             )}
         </View>

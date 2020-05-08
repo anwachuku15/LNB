@@ -22,14 +22,14 @@ const NeedActions = props => {
     const [isLiked, setIsLiked] = useState(false)
 
     
-
+    const uid = useSelector(state => state.auth.userId)
     useEffect(() => {
         if (!props.needId) {
             console.log('no id yet')
         }
         const setLikeIcon = db.collection('likes')
         .where('needId','==',props.needId)
-        .where('uid', '==', firebase.auth().currentUser.uid)
+        .where('uid', '==', uid)
         .onSnapshot(snapshot => {
             if (snapshot.empty) {
                 setIsLiked(false)
