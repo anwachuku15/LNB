@@ -84,6 +84,9 @@ const MessagesScreen = props => {
                                                                     if (doc.id.includes(uid)) {
                                                                         const messages = doc.data().messages
                                                                         const chatWithId = doc.id.replace(uid,'')
+                                                                        const authUser = uid < chatWithId
+                                                                                    ? 'user1'
+                                                                                    : 'user2'
                                                                         const name = uid > chatWithId 
                                                                                     ? doc.data().users.user1.name
                                                                                     : doc.data().users.user2.name
@@ -99,7 +102,8 @@ const MessagesScreen = props => {
                                                                                 },
                                                                                 lastMessageText: messages[messages.length-1].text,
                                                                                 lastMessageSenderId: messages[messages.length-1].user._id,
-                                                                                lastMessageTimestamp: doc.data().lastMessageTimestamp
+                                                                                lastMessageTimestamp: doc.data().lastMessageTimestamp,
+                                                                                lastRead: authUser === 'user1' ? doc.data().lastRead.user1.timestamp : doc.data().lastRead.user2.timestamp
                                                                             })
                                                                         }
                                                                         console.log(num + ' chat thread(s)')
@@ -135,7 +139,7 @@ const MessagesScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
 
-    const renderItem = ({item}) => (
+    const renderChat = ({item}) => (
         <TouchableCmp onPress={async () => {
             await dispatch(getUser(item.chatWith.uid));
             props.navigation.navigate({
@@ -147,7 +151,7 @@ const MessagesScreen = props => {
         }}>
             <ListItem
                 // containerStyle={{backgroundColor:background}}
-                containerStyle={{backgroundColor:'rgba(251, 188, 4, 0.4)'}}
+                containerStyle={{backgroundColor: item.lastRead < item.lastMessageTimestamp ? 'rgba(251, 188, 4, 0.4)' : background}}
                 title={
                     <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                         <Text style={{color:text, fontSize: 16}}>{item.chatWith.name}</Text>
@@ -194,7 +198,7 @@ const MessagesScreen = props => {
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
                     data={chats}
-                    renderItem={renderItem}
+                    renderItem={renderChat}
                 />
             ) : (
                 <Text style={{color:text, alignSelf:'center'}}>No Messages</Text>

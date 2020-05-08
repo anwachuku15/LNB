@@ -27,7 +27,6 @@ const MessageIcon = props => {
     let unread = notifications.filter(notification => notification.read === false)
     const BadgedIcon = withBadge(unread.length)(Icon)
 
-
     // SET UNREAD NOTIFICATION COUNT WITH FIRESTORE LISTENER
     const [unreadCount, setUnreadCount] = useState(0)
 
@@ -39,12 +38,24 @@ const MessageIcon = props => {
         <View>
             {/* {unreadCount > 0 ? (    */}
             {unread && unread.length > 0 ? (
-                <BadgedIcon 
-                    type='ionicon'
-                    style={{marginHorizontal:11}}
-                    color={Colors.primary}
-                    name={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                />
+                // <BadgedIcon
+                //     type='ionicon'
+                //     color={Colors.primary}
+                //     name={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
+                // />
+                <View>
+                    <Ionicons 
+                        name={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'} 
+                        size={23} 
+                        color={Colors.primary}
+                        style={{marginHorizontal:11}}
+                    />
+                    <Badge 
+                        value={unread.length} 
+                        status='error'
+                        containerStyle={{position: 'absolute', top: -4, right: 0}}
+                    />
+                </View>
             ) : (
                 <Ionicons 
                     name={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'} 
