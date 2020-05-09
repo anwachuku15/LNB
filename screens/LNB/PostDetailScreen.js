@@ -1,10 +1,25 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import firebase from 'firebase'
 // import '@firebase/firestore'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 // REACT-NATIVE
-import { Platform, ScrollView, TouchableOpacity, TouchableNativeFeedback, Text, Button, FlatList, ActivityIndicator, View, StyleSheet, Image, SafeAreaView } from 'react-native'
+import { 
+    Platform,
+    ScrollView, 
+    TouchableOpacity, 
+    TouchableNativeFeedback, 
+    Text, 
+    TextInput, 
+    Button, 
+    FlatList, 
+    ActivityIndicator, 
+    View, 
+    StyleSheet, 
+    Image, 
+    SafeAreaView, 
+    KeyboardAvoidingView 
+} from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
@@ -14,7 +29,7 @@ import { fetchNeeds, likeNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
-import { ListItem } from 'react-native-elements'
+import { Avatar, ListItem } from 'react-native-elements'
 
 const db = firebase.firestore()
 
@@ -38,15 +53,32 @@ const PostDetailScreen = props => {
     const need = useSelector(state => state.posts.allNeeds.find(need => need.id === needId))
     const dispatch = useDispatch()
 
+    const [isLoading, setIsLoading] = useState(true)
+    const [isRefreshing, setIsRefreshing] = useState(false)
+    const [error, setError] = useState()
+    const [body, setBody] = useState('')
+    const [image, setImage] = useState()
     const [comments, setComments] = useState()
+    const commentAvatar = (item) => {
+        return (
+            <Avatar
+                source={{ uri: item.userImage }}
+            />
+        )
+    }
     const loadComments = useCallback(async () => {
+        setError(null)
+        setIsRefreshing(true)
         try {
             let postComments = []
-            const allComments = await (await db.collection('comments').orderBy('timestamp', 'desc').get())
+            const allComments = await (await db.collection('comments').orderBy('timestamp', 'asc').get())
                                                                       .docs
                                                                       .forEach(doc => {
                                                                         if (doc.data().postId === needId) {
-                                                                            postComments.push(doc.data())
+                                                                            postComments.push({
+                                                                                commentId: doc.id,
+                                                                                ...doc.data()
+                                                                            })
                                                                         } else {
                                                                             console.log('nothing')
                                                                         }
@@ -54,12 +86,37 @@ const PostDetailScreen = props => {
             setComments(postComments)
         } catch (err) {
             console.log(err)
+            setError(err.message)
         }
-    }, [setComments])
+        setIsRefreshing(false)
+    }, [setComments, setIsRefreshing, setError])
 
     useEffect(() => {
-        loadComments()
+        setIsLoading
+        loadComments().then(() => {
+            setIsLoading(false)
+        })
     }, [loadComments])
+
+    if (error) {
+        return (
+            <View style={styles.spinner}>
+                <Text>An error occured</Text>
+                <Button title='try again' onPress={loadData} color={Colors.primary}/>
+            </View>
+        )
+    }
+
+    if (isLoading) {
+        return (
+            <View style={styles.spinner}>
+                <ActivityIndicator 
+                    size='large'
+                    color={Colors.primary}
+                />
+            </View>
+        )
+    }
 
     
 
@@ -73,13 +130,15 @@ const PostDetailScreen = props => {
         })
     }
 
+
+
     const commentButtonHandler = () => {
         props.navigation.navigate('Comment')
     }
 
     const renderComment = ({item}) => (
         <TouchableCmp onPress={() => {}}>
-            <ListItem 
+            {/* <ListItem
                 containerStyle={{backgroundColor: background}}
                 title={
                     <View style={{flexDirection:'row', justifyContent:'space-between'}}>
@@ -95,7 +154,23 @@ const PostDetailScreen = props => {
                 leftAvatar={{source: {uri: item.userImage}}}
                 bottomDivider
                 topDivider
-            />
+            /> */}
+            <View style={{...styles.commentView, ...{backgroundColor:background}}} key={item.commentId}>
+                <Image source={{uri: item.userImage}} style={styles.commentAvatar}/>
+                <View style={{flex: 1, backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderBottomLeftRadius: 15, borderBottomRightRadius: 15}}>
+                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                        <View>
+                            <TouchableCmp onPress={() => {}}>
+                                <Text style={{fontSize: 15, fontWeight:'600', color: scheme==='light' ? 'black' : 'white'}}>
+                                    {item.userName}
+                                    <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
+                                </Text>
+                            </TouchableCmp>
+                        </View>
+                    </View>
+                    <Text style={{marginTop:12, fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.body}</Text>
+                </View>
+            </View>
         </TouchableCmp>
     )
 
@@ -103,8 +178,10 @@ const PostDetailScreen = props => {
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
     }
+
+    
     return (
-        <View>
+        <View style={styles.screen}>
             {/* HEADER */}
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -125,6 +202,7 @@ const PostDetailScreen = props => {
                     />
                 </HeaderButtons>
             </View>
+            
             <View style={styles.feedItem}>
                 <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
                     <Image source={{uri: need.userImage}} style={styles.avatar} />
@@ -152,15 +230,33 @@ const PostDetailScreen = props => {
             </View>
 
             {/* Comments */}
-            {comments && comments.length > 0 ? (
+            {!isLoading && comments.length > 0 ? (
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
                     data={comments}
                     renderItem={renderComment}
+                    onRefresh={loadComments}
+                    refreshing={isRefreshing}
                 />
             ): (
                 <Text style={{color:text, alignSelf:'center'}}>No Comments</Text>
             )}
+
+            <KeyboardAvoidingView behavior='padding'>
+                <View style={styles.inputContainer}>
+                    <TextInput 
+                        autoFocus={false} 
+                        multiline={true}
+                        numberOfLines={4} 
+                        style={{flex:1, color:text}}
+                        placeholder={'Leave a reply'}
+                        placeholderTextColor={'#838383'}
+                        onChangeText={text => {setBody(text)}}
+                        value={body}
+                    />
+                </View>
+            </KeyboardAvoidingView>
+
         </View>
     )
 }
@@ -197,8 +293,20 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     screen: {
-        flex: 1,
-        backgroundColor: themeColor
+        flex: 1
+    },
+    commentView: {
+        padding: 10,
+        flexDirection: 'row'
+    },
+    inputContainer: {
+        margin: 10,
+        padding: 10,
+        borderColor: Colors.primary,
+        borderWidth: 1,
+        borderRadius: 20,
+        justifyContent: 'flex-end',
+        flexDirection: 'row'
     },
     header: {
         flexDirection:'row',
@@ -238,6 +346,12 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         marginRight: 16
     },
+    commentAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginRight: 10
+    },
     name: {
         fontSize: 15,
         fontWeight: '500',
@@ -249,7 +363,7 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
     post: {
-        marginTop: 16,
+        marginTop: 12,
         fontSize: 14,
         color: '#838899'
     },

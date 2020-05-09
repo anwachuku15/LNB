@@ -107,8 +107,6 @@ const ChatScreen = props => {
         }
     }, [readTimestamp])
 
-    
-
     const sendMessage = async (chatId, content) => {
         const messageData = {
             uid: firebase.auth().currentUser.uid,
@@ -164,7 +162,6 @@ const ChatScreen = props => {
         }
     }
    
-
     const sendMessageNotification = (authId, authName, message, selectedUserId, pushToken) => {
         db.collection('notifications').add({
             timestamp: new Date().toISOString(),
@@ -220,6 +217,7 @@ const ChatScreen = props => {
     return (
         
         <SafeAreaView style={styles.screen}>
+
             <View style={styles.header}>
                 <View style={{flexDirection:'row', alignItems:'center'}}>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -251,62 +249,12 @@ const ChatScreen = props => {
                 </HeaderButtons>
             </View>
             
-
-            {/* <KeyboardAvoidingView
-                style={{flex:1}}
-                behavior='padding'
-                keyboardVerticalOffset={Platform.select({
-                    ios: () => 0,
-                    android: () => 100
-                })()}
-            > */}
             <GiftedChat
                 messageIdGenerator={messageIdGenerator}
                 messages={messages}
                 onSend={send}
                 user={chatUser}
-                
             />
-            {/* </KeyboardAvoidingView> */}
-
-
-            {/* <FlatList
-                keyExtractor={(item, index) => index.toString()}
-                data={chatData}
-                showsHorizontalScrollIndicator={false}
-                showsVerticalScrollIndicator={false}
-                renderItem={itemData => {
-
-                }}
-            />
-            
-            <View style={{flexDirection:'row'}}>
-                <TouchableCmp style={styles.addImg} onPress={() => {}}>
-                    <Ionicons name='ios-camera' size={32} color={'#838383'}/>
-                </TouchableCmp>
-                <View style={styles.textFormContainer}>
-                    <TextInput
-                        style={styles.textForm}
-                        placeholder={'Your message'}
-                        onChangeText={text => {setBody(text)}}
-                        value={body}
-                    />
-                </View>
-                {body.trim().length > 0 ? (
-                    <TouchableCmp 
-                        // style={{flex:1}}
-                        style={{width:'15%', justifyContent:'center', alignItems:'center'}}
-                        onPress={() => sendMessage(chatId, body)}
-                    >
-                        <Ionicons name='md-send' size={24} color={Colors.blue}/>
-                    </TouchableCmp>
-                ) : (
-                    <TouchableCmp style={{width:'15%', justifyContent:'center', alignItems:'center'}} disabled>
-                        <Ionicons name='md-send' size={24} color={'#838383'}/>
-                    </TouchableCmp>
-                )}
-            </View> */}
-
 
         </SafeAreaView>
     )
@@ -372,4 +320,5 @@ const styles = StyleSheet.create({
         // width: '100%'
     }
 })
+
 export default ChatScreen

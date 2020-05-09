@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
       borderTopColor: 'black',
       height: 60,
       borderTopWidth: 0.3,
-      borderTopColor: 'black'
+      // borderTopColor: 'black'
     },
     icon:{
       position: "absolute",

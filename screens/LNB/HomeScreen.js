@@ -117,19 +117,7 @@ const HomeScreen = props => {
     const [error, setError] = useState()
     const [isModalVisible, setIsModalVisible] = useState(false)
     const needs = useSelector(state => state.posts.allNeeds)
-    // const notifications = useSelector(state => state.auth.notifications)
     const dispatch = useDispatch()
-    // const uid = useSelector(state => state.auth.userId)
-    // useEffect(() => {
-    //     const unreadListener = db.collection('notifications')
-    //                     .where('recipientId','==',uid)
-    //                     .onSnapshot(snapshot => {
-    //                         dispatch(setNotifications())
-    //                     })
-    //     return () => {
-    //         unreadListener
-    //     }
-    //   },[])
     const loadData = useCallback(async () => {
         setError(null)
         setIsRefreshing(true)

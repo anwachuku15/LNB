@@ -151,15 +151,15 @@ const AuthScreen = props => {
         } 
     }
     
-    const colorScheme = useColorScheme()
+    const scheme = useColorScheme()
     let switchButton
     
-    if(colorScheme === 'dark') {
+    if(scheme === 'dark') {
         text = 'white'
         switchButton = Colors.tan
     } else {
         text = 'black'
-        switchButton = Colors.pastel
+        switchButton = '#414959'
     }
 
     let TouchableCmp = TouchableOpacity
@@ -270,11 +270,11 @@ const AuthScreen = props => {
                                 }} 
                                 style={{alignSelf: 'center', marginTop: 10}}>
                                 {isSignup ? (
-                                    <Text style={{color:'#414959', fontSize: 13}}>
+                                    <Text style={{color: switchButton, fontSize: 13}}>
                                         Returning LNB Member? <Text style={{fontWeight:'500', color:Colors.primary}}>Log In</Text>
                                     </Text>
                                 ) : (
-                                    <Text style={{color:'#414959', fontSize: 13}}>
+                                    <Text style={{color: switchButton, fontSize: 13}}>
                                         New LNB Member? <Text style={{fontWeight:'500', color:Colors.primary}}>Sign Up</Text>
                                     </Text>
                                 )}
@@ -288,7 +288,7 @@ const AuthScreen = props => {
 }
 
 AuthScreen.navigationOptions = {
-    headerTitle: 'Sign In'
+    headerTitle: 'Leave Normal Behind'
 }
 
 const styles = StyleSheet.create({
