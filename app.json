@@ -2,6 +2,7 @@
   "expo": {
     "name": "LNB Members",
     "slug": "leave-normal-behind",
+    "privacy": "unlisted",
     "sdkVersion": "37.0.0",
     "platforms": [
       "ios",
@@ -22,6 +23,7 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.andrewnwachuku.lnbapp",
       "supportsTablet": true,
       "userInterfaceStyle": "automatic"
     }

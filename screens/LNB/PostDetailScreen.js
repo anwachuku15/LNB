@@ -24,8 +24,8 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-import { fetchNeeds, likeNeed } from '../../redux/actions/postsActions'
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { fetchNeeds, likeNeed, unLikeNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
@@ -50,6 +50,7 @@ const PostDetailScreen = props => {
         background = 'white'
     }
 
+    const uid = useSelector(state => state.auth.userId)
     const needId = props.navigation.getParam('needId')
     const need = useSelector(state => state.posts.allNeeds.find(need => need.id === needId))
     const dispatch = useDispatch()
@@ -60,6 +61,13 @@ const PostDetailScreen = props => {
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
     const [comments, setComments] = useState()
+
+    const userLikes = useSelector(state => state.auth.likes)
+    const [likeCount, setLikeCount] = useState(need.likeCount)
+    const [commentCount, setCommentCount] = useState(need.commentCount)
+    const [isLiked, setIsLiked] = useState(false)
+
+
     const commentAvatar = (item) => {
         return (
             <Avatar
@@ -82,8 +90,6 @@ const PostDetailScreen = props => {
                                                                                 commentId: doc.id,
                                                                                 ...doc.data()
                                                                             })
-                                                                        } else {
-                                                                            console.log('nothing')
                                                                         }
                                                                       })
             setComments(postComments)
@@ -95,11 +101,32 @@ const PostDetailScreen = props => {
     }, [setComments, setIsRefreshing, setError])
 
     useEffect(() => {
+        let mounted = true
         setIsLoading(true)
-        loadComments().then(() => {
-            setIsLoading(false)
-        })
+        if (mounted) {
+            loadComments().then(() => {
+                setIsLoading(false)
+            })
+        }
+        return () => mounted = false
     }, [loadComments])
+
+    useEffect(() => {
+        const setLikeIcon = db.collection('likes')
+            .where('needId','==',needId)
+            .where('uid', '==', uid)
+            .onSnapshot(snapshot => {
+                if (snapshot.empty) {
+                    setIsLiked(false)
+                } else {
+                    setIsLiked(true)
+                }
+            })
+
+        return () => {
+            setLikeIcon
+        }
+    },[dispatch])
 
     if (error) {
         return (
@@ -110,16 +137,6 @@ const PostDetailScreen = props => {
         )
     }
 
-    if (isLoading) {
-        return (
-            <View style={styles.spinner}>
-                <ActivityIndicator 
-                    size='large'
-                    color={Colors.primary}
-                />
-            </View>
-        )
-    }
 
     const selectUserHandler = (userId) => {
         props.navigation.navigate({
@@ -146,9 +163,11 @@ const PostDetailScreen = props => {
         try {
             setIsLoading(true)
             await dispatch(createComment(needId, body, image))
-            setIsLoading(false)
             setBody('')
             setImage(null)
+            loadComments().then(() => {
+                setIsLoading(false)
+            })
         } catch (err) {
             alert(err)
             console.log(err)
@@ -180,6 +199,13 @@ const PostDetailScreen = props => {
             </View>
         </TouchableCmp>
     )
+
+    const likeHandler = () => {
+        dispatch(likeNeed(needId))
+    }
+    const unlikeHandler = () => {
+        dispatch(unLikeNeed(needId))
+    }
 
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
@@ -232,11 +258,33 @@ const PostDetailScreen = props => {
                     ) : (
                         null
                     )}
-                    <NeedActions needId={need.id} leaveComment={commentButtonHandler}/>
+                    {/* <NeedActions needId={need.id} leaveComment={commentButtonHandler}/> */}
+                    <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                        <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
+                            <View style={{flexDirection:'row'}}>
+                                <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
+                                {/* {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>} */}
+                            </View>
+                        </TouchableCmp>
+                        <TouchableCmp onPress={props.leaveComment}>
+                            <View style={{flexDirection:'row'}}>
+                                <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
+                                {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}
+                            </View>
+                        </TouchableCmp>
+                    </View>
                 </View>
             </View>
 
             {/* Comments */}
+            {isLoading && (
+                <View style={styles.spinner}>
+                    <ActivityIndicator 
+                        size='large'
+                        color={Colors.primary}
+                    />
+                </View>
+            )}
             {!isLoading && comments.length > 0 ? (
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
@@ -245,8 +293,8 @@ const PostDetailScreen = props => {
                     onRefresh={loadComments}
                     refreshing={isRefreshing}
                 />
-            ): (
-                <Text style={{color:text, alignSelf:'center'}}>No Comments</Text>
+            ) : (
+                <View style={{alignSelf:'center', flex:1}}></View>
             )}
 
             <KeyboardAvoidingView behavior='padding'>
@@ -256,7 +304,7 @@ const PostDetailScreen = props => {
                             <Ionicons name='md-camera' size={20} color='white'/>
                         </TouchableCmp>
                         <TextInput
-                            autoFocus={false} 
+                            autoFocus={false}
                             multiline={true}
                             numberOfLines={4} 
                             style={{flex:1, color:text, marginHorizontal:10, alignSelf:'center', paddingTop:0}}
