@@ -30,7 +30,8 @@ import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
 import { Avatar, ListItem } from 'react-native-elements'
-
+import * as ImagePicker from 'expo-image-picker'
+import { createComment } from '../../redux/actions/postsActions'
 const db = firebase.firestore()
 
 let themeColor
@@ -66,6 +67,8 @@ const PostDetailScreen = props => {
             />
         )
     }
+
+    // ChatScreen.js:88
     const loadComments = useCallback(async () => {
         setError(null)
         setIsRefreshing(true)
@@ -92,7 +95,7 @@ const PostDetailScreen = props => {
     }, [setComments, setIsRefreshing, setError])
 
     useEffect(() => {
-        setIsLoading
+        setIsLoading(true)
         loadComments().then(() => {
             setIsLoading(false)
         })
@@ -118,9 +121,6 @@ const PostDetailScreen = props => {
         )
     }
 
-    
-
-
     const selectUserHandler = (userId) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
@@ -130,6 +130,30 @@ const PostDetailScreen = props => {
         })
     }
 
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4,3]
+        })
+
+        if(!result.cancelled) {
+            setImage(result.uri)
+        }
+    }
+
+    const handlePost = async () => {
+        try {
+            setIsLoading(true)
+            await dispatch(createComment(needId, body, image))
+            setIsLoading(false)
+            setBody('')
+            setImage(null)
+        } catch (err) {
+            alert(err)
+            console.log(err)
+        }
+    }
 
 
     const commentButtonHandler = () => {
@@ -138,23 +162,6 @@ const PostDetailScreen = props => {
 
     const renderComment = ({item}) => (
         <TouchableCmp onPress={() => {}}>
-            {/* <ListItem
-                containerStyle={{backgroundColor: background}}
-                title={
-                    <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                        <Text style={{color:'#454D65', fontSize: 16}}>{item.userName}</Text>
-                        <Text style={{color:Colors.disabled, fontSize: 14}}>{moment(item.timestamp).fromNow()}</Text>
-                    </View>
-                }
-                subtitle={
-                    <View style={{flexDirection:'row'}}>
-                        <Text style={{color: text}}>{item.body}</Text>
-                    </View>
-                }
-                leftAvatar={{source: {uri: item.userImage}}}
-                bottomDivider
-                topDivider
-            /> */}
             <View style={{...styles.commentView, ...{backgroundColor:background}}} key={item.commentId}>
                 <Image source={{uri: item.userImage}} style={styles.commentAvatar}/>
                 <View style={{flex: 1, backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderBottomLeftRadius: 15, borderBottomRightRadius: 15}}>
@@ -243,17 +250,29 @@ const PostDetailScreen = props => {
             )}
 
             <KeyboardAvoidingView behavior='padding'>
-                <View style={styles.inputContainer}>
-                    <TextInput 
-                        autoFocus={false} 
-                        multiline={true}
-                        numberOfLines={4} 
-                        style={{flex:1, color:text}}
-                        placeholder={'Leave a reply'}
-                        placeholderTextColor={'#838383'}
-                        onChangeText={text => {setBody(text)}}
-                        value={body}
-                    />
+                <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
+                    <View style={styles.inputContainer}>
+                        <TouchableCmp onPress={pickImage} style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.primary, padding:0, borderRadius:20, width:30, height:30}}>
+                            <Ionicons name='md-camera' size={20} color='white'/>
+                        </TouchableCmp>
+                        <TextInput
+                            autoFocus={false} 
+                            multiline={true}
+                            numberOfLines={4} 
+                            style={{flex:1, color:text, marginHorizontal:10, alignSelf:'center', paddingTop:0}}
+                            placeholder={'Leave a reply'}
+                            placeholderTextColor={'#838383'}
+                            onChangeText={text => {setBody(text)}}
+                            value={body}
+                        />
+                    </View>
+                    <TouchableCmp onPress={handlePost} disabled={!body.trim().length}>
+                        <Ionicons 
+                            name='md-send' 
+                            size={24} 
+                            color={!body.trim().length ? Colors.disabled : Colors.primary}
+                        />
+                    </TouchableCmp>
                 </View>
             </KeyboardAvoidingView>
 
@@ -301,7 +320,8 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         margin: 10,
-        padding: 10,
+        paddingHorizontal: 5,
+        paddingVertical: 5,
         borderColor: Colors.primary,
         borderWidth: 1,
         borderRadius: 20,
