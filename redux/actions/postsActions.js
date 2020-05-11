@@ -156,13 +156,16 @@ export const createComment = (postId, body, localUri) => {
         const userName = getState().auth.credentials.displayName
         const userImage = getState().auth.credentials.imageUrl
         const needDocument = db.doc(`/needs/${postId}`)
-
+        
         let imageUrl, commentId
         if (localUri !== undefined) {
+            
             imageUrl = await uploadPhotoAsyn(localUri)
         } else {
             imageUrl = null
         }
+        
+        
         const timestamp = moment(Date.now()).toISOString()
         const newComment = {
             timestamp,
@@ -176,6 +179,7 @@ export const createComment = (postId, body, localUri) => {
             likeCount: 0
         }
         let needData
+        
         
         needDocument.get()
             .then(doc => {
@@ -197,6 +201,7 @@ export const createComment = (postId, body, localUri) => {
         })
         .catch(err => {
             console.error(err)
+            
         })
         dispatch({
             type: CREATE_COMMENT,

@@ -25,10 +25,8 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import { fetchNeeds, likeNeed, unLikeNeed } from '../../redux/actions/postsActions'
+import { getNeed, likeNeed, unLikeNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
-import NeedActions from '../../components/LNB/NeedActions'
-import { setLikes } from '../../redux/actions/authActions';
 import { Avatar, ListItem } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import { createComment } from '../../redux/actions/postsActions'
@@ -81,6 +79,7 @@ const PostDetailScreen = props => {
         setError(null)
         setIsRefreshing(true)
         try {
+            await dispatch(getNeed(needId))
             let postComments = []
             const allComments = await (await db.collection('comments').orderBy('timestamp', 'asc').get())
                                                                       .docs
@@ -160,11 +159,12 @@ const PostDetailScreen = props => {
     }
 
     const handlePost = async () => {
+        
         try {
             setIsLoading(true)
             await dispatch(createComment(needId, body, image))
             setBody('')
-            setImage(null)
+            setImage()
             loadComments().then(() => {
                 setIsLoading(false)
             })

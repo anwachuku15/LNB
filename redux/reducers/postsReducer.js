@@ -67,16 +67,12 @@ export default (state = initialState, action) => {
             }
         
         case CREATE_COMMENT:
-            state.allNeeds.comments = state.allNeeds.comments !== undefined
-                                        ? [action.commentData, ...state.need.comments]
-                                        : [action.commentData]
             let index2 = state.allNeeds.findIndex((need) => need.id === action.commentData.postId)
             state.allNeeds[index2].commentCount++
+            console.log(state.allNeeds[index2])
             return {
                 ...state,
-                need: {
-                    ...state.need
-                }
+                need: state.allNeeds[index2]
             }
         default:
             return state
