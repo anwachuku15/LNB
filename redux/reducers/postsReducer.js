@@ -69,7 +69,6 @@ export default (state = initialState, action) => {
         case CREATE_COMMENT:
             let index2 = state.allNeeds.findIndex((need) => need.id === action.commentData.postId)
             state.allNeeds[index2].commentCount++
-            console.log(state.allNeeds[index2])
             return {
                 ...state,
                 need: state.allNeeds[index2]

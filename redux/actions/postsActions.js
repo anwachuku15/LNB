@@ -29,7 +29,7 @@ export const fetchNeeds = () => {
                     userName: doc.data().userName,
                     userImage: doc.data().userImage,
                     body: doc.data().body,
-                    imageUrl: doc.data().image ? doc.data().image : null,
+                    imageUrl: doc.data().imageUrl ? doc.data().imageUrl : null,
                     likeCount: doc.data().likeCount,
                     commentCount: doc.data().commentCount
                 })
@@ -61,7 +61,7 @@ export const createNeed = (userName, body, localUri) => {
                 uid: uid,
                 userImage: userImage,
                 timestamp: timestamp,
-                image: remoteUri,
+                imageUrl: remoteUri,
                 commentCount: 0,
                 likeCount: 0
             })
@@ -311,8 +311,6 @@ export const likeNeed = (needId) => {
                             }
                         })
                     })
-                } else {
-                    // unlike 
                 }
             })
             .catch(err => {

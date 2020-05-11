@@ -266,7 +266,7 @@ const PostDetailScreen = props => {
                                 {/* {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>} */}
                             </View>
                         </TouchableCmp>
-                        <TouchableCmp onPress={props.leaveComment}>
+                        <TouchableCmp onPress={() => {}}>
                             <View style={{flexDirection:'row'}}>
                                 <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
                                 {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}

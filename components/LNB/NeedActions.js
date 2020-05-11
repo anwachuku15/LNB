@@ -43,12 +43,13 @@ const NeedActions = props => {
         })
 
         return () => {
-            setLikeIcon
             needDataListener
+            setLikeIcon
         }
     },[dispatch])
 
     const likeHandler = () => {
+        setLikeCount(likeCount+1)
         dispatch(likeNeed(props.needId))
     }
     const unlikeHandler = () => {
