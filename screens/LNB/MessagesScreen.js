@@ -65,7 +65,8 @@ const MessagesScreen = props => {
     // const uid = firebase.auth().currentUser.uid
     const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
-    
+    const [isMounted, setIsMounted] = useState(true)
+
     const loadMessageNotifications = useCallback(async () => {
         try {
             await dispatch(markMessageNotificationsAsRead())
@@ -130,7 +131,13 @@ const MessagesScreen = props => {
         }
     }, [loadChats])
 
-    // useEffect(() => {}, [])
+    useEffect(() => {
+        setIsMounted(true)
+        return (() => {
+            setIsMounted(false)
+            console.log('MessageScreen Unmounted')
+        })
+    }, [])
 
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
@@ -168,40 +175,42 @@ const MessagesScreen = props => {
     )
 
     return (
-        <View style={styles.screen}>
+        (isMounted && 
+            <View style={styles.screen}>
 
-            <View style={styles.header}>
-                <View style={{flexDirection:'row', alignItems:'center'}}>
+                <View style={styles.header}>
+                    <View style={{flexDirection:'row', alignItems:'center'}}>
+                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                            <Item
+                                title='Direct'
+                                iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                                onPress={() => {props.navigation.navigate({
+                                    routeName: 'Drawer'
+                                })}}
+                            />
+                        </HeaderButtons>
+                    </View>
+                    <Text style={styles.headerTitle}>Messages</Text>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
                             title='Direct'
-                            iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                            onPress={() => {props.navigation.navigate({
-                                routeName: 'Drawer'
-                            })}}
+                            iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                            onPress={() => {}}
                         />
                     </HeaderButtons>
                 </View>
-                <Text style={styles.headerTitle}>Messages</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                        onPress={() => {}}
-                    />
-                </HeaderButtons>
-            </View>
 
-            {chats && chats.length > 0 ? (
-                <FlatList
-                    keyExtractor={(item, index) => index.toString()}
-                    data={chats}
-                    renderItem={renderChat}
-                />
-            ) : (
-                <Text style={{color:text, alignSelf:'center'}}>No Messages</Text>
-            )}
-        </View>
+                {chats && chats.length > 0 ? (
+                    <FlatList
+                        keyExtractor={(item, index) => index.toString()}
+                        data={chats}
+                        renderItem={renderChat}
+                    />
+                ) : (
+                    <Text style={{color:text, alignSelf:'center'}}>No Messages</Text>
+                )}
+            </View>
+        )
     )
 }
 

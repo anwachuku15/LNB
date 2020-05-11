@@ -15,47 +15,12 @@ export const LIKE_NEED = 'LIKE_NEED'
 export const UNLIKE_NEED = 'UNLIKE_NEED'
 export const CREATE_COMMENT = 'CREATE_COMMENT'
 
-// export const fetchNeeds = () => {
-//     return async (dispatch, getState) => {
-//         const userId = getState().auth.userId
-//         let loadedNeeds = []
-//         db.collection('needs').orderBy('timestamp', 'desc')
-//             .get()
-//             .then(data => {
-//                 data.forEach(doc => {
-//                     loadedNeeds.push({
-//                         id: doc.id,
-//                         timestamp: doc.data().timestamp,
-//                         uid: doc.data().uid,
-//                         userName: doc.data().userName,
-//                         userImage: doc.data().userImage,
-//                         body: doc.data().body,
-//                         imageUrl: doc.data().image ? doc.data().image : null,
-//                         likeCount: doc.data().likeCount,
-//                         commentCount: doc.data().commentCount
-//                     })
-//                 })
-//             })
-//             .then(() => {
-//                 dispatch({
-//                     type: SET_NEEDS,
-//                     allNeeds: loadedNeeds,
-//                     userNeeds: loadedNeeds.filter(need => need.uid === userId)
-//                 })
-//             })
-//             .catch(err => {
-//                 console.log(err)
-//                 throw err
-//             })
-//     }
-// }
-
 export const fetchNeeds = () => {
     return async (dispatch, getState) => {
         const userId = getState().auth.userId
         try {
-            const needsData = await db.collection('needs').orderBy('timestamp', 'desc').get()
             const loadedNeeds = []
+            const needsData = await db.collection('needs').orderBy('timestamp', 'desc').get()
             needsData.forEach(doc => {
                 loadedNeeds.push({
                     id: doc.id,
@@ -211,6 +176,7 @@ export const createComment = (postId, body, localUri) => {
             likeCount: 0
         }
         let needData
+        
         needDocument.get()
             .then(doc => {
                 if (doc.exists) {
@@ -221,7 +187,7 @@ export const createComment = (postId, body, localUri) => {
             .catch(err => {
                 console.log(err)
             })
-
+        
         db.collection('comments')
         .add(newComment)
         .then(doc => {

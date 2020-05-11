@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { NavigationActions } from 'react-navigation'
 import LNBNavigator from './LNBNavigator'
@@ -19,9 +19,14 @@ const NavContainer = props => {
 
     const navRef = useRef()
     const isAuth = useSelector(state => !!state.auth.token)
+    const posts = useSelector(state => state.posts.allNeeds)
+    const userPosts = useSelector(state => state.posts.userNeeds)
+    const need = useSelector(state => state.posts.need)
+    const [mounted, setMounted] = useState(true)
 
     // access Navigation properties outside of navigator with useRef
     useEffect(() => {
+        setMounted(true)
         if (!isAuth) {
             navRef.current.dispatch(
                 NavigationActions.navigate({
@@ -29,10 +34,13 @@ const NavContainer = props => {
                 })
             )
         }
-    }, [isAuth])
+        return () => {
+            setMounted(false)
+        }
+    }, [isAuth, mounted])
     
     return (
-        <LNBNavigator theme={props.theme} ref={navRef}/>
+        mounted && <LNBNavigator theme={props.theme} ref={navRef}/>
     )
 }
 

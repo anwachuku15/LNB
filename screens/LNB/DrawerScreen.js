@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   StyleSheet,
   Text,
@@ -33,20 +33,17 @@ const DrawerScreen = props => {
     const uid = useSelector(state => state.auth.userId)
     const user = useSelector(state => state.auth)
     const dispatch = useDispatch()
-    // useEffect(() => {
-    //   const unreadListener = db.collection('notifications')
-    //                   .where('recipientId','==',uid)
-    //                   .onSnapshot(snapshot => {
-    //                     if (snapshot.docChanges().filter(snapshot => snapshot.doc.data().recipientId === uid)) {
-    //                       dispatch(setNotifications())
-    //                     }
-    //                   })
-    //   return () => {
-    //       unreadListener
-    //   }
-    // },[])
+    const [isMounted, setIsMounted] = useState(true)
+    useEffect(() => {
+      setIsMounted(true)
+      return () => {
+        setIsMounted(false)
+        console.log('Drawer Is Unmounted')
+      }
+    }, [])
   
     return (
+      (isMounted && 
         <View style={styles.container}>
             <View style={styles.top}>
               <TouchableOpacity 
@@ -162,6 +159,7 @@ const DrawerScreen = props => {
                 </TouchableOpacity>
             </ScrollView>
         </View>
+      )
     )
 }
 

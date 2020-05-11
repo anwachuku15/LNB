@@ -20,10 +20,12 @@ const NeedActions = props => {
     const [commentCount, setCommentCount] = useState(need.commentCount)
     const dispatch = useDispatch()
     const [isLiked, setIsLiked] = useState(false)
-
+    
     
     const uid = useSelector(state => state.auth.userId)
     
+    
+
     useEffect(() => {
         const setLikeIcon = db.collection('likes')
             .where('needId','==',props.needId)
@@ -60,20 +62,20 @@ const NeedActions = props => {
 
 
     return (
-    <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
-        <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
-            <View style={{flexDirection:'row'}}>
-                <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
-                {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>}
-            </View>
-        </TouchableCmp>
-        <TouchableCmp onPress={props.leaveComment}>
-            <View style={{flexDirection:'row'}}>
-                <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
-                {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>}
-            </View>
-        </TouchableCmp>
-    </View>
+        <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+            <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
+                <View style={{flexDirection:'row'}}>
+                    <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
+                    {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>}
+                </View>
+            </TouchableCmp>
+            <TouchableCmp onPress={props.leaveComment}>
+                <View style={{flexDirection:'row'}}>
+                    <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
+                    {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>}
+                </View>
+            </TouchableCmp>
+        </View>
   );
 }
 

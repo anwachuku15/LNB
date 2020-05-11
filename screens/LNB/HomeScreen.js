@@ -112,10 +112,13 @@ const HomeScreen = props => {
     };
 
     // SCREEN SETTINGS/UI/FUNCTIONS
+    const [isMounted, setIsMounted] = useState(true)
+    const [showNeedActions, setShowNeedActions] = useState(true)
     const [isLoading, setIsLoading] = useState(true)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
     const [isModalVisible, setIsModalVisible] = useState(false)
+    
     const needs = useSelector(state => state.posts.allNeeds)
     const dispatch = useDispatch()
     const loadData = useCallback(async () => {
@@ -130,6 +133,18 @@ const HomeScreen = props => {
         }
         setIsRefreshing(false)
     },[dispatch, setIsRefreshing, setError])
+
+    useEffect(() => {
+
+        setShowNeedActions(true)
+        setIsMounted(true)
+
+        return () => {
+            setShowNeedActions(false)
+            setIsMounted(false)
+            console.log('HomeScreen unmounted - loadData')
+        }
+    }, [isMounted, showNeedActions, isMounted])
 
     // NAV LISTENER
     useEffect(() => {
@@ -148,6 +163,9 @@ const HomeScreen = props => {
         loadData().then(() => {
             setIsLoading(false)
         })
+        return () => {
+            loadData()
+        }
     }, [dispatch, loadData])
     
 
@@ -161,7 +179,7 @@ const HomeScreen = props => {
     }
 
 
-    if (error) {
+    if (isMounted && error) {
         return (
             <View style={styles.spinner}>
                 <Text>An error occured</Text>
@@ -170,7 +188,7 @@ const HomeScreen = props => {
         )
     }
 
-    if (isLoading) {
+    if (isMounted && isLoading) {
         return (
             <View style={styles.spinner}>
                 <ActivityIndicator 
@@ -181,7 +199,7 @@ const HomeScreen = props => {
         )
     }
 
-    if (!isLoading && needs.length === 0) {
+    if (isMounted && !isLoading && needs.length === 0) {
         console.log('not loading')
         return (
             <View style={styles.spinner}>
@@ -230,108 +248,110 @@ const HomeScreen = props => {
     }
     
     return (
-        <View style={styles.screen}>
-            {/* HEADER */}
-            <View style={styles.header}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Menu'
-                        iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                        onPress={() => {props.navigation.toggleDrawer()}}
-                    />
-                </HeaderButtons>
-                <Text style={styles.headerTitle}>Feed</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    {/* <Item
-                        title='Messages'
-                        iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
-                    /> */}
-                    <Item
-                        ButtonElement={<MessageIcon/>}
-                        title='Messages'
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
-                    />
-                </HeaderButtons>
-            </View>
+        isMounted && (
+            <View style={styles.screen}>
+                {/* HEADER */}
+                <View style={styles.header}>
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        <Item
+                            title='Menu'
+                            iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
+                            onPress={() => {props.navigation.toggleDrawer()}}
+                        />
+                    </HeaderButtons>
+                    <Text style={styles.headerTitle}>Feed</Text>
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        {/* <Item
+                            title='Messages'
+                            iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
+                            onPress={() => {
+                                props.navigation.navigate('Messages')
+                            }}
+                        /> */}
+                        <Item
+                            ButtonElement={<MessageIcon/>}
+                            title='Messages'
+                            onPress={() => {
+                                props.navigation.navigate('Messages')
+                            }}
+                        />
+                    </HeaderButtons>
+                </View>
 
-            {/* NEED POSTS */}
-            
-            <FlatList
-                keyExtractor={(item, index) => index.toString()}
-                data={needs}
-                onRefresh={loadData}
-                refreshing={isRefreshing}
-                style={styles.feed}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                renderItem={itemData => (
-                    <TouchableCmp onPress={() => {
-                        props.navigation.navigate({
-                            routeName: 'PostDetail',
-                            params: {
-                                needId: itemData.item.id
-                            }
-                        })
-                    }} useForeground>
-                        <View style={styles.feedItem} key={itemData.item.id}>
-                            <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
-                                <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
-                            </TouchableCmp>
-                            <View style={{flex: 1}}>
-                                <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                                    <View>
-                                        <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
-                                            <Text style={styles.name}>
-                                                {itemData.item.userName}
-                                                <Text style={styles.timestamp}>  ·  {moment(itemData.item.timestamp).fromNow()}</Text>
-                                            </Text>
-                                        </TouchableCmp>
-                                    </View>
-                                    <TouchableCmp onPress={() => {
-                                        console.log(itemData.item.id)
-                                        setIsModalVisible(!isModalVisible)
-                                    }}>
-                                        <Ionicons name='ios-more' size={24} color='#73788B'/>
-                                    </TouchableCmp>
-                                    <Modal
-                                        animationType='slide'
-                                        transparent={true}
-                                        visible={isModalVisible}
-                                        onDismiss={() => {}}
-                                    >
-                                        <View style={styles.modalView}>
-                                            <View style={styles.modal}>
-                                                <Text style={styles.modalText}>what</Text>
-                                                <TouchableHighlight
-                                                    style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
-                                                    onPress={() => {
-                                                        setIsModalVisible(!isModalVisible);
-                                                    }}
-                                                >
-                                                    <Text style={styles.modalButtonText}>Hide Modal</Text>
-                                                </TouchableHighlight>
-                                            </View>
+                {/* NEED POSTS */}
+                
+                <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={needs}
+                    onRefresh={loadData}
+                    refreshing={isRefreshing}
+                    style={styles.feed}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={itemData => (
+                        <TouchableCmp onPress={() => {
+                            props.navigation.navigate({
+                                routeName: 'PostDetail',
+                                params: {
+                                    needId: itemData.item.id
+                                }
+                            })
+                        }} useForeground>
+                            <View style={styles.feedItem} key={itemData.item.id}>
+                                <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
+                                    <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
+                                </TouchableCmp>
+                                <View style={{flex: 1}}>
+                                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+                                        <View>
+                                            <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
+                                                <Text style={styles.name}>
+                                                    {itemData.item.userName}
+                                                    <Text style={styles.timestamp}>  ·  {moment(itemData.item.timestamp).fromNow()}</Text>
+                                                </Text>
+                                            </TouchableCmp>
                                         </View>
-                                    </Modal>
+                                        <TouchableCmp onPress={() => {
+                                            console.log(itemData.item.id)
+                                            setIsModalVisible(!isModalVisible)
+                                        }}>
+                                            <Ionicons name='ios-more' size={24} color='#73788B'/>
+                                        </TouchableCmp>
+                                        <Modal
+                                            animationType='slide'
+                                            transparent={true}
+                                            visible={isModalVisible}
+                                            onDismiss={() => {}}
+                                        >
+                                            <View style={styles.modalView}>
+                                                <View style={styles.modal}>
+                                                    <Text style={styles.modalText}>what</Text>
+                                                    <TouchableHighlight
+                                                        style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
+                                                        onPress={() => {
+                                                            setIsModalVisible(!isModalVisible);
+                                                        }}
+                                                    >
+                                                        <Text style={styles.modalButtonText}>Hide Modal</Text>
+                                                    </TouchableHighlight>
+                                                </View>
+                                            </View>
+                                        </Modal>
+                                    </View>
+                                    <Text style={styles.post}>{itemData.item.body}</Text>
+                                    {itemData.item.imageUrl ? (
+                                        <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
+                                    ) : (
+                                        null
+                                    )}
+                                    {showNeedActions && itemData.item.id && (<NeedActions needId={itemData.item.id} leaveComment={() => commentButtonHandler(itemData.item.id)}/>)}
                                 </View>
-                                <Text style={styles.post}>{itemData.item.body}</Text>
-                                {itemData.item.imageUrl ? (
-                                    <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
-                                ) : (
-                                    null
-                                )}
-                                {itemData.item.id && (<NeedActions needId={itemData.item.id} leaveComment={() => commentButtonHandler(itemData.item.id)}/>)}
                             </View>
-                        </View>
-                    </TouchableCmp>
-                )}
-            />
-        </View>
+                        </TouchableCmp>
+                    )}
+                />
+            </View>
+        )
     )
 }
 

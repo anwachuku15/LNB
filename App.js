@@ -1,5 +1,5 @@
 // import Fire from './Firebase/Fire'
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppearanceProvider, useColorScheme } from 'react-native-appearance'
 import { StatusBar, } from 'react-native'
 import { Provider } from 'react-redux'
@@ -30,14 +30,25 @@ export default function App() {
     'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf')
   })
 
+  const [isMounted, setIsMounted] = useState(true)
+  useEffect(() => {
+    setIsMounted(true)
+    return () => {
+      setIsMounted(false)
+      console.log('App Unmounted')
+    }
+  })
+
   if(!fontsLoaded) {
     return <AppLoading />
   } else {
     return (
       <AppearanceProvider>
-        <Provider store={store}>
-            <NavContainer theme={colorScheme}/>
-        </Provider>
+        {isMounted &&
+          <Provider store={store}>
+              <NavContainer theme={colorScheme}/>
+          </Provider>
+        }
       </AppearanceProvider>
     )
   }
