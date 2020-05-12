@@ -1,5 +1,6 @@
 import React from 'react'
-import { 
+import {
+    Platform, 
     View, 
     Text, 
     StyleSheet, 
@@ -13,17 +14,13 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
-import MessageIcon from '../../components/LNB/MessageIcon'
+import MessageIcon from '../../components/LNB/MessageIcon';
+
 let themeColor
 let text
-const ConnectScreen = props => {
-    const scheme = useColorScheme()
-
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
+const EventsScreen = props => {
     const dispatch = useDispatch()
     
-
     const colorScheme = useColorScheme()
     let text
     if (colorScheme === 'dark') {
@@ -39,42 +36,39 @@ const ConnectScreen = props => {
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                        onPress={() => {props.navigation.toggleDrawer()}}
+                        title='Back'
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {props.navigation.goBack()}}
                     />
                 </HeaderButtons>
-                <Text style={styles.headerTitle}>Connect</Text>
+                <Text style={styles.headerTitle}>Events</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
-                        ButtonElement={<MessageIcon/>}
-                        title='Messages'
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
+                        // ButtonElement={<MessageIcon/>}
+                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                        title='more'
+                        onPress={() => {}}
                     />
                 </HeaderButtons>
             </View>
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Connect request notifications show up here</Text>
+                <Text style={{color:text}}>Coming soon...</Text>
             </View>
-            
         </View>
-
-            
     )
 }
 
 
-ConnectScreen.navigationOptions = (navData) => {
+EventsScreen.navigationOptions = (navData) => {
     return {
-        headerTitle: 'Needs'
+        headerTitle: 'Events'
     }
 }
 
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+        backgroundColor: themeColor
     },
     header: {
         flexDirection:'row',
@@ -92,4 +86,6 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
 })
-export default ConnectScreen
+
+
+export default EventsScreen

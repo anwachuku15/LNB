@@ -104,7 +104,11 @@ const DrawerScreen = props => {
                       <Text style={{...styles.text, ...{color:text}}}> Profile </Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>{}} style={styles.list}>
+                <TouchableOpacity onPress={()=>{
+                  props.navigation.navigate({
+                    routeName: 'Events'
+                  })
+                }} style={styles.list}>
                     <View>
                         <Ionicons style={styles.icon} name='ios-calendar' size={20} color='rgb(136, 153, 166)' />
                         <Text style={{...styles.text, ...{color:text}}}> Events </Text>
@@ -147,7 +151,12 @@ const DrawerScreen = props => {
                     <Text style={{...styles.text, ...{color:text}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.list} onPress={() => props.navigation.navigate('Settings')}>
+                <TouchableOpacity 
+                  style={styles.list} 
+                  onPress={() => {
+                    props.navigation.navigate('Settings')
+                  }}
+                >
                     <View>
                         <Ionicons
                             style={styles.icon}

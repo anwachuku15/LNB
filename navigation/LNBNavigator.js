@@ -17,8 +17,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../components/UI/HeaderButton'
 
 import HomeScreen from '../screens/LNB/HomeScreen'
-import { Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons'
-
+import { Ionicons, FontAwesome, MaterialCommunityIcons, SimpleLineIcons, Feather } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import BulletinScreen from '../screens/LNB/BulletinScreen'
@@ -35,6 +34,7 @@ import CreateCommentScreen from '../screens/LNB/CreateCommentScreen'
 import ChatScreen from '../screens/LNB/ChatScreen'
 import NotificationIcon from '../components/LNB/NotificationIcon'
 import PostDetailScreen from '../screens/LNB/PostDetailScreen'
+import EventsScreen from '../screens/LNB/EventsScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -94,6 +94,14 @@ const HomeStack = createStackNavigator({
     },
     Settings: {
         screen: SettingsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Events: {
+        screen: EventsScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -183,10 +191,10 @@ const BottomTabStackContainer = createStackNavigator({
             navigationOptions: {
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <Ionicons 
-                            name='ios-home' 
-                            size={25} 
-                            color={tabInfo.tintColor}
+                        <Feather 
+                            name='home' 
+                            size={23} 
+                            color={tabInfo.tintColor} 
                         />
                     )
                 },
@@ -202,9 +210,9 @@ const BottomTabStackContainer = createStackNavigator({
                 tabBarLabel: 'Bulletin',
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <MaterialCommunityIcons 
-                            name='bulletin-board'
-                            size={25} 
+                        <SimpleLineIcons 
+                            name='event'
+                            size={20} 
                             color={tabInfo.tintColor}
                         />
                     )
@@ -254,7 +262,7 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <FontAwesome 
                             name='handshake-o' 
-                            size={25} 
+                            size={23} 
                             color={tabInfo.tintColor}
                         />
                     )
@@ -278,6 +286,7 @@ const BottomTabStackContainer = createStackNavigator({
         tabBarOptions: {
             activeTintColor: Colors.primary,
             keyboardHidesTabBar: false,
+            showLabel: false
         }
     }),
     postModal: {

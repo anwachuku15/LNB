@@ -8,6 +8,7 @@ import Constants from 'expo-constants';
 import { useSelector, useDispatch } from 'react-redux'
 // REACT-NATIVE
 import { 
+    LayoutAnimation,
     AppState, 
     Platform, 
     Modal, 
@@ -247,6 +248,7 @@ const HomeScreen = props => {
         })
     }
     
+    LayoutAnimation.easeInEaseOut();
     return (
         isMounted && (
             <View style={styles.screen}>

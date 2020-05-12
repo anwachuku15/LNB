@@ -7,6 +7,7 @@ import store from './redux/store';
 import { useFonts } from '@use-expo/font'
 import { AppLoading } from 'expo'
 import { enableScreens } from 'react-native-screens'
+
 import Colors from './constants/Colors'
 
 import NavContainer from './navigation/NavContainer'
