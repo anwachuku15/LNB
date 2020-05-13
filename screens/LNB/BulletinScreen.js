@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
+        borderBottomWidth: StyleSheet.hairlineWidth
     },
     headerTitle: {
         color: Colors.primary,

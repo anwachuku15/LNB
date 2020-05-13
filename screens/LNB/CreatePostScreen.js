@@ -164,7 +164,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.primary
+        borderBottomColor: Colors.primary,
+        borderBottomWidth: StyleSheet.hairlineWidth
     },
     inputContainer: {
         margin: 32,

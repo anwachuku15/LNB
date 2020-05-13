@@ -17,7 +17,8 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
 let themeColor
 let text
-const DeveloperScreen = props => {
+
+const AdminScreen = props => {
     const scheme = useColorScheme()
 
     const dispatch = useDispatch()
@@ -39,11 +40,11 @@ const DeveloperScreen = props => {
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                        onPress={() => {props.navigation.toggleDrawer()}}
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {props.navigation.goBack()}}
                     />
                 </HeaderButtons>
-                <Text style={styles.headerTitle}>Dev Notes</Text>
+                <Text style={styles.headerTitle}>Admin</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         ButtonElement={<MessageIcon/>}
@@ -60,7 +61,19 @@ const DeveloperScreen = props => {
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
-                    <Text style={{color:Colors.raspberry, fontWeight: '600'}}>* Search/List members (include search bar on ConnectScreen)</Text>
+                    <Text style={{color:Colors.orange, fontWeight: '600'}}>* Start moving all Firebase functions</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginVertical: 5}}>
+                    <Text style={{color:text}}>-    </Text>
+                    <Text style={{color:text}}>Start building Admin Page (allow Admins to add new admins)</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginVertical: 5}}>
+                    <Text style={{color:text}}>-    </Text>
+                    <Text style={{color:text}}>Implement refresh token</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginVertical: 5}}>
+                    <Text style={{color:text}}>-    </Text>
+                    <Text style={{color:text}}>Search/List members (include search bar on ConnectScreen)</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
@@ -111,7 +124,7 @@ const DeveloperScreen = props => {
 }
 
 
-DeveloperScreen.navigationOptions = (navData) => {
+AdminScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Developer'
     }
@@ -129,6 +142,7 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
+        borderBottomWidth: StyleSheet.hairlineWidth
     },
     headerTitle: {
         color: Colors.primary,
@@ -137,4 +151,4 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
 })
-export default DeveloperScreen
+export default AdminScreen

@@ -13,7 +13,7 @@ import { useColorScheme } from 'react-native-appearance'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Colors from '../../constants/Colors'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotifications } from '../../redux/actions/authActions'
@@ -32,8 +32,17 @@ const DrawerScreen = props => {
     }
     const uid = useSelector(state => state.auth.userId)
     const user = useSelector(state => state.auth)
+    const isAdmin = useSelector(state => state.auth.credentials.isAdmin)
+
     const dispatch = useDispatch()
     const [isMounted, setIsMounted] = useState(true)
+    const [admin, setAdmin] = useState(false)
+
+    
+    useEffect(() => {
+      setAdmin(isAdmin)
+    }, [])
+
     useEffect(() => {
       setIsMounted(true)
       return () => {
@@ -159,21 +168,24 @@ const DrawerScreen = props => {
                         <Text style={{...styles.text, ...{color:text}}}> Settings </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.list} 
-                  onPress={() => {
-                    props.navigation.navigate('Developer')
-                  }}
-                >
-                    <View>
-                        <MaterialIcons
-                            style={styles.icon}
-                            name="developer-board"
-                            size={23}
-                            color={Colors.redcrayola}/>
-                        <Text style={{...styles.text, ...{color:Colors.redcrayola}}}> Dev Notes </Text>
-                    </View>
-                </TouchableOpacity>
+                {admin &&
+                  <TouchableOpacity 
+                    style={styles.list} 
+                    onPress={() => {
+                      props.navigation.navigate('Admin')
+                    }}
+                  >
+                      <View>
+                          <MaterialCommunityIcons
+                              style={styles.icon}
+                              name="account-card-details"
+                              size={23}
+                              color={Colors.redcrayola}
+                            />
+                          <Text style={{...styles.text, ...{color:Colors.redcrayola}}}> Admin </Text>
+                      </View>
+                  </TouchableOpacity>
+                }
             </ScrollView>
         </View>
       )

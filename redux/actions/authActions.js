@@ -61,7 +61,7 @@ const saveDataToStorage = (token, userId, expDate) => {
 export const signup = (email, password, fname, lname, headline, localUri) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expiresIn, expDate, displayName, imageUrl
-        console.log(headline)
+        let isAdmin = false
         const noImg = 'no-img.png'
         // ---- ADD NEW USER TO FIREBASE ---- //
         try {
@@ -92,11 +92,12 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
             location: '',
             bio: '',
             website: '',
-            messages: {}
+            messages: {},
+            isAdmin: isAdmin
         })
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId, expiresIn))
-        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}))
+        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin))
     }
 }
 export const login = (email, password) => {
@@ -121,9 +122,9 @@ export const login = (email, password) => {
         dispatch(authenticate(idToken, userId, expiresIn))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = userDoc.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = userDoc.data()
             
-            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages))
+            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin))
         }
     }
 }
@@ -134,11 +135,12 @@ export const logout = () => {
 }
 
 // SET USER ACTIONS
-export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages) => {
+export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin) => {
     return async dispatch => {
         dispatch({
             type: SET_USER,
             credentials: {
+                isAdmin: isAdmin,
                 userId: userId,
                 email: email,
                 displayName: displayName,
@@ -207,12 +209,13 @@ export const getUser = (userId) => {
         }
 
         if (userData.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = userData.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = userData.data()
             // console.log(isConnected)
             dispatch({
                 type: SET_SELECTED_USER,
                 selectedUser: {
                     credentials: {
+                        isAdmin: isAdmin,
                         userId: userId,
                         email: email,
                         displayName: displayName,
@@ -235,6 +238,7 @@ export const getUser = (userId) => {
 export const updateProfile = (headline, location, bio, link, uri) => {
     return async (dispatch, getState) => {
         let imageUrl
+        const auth = getState().auth
         if (uri !== getState().auth.credentials.imageUrl) {
             imageUrl = await uploadPhotoAsyn(uri)
         } else {
@@ -243,7 +247,7 @@ export const updateProfile = (headline, location, bio, link, uri) => {
         const website = link.trim() !== '' && link.trim().substring(0,4) !== 'http'
                         ? `https://${link.trim()}`
                         : link
-        await db.doc(`/users/${firebase.auth().currentUser.uid}`).update({
+        await db.doc(`/users/${auth.userId}`).update({
             headline: headline,
             location: location,
             bio: bio,
@@ -254,9 +258,8 @@ export const updateProfile = (headline, location, bio, link, uri) => {
             console.log(err)
         }) 
 
-        const auth = getState().auth
         dispatch(getAuthenticatedUser(
-            firebase.auth().currentUser.uid,
+            auth.userId,
             auth.credentials.email,
             auth.credentials.displayName,
             headline,
@@ -266,12 +269,13 @@ export const updateProfile = (headline, location, bio, link, uri) => {
             website,
             auth.connections,
             auth.pendingConnections,
-            auth.messages
+            auth.messages,
+            auth.credentials.isAdmin
         ))
     }
 }
 
-export const uploadPhotoAsyn = async uri => {
+export const uploadPhotoAsyn = async (uri) => {
     const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
     return new Promise(async (res, rej) => {
         const response = await fetch(uri)
@@ -313,11 +317,12 @@ export const connectReq = (authId, authName, selectedUserId) => {
                 .then(() => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = doc.data()
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = doc.data()
                             dispatch({
                                 type: SET_SELECTED_USER,
                                 selectedUser: {
                                     credentials: {
+                                        isAdmin: isAdmin,
                                         userId: userId,
                                         email: email,
                                         displayName: displayName,
@@ -419,6 +424,7 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             type: SET_SELECTED_USER,
             selectedUser: {
                 credentials: {
+                    isAdmin: selectedUserData.isAdmin,
                     userId: selectedUserData.userId,
                     email: selectedUserData.email,
                     displayName: selectedUserName,
@@ -588,7 +594,7 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
         //         {merge: true}
         //     )
         // }
-        const uid = firebase.auth().currentUser.uid
+        const uid = getState().auth.userId
         if (uid < selectedUserId) {
             await db.collection('chats').doc(`${chatId}`).set(
                 {lastRead: {
@@ -694,6 +700,7 @@ export const disconnect = (authId, selectedUserId) => {
         dispatch({
             type: SET_USER,
             credentials: {
+                isAdmin: authData.isAdmin,
                 userId: authId,
                 email: authData.email,
                 displayName: authData.displayName,
@@ -710,6 +717,7 @@ export const disconnect = (authId, selectedUserId) => {
             type: SET_SELECTED_USER,
             selectedUser: {
                 credentials: {
+                    isAdmin: selectedUserData.isAdmin,
                     userId: selectedUserData.userId,
                     email: selectedUserData.email,
                     displayName: selectedUserData.displayName,
@@ -750,11 +758,12 @@ export const unrequest = (authId, selectedUserId) => {
                 .then(() => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages } = doc.data()
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = doc.data()
                             dispatch({
                                 type: SET_SELECTED_USER,
                                 selectedUser: {
                                     credentials: {
+                                        isAdmin: isAdmin,
                                         userId: userId,
                                         email: email,
                                         displayName: displayName,

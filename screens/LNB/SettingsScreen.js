@@ -14,6 +14,7 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import { FontAwesome } from '@expo/vector-icons'
 
 let themeColor
 let text
@@ -57,9 +58,9 @@ const SettingsScreen = props => {
                 </HeaderButtons>
             </View>
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Settings</Text>
+                <Text style={{color:Colors.socialdark}}>Under Construction</Text>
+                <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
             </View>
-            
         </View>
 
             
@@ -85,6 +86,7 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
+        borderBottomWidth: StyleSheet.hairlineWidth
     },
     header2: {
         // borderBottomWidth: 0.5,

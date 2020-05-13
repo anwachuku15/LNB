@@ -35,7 +35,7 @@ import ChatScreen from '../screens/LNB/ChatScreen'
 import NotificationIcon from '../components/LNB/NotificationIcon'
 import PostDetailScreen from '../screens/LNB/PostDetailScreen'
 import EventsScreen from '../screens/LNB/EventsScreen'
-import DeveloperScreen from '../screens/LNB/DeveloperScreen'
+import AdminScreen from '../screens/LNB/AdminScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -109,8 +109,8 @@ const HomeStack = createStackNavigator({
             }
         }
     },
-    Developer: {
-        screen: DeveloperScreen,
+    Admin: {
+        screen: AdminScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300

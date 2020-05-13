@@ -122,7 +122,7 @@ export default class DrawerContainer extends React.Component {
                   left: 20
                 }
               ]}>
-                Help Centre
+                Help Center
               </Text>
             </View>
           </TouchableOpacity>

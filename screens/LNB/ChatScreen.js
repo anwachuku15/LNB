@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
+        borderBottomWidth: StyleSheet.hairlineWidth
     },
     header2: {
         // borderBottomWidth: 0.5,

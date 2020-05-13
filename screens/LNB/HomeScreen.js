@@ -255,7 +255,7 @@ const HomeScreen = props => {
     //     }
     // }
     // LayoutAnimation.easeInEaseOut();
-    LayoutAnimation.Types.easeIn()
+    // LayoutAnimation.Types.easeIn
     return (
         isMounted && (
             <View style={styles.screen}>
@@ -270,13 +270,6 @@ const HomeScreen = props => {
                     </HeaderButtons>
                     <Text style={styles.headerTitle}>Feed</Text>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        {/* <Item
-                            title='Messages'
-                            iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                            onPress={() => {
-                                props.navigation.navigate('Messages')
-                            }}
-                        /> */}
                         <Item
                             ButtonElement={<MessageIcon/>}
                             title='Messages'
@@ -424,6 +417,7 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
+        borderBottomWidth: StyleSheet.hairlineWidth
     },
     headerTitle: {
         color: Colors.primary,
