@@ -15,6 +15,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
+import { colors } from 'react-native-elements'
 let themeColor
 let text
 
@@ -77,15 +78,15 @@ const AdminScreen = props => {
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
-                    <Text style={{color:text}}>ANIMATIONS: Like button, shared transitions (opening/navigating to need/picture/video, double-tap(?) etc)</Text>
+                    <Text style={{color:Colors.raspberry}}>ANIMATIONS: Like button, shared transitions (opening/navigating to need/picture/video, double-tap(?) etc)</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
-                    <Text style={{color:text}}>App Redesign: DrawerScreen, Profile Header, Feed (animated header, new card component, embedded media)</Text>
+                    <Text style={{color:Colors.raspberry}}>App Redesign: DrawerScreen, Profile Header, Feed (animated header, new card component, embedded media)</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
-                    <Text style={{color:text}}>Move connect request notifications to connect screen</Text>
+                    <Text style={{color:Colors.raspberry, fontWeight:'600'}}>Move connect request notifications to connect screen</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
@@ -93,7 +94,7 @@ const AdminScreen = props => {
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
-                    <Text style={{color:text}}>Improve image aspect ratio</Text>
+                    <Text style={{color:Colors.raspberry}}>Improve image aspect ratio, show image when pressed (UserProfile)</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginVertical: 5}}>
                     <Text style={{color:text}}>-    </Text>
