@@ -19,8 +19,6 @@ let text
 const ConnectScreen = props => {
     const scheme = useColorScheme()
 
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
     const dispatch = useDispatch()
     
 
@@ -56,7 +54,7 @@ const ConnectScreen = props => {
                 </HeaderButtons>
             </View>
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Connect request notifications show up here</Text>
+                <Text style={{color:text}}><Text style={{color:Colors.primary, fontWeight:'500'}}>NOTE: </Text>Move connect request notifications here</Text>
             </View>
             
         </View>

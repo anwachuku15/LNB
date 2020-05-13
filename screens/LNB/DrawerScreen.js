@@ -116,14 +116,7 @@ const DrawerScreen = props => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.list} 
-                  onPress={() => 
-                    props.navigation.navigate({
-                      routeName: 'UserProfile',
-                      params: {
-                        userId: firebase.auth().currentUser.uid
-                      }
-                    })
-                  }
+                  onPress={() => {}}
                 >
                     <View>
                     <MaterialIcons
@@ -131,7 +124,7 @@ const DrawerScreen = props => {
                         name='group'
                         size={23}
                         color="rgb(136, 153, 166)"/>
-                    <Text style={{...styles.text, ...{color:text}}}> Network </Text>
+                    <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Network </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -143,12 +136,12 @@ const DrawerScreen = props => {
                   }]}
                 >
                     <View>
-                    <Ionicons
-                        style={styles.icon}
-                        name='md-analytics'
-                        size={20}
-                        color="rgb(136, 153, 166)"/>
-                    <Text style={{...styles.text, ...{color:text}}}> Trending </Text>
+                      <Ionicons
+                          style={styles.icon}
+                          name='md-analytics'
+                          size={20}
+                          color="rgb(136, 153, 166)"/>
+                      <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -164,6 +157,21 @@ const DrawerScreen = props => {
                             size={23}
                             color="rgb(136, 153, 166)"/>
                         <Text style={{...styles.text, ...{color:text}}}> Settings </Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.list} 
+                  onPress={() => {
+                    props.navigation.navigate('Developer')
+                  }}
+                >
+                    <View>
+                        <MaterialIcons
+                            style={styles.icon}
+                            name="developer-board"
+                            size={23}
+                            color={Colors.redcrayola}/>
+                        <Text style={{...styles.text, ...{color:Colors.redcrayola}}}> Dev Notes </Text>
                     </View>
                 </TouchableOpacity>
             </ScrollView>

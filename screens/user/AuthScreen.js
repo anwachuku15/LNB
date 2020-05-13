@@ -192,7 +192,7 @@ const AuthScreen = props => {
             <Card style={styles.authContainer}>
                 <ScrollView>
                     {isSignup ? (
-                        <Input 
+                        <Input
                             id='fname'
                             placeholder='First Name'
                             keyboardType='default'
@@ -218,14 +218,13 @@ const AuthScreen = props => {
                     ) : (null)}
                     {isSignup ? (
                         <Input
-                            id='title' 
+                            id='headline' 
                             placeholder='Headline (Entrepreneur, designer, etc.)' 
                             keyboardType='default'
                             required 
-                            errorText='Please enter your headline'
-                            minLength={3} 
                             autoCapitalize='words'
-                            onInputChange   ={inputChangeHandler}
+                            errorText='Please enter your headline'
+                            onInputChange={inputChangeHandler}
                             initialValue=''
                         />
                     ) : (null)}
@@ -266,7 +265,7 @@ const AuthScreen = props => {
                             <TouchableCmp 
                                 onPress={() => {
                                     setIsSignup(!isSignup)
-                                    logout()
+                                    // logout()
                                 }} 
                                 style={{alignSelf: 'center', marginTop: 10}}>
                                 {isSignup ? (

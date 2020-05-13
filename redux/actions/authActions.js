@@ -60,7 +60,9 @@ const saveDataToStorage = (token, userId, expDate) => {
 // SIGNUP + LOGIN + LOGOUT
 export const signup = (email, password, fname, lname, headline, localUri) => {
     return async dispatch => {
-        let data, userId, idToken, expTime, expiresIn, expDate, displayName, noImg, imageUrl
+        let data, userId, idToken, expTime, expiresIn, expDate, displayName, imageUrl
+        console.log(headline)
+        const noImg = 'no-img.png'
         // ---- ADD NEW USER TO FIREBASE ---- //
         try {
             data = await firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -74,8 +76,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         expDate = new Date(expTime)
         expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
-        noImg = 'no-img.png'
-        imageUrl = localUri === '' 
+        imageUrl = localUri === undefined 
                     ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
                     : await uploadPhotoAsyn(localUri)
         

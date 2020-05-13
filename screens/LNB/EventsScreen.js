@@ -15,6 +15,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon';
+import { FontAwesome } from '@expo/vector-icons'
 
 let themeColor
 let text
@@ -52,7 +53,8 @@ const EventsScreen = props => {
                 </HeaderButtons>
             </View>
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}>Coming soon...</Text>
+                <Text style={{color:Colors.socialdark}}>Under Construction</Text>
+                <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
             </View>
         </View>
     )

@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "LNB Members",
+    "description": "Members-Only networking platform for those who want to leave normal behind.",
     "slug": "leave-normal-behind",
     "privacy": "unlisted",
     "sdkVersion": "37.0.0",
@@ -26,6 +27,10 @@
       "bundleIdentifier": "com.andrewnwachuku.lnbapp",
       "supportsTablet": true,
       "userInterfaceStyle": "automatic"
+    },
+    "android": {
+      "package": "com.andrewnwachuku.lnbapp",
+      "versionCode": 1
     }
   }
 }

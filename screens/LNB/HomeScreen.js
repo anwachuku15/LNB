@@ -22,7 +22,8 @@ import {
     View, 
     StyleSheet, 
     Image, 
-    SafeAreaView
+    SafeAreaView,
+    UIManager
 } from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
@@ -248,7 +249,13 @@ const HomeScreen = props => {
         })
     }
     
-    LayoutAnimation.easeInEaseOut();
+    // if(Platform.OS === 'android') {
+    //     if (UIManager.setLayoutAnimationEnabledExperimental) {
+    //         UIManager.setLayoutAnimationEnabledExperimental(true)
+    //     }
+    // }
+    // LayoutAnimation.easeInEaseOut();
+    LayoutAnimation.Types.easeIn()
     return (
         isMounted && (
             <View style={styles.screen}>
