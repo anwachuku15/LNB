@@ -91,12 +91,12 @@ const UserProfileScreen = props => {
         loadUser().then(() => {
             setIsLoading(false)
         })
-        const connectionsSnapshot = db.doc(`/users/${firebase.auth().currentUser.uid}`).onSnapshot(snapshot => {
+        const connectionsSnapshot = db.doc(`/users/${authUser.userId}`).onSnapshot(snapshot => {
             const currentConnections = snapshot.data().connections
             setConnections(currentConnections)
         })
 
-        const acceptButton = db.doc(`/users/${firebase.auth().currentUser.uid}`).onSnapshot(snapshot => {
+        const acceptButton = db.doc(`/users/${authUser.userId}`).onSnapshot(snapshot => {
             const authPendings = snapshot.data().pendingConnections
             if (authPendings.indexOf(userId) > -1) {
                 setAccept(true)
@@ -106,7 +106,7 @@ const UserProfileScreen = props => {
         })
         const requestedButton = db.doc(`/users/${userId}`).onSnapshot(snapshot => {
             const selectedUserPendings = snapshot.data().pendingConnections
-            if(selectedUserPendings.indexOf(firebase.auth().currentUser.uid) > -1) {
+            if(selectedUserPendings.indexOf(authUser.userId) > -1) {
                 // setConnectButton(false)
                 setRequested(true)
             } else {
@@ -256,8 +256,8 @@ const UserProfileScreen = props => {
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
                             title='Direct'
-                            iconName={firebase.auth().currentUser.uid === userId ? (Platform.OS==='android' ? 'md-settings' : 'ios-settings') : Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                            onPress={() => {firebase.auth().currentUser.uid === userId ? props.navigation.navigate('EditProfile') : {}}}
+                            iconName={authUser.userId === userId ? (Platform.OS==='android' ? 'md-settings' : 'ios-settings') : Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                            onPress={() => {authUser.userId === userId ? props.navigation.navigate('EditProfile') : {}}}
                         />
                     </HeaderButtons>
                 </View>
@@ -271,14 +271,14 @@ const UserProfileScreen = props => {
                             </View>
                             <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
                             <Text style={styles.infoTitle}>{user.credentials.headline}</Text>
-                            {userId !== firebase.auth().currentUser.uid ? (
+                            {userId !== authUser.userId ? (
                                 <View>
                                     {websiteIcon}
                                     <View>
                                         {accept && (
                                             <TouchableCmp 
                                                 onPress={() => {
-                                                    dispatch(confirmConnect(firebase.auth().currentUser.uid, authName, userId, user.credentials.displayName))
+                                                    dispatch(confirmConnect(authUser.userId, authName, userId, user.credentials.displayName))
                                                     setAccept(false)
                                                 }} 
                                                 style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
@@ -286,16 +286,16 @@ const UserProfileScreen = props => {
                                             </TouchableCmp>
                                         )}
                                         {requested && (
-                                            <TouchableCmp onPress={() => {unrequestHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
+                                            <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
                                                 <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
                                             </TouchableCmp>
                                         )}
-                                        {/* {user.pendingConnections.indexOf(firebase.auth().currentUser.uid) === -1 && !accept && ( */}
+                                        {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}
                                         {!connected && !requested && !accept && ( 
                                             <TouchableCmp 
                                                 style={{...styles.connectButton, ...{borderColor: Colors.bluesea}}}
                                                 onPress={() => {
-                                                    dispatch(connectReq(firebase.auth().currentUser.uid, authName, userId))
+                                                    dispatch(connectReq(authUser.userId, authName, userId))
                                                     setRequested(true)
                                                 }} 
                                             >
@@ -303,7 +303,7 @@ const UserProfileScreen = props => {
                                             </TouchableCmp>
                                         )}
                                         {connected && (
-                                            <TouchableCmp onPress={() => {disconnectHandler(firebase.auth().currentUser.uid, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
+                                            <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
                                                 <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
                                             </TouchableCmp>
                                         )}

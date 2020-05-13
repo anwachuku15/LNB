@@ -23,7 +23,6 @@ export const LAST_READ_TIMESTAMP = 'LAST_READ_TIMESTAMP'
 
 
 const db = firebase.firestore()
-
 // AUTH UTILS
 export const authenticate = (token, userId, expiresIn) => {
     return dispatch => {
@@ -67,19 +66,25 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         try {
             data = await firebase.auth().createUserWithEmailAndPassword(email, password)
         } catch (err) {
-            console.log(err)
+            console.error(err)
             throw err
         }
+        
         userId = data.user.uid
+
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000
         expDate = new Date(expTime)
         expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
+
+        console.log('setting imageUrl...')
         imageUrl = localUri === undefined 
                     ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
                     : await uploadPhotoAsyn(localUri)
-        
+        console.log('imageUrl set')
+
+
         db.doc(`/users/${userId}`).set({
             userId: userId,
             createdAt: new Date().toISOString(),
@@ -95,6 +100,10 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
             messages: {},
             isAdmin: isAdmin
         })
+        .catch(err => {
+            console.log(err)
+        })
+        
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId, expiresIn))
         dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin))
@@ -167,7 +176,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
         await (await db.collection('chats').get()).docs
         .forEach(doc => {
             if (doc.id.includes(userId)) {
-                if (doc.data().lastRead.user1 && doc.data().lastRead.user1.uid === firebase.auth().currentUser.uid) {
+                if (doc.data().lastRead.user1 && doc.data().lastRead.user1.uid === userId) {
                     lastReadMessages.push({
                         chatId: doc.id,
                         uid: doc.data().lastRead.user1.uid,
@@ -177,7 +186,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                         type: LAST_READ_TIMESTAMP,
                         lastReadMessage: lastReadMessages
                     })
-                } else if (doc.data().lastRead.user2 && doc.data().lastRead.user2.uid === firebase.auth().currentUser.uid) {
+                } else if (doc.data().lastRead.user2 && doc.data().lastRead.user2.uid === userId) {
                     lastReadMessages.push({
                         chatId: doc.id,
                         uid: doc.data().lastRead.user2.uid,
@@ -275,8 +284,9 @@ export const updateProfile = (headline, location, bio, link, uri) => {
     }
 }
 
-export const uploadPhotoAsyn = async (uri) => {
-    const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
+export const uploadPhotoAsyn = async (uri) => (getState) => {
+    // const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
+    const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
     return new Promise(async (res, rej) => {
         const response = await fetch(uri)
         const file = await response.blob()
@@ -565,7 +575,9 @@ export const markMessageNotificationsAsRead = () => {
         })
         batch.commit().then(() => {
             console.log('message notifications read')
-        }).catch(err => {console.log(err)})                                                   
+        }).catch(err => {
+            console.log(err)
+        })                                                   
         
         dispatch({
             type: MARK_MESSAGE_NOTIFICATIONS_READ
@@ -577,23 +589,6 @@ export const markMessageNotificationsAsRead = () => {
 export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
     return async (dispatch, getState ) => {
         
-        // if (firebase.auth().currentUser.uid < selectedUserId) {
-        //     await db.collection('chats').doc(`${chatId}`).set(
-        //         {lastReadUser1: {
-        //             uid: firebase.auth().currentUser.uid,
-        //             timestamp: readTimestamp
-        //         }},
-        //         {merge: true}
-        //     )
-        // } else if (selectedUserId < firebase.auth().currentUser.uid) {
-        //     await db.collection('chats').doc(`${chatId}`).set(
-        //         {lastReadUser2: {
-        //             uid: firebase.auth().currentUser.uid,
-        //             timestamp: readTimestamp
-        //         }},
-        //         {merge: true}
-        //     )
-        // }
         const uid = getState().auth.userId
         if (uid < selectedUserId) {
             await db.collection('chats').doc(`${chatId}`).set(

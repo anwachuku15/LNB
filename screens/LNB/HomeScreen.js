@@ -52,7 +52,6 @@ const HomeScreen = props => {
         themeColor = 'white'
         text = 'black'
     }
-    
     // APP SETTINGS
     const [appState, setAppState] = useState(AppState.currentState)
     useEffect(() => {
@@ -89,7 +88,7 @@ const HomeScreen = props => {
             try {
                 let token = await Notifications.getExpoPushTokenAsync();
                 // console.log(token);
-                db.doc(`/users/${firebase.auth().currentUser.uid}`)
+                db.doc(`/users/${userId}`)
                     .set(
                         {pushToken: token},
                         {merge: true}
@@ -121,6 +120,7 @@ const HomeScreen = props => {
     const [error, setError] = useState()
     const [isModalVisible, setIsModalVisible] = useState(false)
     
+    const userId = useSelector(state => state.auth.userId)
     const needs = useSelector(state => state.posts.allNeeds)
     const dispatch = useDispatch()
     const loadData = useCallback(async () => {
@@ -130,6 +130,7 @@ const HomeScreen = props => {
             await dispatch(fetchNeeds())
             dispatch(setLikes())
         } catch (err){
+            console.log('here it is')
             console.log(err)
             setError(err.message)
         }
@@ -144,7 +145,7 @@ const HomeScreen = props => {
         return () => {
             setShowNeedActions(false)
             setIsMounted(false)
-            console.log('HomeScreen unmounted - loadData')
+            // console.log('HomeScreen unmounted - loadData')
         }
     }, [isMounted, showNeedActions, isMounted])
 

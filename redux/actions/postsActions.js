@@ -237,8 +237,9 @@ export const getNeed = (needId) => {
     }
 }
 
-const uploadPhotoAsyn = async uri => {
-    const path = `photos/${this.uid}/${Date.now()}.jpg`
+const uploadPhotoAsyn = async uri => (getState) => {
+    // const path = `photos/${this.uid}/${Date.now()}.jpg`
+    const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
     return new Promise(async (res, rej) => {
         const response = await fetch(uri)
         const file = await response.blob()
@@ -262,16 +263,17 @@ const uploadPhotoAsyn = async uri => {
 
 export const likeNeed = (needId) => {
     return async (dispatch, getState) => {
+        const userId = getState().auth.userId
         const likeDocument = db
             .collection('likes')
-            .where('uid','==',firebase.auth().currentUser.uid)
+            .where('uid','==',userId)
             .where('needId', '==', needId)
             .limit(1)
         const needDocument = db.doc(`/needs/${needId}`)
         
         let needData
         let needUserId
-        const authUserId = firebase.auth().currentUser.uid
+        const authUserId = userId
         const authUserName = getState().auth.credentials.displayName
         const authUserImage = getState().auth.credentials.imageUrl
         needDocument.get()
@@ -349,7 +351,7 @@ export const unLikeNeed = (needId) => {
     return async (dispatch, getState) => {
         const likeDocument = db
             .collection('likes')
-            .where('uid', '==', firebase.auth().currentUser.uid)
+            .where('uid', '==', getState().auth.userId)
             .where('needId', '==', needId)
             .limit(1)
         const needDocument = db.doc(`/needs/${needId}`)
@@ -387,7 +389,7 @@ export const unLikeNeed = (needId) => {
             .then(async () => {
                 db.collection('notifications')
                 .where('needId', '==', needId)
-                .where('senderId', '==', firebase.auth().currentUser.uid)
+                .where('senderId', '==', getState().auth.userId)
                 .limit(1)
                 .get()
                 .then(data => {

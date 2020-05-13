@@ -45,7 +45,7 @@ const NotificationsScreen = props => {
 
     const dispatch = useDispatch()
 
-    const uid = firebase.auth().currentUser.uid
+    const uid = useSelector(state => state.auth.userId)
 
     // GET NOTIFICATIONS FROM STATE
     const notifications = useSelector(state => state.auth.notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))

@@ -62,7 +62,6 @@ const MessagesScreen = props => {
 
     // const unreadThread = useSelector(state => state.auth.lastReadMessages.)
 
-    // const uid = firebase.auth().currentUser.uid
     const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
     const [isMounted, setIsMounted] = useState(true)
@@ -135,7 +134,7 @@ const MessagesScreen = props => {
         setIsMounted(true)
         return (() => {
             setIsMounted(false)
-            console.log('MessageScreen Unmounted')
+            // console.log('MessageScreen Unmounted')
         })
     }, [])
 

@@ -19,6 +19,7 @@ const NavContainer = props => {
 
     const navRef = useRef()
     const isAuth = useSelector(state => !!state.auth.token)
+    
     const posts = useSelector(state => state.posts.allNeeds)
     const userPosts = useSelector(state => state.posts.userNeeds)
     const need = useSelector(state => state.posts.need)

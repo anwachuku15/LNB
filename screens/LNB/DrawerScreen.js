@@ -47,7 +47,7 @@ const DrawerScreen = props => {
       setIsMounted(true)
       return () => {
         setIsMounted(false)
-        console.log('Drawer Is Unmounted')
+        // console.log('Drawer Is Unmounted')
       }
     }, [])
   
@@ -60,7 +60,7 @@ const DrawerScreen = props => {
                   props.navigation.navigate({
                     routeName: 'UserProfile',
                     params: {
-                      userId: firebase.auth().currentUser.uid
+                      userId: uid
                     }
                   })
                 }
@@ -78,7 +78,7 @@ const DrawerScreen = props => {
                         props.navigation.navigate({
                           routeName: 'UserProfile',
                           params: {
-                            userId: firebase.auth().currentUser.uid
+                            userId: uid
                           }
                         })
                       }
@@ -97,7 +97,7 @@ const DrawerScreen = props => {
                     props.navigation.navigate({
                       routeName: 'UserProfile',
                       params: {
-                        userId: firebase.auth().currentUser.uid
+                        userId: uid
                       }
                     })
                   }

@@ -41,8 +41,8 @@ const ChatScreen = props => {
         text = 'black'
     }
 
-    const uid = firebase.auth().currentUser.uid
     const authUser = useSelector(state => state.auth)
+    const uid = authUser.userId
     const user = useSelector(state => state.auth.selectedUser)
     const selectedUserId = props.navigation.getParam('selectedUserId')
     const chatId = uid < user.credentials.userId ? 
@@ -73,6 +73,16 @@ const ChatScreen = props => {
                             uid: user2,
                             name: user2 === uid ? authUser.credentials.displayName : user.credentials.displayName,
                             userImage: user2 === uid ? authUser.credentials.imageUrl : user.credentials.imageUrl
+                        }
+                    },
+                    lastRead: {
+                        user1: {
+                            timestamp: user1 === uid ? new Date().toISOString() : null,
+                            uid: user1,
+                        },
+                        user2: {
+                            timestamp: user2 === uid ? new Date().toISOString() : null,
+                            uid: user2
                         }
                     },
                     lastMessageTimestamp: null,
@@ -109,7 +119,7 @@ const ChatScreen = props => {
 
     const sendMessage = async (chatId, content) => {
         const messageData = {
-            uid: firebase.auth().currentUser.uid,
+            uid: uid,
             userImage: authUser.credentials.imageUrl,
             content: content,
             timestamp: new Date().toISOString()
@@ -119,14 +129,14 @@ const ChatScreen = props => {
         })
         const pushToken = (await db.doc(`/users/${user.credentials.userId}`).get()).data().pushToken
         if (pushToken) {
-            sendMessageNotification(firebase.auth().currentUser.uid, authUser.credentials.displayName, content, user.credentials.userId, pushToken)
+            sendMessageNotification(uid, authUser.credentials.displayName, content, user.credentials.userId, pushToken)
         }
         setBody('')
     }
 
     const chatUser = {
         name: authUser.credentials.displayName,
-        _id: firebase.auth().currentUser.uid,
+        _id: uid,
         userImage: authUser.credentials.imageUrl
     }
     const send = messages => {
