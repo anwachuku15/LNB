@@ -30,7 +30,6 @@ const MessageIcon = props => {
     // SET UNREAD NOTIFICATION COUNT WITH FIRESTORE LISTENER
     const [unreadCount, setUnreadCount] = useState(0)
 
-
    
     // const BadgedIcon = withBadge(unreadCount)(Icon)
 

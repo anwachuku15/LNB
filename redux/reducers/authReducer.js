@@ -8,7 +8,7 @@ import {
     SET_NEW_CONNECTION, 
     SET_LIKES, 
     SET_NOTIFICATIONS, 
-    SET_MESSAGE_NOTIFCATIONS,
+    SET_MESSAGE_NOTIFICATIONS,
     MARK_NOTIFICATIONS_READ,
     MARK_MESSAGE_NOTIFICATIONS_READ,
     LAST_READ_TIMESTAMP
@@ -73,7 +73,7 @@ export default (state = initialState, action) => {
                 notifications: action.notifications
             }
         }
-        case SET_MESSAGE_NOTIFCATIONS: {
+        case SET_MESSAGE_NOTIFICATIONS: {
             return {
                 ...state,
                 messageNotifications: action.messageNotifications

@@ -1,6 +1,7 @@
 import React, {useCallback, useState, useEffect} from 'react'
 import { 
     Platform,
+    Animated,
     View, 
     Text, 
     StyleSheet, 
@@ -14,7 +15,7 @@ import {
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import { getUser, setNotifications, markNotificationsAsRead } from '../../redux/actions/authActions'
+import { getUser, setNotifications, markNotificationsAsRead, confirmConnect, declineConnect} from '../../redux/actions/authActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -24,6 +25,7 @@ import MessageIcon from '../../components/LNB/MessageIcon'
 import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
+import { LayoutAnimation } from 'react-native'
 
 const db = firebase.firestore()
 
@@ -46,10 +48,11 @@ const NotificationsScreen = props => {
 
     const dispatch = useDispatch()
 
+    const auth = useSelector(state => state.auth)
     const uid = useSelector(state => state.auth.userId)
-
+    
     // GET NOTIFICATIONS FROM STATE
-    const notifications = useSelector(state => state.auth.notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))
+    let notifications = useSelector(state => state.auth.notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))
     const connectReqs = useSelector(state => state.auth.notifications.filter(notification => notification.type === 'connection request'))
     const connectReqIds = []
     connectReqs.forEach(req => {
@@ -57,6 +60,7 @@ const NotificationsScreen = props => {
     })
 
     const [isAccepted, setIsAccepted] = useState(false)
+    const [isDeclined, setIsDeclined] = useState(false)
 
     const loadNotifications = useCallback(async () => {
         try {
@@ -65,7 +69,6 @@ const NotificationsScreen = props => {
             console.log(err)
         }
     }, [dispatch])
-    
     
 
     useEffect(() => {
@@ -76,20 +79,8 @@ const NotificationsScreen = props => {
         }
     }, [loadNotifications])
 
-    // isAccepted listener
-    // useEffect(() => {
-    //     const requestListener = db.collection('notifications')
-    //                                 .where('type', '==', 'connection request')
-    //                                 .where('recipientId', '==', uid)
-    //                                 .where('senderId', 'in', connectReqIds) //up to 10 comparisons. Must address in next app version.
-    //                                 .onSnapshot(snapshot => {
-    //                                     snapshot.docs.forEach(doc => {
-    //                                         if (doc.data().accepted === true) {
 
-    //                                         }
-    //                                     } )
-    //                                 })
-    // })
+
     // UNMOUNT
     useEffect(() => {
         loadNotifications()
@@ -119,85 +110,138 @@ const NotificationsScreen = props => {
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
     }
+
+    const CustomLayout = {
+        duration: 300,
+        delete: {
+            type: LayoutAnimation.Types.easeOut,
+            property: LayoutAnimation.Properties.opacity
+        }
+    }
+    
+    
+    const onDecline = (id) => {
+        const notif = notifications.find(x => x.id === id)
+        const index = notifications.indexOf(notif)
+        notifications = notifications.splice(index, 1)
+    }
     
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={() => {
-            item.type === 'connection request' && (navToUserProfile(item.senderId))
-            item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName))
-        }}>
-            <ListItem
-                containerStyle={{backgroundColor:background, paddingLeft: 0}}
-                title={
-                    <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                        {item.type === 'connection request' && (
-                            <View style={{flexDirection:'row', width: '90%'}} >
-                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                                    <FontAwesome
-                                        name='handshake-o' 
-                                        size={23} 
-                                        color={Colors.blue}
-                                    />
-                                </View>
-                                <View style={{width: '50%'}}> 
-                                    <View style={{}}>  
-                                        <Image 
-                                            source={{uri: item.senderImage}}
-                                            style={styles.avatar}
+        // <Animated.View>
+            <TouchableCmp onPress={() => {
+                (item.type === 'connection request' || item.type === 'new connection') && (navToUserProfile(item.senderId))
+                item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName))
+            }}>
+                <ListItem
+                    containerStyle={{backgroundColor:background, paddingLeft: 0}}
+                    title={
+                        <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                            {item.type === 'connection request' && (
+                                <View style={{flexDirection:'row', width: '90%'}} >
+                                    <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
+                                        <FontAwesome
+                                            name='handshake-o' 
+                                            size={23} 
+                                            color={Colors.blue}
                                         />
-                                        <Text style={styles.connectReqText}>
-                                            {item.senderName}
-                                        </Text>
-                                        <Text style={{color:Colors.disabled}}>
-                                            {item.senderHeadline}
+                                    </View>
+                                    <View style={{width: '50%'}}> 
+                                        <View style={{}}>  
+                                            <Image 
+                                                source={{uri: item.senderImage}}
+                                                style={styles.avatar}
+                                            />
+                                            <Text style={styles.connectReqText}>
+                                                {item.senderName}
+                                            </Text>
+                                            <Text style={{color:Colors.disabled}}>
+                                                {item.senderHeadline}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <View style={{flexDirection: 'column', width: '30%', justifyContent: 'space-between', paddingVertical:12}}>
+                                        <TouchableCmp 
+                                            style={styles.acceptButton} 
+                                            onPress={() => {
+                                                dispatch(confirmConnect(uid, auth.credentials.displayName, item.senderId, item.senderName))
+                                            }}
+                                        >
+                                            <Text style={styles.acceptButtonText}>Accept</Text>
+                                        </TouchableCmp>
+                                        <TouchableCmp 
+                                            style={styles.declineButton}
+                                            onPress={() => {
+                                                dispatch(declineConnect(uid, item.senderId, item.senderName))
+                                                LayoutAnimation.configureNext(CustomLayout)
+                                            }}
+                                        >
+                                            <Text style={styles.declineButtonText}>Decline</Text>
+                                        </TouchableCmp>
+                                    </View>
+                                </View>
+                            )}
+                            {item.type === 'new connection' && (
+                                <View style={{flexDirection:'row', width: '90%'}} >
+                                    <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
+                                        <Ionicons
+                                            name='md-person-add' 
+                                            size={23} 
+                                            color={Colors.blue}
+                                        />
+                                    </View>
+                                    <View style={{width: '80%'}}>
+                                        <TouchableCmp 
+                                            style={{alignSelf:'flex-start'}}
+                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                        >
+                                            <Image 
+                                                source={{uri: item.senderImage}}
+                                                style={styles.avatar}
+                                            />
+                                        </TouchableCmp>
+                                        <Text style={{color:text, marginTop: 3}}>
+                                            <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName} </Text>
+                                            accepted your connect request.
                                         </Text>
                                     </View>
                                 </View>
-                                <View style={{flexDirection: 'column', width: '30%', justifyContent: 'space-between', paddingVertical:12}}>
-                                    <TouchableCmp style={styles.acceptButton}>
-                                        <Text style={styles.acceptButtonText}>Accept</Text>
-                                    </TouchableCmp>
-                                    <TouchableCmp style={styles.declineButton}>
-                                        <Text style={styles.declineButtonText}>Decline</Text>
-                                    </TouchableCmp>
-                                </View>
-                            </View>
-                        )}
-                        {item.type === 'new connection' && (<Text style={{color:text, fontSize: 14}}>{item.senderName} accepted your connect request.</Text>)}
-                        {item.type === 'likeNeed' && (
-                            <View style={{flexDirection:'row', width: '90%'}} >
-                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                                    <MaterialCommunityIcons
-                                        name='thumb-up-outline' 
-                                        size={23} 
-                                        color={Colors.pink}
-                                    />
-                                </View>
-                                <View style={{width: '80%'}}>
-                                    <TouchableCmp 
-                                        style={{alignSelf:'flex-start'}}
-                                        onPress={() => {navToUserProfile(item.senderId)}}
-                                    >
-                                        <Image 
-                                            source={{uri: item.senderImage}}
-                                            style={styles.avatar}
+                            )}
+                            {item.type === 'likeNeed' && (
+                                <View style={{flexDirection:'row', width: '90%'}} >
+                                    <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
+                                        <MaterialCommunityIcons
+                                            name='thumb-up-outline' 
+                                            size={23} 
+                                            color={Colors.pink}
                                         />
-                                    </TouchableCmp>
-                                    <Text style={{color:text, marginTop: 3}}>
-                                        <Text style={{fontWeight:'500'}}>{item.senderName} </Text>
-                                        liked one of your needs.
-                                    </Text>
+                                    </View>
+                                    <View style={{width: '80%'}}>
+                                        <TouchableCmp 
+                                            style={{alignSelf:'flex-start'}}
+                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                        >
+                                            <Image 
+                                                source={{uri: item.senderImage}}
+                                                style={styles.avatar}
+                                            />
+                                        </TouchableCmp>
+                                        <Text style={{color:text, marginTop: 3}}>
+                                            <Text style={{fontWeight:'500'}}>{item.senderName} </Text>
+                                            liked one of your needs.
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
-                        )}
-                        {item.type === 'commentNeed' && (<Text style={{color:text, fontSize: 14}}>{item.senderName} replied to your need post.</Text>)}
-                            <Text style={{width: '10%', textAlign:'center', color:Colors.disabled, fontSize: 14}}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
-                    </View>
-                }
-                // subtitle='Content of what was liked or commented'
-                // leftAvatar=
-                bottomDivider
-            />
-        </TouchableCmp>
+                            )}
+                            {item.type === 'commentNeed' && (<Text style={{color:text, fontSize: 14}}>{item.senderName} replied to your need post.</Text>)}
+                                <Text style={{width: '10%', textAlign:'center', color:Colors.disabled, fontSize: 14}}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
+                        </View>
+                    }
+                    // subtitle='Content of what was liked or commented'
+                    // leftAvatar=
+                    bottomDivider
+                />
+            </TouchableCmp>
+        // </View>
     )
 
     return (
@@ -277,6 +321,7 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     connectReqText: {
+        fontWeight: '500',
         color:Colors.primary, 
         marginTop: 3,
         fontSize: 14

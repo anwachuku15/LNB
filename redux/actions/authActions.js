@@ -15,7 +15,7 @@ export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
 export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
 export const SET_LIKES = 'SET_LIKES'
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
-export const SET_MESSAGE_NOTIFCATIONS = 'SET_MESSAGE_NOTIFCATIONS'
+export const SET_MESSAGE_NOTIFICATIONS = 'SET_MESSAGE_NOTIFICATIONS'
 export const MARK_NOTIFICATIONS_READ = 'MARK_NOTIFICATIONS_READ'
 export const MARK_MESSAGE_NOTIFICATIONS_READ = 'MARK_MESSAGE_NOTIFICATIONS_READ'
 export const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
@@ -411,15 +411,13 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                                          .where('senderId', '==', selectedUserId)
                                          .limit(1)
                                          .get()).docs[0]
-        db.doc(`/notifications/${notificationData.id}`).set(
-            {accepted: true},
-            {merge: true}
-        )   
+        notificationData.ref.delete()
+
 
         let authPendingState = getState().auth.pendingConnections
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
         
-                   
+
 
         // Remove from pendingConnections
         const index = authData.pendingConnections.indexOf(selectedUserId)
@@ -479,10 +477,9 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                 type: SET_PENDING_CONNECTIONS,
                 pendingConnections: authPendingState
             })
-        
-
     }
 }
+
 const sendConnectionNotification = (authId, authName, authImg, authHeadline, selectedUserId, pushToken) => {
     db.collection('notifications').add({
         timestamp: new Date().toISOString(),
@@ -507,6 +504,39 @@ const sendConnectionNotification = (authId, authName, authImg, authHeadline, sel
             body: 'You are now connected with ' + authName + '.'
         })
     })
+}
+
+export const declineConnect = (authId, selectedUserId, selectedUserName) => {
+    return async (dispatch, getState) => {
+        const authImg = getState().auth.credentials.imageUrl
+        
+        // Delete request notification
+        const notificationData = (await db.collection('notifications')
+                                         .where('type', '==', 'connection request')
+                                         .where('recipientId', '==', authId)
+                                         .where('senderId', '==', selectedUserId)
+                                         .limit(1)
+                                         .get()).docs[0]
+        notificationData.ref.delete()
+
+
+        let authPendingState = getState().auth.pendingConnections
+        const authData = await (await db.doc(`/users/${authId}`).get()).data()
+        
+        // Remove from pendingConnections
+        const index = authData.pendingConnections.indexOf(selectedUserId)
+        authData.pendingConnections.splice(index, 1)
+        db.doc(`/users/${authId}`).set(
+            {pendingConnections: authData.pendingConnections},
+            {merge: true}
+        )
+
+        
+        dispatch({
+            type: SET_PENDING_CONNECTIONS,
+            pendingConnections: authPendingState
+        })
+    }
 }
 
 export const setLikes = () => {
@@ -549,8 +579,6 @@ export const setNotifications = () => {
                     senderHeadline: doc.data().senderHeadline,
                     senderImage: doc.data().senderImage,
                     read: doc.data().read,
-                    accepted: doc.data().accepted,
-                    declined: doc.data().declined,
                     timestamp: doc.data().timestamp,
                 })
             } else if (doc.data().type == 'message') {
@@ -568,7 +596,7 @@ export const setNotifications = () => {
             notifications: userNotifications
         })
         dispatch({
-            type: SET_MESSAGE_NOTIFCATIONS,
+            type: SET_MESSAGE_NOTIFICATIONS,
             messageNotifications: userMessageNotifications
         })
     }
@@ -702,7 +730,8 @@ export const removeNotification = (type, recipientId, senderId, timestamp, read)
 
 // DISCONNECT + UNREQUEST
 export const disconnect = (authId, selectedUserId) => {
-    return async dispatch => {
+    return async (dispatch, getState) => {
+
         if (authId < selectedUserId) {
             db.doc(`/connections/${authId+selectedUserId}`).delete()
             
@@ -720,7 +749,6 @@ export const disconnect = (authId, selectedUserId) => {
             {connections: selectedUserData.connections - 1},
             {merge: true}
         )
-
         dispatch({
             type: SET_USER,
             credentials: {
@@ -735,8 +763,13 @@ export const disconnect = (authId, selectedUserId) => {
                 website: authData.website
             },
             connections: authData.connections,
-            pendingConnections: authData.pendingConnections
+            pendingConnections: authData.pendingConnections,
+            likes: [],
+            notifications: [],
+            messageNotifications: []
         })
+        dispatch(setNotifications())
+        dispatch(setLikes())
         dispatch({
             type: SET_SELECTED_USER,
             selectedUser: {
@@ -757,6 +790,7 @@ export const disconnect = (authId, selectedUserId) => {
                 // likes: selectedUserData.likes
             }
         })
+        
     }
 }
 
