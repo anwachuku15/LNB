@@ -15,17 +15,18 @@ const firebaseConfig = {
 admin.initializeApp(firebaseConfig)
 const db = admin.firestore()
 
+
+// UPDATE TWO COLLECTIONS: https://stackoverflow.com/questions/57653308/firestore-transaction-update-multiple-collections-in-a-single-transaction
+
 exports.onUserImageChange = functions
   .firestore
   .document('/users/{userId}')
   .onUpdate((change) => {
-    console.log(change.before.data())
-    console.log(change.after.data())
+    
     if (change.before.data().imageUrl !== change.after.data().imageUrl) {
       console.log('image has changed')
       const batch = db.batch()
-      return db
-        .collection('needs')
+      db.collection('needs')
         .where('uid','==',change.before.data().userId)
         .get()
         .then((data) => {
@@ -33,7 +34,6 @@ exports.onUserImageChange = functions
             const need = db.doc(`/needs/${doc.id}`)
             batch.update(need, { userImage: change.after.data().imageUrl })
           })
-          return batch.commit()
         })
         .catch(err => console.error(err))
     } else return true

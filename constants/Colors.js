@@ -23,5 +23,6 @@ export default {
     disabled: '#ACACAC',
     blue: '#00A6ED',
     bluesea: '#5ADBFF',
-    socialdark: '#73788B'
+    socialdark: '#73788B',
+    pink: '#F200C5'
 }

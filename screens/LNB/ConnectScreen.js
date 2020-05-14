@@ -1,11 +1,14 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { 
+    Platform,
+    TouchableOpacity,
+    TouchableNativeFeedback,
     View, 
     Text, 
     StyleSheet, 
     Image, 
     Button, 
-    ScrollView 
+    ScrollView
 } from 'react-native'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -20,16 +23,55 @@ const ConnectScreen = props => {
     const scheme = useColorScheme()
 
     const dispatch = useDispatch()
+    const pendingConnections = useSelector(state => state.auth.pendingConnections)
+    const notifications = useSelector(state => state.auth.notifications.filter(notification => notification.type === 'connection request'))
+    const displayNotifications = notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
+    useEffect(() => {
+        // console.log(pendingConnections)
+        console.log(displayNotifications)
+    }, [])
     
-
+    
+    
     const colorScheme = useColorScheme()
     let text
+    let background
     if (colorScheme === 'dark') {
         themeColor = 'black'
         text = 'white'
+        background = 'black'
     } else {
         themeColor = 'white'
         text = 'black'
+        background = 'white'
+    }
+
+    const renderItem = ({item}) => (
+        <TouchableCmp onPress={async () => {
+            // await dispatch(getUser(item.senderId))
+        }}>
+            <ListItem
+                containerStyle={{backgroundColor:background}}
+                title={
+                    <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                        {item.type === 'connection request' && (
+                            <View style={{flexDirection:'row'}} >
+                                <Text style={{color:text, fontSize: 14}}>{item.senderName} wants to connect with you.</Text>
+                            </View>
+                        )}
+                            <Text style={{color:Colors.disabled, fontSize: 14, }}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
+                    </View>
+                }
+                // subtitle='Content of what was liked or commented'
+                // leftAvatar=
+                bottomDivider
+            />
+        </TouchableCmp>
+    )
+
+    let TouchableCmp = TouchableOpacity
+    if (Platform.OS === 'android' && Platform.Version >= 21) {
+        TouchableCmp = TouchableNativeFeedback
     }
     return (
         
@@ -53,8 +95,11 @@ const ConnectScreen = props => {
                     />
                 </HeaderButtons>
             </View>
-            <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                <Text style={{color:text}}><Text style={{color:Colors.primary, fontWeight:'500'}}>NOTE: </Text>Move connect request notifications here</Text>
+            <View style={{flex:1, alignItems:'center'}}>
+                <Text style={{color:text}}>
+                    <Text style={{color:Colors.primary, fontWeight:'500'}}>NOTE: </Text>
+                    Show search bar, connection requests, & connections
+                </Text>
             </View>
             
         </View>

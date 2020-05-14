@@ -312,8 +312,9 @@ export const uploadPhotoAsyn = async (uri) => (getState) => {
 
 // CONNECT ACTIONS & NOTIFICATIONS
 export const connectReq = (authId, authName, selectedUserId) => {
-    return async dispatch => {
-        
+    return async (dispatch, getState) => {
+        const authImg = getState().auth.credentials.imageUrl
+        const authHeadline = getState().auth.credentials.headline
         const userData = await db.doc(`/users/${selectedUserId}`).get()
         let userPendingReq = userData.data().pendingConnections
         
@@ -361,7 +362,7 @@ export const connectReq = (authId, authName, selectedUserId) => {
                             
                             const pushToken = (await db.doc(`/users/${selectedUserId}`).get()).data().pushToken
                             if (pushToken) {
-                                sendRequestNotification(authId, authName, selectedUserId, pushToken)
+                                sendRequestNotification(authId, authName, authImg, authHeadline, selectedUserId, pushToken)
                                 
                             }
                         })
@@ -372,14 +373,18 @@ export const connectReq = (authId, authName, selectedUserId) => {
         }
     }
 }
-const sendRequestNotification = (authId, authName, selectedUserId, pushToken) => {
+const sendRequestNotification = (authId, authName, authImg, authHeadline, selectedUserId, pushToken) => {
     db.collection('notifications').add({
         timestamp: new Date().toISOString(),
         type: 'connection request',
         recipientId: selectedUserId,
         senderId: authId,
         senderName: authName,
-        read: false
+        senderHeadline: authHeadline,
+        senderImage: authImg,
+        read: false,
+        accepted: false,
+        declined: false
     })
     let res = fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
@@ -397,20 +402,39 @@ const sendRequestNotification = (authId, authName, selectedUserId, pushToken) =>
 }
 export const confirmConnect = (authId, authName, selectedUserId, selectedUserName) => {
     return async (dispatch, getState) => {
+        const authImg = getState().auth.credentials.imageUrl
+        const authHeadline = getState().auth.credentials.headline
+        // Accept request notification
+        const notificationData = (await db.collection('notifications')
+                                         .where('type', '==', 'connection request')
+                                         .where('recipientId', '==', authId)
+                                         .where('senderId', '==', selectedUserId)
+                                         .limit(1)
+                                         .get()).docs[0]
+        db.doc(`/notifications/${notificationData.id}`).set(
+            {accepted: true},
+            {merge: true}
+        )   
+
         let authPendingState = getState().auth.pendingConnections
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
         
+                   
+
+        // Remove from pendingConnections
         const index = authData.pendingConnections.indexOf(selectedUserId)
         authData.pendingConnections.splice(index, 1)
         db.doc(`/users/${authId}`).set(
             {pendingConnections: authData.pendingConnections},
             {merge: true}
         )
+        // Increment connections by 1
         db.doc(`/users/${authId}`).set(
             {connections: authData.connections + 1},
             {merge: true}
         )
-
+        
+        // Increment selected user connections by 1
         const selectedUserData = (await db.doc(`/users/${selectedUserId}`).get()).data()
         db.doc(`/users/${selectedUserId}`).set(
             {connections: selectedUserData.connections + 1},
@@ -450,7 +474,7 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                 // likes: selectedUserData.likes
             }
         })
-        sendConnectionNotification(authId, authName, selectedUserId, selectedUserData.pushToken)
+        sendConnectionNotification(authId, authName, authImg, authHeadline, selectedUserId, selectedUserData.pushToken)
             dispatch({
                 type: SET_PENDING_CONNECTIONS,
                 pendingConnections: authPendingState
@@ -459,13 +483,15 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
 
     }
 }
-const sendConnectionNotification = (authId, authName, selectedUserId, pushToken) => {
+const sendConnectionNotification = (authId, authName, authImg, authHeadline, selectedUserId, pushToken) => {
     db.collection('notifications').add({
         timestamp: new Date().toISOString(),
         type: 'new connection',
         recipientId: selectedUserId,
         senderId: authId,
         senderName: authName,
+        senderHeadline: authHeadline,
+        senderImage: authImg,
         read: false
     })
     let res = fetch('https://exp.host/--/api/v2/push/send', {
@@ -520,8 +546,11 @@ export const setNotifications = () => {
                     type: doc.data().type,
                     senderId: doc.data().senderId,
                     senderName: doc.data().senderName,
+                    senderHeadline: doc.data().senderHeadline,
                     senderImage: doc.data().senderImage,
                     read: doc.data().read,
+                    accepted: doc.data().accepted,
+                    declined: doc.data().declined,
                     timestamp: doc.data().timestamp,
                 })
             } else if (doc.data().type == 'message') {
@@ -555,7 +584,6 @@ export const markNotificationsAsRead = () => {
             batch.update(notification, {read: true})
         })
         batch.commit().then(() => {
-            console.log('notifications read')
         }).catch(err => {console.log(err)})                                                   
         
         dispatch({
@@ -584,6 +612,7 @@ export const markMessageNotificationsAsRead = () => {
         })
     }
 }
+
 
 
 export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {

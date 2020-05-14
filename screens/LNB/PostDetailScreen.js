@@ -50,6 +50,8 @@ const PostDetailScreen = props => {
 
     const uid = useSelector(state => state.auth.userId)
     const needId = props.navigation.getParam('needId')
+    const senderName = props.navigation.getParam('senderName')
+
     const need = useSelector(state => state.posts.allNeeds.find(need => need.id === needId))
     const dispatch = useDispatch()
 
@@ -216,7 +218,7 @@ const PostDetailScreen = props => {
     return (
         <View style={styles.screen}>
             {/* HEADER */}
-            <View style={styles.header}>
+            <View style={{...styles.header, ...{paddingBottom: senderName ? 1 : 16}}}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Back'
@@ -224,7 +226,14 @@ const PostDetailScreen = props => {
                         onPress={() => {props.navigation.goBack()}}
                     />
                 </HeaderButtons>
-                <Text style={styles.headerTitle}>Need Detail</Text>
+                {senderName ? (
+                    <View>
+                        <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>Liked</Text>
+                        <Text style={{color:Colors.disabled, fontFamily: 'open-sans', fontSize:12}}>by {senderName}</Text>
+                    </View>
+                ) : (
+                    <Text style={styles.headerTitle}>Need Detail</Text>
+                )}
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Direct'
@@ -381,7 +390,6 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems: 'center',
         paddingTop: 49,
-        paddingBottom: 16,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

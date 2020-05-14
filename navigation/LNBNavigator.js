@@ -60,14 +60,6 @@ const HomeStack = createStackNavigator({
             }
         }
     },
-    Profile: {
-        screen: ProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
     EditProfile: {
         screen: EditProfileScreen,
         navigationOptions: {
@@ -130,8 +122,8 @@ const BulletinStack = createStackNavigator({
     Bulletin: {
         screen: BulletinScreen,
     },
-    Profile: {
-        screen: ProfileScreen,
+    UserProfile: {
+        screen: UserProfileScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -152,8 +144,16 @@ const NotificationsStack = createStackNavigator({
     Notifications: {
         screen: NotificationsScreen,
     },
-    Profile: {
-        screen: ProfileScreen,
+    UserProfile: {
+        screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    PostDetail: {
+        screen: PostDetailScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -174,8 +174,8 @@ const NeedsFeedStack = createStackNavigator({
     NeedsFeed: {
         screen: NeedsFeedScreen,
     },
-    Profile: {
-        screen: ProfileScreen,
+    UserProfile: {
+        screen: UserProfileScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300

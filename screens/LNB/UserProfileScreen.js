@@ -263,7 +263,7 @@ const UserProfileScreen = props => {
                 </View>
                 
                 {/* PROFILE HEADER */}
-                <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingBottom:5}}>
+                <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingVertical:5}}>
                     <View style={{paddingHorizontal:20, alignItems:'flex-start', flexDirection:'row'}}>
                         <View style={{flexDirection:'column', width:'40%'}}>
                             <View style={styles.avatarContainer}>
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
         width: '75%',
         marginVertical: 5,
         justifyContent: 'center',
-        borderWidth: 2,
+        borderWidth: 1,
         borderRadius: 50
     },
     infoContainer: {
