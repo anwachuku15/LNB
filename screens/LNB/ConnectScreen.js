@@ -18,13 +18,13 @@ import {
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import {  markConnectNotificationsAsRead } from '../../redux/actions/authActions'
+import {  markConnectNotificationsAsRead, confirmConnect, declineConnect } from '../../redux/actions/authActions'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
-import { FontAwesome } from '@expo/vector-icons'
+import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
 
@@ -35,8 +35,12 @@ const ConnectScreen = props => {
     const scheme = useColorScheme()
     const [search, setSearch] = useState('')
     const dispatch = useDispatch()
+
+    const auth = useSelector(state => state.auth)
+    const uid = useSelector(state => state.auth.userId)
+
     const pendingConnections = useSelector(state => state.auth.pendingConnections)
-    let notifications = useSelector(state => state.auth.connectNotifications.filter(notification => notification.type === 'connection request'))
+    let notifications = useSelector(state => state.auth.connectNotifications.filter(notification => (notification.type === 'connection request' || notification.type === 'new connection')))
     notifications = notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
     
 
@@ -62,6 +66,17 @@ const ConnectScreen = props => {
         console.log(notifications)
     }, [dispatch, readNotifications])
     
+
+    const navToUserProfile = (id) => {
+        props.navigation.navigate({
+            routeName: 'UserProfile',
+            params: {
+                userId: id,
+
+            }
+        })
+    }
+
     const colorScheme = useColorScheme()
     let text
     let background
@@ -95,53 +110,81 @@ const ConnectScreen = props => {
     )
     
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={async () => {
-            // await dispatch(getUser(item.senderId))
-        }}>
+        <TouchableCmp onPress={() => {navToUserProfile(item.senderId)}}>
             <ListItem
                 containerStyle={{backgroundColor:background, paddingLeft: 0}}
                 title={
-                    <View style={{flexDirection:'row', width: '90%'}} >
-                        <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                            <FontAwesome
-                                name='handshake-o' 
-                                size={23} 
-                                color={Colors.blue}
-                            />
-                        </View>
-                        <View style={{width: '50%'}}> 
-                            <View style={{}}>  
-                                <Image 
-                                    source={{uri: item.senderImage}}
-                                    style={styles.avatar}
-                                />
-                                <Text style={styles.connectReqText}>
-                                    {item.senderName}
-                                </Text>
-                                <Text style={{color:Colors.disabled}}>
-                                    {item.senderHeadline}
-                                </Text>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        {item.type === 'connection request' && (
+                            <View style={{flexDirection:'row', width: '90%'}} >
+                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
+                                    <FontAwesome
+                                        name='handshake-o' 
+                                        size={23} 
+                                        color={Colors.blue}
+                                    />
+                                </View>
+                                <View style={{width: '50%'}}> 
+                                    <View style={{}}>  
+                                        <Image 
+                                            source={{uri: item.senderImage}}
+                                            style={styles.avatar}
+                                        />
+                                        <Text style={styles.connectReqText}>
+                                            {item.senderName}
+                                        </Text>
+                                        <Text style={{color:Colors.disabled}}>
+                                            {item.senderHeadline}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View style={{flexDirection: 'column', width: '30%', justifyContent: 'space-between', paddingVertical:12}}>
+                                    <TouchableCmp 
+                                        style={styles.acceptButton} 
+                                        onPress={() => {
+                                            dispatch(confirmConnect(uid, auth.credentials.displayName, item.senderId, item.senderName))
+                                        }}
+                                    >
+                                        <Text style={styles.acceptButtonText}>Accept</Text>
+                                    </TouchableCmp>
+                                    <TouchableCmp 
+                                        style={styles.declineButton}
+                                        onPress={() => {
+                                            dispatch(declineConnect(uid, item.senderId, item.senderName))
+                                            // LayoutAnimation.configureNext(CustomLayout)
+                                        }}
+                                    >
+                                        <Text style={styles.declineButtonText}>Decline</Text>
+                                    </TouchableCmp>
+                                </View>
                             </View>
-                        </View>
-                        <View style={{flexDirection: 'column', width: '30%', justifyContent: 'space-between', paddingVertical:12}}>
-                            <TouchableCmp 
-                                style={styles.acceptButton} 
-                                onPress={() => {
-                                    dispatch(confirmConnect(uid, auth.credentials.displayName, item.senderId, item.senderName))
-                                }}
-                            >
-                                <Text style={styles.acceptButtonText}>Accept</Text>
-                            </TouchableCmp>
-                            <TouchableCmp 
-                                style={styles.declineButton}
-                                onPress={() => {
-                                    dispatch(declineConnect(uid, item.senderId, item.senderName))
-                                    LayoutAnimation.configureNext(CustomLayout)
-                                }}
-                            >
-                                <Text style={styles.declineButtonText}>Decline</Text>
-                            </TouchableCmp>
-                        </View>
+                        )}
+                        {item.type === 'new connection' && (
+                            <View style={{flexDirection:'row', width: '90%'}} >
+                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
+                                    <Ionicons
+                                        name='md-person-add' 
+                                        size={23} 
+                                        color={Colors.blue}
+                                    />
+                                </View>
+                                <View style={{width: '80%'}}>
+                                    <TouchableCmp 
+                                        style={{alignSelf:'flex-start'}}
+                                        onPress={() => {navToUserProfile(item.senderId)}}
+                                    >
+                                        <Image 
+                                            source={{uri: item.senderImage}}
+                                            style={styles.avatar}
+                                        />
+                                    </TouchableCmp>
+                                    <Text style={{color:text, marginTop: 3}}>
+                                        <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName} </Text>
+                                        accepted your connect request.
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
                         <Text style={{width: '10%',color:Colors.disabled, fontSize: 14, }}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
                     </View>
                 }
