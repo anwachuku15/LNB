@@ -9,8 +9,10 @@ import {
     SET_LIKES, 
     SET_NOTIFICATIONS, 
     SET_MESSAGE_NOTIFICATIONS,
+    SET_CONNECT_NOTIFICATIONS,
     MARK_NOTIFICATIONS_READ,
     MARK_MESSAGE_NOTIFICATIONS_READ,
+    MARK_CONNECT_NOTIFICATIONS_READ,
     LAST_READ_TIMESTAMP
 } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
@@ -79,6 +81,12 @@ export default (state = initialState, action) => {
                 messageNotifications: action.messageNotifications
             }
         }
+        case SET_CONNECT_NOTIFICATIONS: {
+            return {
+                ...state,
+                connectNotifications: action.connectNotifications
+            }
+        }
         case MARK_NOTIFICATIONS_READ: {
             state.notifications.forEach(notification => notification.read = true)
             return {
@@ -87,6 +95,12 @@ export default (state = initialState, action) => {
         }
         case MARK_MESSAGE_NOTIFICATIONS_READ: {
             state.messageNotifications.forEach(notification => notification.read = true)
+            return {
+                ...state
+            }
+        }
+        case MARK_CONNECT_NOTIFICATIONS_READ: {
+            state.connectNotifications.forEach(notification => notification.read = true)
             return {
                 ...state
             }

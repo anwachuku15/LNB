@@ -3,7 +3,6 @@ import firebase from 'firebase'
 // import '@firebase/firestore'
 import moment from 'moment'
 import Need from '../../models/need-model'
-import { setNotifications } from './authActions'
 const db = firebase.firestore()
 
 export const CREATE_NEED = 'CREATE_NEED'
@@ -395,9 +394,6 @@ export const unLikeNeed = (needId) => {
                 .then(data => {
                     db.doc(`/notifications/${data.docs[0].id}`)
                     .delete()
-                    // .then(() => {
-                    //     dispatch(setNotifications())
-                    // })
                 })
             })
             .catch(err => {

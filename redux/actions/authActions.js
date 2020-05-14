@@ -16,8 +16,10 @@ export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
 export const SET_LIKES = 'SET_LIKES'
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
 export const SET_MESSAGE_NOTIFICATIONS = 'SET_MESSAGE_NOTIFICATIONS'
+export const SET_CONNECT_NOTIFICATIONS = 'SET_CONNECT_NOTIFICATIONS'
 export const MARK_NOTIFICATIONS_READ = 'MARK_NOTIFICATIONS_READ'
 export const MARK_MESSAGE_NOTIFICATIONS_READ = 'MARK_MESSAGE_NOTIFICATIONS_READ'
+export const MARK_CONNECT_NOTIFICATIONS_READ = 'MARK_CONNECT_NOTIFICATIONS_READ'
 export const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
 export const LAST_READ_TIMESTAMP = 'LAST_READ_TIMESTAMP'
 
@@ -164,6 +166,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
             messages: messages,
             likes: [],
             notifications: [],
+            connectNotifications: [],
             messageNotifications: []
         })
         const unreadListener = db.collection('notifications')
@@ -557,6 +560,7 @@ export const setNotifications = () => {
     return async (dispatch, getState) => {
         const userNotifications = []
         const userMessageNotifications = []
+        const userConnectNotifications = []
         await (await db.collection('notifications').where('recipientId', '==', getState().auth.userId).get())
         .forEach(doc => {
             if (doc.data().type == 'likeNeed') {
@@ -571,7 +575,7 @@ export const setNotifications = () => {
                     timestamp: doc.data().timestamp,
                 })
             } else if (doc.data().type == 'connection request' || doc.data().type == 'new connection') {
-                userNotifications.push({
+                userConnectNotifications.push({
                     id: doc.id,
                     type: doc.data().type,
                     senderId: doc.data().senderId,
@@ -594,6 +598,10 @@ export const setNotifications = () => {
         dispatch({
             type: SET_NOTIFICATIONS,
             notifications: userNotifications
+        })
+        dispatch({
+            type: SET_CONNECT_NOTIFICATIONS,
+            connectNotifications: userConnectNotifications
         })
         dispatch({
             type: SET_MESSAGE_NOTIFICATIONS,
@@ -641,6 +649,26 @@ export const markMessageNotificationsAsRead = () => {
     }
 }
 
+export const markConnectNotificationsAsRead = () => {
+    return async (dispatch, getState) => {
+        let batch = db.batch()
+        const unreadNotificationIds = getState().auth.connectNotifications.filter(notification => !notification.read)
+                                                                   .map(notification => notification.id)
+        unreadNotificationIds.forEach(id => {
+            const notification = db.doc(`notifications/${id}`)
+            batch.update(notification, {read: true})
+        })
+        batch.commit().then(() => {
+            console.log('connect notifications read')
+        }).catch(err => {
+            console.log(err)
+        })                                                   
+        
+        dispatch({
+            type: MARK_CONNECT_NOTIFICATIONS_READ
+        })
+    }
+}
 
 
 export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
@@ -766,6 +794,7 @@ export const disconnect = (authId, selectedUserId) => {
             pendingConnections: authData.pendingConnections,
             likes: [],
             notifications: [],
+            connectNotifications: [],
             messageNotifications: []
         })
         dispatch(setNotifications())

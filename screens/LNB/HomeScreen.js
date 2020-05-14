@@ -34,7 +34,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions' 
-import { setLikes, setNotifications } from '../../redux/actions/authActions';
+import { setLikes } from '../../redux/actions/authActions';
 import MessageIcon from '../../components/LNB/MessageIcon';
 
 const db = firebase.firestore()

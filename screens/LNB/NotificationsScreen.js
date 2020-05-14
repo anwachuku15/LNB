@@ -15,7 +15,7 @@ import {
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import { getUser, setNotifications, markNotificationsAsRead, confirmConnect, declineConnect} from '../../redux/actions/authActions'
+import { getUser, markNotificationsAsRead, confirmConnect, declineConnect} from '../../redux/actions/authActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -65,6 +65,7 @@ const NotificationsScreen = props => {
     const loadNotifications = useCallback(async () => {
         try {
             await dispatch(markNotificationsAsRead())
+            console.log(connectReqs)
         } catch (err) {
             console.log(err)
         }
@@ -72,7 +73,6 @@ const NotificationsScreen = props => {
     
 
     useEffect(() => {
-        console.log(notifications)
         const willFocusSub = props.navigation.addListener('willFocus', loadNotifications)
         return () => {
             willFocusSub
@@ -117,13 +117,6 @@ const NotificationsScreen = props => {
             type: LayoutAnimation.Types.easeOut,
             property: LayoutAnimation.Properties.opacity
         }
-    }
-    
-    
-    const onDecline = (id) => {
-        const notif = notifications.find(x => x.id === id)
-        const index = notifications.indexOf(notif)
-        notifications = notifications.splice(index, 1)
     }
     
     const renderItem = ({item}) => (

@@ -227,7 +227,7 @@ const EditProfileScreen = props => {
 
                         <Input
                             id='bio'
-                            label='Bio'
+                            label='Skillset'
                             errorText='Please enter a valid bio'
                             keyboardType='default'
                             autoCapitalize='sentences'

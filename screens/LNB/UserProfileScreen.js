@@ -22,7 +22,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import * as firebase from 'firebase'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setNotifications, setLikes } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
 import { fetchNeeds } from '../../redux/actions/postsActions'
 
