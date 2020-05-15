@@ -106,7 +106,7 @@ const ChatScreen = props => {
         const updateChat = db.doc(`/chats/${chatId}`).onSnapshot(snapshot => {
             if (snapshot.data()) {
                 const thread = snapshot.data().messages
-                setMessages(thread)
+                setMessages(thread.reverse())
             }
         })
         return () => {
@@ -258,6 +258,8 @@ const ChatScreen = props => {
                 keyExtractor={(item,index) => index.toString()}
                 data={messages}
                 renderItem={renderMessage}
+                keyboardDismissMode={Platform.OS==='ios' ? 'interactive' : 'on-drag'}
+                inverted
             />
             <KeyboardAvoidingView behavior='padding'>
                 <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
