@@ -237,10 +237,8 @@ const PostDetailScreen = props => {
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
+                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                        onPress={() => {}}
                     />
                 </HeaderButtons>
             </View>

@@ -23,6 +23,7 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import Placeholder from '../../components/UI/HeaderButtonPlaceholder'
 import MessageIcon from '../../components/LNB/MessageIcon'
 import { Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons'
 import firebase from 'firebase'
@@ -197,37 +198,32 @@ const ConnectRequestsScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
     return (
-        
-            <View style={{...styles.screen, ...{backgroundColor: ''}}}>
-                <View style={{...styles.header, ...{backgroundColor: themeColor}}}>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            title='Direct'
-                            iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                            onPress={() => {props.navigation.toggleDrawer()}}
-                        />
-                    </HeaderButtons>
-                    <Text style={styles.headerTitle}>Requests</Text>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            ButtonElement={<MessageIcon/>}
-                            title='Messages'
-                            onPress={() => {
-                                props.navigation.navigate('Messages')
-                            }}
-                        />
-                    </HeaderButtons>
-                </View>
-                {notifications && notifications.length > 0 && (
-                    <FlatList
-                        style={styles.requests}
-                        keyExtractor={(item,index) => index.toString()}
-                        data={notifications}
-                        renderItem={renderItem}
+        <View style={{...styles.screen, ...{backgroundColor: ''}}}>
+            <View style={{...styles.header, ...{backgroundColor: themeColor}}}>
+                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                    <Item
+                        title='Back'
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {props.navigation.goBack()}}
                     />
-                )}
+                </HeaderButtons>
+                <Text style={styles.headerTitle}>Requests</Text>
+                <HeaderButtons HeaderButtonComponent={Placeholder}>
+                    <Item
+                        title='More'
+                        iconName='md-more'
+                    />
+                </HeaderButtons>
             </View>
-        
+            {notifications && notifications.length > 0 && (
+                <FlatList
+                    style={styles.requests}
+                    keyExtractor={(item,index) => index.toString()}
+                    data={notifications}
+                    renderItem={renderItem}
+                />
+            )}
+        </View>
     )
 }
 

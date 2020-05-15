@@ -76,7 +76,7 @@ const AdminScreen = props => {
                                 <Text style={{fontSize:3}}>https://youtu.be/g2nMKzhkvxw?t=429</Text> 
                                 {"\n"}
                             </Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Reusable Components for cleaner code{"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>    -    Reusable Components (incl. menuAvatar){"\n"}</Text>
                             <Text style={{color:text, fontWeight:'400'}}>    -    Make Models! OOP/MVC{"\n"}</Text>
                         </Text>
                     </View>
@@ -85,7 +85,7 @@ const AdminScreen = props => {
                         <Text style={{color:Colors.orange, fontWeight: '600'}}>Rob's Notes: {"\n"}
                             <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Nav to UserProfile from ChatScreen{"\n"} {"\n"}</Text>
                             <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Improve EditProfileScreen inputs{"\n"} {"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Fix KeyboardDismiss on ConnectScreen{"\n"} {"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Fix KeyboardDismiss on ConnectScreen{"\n"} {"\n"}</Text>
                             <Text style={{color:text, fontWeight:'400'}}>    -    Open website link on UserProfileScreen{"\n"} {"\n"}</Text>
                         </Text>
                     </View>
