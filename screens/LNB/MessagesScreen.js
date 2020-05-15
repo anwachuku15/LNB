@@ -77,7 +77,7 @@ const MessagesScreen = props => {
     const loadChats = useCallback(async () => {
         try {
             let userChats = []
-            const allChats = await (await db.collection('chats').get())
+            const allChats = await (await db.collection('chats').orderBy('lastMessageTimestamp', 'desc').get())
                                                                 .docs
                                                                 .forEach(doc => {
                                                                     if (doc.id.includes(uid)) {
@@ -107,9 +107,9 @@ const MessagesScreen = props => {
                                                                         }
                                                                     }
                                                                 })
-            userChats.sort((a,b) => {
-                a.lastMessageTimestamp > b.lastMessageTimestamp ? -1 : 1
-            })
+            // userChats.sort((a,b) => {
+            //     a.lastMessageTimestamp > b.lastMessageTimestamp ? -1 : 1
+            // })
             setChats(userChats)
         } catch (err) {
             console.log(err)

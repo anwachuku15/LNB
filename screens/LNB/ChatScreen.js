@@ -11,6 +11,7 @@ import {
     TextInput,
     SafeAreaView,
     KeyboardAvoidingView,
+    Keyboard,
     FlatList,
     Platform
 } from 'react-native'
@@ -22,13 +23,16 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import { GiftedChat } from 'react-native-gifted-chat'
+import { InputToolbar, Actions, Composer, Send } from 'react-native-gifted-chat'
 import firebase, { firestore } from 'firebase'
 import { Ionicons } from '@expo/vector-icons'
+import * as ImagePicker from 'expo-image-picker'
 import moment from 'moment'
 const db = firebase.firestore()
 
 let themeColor
 let text
+let background
 const ChatScreen = props => {
     const scheme = useColorScheme()
     const colorScheme = useColorScheme()
@@ -36,9 +40,11 @@ const ChatScreen = props => {
     if (colorScheme === 'dark') {
         themeColor = 'black'
         text = 'white'
+        background = 'black'
     } else {
         themeColor = 'white'
         text = 'black'
+        background = 'white'
     }
 
     const authUser = useSelector(state => state.auth)
@@ -100,7 +106,7 @@ const ChatScreen = props => {
         const updateChat = db.doc(`/chats/${chatId}`).onSnapshot(snapshot => {
             if (snapshot.data()) {
                 const thread = snapshot.data().messages
-                setMessages(thread.reverse())
+                setMessages(thread)
             }
         })
         return () => {
@@ -117,61 +123,31 @@ const ChatScreen = props => {
         }
     }, [readTimestamp])
 
-    const sendMessage = async (chatId, content) => {
-        const messageData = {
-            uid: uid,
-            userImage: authUser.credentials.imageUrl,
-            content: content,
-            timestamp: new Date().toISOString()
+    const sendMessage = async (body) => {
+        const message = {
+            _id: messageIdGenerator(),
+            text: body,
+            timestamp: new Date().toISOString(),
+            user: {
+                _id: uid,
+                name: authUser.credentials.displayName,
+                userImage: authUser.credentials.imageUrl,
+            },
         }
-        await db.collection('chats').doc(chatId).update({
-            messages: firestore.FieldValue.arrayUnion(messageData)
-        })
+        db.doc(`/chats/${chatId}`).update({
+            messages: firestore.FieldValue.arrayUnion(message),
+            lastMessageTimestamp: message.timestamp,
+            messageCount: firestore.FieldValue.increment(1)
+        }).catch(err => console.log(err))
+
         const pushToken = (await db.doc(`/users/${user.credentials.userId}`).get()).data().pushToken
         if (pushToken) {
-            sendMessageNotification(uid, authUser.credentials.displayName, content, user.credentials.userId, pushToken)
+            sendMessageNotification(uid, authUser.credentials.displayName, message.text, user.credentials.userId, pushToken)
         }
         setBody('')
     }
 
-    const chatUser = {
-        name: authUser.credentials.displayName,
-        _id: uid,
-        userImage: authUser.credentials.imageUrl
-    }
-    const send = messages => {
-        messages.forEach(async item => {
-            const message = {
-                _id: item._id,
-                text: item.text,
-                timestamp: new Date().toISOString(),
-                user: item.user
-            }
-            db.doc(`/chats/${chatId}`).update({
-                messages: firestore.FieldValue.arrayUnion(message),
-                lastMessageTimestamp: message.timestamp,
-                messageCount: firestore.FieldValue.increment(1)
-            })
-            const pushToken = (await db.doc(`/users/${user.credentials.userId}`).get()).data().pushToken
-            if (pushToken) {
-                sendMessageNotification(chatUser._id, chatUser.name, message.text, user.credentials.userId, pushToken)
-            }
-        })
-    }
 
-    const parse = message => {
-        const {user, text, timestamp} = message.val()
-        const {_id} = message
-        const createdAt = timestamp
-
-        return { 
-            _id,
-            createdAt,
-            text,
-            user
-        }
-    }
-   
     const sendMessageNotification = (authId, authName, message, selectedUserId, pushToken) => {
         db.collection('notifications').add({
             timestamp: new Date().toISOString(),
@@ -196,13 +172,6 @@ const ChatScreen = props => {
     }
     const sendMessageWithImg = async () => {}
     const pickImage = async () => {
-        if (Constants.platform.ios) {
-            const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-
-            if(status != 'granted') {
-                alert('We need permission to access your camera roll')
-            }
-        }
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
@@ -219,13 +188,38 @@ const ChatScreen = props => {
     }
     
 
+    const renderMessage = ({item}) => (
+        item.user._id === uid ? (
+            <TouchableCmp onPress={() => {}}>
+                <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
+                    <Image source={{uri: item.user.userImage}} style={styles.rightMessageAvatar}/>
+
+                    <View style={{alignSelf: 'flex-start', backgroundColor: scheme==='light' ? 'white' : 'black', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, borderColor: Colors.primary}}>
+                        <Text style={{fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                    </View>
+
+                </View>
+            </TouchableCmp>
+        ) : (
+            <TouchableCmp onPress={() => {}}>
+                <View style={{...styles.leftMessageView, ...{backgroundColor:background}}} key={item._id}>
+                    <Image source={{uri: item.user.userImage}} style={styles.leftMessageAvatar}/>
+                    <View style={{backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomRightRadius: 15}}>
+                        <Text style={{fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                    </View>
+                </View>
+            </TouchableCmp>
+        )
+    )
+
+
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
     }
     
+
     return (
-        
         <SafeAreaView style={styles.screen}>
 
             <View style={styles.header}>
@@ -259,13 +253,43 @@ const ChatScreen = props => {
                 </HeaderButtons>
             </View>
             
-            <GiftedChat
-                messageIdGenerator={messageIdGenerator}
-                messages={messages}
-                onSend={send}
-                user={chatUser}
+            <FlatList
+                contentContainerStyle={styles.messages}
+                keyExtractor={(item,index) => index.toString()}
+                data={messages}
+                renderItem={renderMessage}
             />
-
+            <KeyboardAvoidingView behavior='padding'>
+                <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
+                    <View style={styles.inputContainer}>
+                        <TouchableCmp 
+                            onPress={pickImage}
+                            disabled
+                            style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.primary, padding:0, borderRadius:20, width:30, height:30}}
+                        >
+                            <Ionicons name='md-camera' size={20} color='white'/>
+                        </TouchableCmp>
+                        <TextInput
+                            autoFocus={false}
+                            multiline={true}
+                            numberOfLines={4} 
+                            style={{flex:1, color:text, marginHorizontal:10, alignSelf:'center', paddingTop:0}}
+                            placeholder={'Message...'}
+                            placeholderTextColor={'#838383'}
+                            onChangeText={text => {setBody(text)}}
+                            value={body}
+                            
+                        />
+                    </View>
+                    <TouchableCmp onPress={() => sendMessage(body)} disabled={!body.trim().length}>
+                        <Ionicons 
+                            name='md-send' 
+                            size={24} 
+                            color={!body.trim().length ? Colors.disabled : Colors.primary}
+                        />
+                    </TouchableCmp>
+                </View>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     )
 }
@@ -280,6 +304,57 @@ ChatScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    messages: {
+        justifyContent: 'flex-start'
+    },
+    leftMessageView: {
+        padding: 10,
+        flexDirection: 'row',
+        maxWidth: '80%',
+        alignItems: 'flex-end'
+    },
+    leftMessageAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginRight: 10
+    },
+    rightMessageView: {
+        padding: 10,
+        flexDirection: 'row-reverse',
+        alignSelf:'flex-end',
+        maxWidth: '80%',
+        alignItems: 'flex-end'
+    },
+    rightMessageAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginLeft: 10
+    },
+    timestamp: {
+        fontSize: 14,
+        color: '#C4C6CE',
+        marginTop: 4
+    },
+    inputContainer: {
+        margin: 10,
+        paddingHorizontal: 5,
+        paddingVertical: 5,
+        borderColor: Colors.primary,
+        borderWidth: 1,
+        borderRadius: 20,
+        justifyContent: 'flex-end',
+        flexDirection: 'row'
+    },
+
+    sendContainer: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 4
     },
     addImg: {
         // marginHorizontal: 5,
