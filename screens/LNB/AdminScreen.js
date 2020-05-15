@@ -2,8 +2,7 @@ import React from 'react'
 import { 
     View, 
     Text, 
-    StyleSheet, 
-    CheckBox,
+    StyleSheet,
     Image, 
     Button, 
     ScrollView 
@@ -15,7 +14,8 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
-import { colors } from 'react-native-elements'
+import { CheckBox } from 'react-native-elements'
+import { Ionicons } from '@expo/vector-icons'
 let themeColor
 let text
 
@@ -24,6 +24,13 @@ const AdminScreen = props => {
 
     const dispatch = useDispatch()
     
+    const CheckMark = () => (
+        <Ionicons
+            name='ios-checkmark-circle'
+            size={16}
+            color={Colors.blue}
+        />
+    )
 
     const colorScheme = useColorScheme()
     let text
@@ -56,7 +63,7 @@ const AdminScreen = props => {
                     />
                 </HeaderButtons>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} style={{paddingRight:10}}>
                 <View style={{flex:1, alignItems:'flex-start', padding:20}}>
                     <View style={{flexDirection: 'row', marginVertical: 5, alignSelf: 'center'}}>
                         <Text style={{color:Colors.redcrayola, fontWeight:'600', fontSize: 20}}>Weekly Notes (May 11 - May 16)</Text>
@@ -76,12 +83,11 @@ const AdminScreen = props => {
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
                         <Text style={{color:Colors.orange, fontWeight: '600'}}>Rob's Notes: {"\n"}
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Nav to UserProfile from ChatScreen{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Open website link on UserProfileScreen{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Improve EditProfileScreen inputs{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Fix KeyboardDismiss on ConnectScreen{"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Nav to UserProfile from ChatScreen{"\n"} {"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Improve EditProfileScreen inputs{"\n"} {"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>    -    Fix KeyboardDismiss on ConnectScreen{"\n"} {"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>    -    Open website link on UserProfileScreen{"\n"} {"\n"}</Text>
                         </Text>
-                        
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
@@ -148,7 +154,7 @@ AdminScreen.navigationOptions = (navData) => {
 
 const styles = StyleSheet.create({
     screen: {
-        flex: 1,
+        flex: 1
     },
     header: {
         flexDirection:'row',

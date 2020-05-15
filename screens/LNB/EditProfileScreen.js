@@ -9,7 +9,9 @@ import {
     Button, 
     ScrollView,
     TouchableOpacity,
-    TouchableNativeFeedback
+    TouchableNativeFeedback,
+    KeyboardAvoidingView,
+    SafeAreaView
 } from 'react-native'
 import Input from '../../components/UI/Input'
 import { Ionicons } from '@expo/vector-icons'
@@ -182,91 +184,95 @@ const EditProfileScreen = props => {
                 </HeaderButtons>
             </View>
             
-            <View style={{flex:1, justifyContent: 'flex-start'}}>
-                <TouchableCmp 
-                    onPress={chooseProfilePicture}
-                    style={styles.avatarContainer} 
-                >
-                    <Image source={{uri: profilePic}} style={styles.avatar}/>
-                    <Ionicons 
-                        name='ios-camera'
-                        size={30}
-                        color={Colors.disabled}
-                        style={{marginTop: 6, marginLeft: 2}}
-                    />
-                </TouchableCmp>
-                <View style={styles.form}>
-                    <View>
-                        <Input
-                            id='headline'
-                            label='Headline'
-                            errorText='Please enter a valid headline'
-                            keyboardType='default'
-                            autoCapitalize='sentences'
-                            autoCorrect
-                            returnKeyType='next'
-                            onInputChange={inputChangeHandler}
-                            initialValue={auth.credentials.headline}
-                            initiallyValid={!!auth.credentials}
-                            required
-                        />
+            <KeyboardAvoidingView behavior='padding' style={{flex: 1}}>
+                <ScrollView keyboardDismissMode='on-drag' showsVerticalScrollIndicator={false}>
+                    <View style={{flex: 1, justifyContent: 'flex-start'}}>
+                        <TouchableCmp 
+                            onPress={chooseProfilePicture}
+                            style={styles.avatarContainer} 
+                        >
+                            <Image source={{uri: profilePic}} style={styles.avatar}/>
+                            <Ionicons 
+                                name='ios-camera'
+                                size={30}
+                                color={Colors.disabled}
+                                style={{marginTop: 6, marginLeft: 2}}
+                            />
+                        </TouchableCmp>
+                        
+                        <View style={styles.form}>
+                            <View>
+                                <Input
+                                    id='headline'
+                                    label='Headline'
+                                    errorText='Please enter a valid headline'
+                                    keyboardType='default'
+                                    autoCapitalize='sentences'
+                                    autoCorrect
+                                    returnKeyType='next'
+                                    onInputChange={inputChangeHandler}
+                                    initialValue={auth.credentials.headline}
+                                    initiallyValid={!!auth.credentials}
+                                    required
+                                />
 
-                        <Input
-                            id='location'
-                            label='Location'
-                            errorText='Please enter a valid location'
-                            keyboardType='default'
-                            autoCapitalize='sentences'
-                            autoCorrect
-                            returnKeyType='next'
-                            onInputChange={inputChangeHandler}
-                            initialValue={auth.credentials.location}
-                            initiallyValid={!!auth.credentials}
-                            required
-                        />
+                                <Input
+                                    id='bio'
+                                    label='Bio'
+                                    errorText='Please enter your bio (160 character max)'
+                                    keyboardType='default'
+                                    autoCapitalize='sentences'
+                                    autoCorrect
+                                    returnKeyType='next'
+                                    onInputChange={inputChangeHandler}
+                                    initialValue={auth.credentials.bio}
+                                    initiallyValid={!!auth.credentials}
+                                    required
+                                    multiline
+                                    numberOfLines={3}
+                                />
+                                <Input
+                                    id='location'
+                                    label='Location'
+                                    errorText='Please enter a valid location'
+                                    keyboardType='default'
+                                    autoCapitalize='sentences'
+                                    autoCorrect
+                                    returnKeyType='next'
+                                    onInputChange={inputChangeHandler}
+                                    initialValue={auth.credentials.location}
+                                    initiallyValid={!!auth.credentials}
+                                    required
+                                />
 
-                        <Input
-                            id='bio'
-                            label='Skillset'
-                            errorText='Please enter a valid bio'
-                            keyboardType='default'
-                            autoCapitalize='sentences'
-                            autoCorrect
-                            returnKeyType='next'
-                            onInputChange={inputChangeHandler}
-                            initialValue={auth.credentials.bio}
-                            initiallyValid={!!auth.credentials}
-                            required
-                            multiline
-                            numberOfLines={3}
-                        />
+                                <Input
+                                    id='website'
+                                    website
+                                    label='Website'
+                                    errorText='Please enter a valid website'
+                                    keyboardType='default'
+                                    autoCapitalize='none'
+                                    autoCorrect
+                                    returnKeyType='next'
+                                    onInputChange={inputChangeHandler}
+                                    initialValue={auth.credentials.website}
+                                    initiallyValid={!!auth.credentials}
+                                    required
+                                />
 
-                        <Input
-                            id='website'
-                            website
-                            label='Website'
-                            errorText='Please enter a valid website'
-                            keyboardType='default'
-                            autoCapitalize='none'
-                            autoCorrect
-                            returnKeyType='next'
-                            onInputChange={inputChangeHandler}
-                            initialValue={auth.credentials.website}
-                            initiallyValid={!!auth.credentials}
-                            required
-                        />
-
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity 
-                                style={{...styles.button, ...{marginTop: 20}}} 
-                                onPress={submitHandler}
-                            >
-                                <Text style={{color:text, fontWeight:'500'}}>Save Changes</Text>
-                            </TouchableOpacity>
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity 
+                                        style={{...styles.button, ...{marginTop: 20}}} 
+                                        onPress={submitHandler}
+                                    >
+                                        <Text style={{color:text, fontWeight:'500'}}>Save Changes</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         </View>
                     </View>
-                </View>
-            </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
             
         </View>
 
@@ -284,6 +290,13 @@ EditProfileScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+        // justifyContent: 'center',
+        // alignItems: 'center'
+    },
+    inner: {
+        padding: 24,
+        flex: 1,
+        justifyContent: "flex-end",
     },
     header: {
         flexDirection:'row',
@@ -331,7 +344,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 30
     },
     buttonContainer: {
-        marginTop: 10
+        marginHorizontal: 10
     },
     button: {
         marginHorizontal: 30,

@@ -187,28 +187,34 @@ const ChatScreen = props => {
         return Math.random().toString(36)
     }
     
+    const navToUserProfile = (id) => {
+        props.navigation.navigate({
+            routeName: 'UserProfile',
+            params: {
+                userId: id,
+                from: 'ChatScreen'
+            }
+        })
+    }
 
     const renderMessage = ({item}) => (
         item.user._id === uid ? (
-            <TouchableCmp onPress={() => {}}>
-                <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
-                    <Image source={{uri: item.user.userImage}} style={styles.rightMessageAvatar}/>
-
-                    <View style={{alignSelf: 'flex-start', backgroundColor: scheme==='light' ? 'white' : 'black', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, borderColor: Colors.primary}}>
-                        <Text style={{fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
-                    </View>
-
+            <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
+                
+                <View style={{alignSelf: 'flex-start', backgroundColor: scheme==='light' ? 'white' : 'black', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, borderColor: Colors.primary}}>
+                    <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                 </View>
-            </TouchableCmp>
+
+            </View>
         ) : (
-            <TouchableCmp onPress={() => {}}>
-                <View style={{...styles.leftMessageView, ...{backgroundColor:background}}} key={item._id}>
+            <View style={{...styles.leftMessageView, ...{backgroundColor:background}}} key={item._id}>
+                <TouchableCmp onPress={() => navToUserProfile(item.user._id)}>
                     <Image source={{uri: item.user.userImage}} style={styles.leftMessageAvatar}/>
-                    <View style={{backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomRightRadius: 15}}>
-                        <Text style={{fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
-                    </View>
+                </TouchableCmp>
+                <View style={{backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomRightRadius: 15}}>
+                    <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                 </View>
-            </TouchableCmp>
+            </View>
         )
     )
 
@@ -267,7 +273,7 @@ const ChatScreen = props => {
                         <TouchableCmp 
                             onPress={pickImage}
                             disabled
-                            style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.primary, padding:0, borderRadius:20, width:30, height:30}}
+                            style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.pink, padding:0, borderRadius:20, width:30, height:30}}
                         >
                             <Ionicons name='md-camera' size={20} color='white'/>
                         </TouchableCmp>
@@ -280,14 +286,13 @@ const ChatScreen = props => {
                             placeholderTextColor={'#838383'}
                             onChangeText={text => {setBody(text)}}
                             value={body}
-                            
                         />
                     </View>
                     <TouchableCmp onPress={() => sendMessage(body)} disabled={!body.trim().length}>
                         <Ionicons 
-                            name='md-send' 
-                            size={24} 
-                            color={!body.trim().length ? Colors.disabled : Colors.primary}
+                            name={Platform.OS === 'ios' ? 'ios-send' : 'md-send'} 
+                            size={26} 
+                            color={!body.trim().length ? Colors.disabled : Colors.blue}
                         />
                     </TouchableCmp>
                 </View>

@@ -239,6 +239,14 @@ const UserProfileScreen = props => {
                         </View>
     }
 
+
+    const EditProfileButton = () => (
+        <TouchableCmp onPress={() => {props.navigation.navigate('EditProfile')}} style={{...styles.editProfileButton, ...{borderColor: Colors.green}}}>
+            <View key={userId}>
+                <Text style={{color:Colors.green, fontSize:12, alignSelf:'center'}}>Edit Profile</Text>
+            </View>
+        </TouchableCmp>
+    )
     return (
         <View style={styles.screen}>
             {user && (
@@ -247,7 +255,7 @@ const UserProfileScreen = props => {
                 <View style={styles.header}>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
-                            title='Direct'
+                            title='Back'
                             iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
                             onPress={() => {props.navigation.goBack()}}
                         />
@@ -255,9 +263,9 @@ const UserProfileScreen = props => {
                     <Text style={styles.headerTitle}>{user.credentials.displayName}</Text>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
-                            title='Direct'
+                            title='More'
                             iconName={authUser.userId === userId ? (Platform.OS==='android' ? 'md-settings' : 'ios-settings') : Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                            onPress={() => {authUser.userId === userId ? props.navigation.navigate('EditProfile') : {}}}
+                            onPress={() => {authUser.userId === userId ? props.navigation.navigate('Settings') : {}}}
                         />
                     </HeaderButtons>
                 </View>
@@ -331,8 +339,9 @@ const UserProfileScreen = props => {
                         </View>
 
                         <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
+                            {authUser.userId === userId && <EditProfileButton key={userId}/>}
                             <View style={{flex: 3}}>
-                                <Text style={styles.infoTitle}>Skillset</Text>
+                                <Text style={styles.infoTitle}>Bio</Text>
                                 <Text style={{color:text}}>{user.credentials.bio}</Text>
                             </View>
                             <View style={{flex:1, flexDirection:'row', justifyContent:'space-between', }}>
@@ -438,6 +447,12 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500'
+    },
+    editProfileButton: {
+        justifyContent: 'center',
+        padding: 4,
+        borderWidth: 1,
+        borderRadius: 50
     },
     avatarContainer: {
         shadowColor: '#151734',
