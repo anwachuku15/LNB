@@ -347,11 +347,24 @@ const UserProfileScreen = props => {
                             <View style={{flex:1, flexDirection:'row', justifyContent:'space-between', }}>
                                 <View style={{alignItems:'center'}}>
                                     <Text style={styles.infoValue}>{userPosts.length}</Text>
-                                    <Text style={styles.infoTitle}>Needs</Text>
+                                    <Text style={styles.infoTitle}>{userPosts.length === 1 ? 'Need' : 'Needs'}</Text>
                                 </View>
                                 <View style={{alignItems:'center'}}>
-                                    <Text style={styles.infoValue}>{connections}</Text>
-                                    <Text style={styles.infoTitle}>Connections</Text>
+                                    <TouchableCmp
+                                        style={{alignItems:'center'}} 
+                                        onPress={() => {
+                                            props.navigation.navigate({
+                                            routeName: 'Connections',
+                                            params: {
+                                                userId: userId,
+                                                userName: user.credentials.displayName
+                                            }
+                                            })
+                                        }}
+                                    >
+                                        <Text style={styles.infoValue}>{connections}</Text>
+                                        <Text style={styles.infoTitle}>{connections === 1 ? 'Connection' : 'Connections'}</Text>
+                                    </TouchableCmp>
                                 </View>
                                 <View style={{alignItems:'center'}}>
                                     <Text style={styles.infoValue}>{user.credentials.location}</Text>
