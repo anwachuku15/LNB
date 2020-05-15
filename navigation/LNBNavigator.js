@@ -36,6 +36,7 @@ import NotificationIcon from '../components/LNB/NotificationIcon'
 import PostDetailScreen from '../screens/LNB/PostDetailScreen'
 import EventsScreen from '../screens/LNB/EventsScreen'
 import AdminScreen from '../screens/LNB/AdminScreen'
+import ConnectionsScreen from '../screens/LNB/ConnectionsScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -71,6 +72,14 @@ const HomeStack = createStackNavigator({
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Connections: {
+        screen: ConnectionsScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -176,6 +185,14 @@ const NeedsFeedStack = createStackNavigator({
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Connections: {
+        screen: ConnectionsScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
