@@ -31,14 +31,13 @@ import moment from 'moment'
 
 let themeColor
 let text
-const ConnectScreen = props => {
+const ConnectRequestsScreen = props => {
     const scheme = useColorScheme()
     const [query, setQuery] = useState('')
     const dispatch = useDispatch()
 
     const auth = useSelector(state => state.auth)
     const uid = useSelector(state => state.auth.userId)
-    const authUser = useSelector(state => state.auth.credentials)
 
     const pendingConnections = useSelector(state => state.auth.pendingConnections)
     let notifications = useSelector(state => state.auth.connectNotifications.filter(notification => (notification.type === 'connection request' || notification.type === 'new connection')))
@@ -73,7 +72,6 @@ const ConnectScreen = props => {
             routeName: 'UserProfile',
             params: {
                 userId: id,
-
             }
         })
     }
@@ -202,12 +200,14 @@ const ConnectScreen = props => {
         
             <View style={{...styles.screen, ...{backgroundColor: ''}}}>
                 <View style={{...styles.header, ...{backgroundColor: themeColor}}}>
-                    <View>
-                        <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
-                            <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
-                        </TouchableCmp>
-                    </View>
-                    <Text style={styles.headerTitle}>Connect</Text>
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        <Item
+                            title='Direct'
+                            iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
+                            onPress={() => {props.navigation.toggleDrawer()}}
+                        />
+                    </HeaderButtons>
+                    <Text style={styles.headerTitle}>Requests</Text>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
                             ButtonElement={<MessageIcon/>}
@@ -218,51 +218,21 @@ const ConnectScreen = props => {
                         />
                     </HeaderButtons>
                 </View>
-                <ScrollView>
-                    <View style={{...styles.inputContainer, ...{backgroundColor:background}}}>
-                        <TextInput
-                            autoFocus={false}
-                            multiline={true}
-                            numberOfLines={4} 
-                            style={{flex:1, fontSize:16, color:text, marginHorizontal:10, alignSelf:'center', paddingVertical:5}}
-                            placeholder={'Search...'}
-                            placeholderTextColor={'#838383'}
-                            onChangeText={text => {setQuery(text)}}
-                            value={query}
-                        />
-                    </View>
-                    {notifications.length > 0 && (
-                        <TouchableCmp
-                            onPress={() => {
-                                props.navigation.navigate('ConnectRequests')
-                            }}
-                        >
-                            <View style={styles.requestsContainer}>
-                                <View style={{flexDirection:'row'}}>
-                                    <Text style={{color:Colors.blue, fontWeight:'bold', alignSelf:'center'}}>
-                                        Requests
-                                    </Text>
-                                    <View style={styles.requestCountContainer}>
-                                        <Text style={styles.requestCount}>{notifications.length}</Text>
-                                    </View>
-                                </View>
-                                <MaterialIcons
-                                    name='navigate-next'
-                                    color={Colors.blue}
-                                    size={24}
-                                />
-                            </View>
-                        </TouchableCmp>
-                    )}
-                    
-                </ScrollView>
+                {notifications && notifications.length > 0 && (
+                    <FlatList
+                        style={styles.requests}
+                        keyExtractor={(item,index) => index.toString()}
+                        data={notifications}
+                        renderItem={renderItem}
+                    />
+                )}
             </View>
         
     )
 }
 
 
-ConnectScreen.navigationOptions = (navData) => {
+ConnectRequestsScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Needs'
     }
@@ -286,12 +256,6 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500'
-    },
-    menuAvatar: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        marginLeft: 16
     },
     inputContainer: {
         margin: 10,
@@ -368,4 +332,4 @@ const styles = StyleSheet.create({
         color: Colors.raspberry
     },
 })
-export default ConnectScreen
+export default ConnectRequestsScreen

@@ -5,7 +5,9 @@ import {
     StyleSheet, 
     Image, 
     Button, 
-    ScrollView 
+    ScrollView,
+    TouchableOpacity,
+    TouchableNativeFeedback
 } from 'react-native'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -21,8 +23,7 @@ let text
 const BulletinScreen = props => {
     const scheme = useColorScheme()
 
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
+    const authUser = useSelector(state => state.auth.credentials)
     const dispatch = useDispatch()
     
     const colorScheme = useColorScheme()
@@ -34,17 +35,19 @@ const BulletinScreen = props => {
         themeColor = 'white'
         text = 'black'
     }
+    let TouchableCmp = TouchableOpacity
+    if (Platform.OS === 'android' && Platform.Version >= 21) {
+        TouchableCmp = TouchableNativeFeedback
+    }
     return (
         
         <View style={styles.screen}>
             <View style={styles.header}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                        onPress={() => {props.navigation.toggleDrawer()}}
-                    />
-                </HeaderButtons>
+                <View>
+                    <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
+                        <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
+                    </TouchableCmp>
+                </View>
                 <Text style={styles.headerTitle}>Bulletin</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -91,6 +94,12 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500'
+    },
+    menuAvatar: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        marginLeft: 16
     },
 })
 

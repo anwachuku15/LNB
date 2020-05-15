@@ -21,7 +21,7 @@ import { Ionicons, FontAwesome, MaterialCommunityIcons, SimpleLineIcons, Feather
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import BulletinScreen from '../screens/LNB/BulletinScreen'
-import NeedsFeedScreen from '../screens/LNB/ConnectScreen'
+import ConnectScreen from '../screens/LNB/ConnectScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
 import MessagesScreen from '../screens/LNB/MessagesScreen'
@@ -37,6 +37,8 @@ import PostDetailScreen from '../screens/LNB/PostDetailScreen'
 import EventsScreen from '../screens/LNB/EventsScreen'
 import AdminScreen from '../screens/LNB/AdminScreen'
 import ConnectionsScreen from '../screens/LNB/ConnectionsScreen'
+import ConnectRequestsScreen from '../screens/LNB/ConnectRequestsScreen'
+// import ConnectScreen from '../screens/LNB/ConnectScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -179,12 +181,50 @@ const NotificationsStack = createStackNavigator({
     },
 }, {headerMode:'none'})
 
-const NeedsFeedStack = createStackNavigator({
-    NeedsFeed: {
-        screen: NeedsFeedScreen,
+// const NeedsFeedStack = createStackNavigator({
+//     NeedsFeed: {
+//         screen: NeedsFeedScreen,
+//     },
+//     UserProfile: {
+//         screen: UserProfileScreen,
+//         navigationOptions: {
+//             gestureResponseDistance: {
+//                 horizontal: 300
+//             }
+//         }
+//     },
+//     Connections: {
+//         screen: ConnectionsScreen,
+//         navigationOptions: {
+//             gestureResponseDistance: {
+//                 horizontal: 300
+//             }
+//         }
+//     },
+//     Settings: {
+//         screen: SettingsScreen,
+//         navigationOptions: {
+//             gestureResponseDistance: {
+//                 horizontal: 300
+//             }
+//         }
+//     },
+// }, {headerMode:'none'})
+
+const ConnectStack = createStackNavigator({
+    Connect: {
+        screen: ConnectScreen
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    ConnectRequests: {
+        screen: ConnectRequestsScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -207,8 +247,7 @@ const NeedsFeedStack = createStackNavigator({
             }
         }
     },
-}, {headerMode:'none'})
-
+}, {headerMode: 'none'})
 
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
@@ -281,8 +320,8 @@ const BottomTabStackContainer = createStackNavigator({
                                 : 'Notifications'
             }
         },
-        NeedsFeed: {
-            screen: NeedsFeedStack,
+        Connect: {
+            screen: ConnectStack,
             navigationOptions: {
                 tabBarIcon: (tabInfo) => {
                     return (

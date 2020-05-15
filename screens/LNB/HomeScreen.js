@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import firebase from 'firebase'
 // EXPO
 import { Notifications } from 'expo';
@@ -15,6 +15,7 @@ import {
     TouchableOpacity, 
     TouchableNativeFeedback, 
     TouchableHighlight,
+    TouchableWithoutFeedback,
     Text, 
     Button, 
     FlatList, 
@@ -120,8 +121,15 @@ const HomeScreen = props => {
     const [error, setError] = useState()
     const [isModalVisible, setIsModalVisible] = useState(false)
     
+    const authUser = useSelector(state => state.auth.credentials)
     const userId = useSelector(state => state.auth.userId)
     const needs = useSelector(state => state.posts.allNeeds)
+
+    const flatListRef = useRef()
+    const toTop = () => {
+        flatListRef.current.scrollToOffset({animated: true, offset: 0})
+    }
+    
     const dispatch = useDispatch()
     const loadData = useCallback(async () => {
         setError(null)
@@ -249,6 +257,8 @@ const HomeScreen = props => {
             }
         })
     }
+
+    
     
     // if(Platform.OS === 'android') {
     //     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -261,29 +271,37 @@ const HomeScreen = props => {
         isMounted && (
             <View style={styles.screen}>
                 {/* HEADER */}
-                <View style={styles.header}>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            title='Menu'
-                            iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                            onPress={() => {props.navigation.toggleDrawer()}}
-                        />
-                    </HeaderButtons>
-                    <Text style={styles.headerTitle}>Feed</Text>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            ButtonElement={<MessageIcon/>}
-                            title='Messages'
-                            onPress={() => {
-                                props.navigation.navigate('Messages')
-                            }}
-                        />
-                    </HeaderButtons>
-                </View>
+                <TouchableWithoutFeedback onPress={toTop}>
+                    <View style={styles.header}>
+                        {/* <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                            <Item
+                                title='Menu'
+                                iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
+                                onPress={() => {props.navigation.toggleDrawer()}}
+                            />
+                        </HeaderButtons> */}
+                        <View>
+                            <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
+                                <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
+                            </TouchableCmp>
+                        </View>
+                        <Text style={styles.headerTitle}>Feed</Text>
+                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                            <Item
+                                ButtonElement={<MessageIcon/>}
+                                title='Messages'
+                                onPress={() => {
+                                    props.navigation.navigate('Messages')
+                                }}
+                            />
+                        </HeaderButtons>
+                    </View>
+                </TouchableWithoutFeedback>
 
                 {/* NEED POSTS */}
                 
                 <FlatList
+                    ref={flatListRef}
                     keyExtractor={(item, index) => index.toString()}
                     data={needs}
                     onRefresh={loadData}
@@ -425,6 +443,12 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500'
+    },
+    menuAvatar: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        marginLeft: 16
     },
     feed: {
         // marginHorizontal: 16

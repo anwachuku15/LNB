@@ -50,6 +50,7 @@ const NotificationsScreen = props => {
 
     const auth = useSelector(state => state.auth)
     const uid = useSelector(state => state.auth.userId)
+    const authUser = useSelector(state => state.auth.credentials)
     
     // GET NOTIFICATIONS FROM STATE
     let notifications = useSelector(state => state.auth.notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))
@@ -241,13 +242,11 @@ const NotificationsScreen = props => {
         
         <View style={styles.screen}>
             <View style={styles.header}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                        onPress={() => {props.navigation.toggleDrawer()}}
-                    />
-                </HeaderButtons>
+                <View>
+                    <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
+                        <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
+                    </TouchableCmp>
+                </View>
                 <Text style={styles.headerTitle}>Notifications</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -312,6 +311,12 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500'
+    },
+    menuAvatar: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        marginLeft: 16
     },
     connectReqText: {
         fontWeight: '500',
