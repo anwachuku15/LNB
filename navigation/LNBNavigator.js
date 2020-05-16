@@ -149,6 +149,22 @@ const BulletinStack = createStackNavigator({
             }
         }
     },
+    Events: {
+        screen: EventsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Admin: {
+        screen: AdminScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
 }, {headerMode:'none'})
 
 const NotificationsStack = createStackNavigator({
@@ -179,37 +195,23 @@ const NotificationsStack = createStackNavigator({
             }
         }
     },
+    Events: {
+        screen: EventsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Admin: {
+        screen: AdminScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
 }, {headerMode:'none'})
-
-// const NeedsFeedStack = createStackNavigator({
-//     NeedsFeed: {
-//         screen: NeedsFeedScreen,
-//     },
-//     UserProfile: {
-//         screen: UserProfileScreen,
-//         navigationOptions: {
-//             gestureResponseDistance: {
-//                 horizontal: 300
-//             }
-//         }
-//     },
-//     Connections: {
-//         screen: ConnectionsScreen,
-//         navigationOptions: {
-//             gestureResponseDistance: {
-//                 horizontal: 300
-//             }
-//         }
-//     },
-//     Settings: {
-//         screen: SettingsScreen,
-//         navigationOptions: {
-//             gestureResponseDistance: {
-//                 horizontal: 300
-//             }
-//         }
-//     },
-// }, {headerMode:'none'})
 
 const ConnectStack = createStackNavigator({
     Connect: {
@@ -241,6 +243,22 @@ const ConnectStack = createStackNavigator({
     },
     Settings: {
         screen: SettingsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Events: {
+        screen: EventsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    Admin: {
+        screen: AdminScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
