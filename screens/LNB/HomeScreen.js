@@ -285,7 +285,14 @@ const HomeScreen = props => {
                                 <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
                             </TouchableCmp>
                         </View>
-                        <Text style={styles.headerTitle}>Feed</Text>
+                        {/* <Text style={styles.headerTitle}>Feed</Text> */}
+                        <View>
+                            <Image 
+                                source={require('../../assets/lnb.png')} 
+                                resizeMode='contain' 
+                                style={{width:38, height:38}}
+                            />
+                        </View>
                         <HeaderButtons HeaderButtonComponent={HeaderButton}>
                             <Item
                                 ButtonElement={<MessageIcon/>}
@@ -432,8 +439,8 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 16,
+        paddingTop: 44,
+        paddingBottom: 7,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
@@ -445,9 +452,9 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     menuAvatar: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         marginLeft: 16
     },
     feed: {

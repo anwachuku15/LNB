@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems: 'center',
         paddingTop: 49,
-        paddingBottom: 16,
+        paddingBottom: 14.5,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
@@ -240,7 +240,9 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontFamily: 'open-sans-bold',
         fontSize: 17,
-        fontWeight: '500'
+        fontWeight: '500',
+        // marginTop: 4
+        
     },
     subtitleView: {
         flexDirection: 'row'

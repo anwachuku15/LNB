@@ -126,13 +126,6 @@ const ConnectScreen = props => {
         }
         
     }
-
-
-    const DismissKeyboard = ({ children }) => (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-            {children}
-        </TouchableWithoutFeedback>
-    )
     
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {navToUserProfile(item.uid)}}>
@@ -241,7 +234,7 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems: 'center',
         paddingTop: 49,
-        paddingBottom: 16,
+        paddingBottom: 12,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
     },
@@ -252,9 +245,9 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     menuAvatar: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         marginLeft: 16
     },
     inputContainer: {
