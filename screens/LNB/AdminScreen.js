@@ -13,6 +13,7 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import Placeholder from '../../components/UI/HeaderButtonPlaceholder'
 import MessageIcon from '../../components/LNB/MessageIcon'
 import { CheckBox } from 'react-native-elements'
 import { Ionicons } from '@expo/vector-icons'
@@ -53,13 +54,10 @@ const AdminScreen = props => {
                     />
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Admin</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <HeaderButtons HeaderButtonComponent={Placeholder}>
                     <Item
-                        ButtonElement={<MessageIcon/>}
                         title='Messages'
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
+                        iconName='md-more'
                     />
                 </HeaderButtons>
             </View>
@@ -82,11 +80,11 @@ const AdminScreen = props => {
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Rob's Notes: {"\n"}
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Nav to UserProfile from ChatScreen{"\n"} {"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Improve EditProfileScreen inputs{"\n"} {"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Fix KeyboardDismiss on ConnectScreen{"\n"} {"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Open website link on UserProfileScreen{"\n"} {"\n"}</Text>
+                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Rob's Notes:    <CheckMark/>{"\n"}
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Nav to UserProfile from ChatScreen{"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Improve EditProfileScreen inputs{"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Fix KeyboardDismiss on ConnectScreen{"\n"}</Text>
+                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Open website link on UserProfileScreen{"\n"}</Text>
                         </Text>
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>

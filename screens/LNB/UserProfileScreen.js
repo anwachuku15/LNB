@@ -25,7 +25,8 @@ import * as firebase from 'firebase'
 import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
 import { fetchNeeds } from '../../redux/actions/postsActions'
-
+import * as Linking from 'expo-linking'
+import * as WebBrowser from 'expo-web-browser'
 
 const db = firebase.firestore()
 
@@ -170,6 +171,10 @@ const UserProfileScreen = props => {
         ])
     }
 
+    const handleOpenWebBrowser = (link) => {
+        WebBrowser.openBrowserAsync(link)
+    }
+
 
     if (error) {
         return (
@@ -201,7 +206,7 @@ const UserProfileScreen = props => {
     if (user) {    
         websiteIcon =   <View>
                             {user.credentials.website.includes('linkedin.com') && (
-                                <TouchableCmp onPress={() => {}} style={{}}>
+                                <TouchableCmp onPress={() => handleOpenWebBrowser(user.credentials.website)} style={{}}>
                                     <MaterialCommunityIcons 
                                         name='linkedin-box' 
                                         size={24}
