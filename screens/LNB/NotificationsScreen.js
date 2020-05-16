@@ -123,57 +123,13 @@ const NotificationsScreen = props => {
     const renderItem = ({item}) => (
         // <Animated.View>
             <TouchableCmp onPress={() => {
-                (item.type === 'connection request' || item.type === 'new connection') && (navToUserProfile(item.senderId))
+                item.type === 'new connection' && (navToUserProfile(item.senderId))
                 item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName))
             }}>
                 <ListItem
                     containerStyle={{backgroundColor:background, paddingLeft: 0}}
                     title={
                         <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                            {item.type === 'connection request' && (
-                                <View style={{flexDirection:'row', width: '90%'}} >
-                                    <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                                        <FontAwesome
-                                            name='handshake-o' 
-                                            size={23} 
-                                            color={Colors.blue}
-                                        />
-                                    </View>
-                                    <View style={{width: '50%'}}> 
-                                        <View style={{}}>  
-                                            <Image 
-                                                source={{uri: item.senderImage}}
-                                                style={styles.avatar}
-                                            />
-                                            <Text style={styles.connectReqText}>
-                                                {item.senderName}
-                                            </Text>
-                                            <Text style={{color:Colors.disabled}}>
-                                                {item.senderHeadline}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    <View style={{flexDirection: 'column', width: '30%', justifyContent: 'space-between', paddingVertical:12}}>
-                                        <TouchableCmp 
-                                            style={styles.acceptButton} 
-                                            onPress={() => {
-                                                dispatch(confirmConnect(uid, auth.credentials.displayName, item.senderId, item.senderName))
-                                            }}
-                                        >
-                                            <Text style={styles.acceptButtonText}>Accept</Text>
-                                        </TouchableCmp>
-                                        <TouchableCmp 
-                                            style={styles.declineButton}
-                                            onPress={() => {
-                                                dispatch(declineConnect(uid, item.senderId, item.senderName))
-                                                LayoutAnimation.configureNext(CustomLayout)
-                                            }}
-                                        >
-                                            <Text style={styles.declineButtonText}>Decline</Text>
-                                        </TouchableCmp>
-                                    </View>
-                                </View>
-                            )}
                             {item.type === 'new connection' && (
                                 <View style={{flexDirection:'row', width: '90%'}} >
                                     <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
@@ -194,8 +150,7 @@ const NotificationsScreen = props => {
                                             />
                                         </TouchableCmp>
                                         <Text style={{color:text, marginTop: 3}}>
-                                            <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName} </Text>
-                                            accepted your connect request.
+                                            You are now connected with <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName}.</Text>
                                         </Text>
                                     </View>
                                 </View>

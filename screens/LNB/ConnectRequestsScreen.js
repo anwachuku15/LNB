@@ -41,7 +41,7 @@ const ConnectRequestsScreen = props => {
     const uid = useSelector(state => state.auth.userId)
 
     const pendingConnections = useSelector(state => state.auth.pendingConnections)
-    let notifications = useSelector(state => state.auth.connectNotifications.filter(notification => (notification.type === 'connection request' || notification.type === 'new connection')))
+    let notifications = useSelector(state => state.auth.connectNotifications.filter(notification => (notification.type === 'connection request')))
     notifications = notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
     
 
@@ -156,32 +156,6 @@ const ConnectRequestsScreen = props => {
                                     >
                                         <Text style={styles.declineButtonText}>Decline</Text>
                                     </TouchableCmp>
-                                </View>
-                            </View>
-                        )}
-                        {item.type === 'new connection' && (
-                            <View style={{flexDirection:'row', width: '90%'}} >
-                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                                    <Ionicons
-                                        name='md-person-add' 
-                                        size={23} 
-                                        color={Colors.blue}
-                                    />
-                                </View>
-                                <View style={{width: '80%'}}>
-                                    <TouchableCmp 
-                                        style={{alignSelf:'flex-start'}}
-                                        onPress={() => {navToUserProfile(item.senderId)}}
-                                    >
-                                        <Image 
-                                            source={{uri: item.senderImage}}
-                                            style={styles.avatar}
-                                        />
-                                    </TouchableCmp>
-                                    <Text style={{color:text, marginTop: 3}}>
-                                        <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName} </Text>
-                                        accepted your connect request.
-                                    </Text>
                                 </View>
                             </View>
                         )}

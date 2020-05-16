@@ -574,7 +574,18 @@ export const setNotifications = () => {
                     read: doc.data().read,
                     timestamp: doc.data().timestamp,
                 })
-            } else if (doc.data().type == 'connection request' || doc.data().type == 'new connection') {
+            } else if (doc.data().type == 'new connection') {
+                userNotifications.push({
+                    id: doc.id,
+                    type: doc.data().type,
+                    senderId: doc.data().senderId,
+                    senderName: doc.data().senderName,
+                    senderHeadline: doc.data().senderHeadline,
+                    senderImage: doc.data().senderImage,
+                    read: doc.data().read,
+                    timestamp: doc.data().timestamp,
+                })
+            } else if (doc.data().type == 'connection request') {
                 userConnectNotifications.push({
                     id: doc.id,
                     type: doc.data().type,
