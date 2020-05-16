@@ -68,7 +68,7 @@ const AdminScreen = props => {
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Refactor Notes: {"\n"}
+                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Refactor Notes: <CheckMark/>{"\n"}
                             <Text style={{color:text, fontWeight:'400'}}>    -    Firebase Functions{"\n"}</Text>
                             <Text style={{color:text, fontWeight:'400'}}>    -    Guard Clauses to avoid If-Nesting 
                                 <Text style={{fontSize:3}}>https://youtu.be/g2nMKzhkvxw?t=429</Text> 
@@ -80,68 +80,22 @@ const AdminScreen = props => {
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Rob's Notes:    <CheckMark/>{"\n"}
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Nav to UserProfile from ChatScreen{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Improve EditProfileScreen inputs{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Fix KeyboardDismiss on ConnectScreen{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>   <CheckMark/>    Open website link on UserProfileScreen{"\n"}</Text>
+                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Misc Notes Notes:    <CheckMark/>{"\n"}
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Start building Admin Page (allow Admins to add new admins){"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Implement refresh token{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Flickering avatars{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Twitter style profile layouts & responsive headers{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Search/List members (include search bar on ConnectScreen){"\n"}</Text>
+                        <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    ANIMATIONS: Like button, shared transitions (opening/navigating to need/picture/video, double-tap(?) etc){"\n"}</Text>
+                        <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    App Redesign: DrawerScreen, Profile Header, Feed (animated header, new card component, embedded media){"\n"}</Text>
+                        <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    Improve image aspect ratio, show image when pressed (UserProfile){"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Allow user to upload audio/video{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Research and implement best practices for SQLite database use cases</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    TESTING, TESTING, TESTING{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Start planning how best to migrate shopping app into LNBapp (Stripe payments){"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    In-App links{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Detect when multiple devices are signed in to same account{"\n"}</Text>
                         </Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Start building Admin Page (allow Admins to add new admins)</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Implement refresh token</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Flickering avatars</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Twitter style profile layouts & responsive headers</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Search/List members (include search bar on ConnectScreen)</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.raspberry}}>ANIMATIONS: Like button, shared transitions (opening/navigating to need/picture/video, double-tap(?) etc)</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.raspberry}}>App Redesign: DrawerScreen, Profile Header, Feed (animated header, new card component, embedded media)</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.raspberry}}>Improve image aspect ratio, show image when pressed (UserProfile)</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Allow user to upload audio/video</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Research and implement best practices for SQLite database use cases</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>TESTING, TESTING, TESTING</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Start planning how best to migrate shopping app into LNBapp (Stripe payments)</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>In-App links</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:text}}>Detect when multiple devices are signed in to same account</Text>
                     </View>
                 </View>
             </ScrollView>
