@@ -26,6 +26,7 @@ import * as firebase from 'firebase'
 import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
 import { fetchNeeds } from '../../redux/actions/postsActions'
+import { LinearGradient } from 'expo-linear-gradient'
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 
@@ -172,8 +173,8 @@ const UserProfileScreen = props => {
         ])
     }
 
-    const handleOpenWebBrowser = (link) => {
-        WebBrowser.openBrowserAsync(link)
+    const handleOpenLink = (link) => {
+        Linking.openURL(link)
     }
 
 
@@ -207,7 +208,7 @@ const UserProfileScreen = props => {
     if (user) {    
         websiteIcon =   <View>
                             {user.credentials.website.includes('linkedin.com') && (
-                                <TouchableCmp onPress={() => handleOpenWebBrowser(user.credentials.website)} style={{}}>
+                                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{}}>
                                     <MaterialCommunityIcons 
                                         name='linkedin-box' 
                                         size={24}
@@ -216,29 +217,11 @@ const UserProfileScreen = props => {
                                 </TouchableCmp>
                             )}
                             {user.credentials.website.includes('instagram.com') && (
-                                <TouchableCmp onPress={() => {}} style={{}}>
+                                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{}}>
                                     <MaterialCommunityIcons 
                                         name='instagram' 
                                         size={24}
                                         color='#C13584'
-                                    />
-                                </TouchableCmp>
-                            )}
-                            {user.credentials.website.includes('facebook.com') && (
-                                <TouchableCmp onPress={() => {}} style={{}}>
-                                    <MaterialCommunityIcons 
-                                        name='facebook-box' 
-                                        size={24}
-                                        color='#4267B2'
-                                    />
-                                </TouchableCmp>
-                            )}
-                            {user.credentials.website.includes('twitter.com') && (
-                                <TouchableCmp onPress={() => {}} style={{}}>
-                                    <MaterialCommunityIcons 
-                                        name='twitter' 
-                                        size={24}
-                                        color='#1DA1F2'
                                     />
                                 </TouchableCmp>
                             )}
