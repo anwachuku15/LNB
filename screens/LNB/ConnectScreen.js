@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { 
     Platform,
+    SafeAreaView,
     TouchableOpacity,
     TouchableNativeFeedback,
     View, 
@@ -151,7 +152,7 @@ const ConnectScreen = props => {
     }
     return (
         
-            <View style={{...styles.screen, ...{backgroundColor: ''}}}>
+            <SafeAreaView style={{...styles.screen, ...{backgroundColor: ''}}}>
                 <View style={{...styles.header, ...{backgroundColor: scheme==='dark' ? 'black' : 'white'}}}>
                     <View>
                         <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
@@ -212,7 +213,7 @@ const ConnectScreen = props => {
                     renderItem={renderItem}
                 />
                     
-            </View>
+            </SafeAreaView>
         
     )
 }
@@ -233,8 +234,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 12,
+        paddingVertical: 10.6,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
     },

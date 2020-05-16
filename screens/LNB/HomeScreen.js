@@ -269,7 +269,7 @@ const HomeScreen = props => {
     // LayoutAnimation.Types.easeIn
     return (
         isMounted && (
-            <View style={styles.screen}>
+            <SafeAreaView style={styles.screen}>
                 {/* HEADER */}
                 <TouchableWithoutFeedback onPress={toTop}>
                     <View style={styles.header}>
@@ -378,7 +378,7 @@ const HomeScreen = props => {
                         </TouchableCmp>
                     )}
                 />
-            </View>
+            </SafeAreaView>
         )
     )
 }
@@ -432,15 +432,15 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     screen: {
-        flex: 1,
-        backgroundColor: themeColor
+        flex: 1
     },
     header: {
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 44,
-        paddingBottom: 7,
+        paddingVertical: 5.6,
+        // paddingTop: 44,
+        // paddingBottom: 7,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { 
     Platform,
+    SafeAreaView,
     TouchableOpacity,
     TouchableNativeFeedback,
     View, 
@@ -172,7 +173,7 @@ const ConnectRequestsScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
     return (
-        <View style={{...styles.screen, ...{backgroundColor: ''}}}>
+        <SafeAreaView style={{...styles.screen, ...{backgroundColor: ''}}}>
             <View style={{...styles.header, ...{backgroundColor: themeColor}}}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -197,7 +198,7 @@ const ConnectRequestsScreen = props => {
                     renderItem={renderItem}
                 />
             )}
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -216,8 +217,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 16,
+        paddingVertical: 12,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
     },

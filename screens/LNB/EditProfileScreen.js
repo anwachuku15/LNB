@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useReducer} from 'react'
 import { 
     Platform,
+    SafeAreaView,
     View, 
     Text, 
     TextInput,
@@ -10,8 +11,7 @@ import {
     ScrollView,
     TouchableOpacity,
     TouchableNativeFeedback,
-    KeyboardAvoidingView,
-    SafeAreaView
+    KeyboardAvoidingView
 } from 'react-native'
 import Input from '../../components/UI/Input'
 import { Ionicons } from '@expo/vector-icons'
@@ -165,7 +165,7 @@ const EditProfileScreen = props => {
     }
     return (
         
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -273,8 +273,7 @@ const EditProfileScreen = props => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-            
-        </View>
+        </SafeAreaView>
 
             
     )
@@ -302,8 +301,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 16,
+        paddingVertical: 12,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

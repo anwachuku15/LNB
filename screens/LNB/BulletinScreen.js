@@ -4,6 +4,7 @@ import {
     Text, 
     StyleSheet, 
     Image, 
+    SafeAreaView,
     Button, 
     ScrollView,
     TouchableOpacity,
@@ -41,7 +42,7 @@ const BulletinScreen = props => {
     }
     return (
         
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
                 <View>
                     <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
@@ -63,7 +64,7 @@ const BulletinScreen = props => {
                 <Text style={{color:Colors.socialdark}}>Under Construction</Text>
                 <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -77,14 +78,12 @@ BulletinScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: themeColor
     },
     header: {
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 12,
+        paddingVertical: 10.6,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

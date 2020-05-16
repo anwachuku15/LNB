@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { 
     AppState,
     Platform,
+    SafeAreaView,
     TouchableOpacity,
     View, 
     Text, 
@@ -253,7 +254,7 @@ const UserProfileScreen = props => {
         </TouchableCmp>
     )
     return (
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
             {user && (
             <View>
                 {/* HEADER */}
@@ -427,7 +428,7 @@ const UserProfileScreen = props => {
                     )}
             </View>
             )}
-        </View>
+        </SafeAreaView>
 
             
     )
@@ -454,8 +455,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 16,
+        paddingVertical: 12,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

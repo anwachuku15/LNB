@@ -2,6 +2,7 @@ import React, {useCallback, useState, useEffect} from 'react'
 import { 
     Platform,
     Animated,
+    SafeAreaView,
     View, 
     Text, 
     StyleSheet, 
@@ -195,7 +196,7 @@ const NotificationsScreen = props => {
 
     return (
         
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
                 <View>
                     <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
@@ -226,7 +227,7 @@ const NotificationsScreen = props => {
                 </View>
                 )}
             
-        </View>
+        </SafeAreaView>
 
             
     )
@@ -247,8 +248,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 12,
+        paddingVertical: 10.6,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

@@ -1,6 +1,7 @@
 import React from 'react'
 import {
     Platform, 
+    SafeAreaView,
     View, 
     Text, 
     StyleSheet, 
@@ -33,7 +34,7 @@ const EventsScreen = props => {
     }
     return (
         
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -56,7 +57,7 @@ const EventsScreen = props => {
                 <Text style={{color:Colors.socialdark}}>Under Construction</Text>
                 <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -76,8 +77,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 16,
+        paddingVertical: 12,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth

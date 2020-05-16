@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { 
-    View, 
+    View,
+    SafeAreaView, 
     Text, 
     StyleSheet, 
     Image, 
@@ -175,7 +176,7 @@ const MessagesScreen = props => {
 
     return (
         (isMounted && 
-            <View style={styles.screen}>
+            <SafeAreaView style={styles.screen}>
 
                 <View style={styles.header}>
                     <View style={{flexDirection:'row', alignItems:'center'}}>
@@ -208,7 +209,7 @@ const MessagesScreen = props => {
                 ) : (
                     <Text style={{color:text, alignSelf:'center'}}>No Messages</Text>
                 )}
-            </View>
+            </SafeAreaView>
         )
     )
 }
@@ -230,8 +231,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
-        paddingTop: 49,
-        paddingBottom: 14.5,
+        paddingVertical: 12,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
@@ -241,8 +241,6 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500',
-        // marginTop: 4
-        
     },
     subtitleView: {
         flexDirection: 'row'
