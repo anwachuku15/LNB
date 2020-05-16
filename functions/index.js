@@ -15,6 +15,48 @@ const firebaseConfig = {
 admin.initializeApp(firebaseConfig)
 const db = admin.firestore()
 
+const algoliasearch = require('algoliasearch')
+const APP_ID = functions.config().algolia.app
+const ADMIN_KEY = functions.config().algolia.key
+
+const client = algoliasearch(APP_ID, ADMIN_KEY)
+const index = client.initIndex('LNBmembers')
+
+exports.addToIndex = functions.firestore.document('/users/{userId}')
+  .onCreate(snapshot => {
+    const data = {
+      name: snapshot.data().displayName,
+      headline: snapshot.data().headline,
+      location: snapshot.data().location,
+      bio: snapshot.data().bio,
+      imageUrl: snapshot.data().imageUrl,
+      website: snapshot.data().website,
+      connections: snapshot.data().connections
+    }
+    const objectID = snapshot.id
+
+    return index.addObject({ data, objectID })
+  })
+
+exports.updateIndex = functions.firestore.document('/users/{userId}')
+  .onUpdate((change) => {
+    const newData = {
+      name: change.after.data().displayName,
+      headline: change.after.data().headline,
+      location: change.after.data().location,
+      bio: change.after.data().bio,
+      imageUrl: change.after.data().imageUrl,
+      website: change.after.data().website,
+      connections: change.after.data().connections
+    }
+    const objectID = change.after.id
+
+    return index.saveObject({ newData, objectID })
+  })
+
+exports.deleteFromIndex = functions.firestore.document('/users/{userId}')
+  .onDelete(snapshot => index.deleteObject(snapshot.id))
+
 
 // UPDATE TWO COLLECTIONS: https://stackoverflow.com/questions/57653308/firestore-transaction-update-multiple-collections-in-a-single-transaction
 

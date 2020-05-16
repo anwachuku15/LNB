@@ -27,7 +27,11 @@ import MessageIcon from '../../components/LNB/MessageIcon'
 import { Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
+import algoliasearch from 'algoliasearch/lite'
+import { appId, key } from '../../secrets/algolia'
 
+const client = algoliasearch(appId, key)
+const index = client.initIndex('LNBmembers')
 
 let themeColor
 let text
