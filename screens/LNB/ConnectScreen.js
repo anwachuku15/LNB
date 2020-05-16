@@ -201,7 +201,7 @@ const ConnectScreen = props => {
     return (
         
             <View style={{...styles.screen, ...{backgroundColor: ''}}}>
-                <View style={{...styles.header, ...{backgroundColor: themeColor}}}>
+                <View style={{...styles.header, ...{backgroundColor: scheme==='dark' ? 'black' : 'white'}}}>
                     <View>
                         <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
                             <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
+        // backgroundColor:'red'
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
@@ -306,7 +307,8 @@ const styles = StyleSheet.create({
     requestsContainer: {
         height: 40,
         borderColor: Colors.blue,
-        borderWidth: StyleSheet.hairlineWidth,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
         flexDirection:'row', 
         paddingHorizontal:20, 
         alignItems:'center', 

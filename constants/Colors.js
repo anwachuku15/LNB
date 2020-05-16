@@ -24,5 +24,7 @@ export default {
     blue: '#00A6ED',
     bluesea: '#5ADBFF',
     socialdark: '#73788B',
-    pink: '#F200C5'
+    pink: '#F200C5',
+    lightHeader: '#F4F4F4',
+    darkHeader: '#2B2B2B'
 }

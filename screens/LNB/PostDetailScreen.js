@@ -184,11 +184,13 @@ const PostDetailScreen = props => {
     const renderComment = ({item}) => (
         <TouchableCmp onPress={() => {}}>
             <View style={{...styles.commentView, ...{backgroundColor:background}}} key={item.commentId}>
-                <Image source={{uri: item.userImage}} style={styles.commentAvatar}/>
+                <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
+                    <Image source={{uri: item.userImage}} style={styles.commentAvatar}/>
+                </TouchableCmp>
                 <View style={{flex: 1, backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderBottomLeftRadius: 15, borderBottomRightRadius: 15}}>
                     <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
                         <View>
-                            <TouchableCmp onPress={() => {}}>
+                            <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
                                 <Text style={{fontSize: 15, fontWeight:'600', color: scheme==='light' ? 'black' : 'white'}}>
                                     {item.userName}
                                     <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>

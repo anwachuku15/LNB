@@ -15,6 +15,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import { FontAwesome } from '@expo/vector-icons'
+import Placeholder from '../../components/UI/HeaderButtonPlaceholder'
 
 let themeColor
 let text
@@ -47,13 +48,10 @@ const SettingsScreen = props => {
                     />
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Settings</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <HeaderButtons HeaderButtonComponent={Placeholder}>
                     <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-chatboxes' : 'ios-chatboxes'}
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
+                        title='More'
+                        iconName='md-more'
                     />
                 </HeaderButtons>
             </View>

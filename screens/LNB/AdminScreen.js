@@ -97,6 +97,14 @@ const AdminScreen = props => {
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
+                        <Text style={{color:text}}>Flickering avatars</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', marginVertical: 5}}>
+                        <Text style={{color:text}}>-    </Text>
+                        <Text style={{color:text}}>Twitter style profile layouts & responsive headers</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', marginVertical: 5}}>
+                        <Text style={{color:text}}>-    </Text>
                         <Text style={{color:text}}>Search/List members (include search bar on ConnectScreen)</Text>
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
