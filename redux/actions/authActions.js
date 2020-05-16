@@ -732,11 +732,9 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
                     })
                 })
         }
-        
-        
-        
     }
 }
+
 
 export const removeNotification = (type, recipientId, senderId, timestamp, read) => {
     return (dispatch, getState) => {

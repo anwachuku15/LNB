@@ -104,7 +104,7 @@ const ChatScreen = props => {
     const [messages, setMessages] = useState([])
     useEffect(() => {
         const updateChat = db.doc(`/chats/${chatId}`).onSnapshot(snapshot => {
-            if (snapshot.data()) {
+            if (snapshot.data().messages) {
                 const thread = snapshot.data().messages
                 setMessages(thread.reverse())
             }
@@ -113,6 +113,8 @@ const ChatScreen = props => {
             updateChat()
         }
     }, [])
+
+    
 
     // UNMOUNT!!!!!
     let readTimestamp 
