@@ -25,6 +25,7 @@ const index = client.initIndex('LNBmembers')
 exports.addToIndex = functions.firestore.document('/users/{userId}')
   .onCreate(snapshot => {
     const data = {
+      uid: snapshot.id,
       name: snapshot.data().displayName,
       headline: snapshot.data().headline,
       location: snapshot.data().location,
@@ -41,6 +42,7 @@ exports.addToIndex = functions.firestore.document('/users/{userId}')
 exports.updateIndex = functions.firestore.document('/users/{userId}')
   .onUpdate((change) => {
     const newData = {
+      uid: change.after.id,
       name: change.after.data().displayName,
       headline: change.after.data().headline,
       location: change.after.data().location,

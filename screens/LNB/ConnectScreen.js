@@ -29,6 +29,7 @@ import firebase from 'firebase'
 import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
 import { appId, key } from '../../secrets/algolia'
+import { set } from 'react-native-reanimated'
 
 const client = algoliasearch(appId, key)
 const index = client.initIndex('LNBmembers')
@@ -37,7 +38,8 @@ let themeColor
 let text
 const ConnectScreen = props => {
     const scheme = useColorScheme()
-    const [query, setQuery] = useState('')
+    const [search, setSearch] = useState('')
+    const [results, setResults] = useState([])
     const dispatch = useDispatch()
 
     const auth = useSelector(state => state.auth)
@@ -67,8 +69,11 @@ const ConnectScreen = props => {
     }, [readNotifications])
     
     useEffect(() => {
-        readNotifications()
-        console.log(notifications)
+        const read = readNotifications()
+        // console.log(notifications)
+        return () => {
+            read
+        }
     }, [dispatch, readNotifications])
     
 
@@ -77,7 +82,6 @@ const ConnectScreen = props => {
             routeName: 'UserProfile',
             params: {
                 userId: id,
-
             }
         })
     }
@@ -104,9 +108,25 @@ const ConnectScreen = props => {
         }
     }
 
+    let searchResults = []
     const updateSearch = (text) => {
         setSearch(text)
+        const query = text
+        if (query.trim().length === 0) {setResults([])}
+        if (query.trim().length > 0) {
+            index.search(query, {
+                attributesToRetrieve: ['newData'],
+                hitsPerPage: 10
+            }).then(({ hits }) => {
+                hits.forEach(hit => {
+                    searchResults.push(hit.newData)
+                })
+                setResults(searchResults)
+            })
+        }
+        
     }
+
 
     const DismissKeyboard = ({ children }) => (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -115,83 +135,17 @@ const ConnectScreen = props => {
     )
     
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={() => {navToUserProfile(item.senderId)}}>
+        <TouchableCmp onPress={() => {navToUserProfile(item.uid)}}>
             <ListItem
-                containerStyle={{backgroundColor:background, paddingLeft: 0}}
+                containerStyle={{backgroundColor:background}}
+                leftAvatar={{source: {uri: item.imageUrl}}}
                 title={
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                        {item.type === 'connection request' && (
-                            <View style={{flexDirection:'row', width: '90%'}} >
-                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                                    <FontAwesome
-                                        name='handshake-o' 
-                                        size={23} 
-                                        color={Colors.blue}
-                                    />
-                                </View>
-                                <View style={{width: '50%'}}> 
-                                    <View style={{}}>  
-                                        <Image 
-                                            source={{uri: item.senderImage}}
-                                            style={styles.avatar}
-                                        />
-                                        <Text style={styles.connectReqText}>
-                                            {item.senderName}
-                                        </Text>
-                                        <Text style={{color:Colors.disabled}}>
-                                            {item.senderHeadline}
-                                        </Text>
-                                    </View>
-                                </View>
-                                <View style={{flexDirection: 'column', width: '30%', justifyContent: 'space-between', paddingVertical:12}}>
-                                    <TouchableCmp 
-                                        style={styles.acceptButton} 
-                                        onPress={() => {
-                                            dispatch(confirmConnect(uid, auth.credentials.displayName, item.senderId, item.senderName))
-                                        }}
-                                    >
-                                        <Text style={styles.acceptButtonText}>Accept</Text>
-                                    </TouchableCmp>
-                                    <TouchableCmp 
-                                        style={styles.declineButton}
-                                        onPress={() => {
-                                            dispatch(declineConnect(uid, item.senderId, item.senderName))
-                                            // LayoutAnimation.configureNext(CustomLayout)
-                                        }}
-                                    >
-                                        <Text style={styles.declineButtonText}>Decline</Text>
-                                    </TouchableCmp>
-                                </View>
-                            </View>
-                        )}
-                        {item.type === 'new connection' && (
-                            <View style={{flexDirection:'row', width: '90%'}} >
-                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
-                                    <Ionicons
-                                        name='md-person-add' 
-                                        size={23} 
-                                        color={Colors.blue}
-                                    />
-                                </View>
-                                <View style={{width: '80%'}}>
-                                    <TouchableCmp 
-                                        style={{alignSelf:'flex-start'}}
-                                        onPress={() => {navToUserProfile(item.senderId)}}
-                                    >
-                                        <Image 
-                                            source={{uri: item.senderImage}}
-                                            style={styles.avatar}
-                                        />
-                                    </TouchableCmp>
-                                    <Text style={{color:text, marginTop: 3}}>
-                                        <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName} </Text>
-                                        accepted your connect request.
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-                        <Text style={{width: '10%',color:Colors.disabled, fontSize: 14, }}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
-                    </View>
+                    <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
+                }
+                subtitle={
+                    <Text style={{color:Colors.disabled}}>
+                        {item.headline}{'\n'}<Text style={{fontSize:12}}>{item.location}</Text>
+                    </Text>
                 }
                 bottomDivider
             />
@@ -222,44 +176,49 @@ const ConnectScreen = props => {
                         />
                     </HeaderButtons>
                 </View>
-                <ScrollView>
-                    <View style={{...styles.inputContainer, ...{backgroundColor:background}}}>
-                        <TextInput
-                            autoFocus={false}
-                            multiline={true}
-                            numberOfLines={4} 
-                            style={{flex:1, fontSize:16, color:text, marginHorizontal:10, alignSelf:'center', paddingVertical:5}}
-                            placeholder={'Search...'}
-                            placeholderTextColor={'#838383'}
-                            onChangeText={text => {setQuery(text)}}
-                            value={query}
-                        />
-                    </View>
-                    {notifications.length > 0 && (
-                        <TouchableCmp
-                            onPress={() => {
-                                props.navigation.navigate('ConnectRequests')
-                            }}
-                        >
-                            <View style={styles.requestsContainer}>
-                                <View style={{flexDirection:'row'}}>
-                                    <Text style={{color:Colors.blue, fontWeight:'bold', alignSelf:'center'}}>
-                                        Requests
-                                    </Text>
-                                    <View style={styles.requestCountContainer}>
-                                        <Text style={styles.requestCount}>{notifications.length}</Text>
-                                    </View>
+                <View style={{...styles.inputContainer, ...{backgroundColor:background}}}>
+                    <TextInput
+                        autoFocus={false}
+                        multiline={true}
+                        numberOfLines={4} 
+                        style={{flex:1, fontSize:16, color:text, marginHorizontal:10, alignSelf:'center', paddingVertical:5}}
+                        placeholder={'Search...'}
+                        placeholderTextColor={'#838383'}
+                        onChangeText={text => {updateSearch(text)}}
+                        value={search}
+                    />
+                </View>
+                {notifications.length > 0 && (
+                    <TouchableCmp
+                        onPress={() => {
+                            props.navigation.navigate('ConnectRequests')
+                        }}
+                    >
+                        <View style={styles.requestsContainer}>
+                            <View style={{flexDirection:'row'}}>
+                                <Text style={{color:Colors.blue, fontWeight:'bold', alignSelf:'center'}}>
+                                    Requests
+                                </Text>
+                                <View style={styles.requestCountContainer}>
+                                    <Text style={styles.requestCount}>{notifications.length}</Text>
                                 </View>
-                                <MaterialIcons
-                                    name='navigate-next'
-                                    color={Colors.blue}
-                                    size={24}
-                                />
                             </View>
-                        </TouchableCmp>
-                    )}
+                            <MaterialIcons
+                                name='navigate-next'
+                                color={Colors.blue}
+                                size={24}
+                            />
+                        </View>
+                    </TouchableCmp>
+                )}
+                <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={results}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={renderItem}
+                />
                     
-                </ScrollView>
             </View>
         
     )
