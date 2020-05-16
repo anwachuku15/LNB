@@ -306,9 +306,11 @@ export const likeNeed = (needId) => {
                         db.doc(`/needs/${needId}`).get()
                         .then(async (doc) => {
                             needUserId = doc.data().uid
-                            const pushToken = (await db.doc(`/users/${needUserId}`).get()).data().pushToken
-                            if (pushToken) {
-                                sendLikeNeedNotification(needId, needUserId, pushToken, authUserId, authUserName, authUserImage)
+                            if (needUserId !== authUserId) {
+                                const pushToken = (await db.doc(`/users/${needUserId}`).get()).data().pushToken
+                                if (pushToken) {
+                                    sendLikeNeedNotification(needId, needUserId, pushToken, authUserId, authUserName, authUserImage)
+                                }
                             }
                         })
                     })
