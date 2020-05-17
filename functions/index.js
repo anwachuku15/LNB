@@ -70,7 +70,8 @@ exports.onUserImageChange = functions
     if (change.before.data().imageUrl !== change.after.data().imageUrl) {
       console.log('image has changed')
       const batch = db.batch()
-      db.collection('needs')
+      return db
+        .collection('needs')
         .where('uid','==',change.before.data().userId)
         .get()
         .then((data) => {
@@ -78,6 +79,38 @@ exports.onUserImageChange = functions
             const need = db.doc(`/needs/${doc.id}`)
             batch.update(need, { userImage: change.after.data().imageUrl })
           })
+          return db
+            .collection('comments')
+            .where('uid', '==', change.before.data().userId)
+            .get()
+        })
+        .then((data) => {
+          data.forEach(doc => {
+            const comment = db.doc(`/comments/${doc.id}`)
+            batch.update(comment, { userImage: change.after.data().imageUrl })
+          })
+          return db
+            .collection('likes')
+            .where('senderId', '==', change.before.data().userId)
+            .get()
+        })
+        .then((data) => {
+          data.forEach(doc => {
+            const like = db.doc(`/likes/${doc.id}`)
+            batch.update(like, { senderImage: change.after.data().imageUrl})
+          })
+          return db
+            .collection('notifications')
+            .where('type', 'in', ['likeNeed', 'new connection'])
+            .where('senderId', '==', change.before.data().userId)
+            .get()
+        })
+        .then((data) => {
+          data.forEach(doc => {
+            const notification = db.doc(`/notifications/${doc.id}`)
+            batch.update(notification, { senderImage: change.after.data().imageUrl})
+          })
+          return batch.commit()
         })
         .catch(err => console.error(err))
     } else return true
