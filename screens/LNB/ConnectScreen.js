@@ -134,6 +134,12 @@ const ConnectScreen = props => {
     const cancelSearch = () => {
         searchInput.current.blur()
     }
+
+    const DismissKeyboard = ({ children }) => (
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            {children}
+        </TouchableWithoutFeedback>
+    )
     
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {navToUserProfile(item.uid)}}>
@@ -167,7 +173,7 @@ const ConnectScreen = props => {
                             </TouchableCmp>
                         </View>
                     )}
-                    <View style={{...styles.searchContainer, ...{width: isFocused ? '81%' : '70%', marginLeft: isFocused ? 15 : 0}}}>
+                    <View style={{...styles.searchContainer, ...{width: isFocused ? '80%' : '70%', marginLeft: isFocused ? 15 : 0}}}>
                         <View style={{justifyContent:'center'}}>
                             <Feather
                                 name='search'
@@ -210,7 +216,7 @@ const ConnectScreen = props => {
                                 cancelSearch()
                                 setSearch('')
                             }}
-                            style={{marginRight:10}}
+                            style={{width:'20%', alignItems:'center', flex: 1}}
                         >
                             <Text style={{color: Colors.primary}}>Cancel</Text>
                         </TouchableCmp>
@@ -253,13 +259,16 @@ const ConnectScreen = props => {
                 {!isFocused && search.length === 0 && (
                     <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
                         <Text style={{color:Colors.socialdark}}>Under Construction</Text>
+                        <Text style={{color:Colors.socialdark, fontSize: 12, marginTop:5}}>You can still use the search though :)</Text>
                         <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
                     </View>
                 )}
                 {isFocused && search.length === 0 && (
-                    <View style={{alignItems:'center', paddingTop: 10}}>
-                        <Text style={{color:'#838383'}}>Search for someone you'd like to connect with</Text>
-                    </View>
+                    <DismissKeyboard>
+                        <View style={{flex: 1, alignItems:'center', paddingTop: 10}}>
+                            <Text style={{color:'#838383'}}>Search for someone you'd like to connect with</Text>
+                        </View>
+                    </DismissKeyboard>
                 )}
                 {search.length > 0 && (
                     <FlatList
