@@ -1,15 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { 
     View,
     SafeAreaView, 
     Text, 
+    TextInput,
     StyleSheet, 
     Image, 
     Button, 
     ScrollView,
     FlatList,
     TouchableNativeFeedback,
-    TouchableOpacity
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    Keyboard
 } from 'react-native'
 import { ListItem } from 'react-native-elements'
 // REDUX
@@ -20,8 +23,15 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import { Feather, MaterialIcons } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
+import algoliasearch from 'algoliasearch/lite'
+import { appId, key } from '../../secrets/algolia'
+
+const client = algoliasearch(appId, key)
+const index = client.initIndex('LNBmembers')
+
 
 const db = firebase.firestore()
 const messagesTimeConfig = {
@@ -66,6 +76,10 @@ const MessagesScreen = props => {
     const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
     const [isMounted, setIsMounted] = useState(true)
+    const [search, setSearch] = useState('')
+    const [results, setResults] = useState([])
+    const [isFocused, setIsFocused] = useState(false)
+    const searchInput = useRef(null)
 
     const loadMessageNotifications = useCallback(async () => {
         try {
@@ -139,6 +153,65 @@ const MessagesScreen = props => {
         })
     }, [])
 
+
+    let searchResults = []
+    const updateSearch = (text) => {
+        setSearch(text)
+        const query = text
+        if (query.trim().length === 0) {setResults([])}
+
+        if (query.trim().length > 0) {
+            index.search(query, {
+                attributesToRetrieve: ['newData'],
+                hitsPerPage: 10
+            }).then(({ hits }) => {
+                hits.forEach(hit => {
+                    searchResults.push(hit.newData)
+                })
+                setResults(searchResults)
+            })
+        }
+    }
+
+    const cancelSearch = () => {
+        searchInput.current.blur()
+    }
+
+    const DismissKeyboard = ({ children }) => (
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            {children}
+        </TouchableWithoutFeedback>
+    )
+
+    const renderResult = ({item}) => (
+        item.uid !== uid &&
+        <TouchableCmp 
+            onPress={async () => {
+                await dispatch(getUser(item.uid))
+                props.navigation.navigate({
+                    routeName: 'ChatScreen',
+                    params: {
+                        selectedUserId: item.uid
+                    }
+                })
+            }}
+        >
+            <ListItem
+                containerStyle={{backgroundColor:background}}
+                leftAvatar={{source: {uri: item.imageUrl}}}
+                title={
+                    <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
+                }
+                subtitle={
+                    <Text style={{color:Colors.disabled}}>
+                        {item.headline}{'\n'}<Text style={{fontSize:12}}>{item.location}</Text>
+                    </Text>
+                }
+                bottomDivider
+            />
+        </TouchableCmp>
+    )
+
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
@@ -200,14 +273,70 @@ const MessagesScreen = props => {
                     </HeaderButtons>
                 </View>
 
-                {chats && chats.length > 0 ? (
+                <View style={{...styles.searchContainer, ...{marginHorizontal: 15, marginTop:10, alignSelf: 'center'}}}>
+                    <View style={{justifyContent:'center'}}>
+                        <Feather
+                            name='search'
+                            size={14}
+                            color={Colors.placeholder}
+                        />
+                    </View>
+                    <TextInput
+                        ref={searchInput}
+                        autoFocus={false}
+                        multiline={true}
+                        numberOfLines={4} 
+                        style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:4}}
+                        placeholder={'Search...'}
+                        placeholderTextColor={Colors.placeholder}
+                        onChangeText={text => {updateSearch(text)}}
+                        value={search}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                    />
+                    {search.length > 0 && (
+                        <TouchableCmp
+                            style={{justifyContent:'center'}}
+                            onPress={() => {
+                                setSearch('')
+                                setResults([])
+                            }}
+                        >
+                            <MaterialIcons
+                                name='cancel'
+                                size={16}
+                                color={Colors.disabled}
+                            />
+                        </TouchableCmp>
+                    )}
+                </View>
+                {!isFocused && search.length === 0 && chats && chats.length > 0 && (
                     <FlatList
                         keyExtractor={(item, index) => index.toString()}
                         data={chats}
                         renderItem={renderChat}
                     />
-                ) : (
-                    <Text style={{color:text, alignSelf:'center'}}>No Messages</Text>
+                )}
+                {!isFocused && chats && chats.length === 0 && (
+                    <View style={{flex:1, alignItems:'center', marginTop:30}}>
+                        <Text style={{color:Colors.placeholder}}>No messages... yet</Text>
+                    </View>
+                )}
+                {search.length > 0 && (
+                    <FlatList
+                        keyExtractor={(item, index) => index.toString()}
+                        data={results}
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderResult}
+                    />
+                )}
+                {isFocused && search.length === 0 && (
+                    <DismissKeyboard>
+                        <View style={{flex:1, alignItems:'center', paddingTop:10}}>
+                            <Text style={{color:Colors.placeholder}}>Search for someone you'd like to message</Text>
+                        </View>
+                    </DismissKeyboard>
                 )}
             </SafeAreaView>
         )
@@ -244,7 +373,16 @@ const styles = StyleSheet.create({
     },
     subtitleView: {
         flexDirection: 'row'
-    }
+    },
+    searchContainer: {
+        justifyContent: 'flex-end',
+        flexDirection: 'row',
+        paddingHorizontal: 5,
+        borderColor: Colors.primary,
+        borderWidth: 1,
+        borderRadius: 20,
+        marginBottom:10,
+    },
 })
 
 
