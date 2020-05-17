@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { 
     Platform,
     SafeAreaView,
@@ -25,7 +25,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
-import { Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons'
+import { AntDesign, Ionicons, FontAwesome, MaterialIcons, Feather } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
@@ -41,6 +41,9 @@ const ConnectScreen = props => {
     const scheme = useColorScheme()
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
+    const [isFocused, setIsFocused] = useState(false)
+    const searchInput = useRef(null)
+
     const dispatch = useDispatch()
 
     const auth = useSelector(state => state.auth)
@@ -114,6 +117,7 @@ const ConnectScreen = props => {
         setSearch(text)
         const query = text
         if (query.trim().length === 0) {setResults([])}
+
         if (query.trim().length > 0) {
             index.search(query, {
                 attributesToRetrieve: ['newData'],
@@ -125,7 +129,10 @@ const ConnectScreen = props => {
                 setResults(searchResults)
             })
         }
-        
+    }
+
+    const cancelSearch = () => {
+        searchInput.current.blur()
     }
     
     const renderItem = ({item}) => (
@@ -151,36 +158,74 @@ const ConnectScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
     return (
-        
             <SafeAreaView style={{...styles.screen, ...{backgroundColor: ''}}}>
                 <View style={{...styles.header, ...{backgroundColor: scheme==='dark' ? 'black' : 'white'}}}>
-                    <View>
-                        <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
-                            <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
-                        </TouchableCmp>
-                    </View>
-                    <Text style={styles.headerTitle}>Connect</Text>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            ButtonElement={<MessageIcon/>}
-                            title='Messages'
-                            onPress={() => {
-                                props.navigation.navigate('Messages')
-                            }}
+                    {!isFocused && (
+                        <View>
+                            <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
+                                <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
+                            </TouchableCmp>
+                        </View>
+                    )}
+                    <View style={{...styles.searchContainer, ...{width: isFocused ? '81%' : '70%', marginLeft: isFocused ? 15 : 0}}}>
+                        <View style={{justifyContent:'center'}}>
+                            <Feather
+                                name='search'
+                                size={14}
+                                color='#838383'
+                            />
+                        </View>
+                        <TextInput
+                            ref={searchInput}
+                            autoFocus={false}
+                            multiline={true}
+                            numberOfLines={4} 
+                            style={{flex:1, fontSize:14, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:4}}
+                            placeholder={'Search...'}
+                            placeholderTextColor={'#838383'}
+                            onChangeText={text => {updateSearch(text)}}
+                            value={search}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
                         />
-                    </HeaderButtons>
-                </View>
-                <View style={{...styles.inputContainer, ...{backgroundColor:background}}}>
-                    <TextInput
-                        autoFocus={false}
-                        multiline={true}
-                        numberOfLines={4} 
-                        style={{flex:1, fontSize:16, color:text, marginHorizontal:10, alignSelf:'center', paddingVertical:5}}
-                        placeholder={'Search...'}
-                        placeholderTextColor={'#838383'}
-                        onChangeText={text => {updateSearch(text)}}
-                        value={search}
-                    />
+                        {search.length > 0 && (
+                            <TouchableCmp
+                                style={{justifyContent:'center'}}
+                                onPress={() => {
+                                    setSearch('')
+                                    setResults([])
+                                }}
+                            >
+                                <MaterialIcons
+                                    name='cancel'
+                                    size={16}
+                                    color={Colors.disabled}
+                                />
+                            </TouchableCmp>
+                        )}
+                    </View>
+                    {isFocused ? (
+                        <TouchableCmp 
+                            onPress={() => {
+                                cancelSearch()
+                                setSearch('')
+                            }}
+                            style={{marginRight:10}}
+                        >
+                            <Text style={{color: Colors.primary}}>Cancel</Text>
+                        </TouchableCmp>
+                    ) : (
+                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                            <Item
+                                ButtonElement={<MessageIcon/>}
+                                title='Messages'
+                                onPress={() => {
+                                    props.navigation.navigate('Messages')
+                                }}
+                            />
+                        </HeaderButtons>
+                    )}
+                    
                 </View>
                 {notifications.length > 0 && (
                     <TouchableCmp
@@ -205,13 +250,26 @@ const ConnectScreen = props => {
                         </View>
                     </TouchableCmp>
                 )}
-                <FlatList
-                    keyExtractor={(item, index) => index.toString()}
-                    data={results}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={renderItem}
-                />
+                {!isFocused && search.length === 0 && (
+                    <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
+                        <Text style={{color:Colors.socialdark}}>Under Construction</Text>
+                        <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
+                    </View>
+                )}
+                {isFocused && search.length === 0 && (
+                    <View style={{alignItems:'center', paddingTop: 10}}>
+                        <Text style={{color:'#838383'}}>Search for someone you'd like to connect with</Text>
+                    </View>
+                )}
+                {search.length > 0 && (
+                    <FlatList
+                        keyExtractor={(item, index) => index.toString()}
+                        data={results}
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderItem}
+                    />
+                )}
                     
             </SafeAreaView>
         
@@ -249,6 +307,14 @@ const styles = StyleSheet.create({
         height: 28,
         borderRadius: 14,
         marginLeft: 16
+    },
+    searchContainer: {
+        justifyContent: 'flex-end',
+        flexDirection: 'row',
+        paddingHorizontal: 5,
+        borderColor: Colors.primary,
+        borderWidth: 1,
+        borderRadius: 20,
     },
     inputContainer: {
         margin: 10,
