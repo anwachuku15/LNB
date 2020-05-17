@@ -311,11 +311,13 @@ const MessagesScreen = props => {
                     )}
                 </View>
                 {!isFocused && search.length === 0 && chats && chats.length > 0 && (
-                    <FlatList
-                        keyExtractor={(item, index) => index.toString()}
-                        data={chats}
-                        renderItem={renderChat}
-                    />
+                    <DismissKeyboard>
+                        <FlatList
+                            keyExtractor={(item, index) => index.toString()}
+                            data={chats}
+                            renderItem={renderChat}
+                        />
+                    </DismissKeyboard>
                 )}
                 {!isFocused && chats && chats.length === 0 && (
                     <View style={{flex:1, alignItems:'center', marginTop:30}}>
