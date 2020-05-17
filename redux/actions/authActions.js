@@ -562,7 +562,7 @@ export const setNotifications = () => {
         const userConnectNotifications = []
         await (await db.collection('notifications').where('recipientId', '==', getState().auth.userId).get())
         .forEach(doc => {
-            if (doc.data().type == 'likeNeed') {
+            if (doc.data().type == 'likeNeed' || doc.data().type == 'commentNeed') {
                 userNotifications.push({
                     id: doc.id,
                     type: doc.data().type,

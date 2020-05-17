@@ -156,7 +156,11 @@ export const createComment = (postId, body, localUri) => {
         const userImage = getState().auth.credentials.imageUrl
         const needDocument = db.doc(`/needs/${postId}`)
         
-        let imageUrl, commentId
+        const authUserId = getState().auth.userId
+        const authUserName = getState().auth.credentials.displayName
+        const authUserImage = getState().auth.credentials.imageUrl
+
+        let imageUrl, commentId, needUserId
         if (localUri !== undefined) {
             
             imageUrl = await uploadPhotoAsyn(localUri)
@@ -196,7 +200,19 @@ export const createComment = (postId, body, localUri) => {
         .then(doc => {
             commentId = doc.id
             needData.commentCount++
-            db.doc(`/needs/${postId}`).update({ commentCount: needData.commentCount })
+            return db.doc(`/needs/${postId}`).update({ commentCount: needData.commentCount })
+        })
+        .then(() => {
+            db.doc(`/needs/${postId}`).get()
+            .then(async (doc) => {
+                needUserId = doc.data().uid
+                if (needUserId !== authUserId) {
+                    const pushToken = (await db.doc(`/users/${needUserId}`).get()).data().pushToken
+                    if (pushToken) {
+                        sendCommentNeedNotification(postId, needUserId, pushToken, authUserId, authUserName, authUserImage)
+                    }
+                }
+            })
         })
         .catch(err => {
             console.error(err)
@@ -220,6 +236,32 @@ export const createComment = (postId, body, localUri) => {
         dispatch(getNeed(postId))
 
     } 
+}
+
+const sendCommentNeedNotification = (needId, recipientId, pushToken, authId, authName, authImage) => {
+    db.collection('notifications').add({
+        timestamp: new Date().toISOString(),
+        type: 'commentNeed',
+        needId,
+        recipientId,
+        senderId: authId,
+        senderName: authName,
+        senderImage: authImage,
+        read: false
+    })
+    let res = fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            to: pushToken,
+            sound: 'default',
+            title: 'New Comment',
+            body: authName + ' commented on one of your needs.'
+        })
+    }) 
 }
 
 export const getNeed = (needId) => {

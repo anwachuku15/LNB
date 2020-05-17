@@ -126,6 +126,7 @@ const NotificationsScreen = props => {
             <TouchableCmp onPress={() => {
                 item.type === 'new connection' && (navToUserProfile(item.senderId))
                 item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName))
+                item.type === 'commentNeed' && (navToNeed(item.needId, item.senderName))
             }}>
                 <ListItem
                     containerStyle={{backgroundColor:background, paddingLeft: 0}}
@@ -182,8 +183,33 @@ const NotificationsScreen = props => {
                                     </View>
                                 </View>
                             )}
-                            {item.type === 'commentNeed' && (<Text style={{color:text, fontSize: 14}}>{item.senderName} replied to your need post.</Text>)}
-                                <Text style={{width: '10%', textAlign:'center', color:Colors.disabled, fontSize: 14}}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
+                            {item.type === 'commentNeed' && (
+                                <View style={{flexDirection:'row', width:'90%'}}>
+                                    <View style={{width:'20%', alignItems:'center', justifyContent:'center'}}>
+                                        <MaterialCommunityIcons
+                                            name='comment-text-outline'
+                                            size={23}
+                                            color={Colors.green}
+                                        />
+                                    </View>
+                                    <View style={{width: '80%'}}>
+                                        <TouchableCmp
+                                            style={{alignSelf:'flex-start'}}
+                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                        >
+                                            <Image
+                                                source={{uri: item.senderImage}}
+                                                style={styles.avatar}
+                                            />
+                                        </TouchableCmp>
+                                        <Text style={{color:text, marginTop: 3}}>
+                                            <Text style={{fontWeight:'500'}}>{item.senderName} </Text>
+                                            commented on one of your needs.
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+                            <Text style={{width: '10%', textAlign:'center', color:Colors.disabled, fontSize: 14}}>{moment.utc(new Date(item.timestamp)).fromNow()}</Text>
                         </View>
                     }
                     // subtitle='Content of what was liked or commented'
