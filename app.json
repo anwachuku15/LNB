@@ -25,6 +25,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.andrewnwachuku.lnbapp",
+      "buildNumber": "1.0.0",
       "supportsTablet": true,
       "userInterfaceStyle": "automatic"
     },
