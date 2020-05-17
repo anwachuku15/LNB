@@ -94,7 +94,7 @@ const UserProfileScreen = props => {
         loadUser().then(() => {
             setIsLoading(false)
         })
-        const connectionsSnapshot = db.doc(`/users/${authUser.userId}`).onSnapshot(snapshot => {
+        const connectionsSnapshot = db.doc(`/users/${userId}`).onSnapshot(snapshot => {
             const currentConnections = snapshot.data().connections
             setConnections(currentConnections)
         })
