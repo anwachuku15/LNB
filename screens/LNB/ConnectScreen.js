@@ -30,7 +30,6 @@ import firebase from 'firebase'
 import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
 import { appId, key } from '../../secrets/algolia'
-import { set } from 'react-native-reanimated'
 
 const client = algoliasearch(appId, key)
 const index = client.initIndex('LNBmembers')

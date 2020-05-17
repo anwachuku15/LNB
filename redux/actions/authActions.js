@@ -249,6 +249,7 @@ export const getUser = (userId) => {
 
 export const updateProfile = (headline, location, bio, link, uri) => {
     return async (dispatch, getState) => {
+        
         let imageUrl
         const auth = getState().auth
         if (uri !== getState().auth.credentials.imageUrl) {
@@ -287,9 +288,9 @@ export const updateProfile = (headline, location, bio, link, uri) => {
     }
 }
 
-export const uploadPhotoAsyn = async (uri) => (getState) => {
-    // const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
-    const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
+export const uploadPhotoAsyn = async (uri) => {
+    const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
+    // const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
     return new Promise(async (res, rej) => {
         const response = await fetch(uri)
         const file = await response.blob()
@@ -310,7 +311,6 @@ export const uploadPhotoAsyn = async (uri) => (getState) => {
         )
     })
 }
-
 
 
 // CONNECT ACTIONS & NOTIFICATIONS
@@ -555,7 +555,6 @@ export const setLikes = () => {
     }
 }
 
-
 export const setNotifications = () => {
     return async (dispatch, getState) => {
         const userNotifications = []
@@ -681,7 +680,6 @@ export const markConnectNotificationsAsRead = () => {
     }
 }
 
-
 export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
     return async (dispatch, getState ) => {
         
@@ -746,7 +744,6 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
     }
 }
 
-
 export const removeNotification = (type, recipientId, senderId, timestamp, read) => {
     return (dispatch, getState) => {
         const thisNotification = getState().auth.notifications
@@ -763,7 +760,6 @@ export const removeNotification = (type, recipientId, senderId, timestamp, read)
         })
     }
 }
-
 
 // DISCONNECT + UNREQUEST
 export const disconnect = (authId, selectedUserId) => {
