@@ -401,9 +401,7 @@ const MessagesStack = createStackNavigator({
             }
         }
     }
-}, {
-    headerMode: 'none'
-})
+}, {headerMode: 'none'})
 
 
 

@@ -173,12 +173,12 @@ const ConnectScreen = props => {
                             </TouchableCmp>
                         </View>
                     )}
-                    <View style={{...styles.searchContainer, ...{width: isFocused ? '80%' : '70%', marginLeft: isFocused ? 15 : 0}}}>
+                    <View style={{...styles.searchContainer, ...{width: isFocused ? '80%' : '70%', marginLeft: isFocused ? 15 : 0, alignSelf: !isFocused && 'center'}}}>
                         <View style={{justifyContent:'center'}}>
                             <Feather
                                 name='search'
                                 size={14}
-                                color='#838383'
+                                color={Colors.placeholder}
                             />
                         </View>
                         <TextInput
@@ -188,7 +188,7 @@ const ConnectScreen = props => {
                             numberOfLines={4} 
                             style={{flex:1, fontSize:14, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:4}}
                             placeholder={'Search...'}
-                            placeholderTextColor={'#838383'}
+                            placeholderTextColor={Colors.placeholder}
                             onChangeText={text => {updateSearch(text)}}
                             value={search}
                             onFocus={() => setIsFocused(true)}
@@ -259,14 +259,14 @@ const ConnectScreen = props => {
                 {!isFocused && search.length === 0 && (
                     <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
                         <Text style={{color:Colors.socialdark}}>Under Construction</Text>
-                        <Text style={{color:Colors.socialdark, fontSize: 12, marginTop:5}}>You can still use the search though :)</Text>
+                        <Text style={{color:Colors.socialdark, fontSize: 12, marginTop:5}}>You can still search though :)</Text>
                         <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
                     </View>
                 )}
                 {isFocused && search.length === 0 && (
                     <DismissKeyboard>
                         <View style={{flex: 1, alignItems:'center', paddingTop: 10}}>
-                            <Text style={{color:'#838383'}}>Search for someone you'd like to connect with</Text>
+                            <Text style={{color:Colors.placeholder}}>Search for someone you'd like to connect with</Text>
                         </View>
                     </DismissKeyboard>
                 )}
@@ -281,7 +281,6 @@ const ConnectScreen = props => {
                 )}
                     
             </SafeAreaView>
-        
     )
 }
 

@@ -126,6 +126,7 @@ const EditProfileScreen = props => {
     }
 
     const submitHandler = useCallback(async () => {
+        console.log('save!')
         if (!formState.formIsValid) {
             Alert.alert('Invalid Information', 'Please check for errors', [
                 { text: 'Okay' }
@@ -135,7 +136,6 @@ const EditProfileScreen = props => {
         setError(null)
         setIsLoading(true)
         try {
-            console.log(formState.inputValues.location)
             await dispatch(updateProfile(
                 formState.inputValues.headline,
                 formState.inputValues.location,

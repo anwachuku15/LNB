@@ -26,5 +26,6 @@ export default {
     socialdark: '#73788B',
     pink: '#F200C5',
     lightHeader: '#F4F4F4',
-    darkHeader: '#2B2B2B'
+    darkHeader: '#2B2B2B',
+    placeholder: '#838383'
 }
