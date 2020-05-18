@@ -367,8 +367,8 @@ const UserProfileScreen = props => {
 
                 {/* USER NEEDS */}
                 {!isLoading && userPosts.length === 0 ? (
-                    <View style={{justifyContent:'center', alignItems:'center'}}>
-                        <Text>This user hasn't posted any needs.</Text>
+                    <View style={{justifyContent:'center', alignItems:'center', paddingTop: 10}}>
+                        <Text style={{color:Colors.placeholder}}>{user.credentials.displayName} hasn't posted any needs.</Text>
                     </View>
                 ) : (
                     <FlatList
