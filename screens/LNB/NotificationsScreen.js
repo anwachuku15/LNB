@@ -27,6 +27,7 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icon
 import firebase from 'firebase'
 import moment from 'moment'
 import { LayoutAnimation } from 'react-native'
+import MenuAvatar from '../../components/LNB/MenuAvatar'
 
 const db = firebase.firestore()
 
@@ -224,11 +225,9 @@ const NotificationsScreen = props => {
         
         <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
-                <View>
-                    <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
-                        <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
-                    </TouchableCmp>
-                </View>
+                <MenuAvatar 
+                    toggleDrawer={() => props.navigation.toggleDrawer()}
+                />
                 <Text style={styles.headerTitle}>Notifications</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item

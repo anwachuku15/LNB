@@ -18,6 +18,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon';
 import { FontAwesome } from '@expo/vector-icons'
+import MenuAvatar from '../../components/LNB/MenuAvatar'
 
 let themeColor
 let text
@@ -45,9 +46,9 @@ const BulletinScreen = props => {
         <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
                 <View>
-                    <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
-                        <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
-                    </TouchableCmp>
+                    <MenuAvatar 
+                        toggleDrawer={() => props.navigation.toggleDrawer()}
+                    />
                 </View>
                 <Text style={styles.headerTitle}>Bulletin</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>

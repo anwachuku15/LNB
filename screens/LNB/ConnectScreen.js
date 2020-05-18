@@ -30,6 +30,7 @@ import firebase from 'firebase'
 import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
 import { appId, key } from '../../secrets/algolia'
+import MenuAvatar from '../../components/LNB/MenuAvatar'
 
 const client = algoliasearch(appId, key)
 const index = client.initIndex('LNBmembers')
@@ -166,11 +167,9 @@ const ConnectScreen = props => {
             <SafeAreaView style={{...styles.screen, ...{backgroundColor: ''}}}>
                 <View style={{...styles.header, ...{backgroundColor: scheme==='dark' ? 'black' : 'white'}}}>
                     {!isFocused && (
-                        <View>
-                            <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
-                                <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
-                            </TouchableCmp>
-                        </View>
+                        <MenuAvatar 
+                            toggleDrawer={() => props.navigation.toggleDrawer()}
+                        />
                     )}
                     <View style={{...styles.searchContainer, ...{width: isFocused ? '80%' : '70%', marginLeft: isFocused ? 15 : 0, alignSelf: !isFocused && 'center'}}}>
                         <View style={{justifyContent:'center'}}>

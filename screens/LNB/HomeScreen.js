@@ -37,6 +37,7 @@ import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions' 
 import { setLikes } from '../../redux/actions/authActions';
 import MessageIcon from '../../components/LNB/MessageIcon';
+import MenuAvatar from '../../components/LNB/MenuAvatar'
 
 const db = firebase.firestore()
 
@@ -180,6 +181,7 @@ const HomeScreen = props => {
     }, [dispatch, loadData])
     
 
+
     const selectUserHandler = (userId) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
@@ -280,12 +282,14 @@ const HomeScreen = props => {
                                 onPress={() => {props.navigation.toggleDrawer()}}
                             />
                         </HeaderButtons> */}
-                        <View>
+                        {/* <View>
                             <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
                                 <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
                             </TouchableCmp>
-                        </View>
-                        {/* <Text style={styles.headerTitle}>Feed</Text> */}
+                        </View> */}
+                        <MenuAvatar 
+                            toggleDrawer={() => props.navigation.toggleDrawer()}
+                        />
                         <View>
                             <Image 
                                 source={require('../../assets/lnb.png')} 
