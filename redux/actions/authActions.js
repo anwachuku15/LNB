@@ -632,6 +632,7 @@ export const markNotificationsAsRead = () => {
         batch.commit().then(() => {
         }).catch(err => {console.log(err)})                                                   
         
+        
         dispatch({
             type: MARK_NOTIFICATIONS_READ
         })
@@ -652,7 +653,7 @@ export const markMessageNotificationsAsRead = () => {
         }).catch(err => {
             console.log(err)
         })                                                   
-        
+        // Consider deleting message notifications
         dispatch({
             type: MARK_MESSAGE_NOTIFICATIONS_READ
         })
