@@ -20,6 +20,7 @@
     "expo-av": "~8.1.0",
     "expo-camera": "~8.2.0",
     "expo-constants": "~9.0.0",
+    "expo-file-system": "~8.1.0",
     "expo-image-picker": "^8.1.0",
     "expo-linear-gradient": "^8.1.0",
     "expo-linking": "~1.0.1",
@@ -57,7 +58,8 @@
     "react-navigation-tabs": "^2.8.11",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "shorthash": "0.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
