@@ -309,14 +309,14 @@ const PostDetailScreen = props => {
             <KeyboardAvoidingView behavior='padding'>
                 <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
                     <View style={styles.inputContainer}>
-                        <TouchableCmp onPress={pickImage} style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.primary, padding:0, borderRadius:20, width:30, height:30}}>
+                        {/* <TouchableCmp onPress={pickImage} style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.primary, padding:0, borderRadius:20, width:30, height:30}}>
                             <Ionicons name='md-camera' size={20} color='white'/>
-                        </TouchableCmp>
+                        </TouchableCmp> */}
                         <TextInput
                             autoFocus={false}
                             multiline={true}
                             numberOfLines={4} 
-                            style={{flex:1, color:text, marginHorizontal:10, alignSelf:'center', paddingTop:0}}
+                            style={{flex:1, color:text, marginHorizontal:10, alignSelf:'center', paddingTop:0, fontSize: 15}}
                             placeholder={'Leave a reply'}
                             placeholderTextColor={'#838383'}
                             onChangeText={text => {setBody(text)}}
