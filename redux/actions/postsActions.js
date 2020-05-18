@@ -44,7 +44,7 @@ export const fetchNeeds = () => {
     }
 }
 
-
+// Consider drafts (published: false vs published: true, pubTimestamp)
 export const createNeed = (userName, body, localUri) => {
     return async (dispatch, getState) => {
         const uid = getState().auth.userId
