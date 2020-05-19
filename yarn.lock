@@ -6481,6 +6481,11 @@ react-native-screens@^2.2.0:
   dependencies:
     debounce "^1.2.0"
 
+react-native-shared-element@0.5.6:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/react-native-shared-element/-/react-native-shared-element-0.5.6.tgz#f0efac19aac50d495cd4b8caedae758cb9752503"
+  integrity sha512-4e3mFtrmqVHqmRum9xFTpY3JrteEP78oOIMM2I3ygu1sHcemYlyOq1BRoHk4vjHKzIckYuSXt8GAPYv1U5vosg==
+
 react-native-status-bar-height@^2.2.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/react-native-status-bar-height/-/react-native-status-bar-height-2.5.0.tgz#bc0fb85230603850aab9667ee8111a62954de90c"
@@ -6579,6 +6584,13 @@ react-navigation-material-bottom-tabs@^2.2.10:
   version "2.2.10"
   resolved "https://registry.yarnpkg.com/react-navigation-material-bottom-tabs/-/react-navigation-material-bottom-tabs-2.2.10.tgz#43887dca75567a0dc0f05b38322eacbaa39ea6e4"
   integrity sha512-ZywF8g6PgfLx3pKx4QLVgEF9l3DLDvdt78gVpASvnOu8pQQUP8ijnuL57xsn6Dy7WRpK6e4pg6mczUqpERVRqQ==
+
+react-navigation-shared-element@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-navigation-shared-element/-/react-navigation-shared-element-2.3.0.tgz#d64a150cb7300c064233af210875cfa82506cd60"
+  integrity sha512-fbZnipN8FjaA1sGhhaK1izGsG/GYEHCf7B7cT5lDO75MdFHmOlM7CNkuSq36RBP3I7s8P6pao0xyNI+15//k4w==
+  dependencies:
+    hoist-non-react-statics "^3.3.2"
 
 react-navigation-stack@^1.10.3:
   version "1.10.3"
