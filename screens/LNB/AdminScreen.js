@@ -64,7 +64,7 @@ const AdminScreen = props => {
             <ScrollView showsVerticalScrollIndicator={false} style={{paddingRight:10}}>
                 <View style={{flex:1, alignItems:'flex-start', padding:20}}>
                     <View style={{flexDirection: 'row', marginVertical: 5, alignSelf: 'center'}}>
-                        <Text style={{color:Colors.redcrayola, fontWeight:'600', fontSize: 20}}>Weekly Notes (May 11 - May 16)</Text>
+                        <Text style={{color:Colors.redcrayola, fontWeight:'600', fontSize: 20}}>Notes</Text>
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
@@ -74,27 +74,24 @@ const AdminScreen = props => {
                                 <Text style={{fontSize:3}}>https://youtu.be/g2nMKzhkvxw?t=429</Text> 
                                 {"\n"}
                             </Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Reusable Components (incl. menuAvatar){"\n"}</Text>
                             <Text style={{color:text, fontWeight:'400'}}>    -    Make Models! OOP/MVC{"\n"}</Text>
                         </Text>
                     </View>
                     <View style={{flexDirection: 'row', marginVertical: 5}}>
                         <Text style={{color:text}}>-    </Text>
                         <Text style={{color:Colors.orange, fontWeight: '600'}}>Misc Notes Notes:    <CheckMark/>{"\n"}
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Start building Admin Page (allow Admins to add new admins){"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Build Admin Page (allow Admins to add new admins){"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Implement refresh token{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Flickering avatars{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Start Events App{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Start planning how best to migrate shopping app into LNBapp (Stripe payments){"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Allow user to upload audio/video{"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Twitter style profile layouts & responsive headers{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Search/List members (include search bar on ConnectScreen){"\n"}</Text>
                         <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    ANIMATIONS: Like button, shared transitions (opening/navigating to need/picture/video, double-tap(?) etc){"\n"}</Text>
                         <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    App Redesign: DrawerScreen, Profile Header, Feed (animated header, new card component, embedded media){"\n"}</Text>
                         <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    Improve image aspect ratio, show image when pressed (UserProfile){"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Allow user to upload audio/video{"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Research and implement best practices for SQLite database use cases</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    TESTING, TESTING, TESTING{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Start planning how best to migrate shopping app into LNBapp (Stripe payments){"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    In-App links{"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Detect when multiple devices are signed in to same account{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    TESTING, TESTING, TESTING{"\n"}</Text>
                         </Text>
                     </View>
                 </View>
