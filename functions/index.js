@@ -61,7 +61,6 @@ exports.deleteFromIndex = functions.firestore.document('/users/{userId}')
 
 
 // UPDATE TWO COLLECTIONS: https://stackoverflow.com/questions/57653308/firestore-transaction-update-multiple-collections-in-a-single-transaction
-
 exports.onUserImageChange = functions
   .firestore
   .document('/users/{userId}')
@@ -126,3 +125,45 @@ exports.onCommentCountChange = functions
         console.error(err)
       })
   })
+
+// when a need is deleted, delete its likes, comments, and notifications
+exports.onNeedDelete = functions
+  .firestore
+  .document('needs/{needId}')
+  .onDelete((snapshot => {
+    const batch = db.batch()
+    return db
+      .collection('comments')
+      .where('postId', '==', snapshot.id)
+      .get()
+      .then(data => {
+        data.forEach(doc => {
+          batch.delete(db.doc(`/comments/${doc.id}`))
+        })
+        return db
+          .collection('likes')
+          .where('needId', '==', snapshot.id)
+          .get()
+      })
+      .then(data => {
+        data.forEach(doc => {
+          batch.delete(db.doc(`/likes/${doc.id}`))
+        })
+        return db
+          .collection('notifications')
+          .where('needId', '==', snapshot.id)
+          .get()
+      })
+      .then(data => {
+        data.forEach(doc => {
+          batch.delete(db.doc(`/notifications/${doc.id}`))
+        })
+        return batch.commit()
+      })
+      .catch(err => console.error(err))
+  }))
+
+
+
+
+// decrement connection count is user deletes profile
