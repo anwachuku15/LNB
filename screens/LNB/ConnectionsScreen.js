@@ -36,7 +36,52 @@ const ConnectionsScreen = props => {
     const auth = useSelector(state => state.auth)
     
 
-
+    const renderItem = ({item}) => (
+        // <Animated.View>
+            <TouchableCmp onPress={() => {
+                props.navigation.navigate({
+                    routeName: 'UserProfile',
+                    params: {
+                        userId: userId
+                    }
+                })
+            }}>
+                <ListItem
+                    containerStyle={{backgroundColor:background, paddingLeft: 0}}
+                    title={
+                        <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                            <View style={{flexDirection:'row', width: '90%'}} >
+                                <View style={{width: '20%', alignItems:'center', justifyContent:'center'}}>
+                                    <Ionicons
+                                        name='md-person-add' 
+                                        size={23} 
+                                        color={Colors.blue}
+                                    />
+                                </View>
+                                <View style={{width: '80%'}}>
+                                    <TouchableCmp 
+                                        style={{alignSelf:'flex-start'}}
+                                        onPress={() => {navToUserProfile(item.senderId)}}
+                                    >
+                                        <Image 
+                                            source={{uri: item.senderImage}}
+                                            style={styles.avatar}
+                                        />
+                                    </TouchableCmp>
+                                    <Text style={{color:text, marginTop: 3}}>
+                                        You are now connected with <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName}.</Text>
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    }
+                    // subtitle='Content of what was liked or commented'
+                    // leftAvatar=
+                    bottomDivider
+                />
+            </TouchableCmp>
+        // </View>
+    )
     return (
         
         <View style={styles.screen}>
@@ -60,6 +105,7 @@ const ConnectionsScreen = props => {
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
                 <Text style={{color:Colors.socialdark}}>Under Construction</Text>
                 <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
+
             </View>
         </View>
 
