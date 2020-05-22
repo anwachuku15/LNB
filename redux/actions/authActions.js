@@ -78,21 +78,25 @@ const updateStorageData = (newToken, userId, newDate) => {
 
 
 firebase.auth().onIdTokenChanged(async user => {
-    const uid = user.uid
-    const newToken = await user.getIdToken()
-    const newTime = jwtDecode(newToken).exp * 1000
-    const newDate = new Date(newTime)
-    const authData = await AsyncStorage.getItem('authData')
-    const transformedData = JSON.parse(authData)
-    const {token, userId, expDate} = transformedData
-    
-    if (token === newToken) {
-        console.log('same token')
-        console.log(newTime)
-        console.log(expDate)
-        console.log(newDate)
-    } else {
-        updateStorageData(newToken, uid, newDate)
+    console.log('onIdTokenChange - USER:')
+    console.log(user)
+    console.log('\n')
+    if (user !== null) {
+        const uid = user.uid
+        const newToken = await user.getIdToken()
+        const newDate = new Date(jwtDecode(newToken).exp * 1000)
+
+        const authData = await AsyncStorage.getItem('authData')
+        const transformedData = JSON.parse(authData)
+        const {token, userId, expDate} = transformedData
+        if (token != newToken) {
+            console.log('Token Refresh: updateStorageData -> authenticate')
+            
+            updateStorageData(newToken, uid, newDate)
+            authenticate(newToken, uid)
+            
+            console.log('\n')
+        }
     }
 })
 
