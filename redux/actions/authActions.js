@@ -89,6 +89,7 @@ firebase.auth().onIdTokenChanged(async user => {
         const authData = await AsyncStorage.getItem('authData')
         const transformedData = JSON.parse(authData)
         const {token, userId, expDate} = transformedData
+        console.log(new Date(expDate).getTime())
         if (token != newToken) {
             console.log('Token Refresh: updateStorageData -> authenticate')
             
@@ -152,6 +153,11 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
         dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin))
+
+        //ONBOARDING
+        // data.additionalUserInfo.isNewUser for onboarding
+        // data.user.metadata.creationTime
+        // data.user.metadata.lastSignInTime
     }
 }
 export const login = (email, password) => {
