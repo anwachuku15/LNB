@@ -26,9 +26,9 @@ export const LAST_READ_TIMESTAMP = 'LAST_READ_TIMESTAMP'
 
 const db = firebase.firestore()
 // AUTH UTILS
-export const authenticate = (token, userId, expiresIn) => {
+export const authenticate = (token, userId) => {
     return dispatch => {
-        dispatch(setLogoutTimer(expiresIn))
+        // dispatch(setLogoutTimer(expiresIn))
         dispatch({
             type: AUTHENTICATE,
             token: token,
@@ -36,19 +36,30 @@ export const authenticate = (token, userId, expiresIn) => {
         })
     }
 }
-let timer
-const setLogoutTimer = exp => {
-    return dispatch => {
-        timer = setTimeout(() => {
-            dispatch(logout())
-        }, exp)
-    }
+
+// LOGOUT WHEN exp EXPIRES
+// let timer
+// const setLogoutTimer = exp => {
+//     return dispatch => {
+//         timer = setTimeout(() => {
+//             dispatch(logout())
+//         }, exp)
+//     }
+// }
+
+
+// const clearLogoutTimer = () => {
+//     if (timer) {
+//         clearTimeout(timer)
+//     }
+// }
+
+export const logout = () => {
+    // clearLogoutTimer()
+    AsyncStorage.removeItem('authData')
+    return {type: LOGOUT }
 }
-const clearLogoutTimer = () => {
-    if (timer) {
-        clearTimeout(timer)
-    }
-}
+
 const saveDataToStorage = (token, userId, expDate) => {
     AsyncStorage.setItem('authData', JSON.stringify({
         token: token,
@@ -56,6 +67,34 @@ const saveDataToStorage = (token, userId, expDate) => {
         expDate: expDate.toISOString()
     }))
 }
+
+const updateStorageData = (newToken, userId, newDate) => {
+    AsyncStorage.mergeItem('authData', JSON.stringify({
+        token: newToken,
+        userId: userId,
+        expDate: newDate.toISOString()
+    }))
+}
+
+
+firebase.auth().onIdTokenChanged(async user => {
+    const uid = user.uid
+    const newToken = await user.getIdToken()
+    const newTime = jwtDecode(newToken).exp * 1000
+    const newDate = new Date(newTime)
+    const authData = await AsyncStorage.getItem('authData')
+    const transformedData = JSON.parse(authData)
+    const {token, userId, expDate} = transformedData
+    
+    if (token === newToken) {
+        console.log('same token')
+        console.log(newTime)
+        console.log(expDate)
+        console.log(newDate)
+    } else {
+        updateStorageData(newToken, uid, newDate)
+    }
+})
 
 
 // SIGNUP + LOGIN + LOGOUT
@@ -77,7 +116,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000
         expDate = new Date(expTime)
-        expiresIn = expTime - ((new Date()).getTime())
+        // expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
 
         console.log('setting imageUrl...')
@@ -107,7 +146,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         })
         
         saveDataToStorage(idToken, userId, expDate)
-        dispatch(authenticate(idToken, userId, expiresIn))
+        dispatch(authenticate(idToken, userId))
         dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin))
     }
 }
@@ -128,9 +167,9 @@ export const login = (email, password) => {
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000;
         expDate = new Date(expTime)
-        expiresIn = expTime - ((new Date()).getTime())
+        // expiresIn = expTime - ((new Date()).getTime())
         saveDataToStorage(idToken, userId, expDate)
-        dispatch(authenticate(idToken, userId, expiresIn))
+        dispatch(authenticate(idToken, userId))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = userDoc.data()
@@ -139,11 +178,7 @@ export const login = (email, password) => {
         }
     }
 }
-export const logout = () => {
-    clearLogoutTimer()
-    AsyncStorage.removeItem('authData')
-    return {type: LOGOUT }
-}
+
 
 // SET USER ACTIONS
 export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin) => {

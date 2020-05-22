@@ -4,6 +4,8 @@ import { authenticate, getAuthenticatedUser } from '../redux/actions/authActions
 import { StyleSheet, View, ActivityIndicator, AsyncStorage } from 'react-native'
 import Colors from '../constants/Colors'
 import * as firebase from 'firebase'
+import jwtDecode from 'jwt-decode'
+
 // import { db } from '../Firebase/Firebase'
 
 const db = firebase.firestore()
@@ -13,7 +15,8 @@ const LoadingScreen = props => {
     useEffect(() => {
         const tryLogin = async () => {
             const authData = await AsyncStorage.getItem('authData')
-            firebase.auth().onAuthStateChanged(user => {
+
+            firebase.auth().onIdTokenChanged(async user => {
                 if (authData) {
                     const transformedData = JSON.parse(authData)
                     const {token, userId, expDate} = transformedData
@@ -22,9 +25,8 @@ const LoadingScreen = props => {
                         return
                     }
 
-
-                    const expiresIn = new Date(expDate).getTime() - (new Date().getTime())
-                    dispatch(authenticate(token, userId, expiresIn))
+                    // const expiresIn = new Date(expDate).getTime() - (new Date().getTime())
+                    dispatch(authenticate(token, userId))
                     db.doc(`/users/${userId}`)
                         .get()
                         .then(userDoc => {
