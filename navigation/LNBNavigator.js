@@ -2,22 +2,18 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
-import { Platform, View, Button, SafeAreaView, StyleSheet, Image, Text, ScrollView, TouchableOpacity} from 'react-native'
-// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { Platform, View, Button, SafeAreaView, Text } from 'react-native'
 import { createAppContainer, createSwitchNavigator } from 'react-navigation'
-import { createStackNavigator, } from 'react-navigation-stack'
-import { createDrawerNavigator, DrawerNavigatorItems,} from 'react-navigation-drawer'
+import { createStackNavigator } from 'react-navigation-stack'
+import { createDrawerNavigator } from 'react-navigation-drawer'
 import { createMaterialTopTabNavigator, createBottomTabNavigator } from 'react-navigation-tabs'
-import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 
-import Animated, { Easing } from 'react-native-reanimated';
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
 import Colors from '../constants/Colors'
-import { HeaderButtons, Item } from 'react-navigation-header-buttons'
-import HeaderButton from '../components/UI/HeaderButton'
 
 import HomeScreen from '../screens/LNB/HomeScreen'
-import { Ionicons, FontAwesome, MaterialCommunityIcons, SimpleLineIcons, Feather } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, SimpleLineIcons, Feather } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import BulletinScreen from '../screens/LNB/BulletinScreen'
@@ -25,7 +21,6 @@ import ConnectScreen from '../screens/LNB/ConnectScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
 import MessagesScreen from '../screens/LNB/MessagesScreen'
-import ProfileScreen from '../screens/LNB/ProfileScreen'
 import SettingsScreen from '../screens/LNB/SettingsScreen'
 import DrawerScreen from '../screens/LNB/DrawerScreen'
 import EditProfileScreen from '../screens/LNB/EditProfileScreen'
@@ -38,7 +33,7 @@ import EventsScreen from '../screens/LNB/EventsScreen'
 import AdminScreen from '../screens/LNB/AdminScreen'
 import ConnectionsScreen from '../screens/LNB/ConnectionsScreen'
 import ConnectRequestsScreen from '../screens/LNB/ConnectRequestsScreen'
-// import ConnectScreen from '../screens/LNB/ConnectScreen'
+import UserProfilePictureScreen from '../screens/LNB/UserProfilePictureScreen'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -80,6 +75,40 @@ const HomeStack = createStackNavigator({
             }
         }
     },
+    UserProfilePicture: {
+        screen: UserProfilePictureScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    // sharedUserProfile: createSharedElementStackNavigator({
+    //     UserProfile: {
+    //         screen: UserProfileScreen,
+    //         navigationOptions: {
+    //             gestureResponseDistance: {
+    //                 horizontal: 300
+    //             }
+    //         }
+    //     },
+    //     UserProfilePicture: {
+    //         screen: UserProfilePictureScreen,
+    //         navigationOptions: {
+    //             gestureResponseDistance: {
+    //                 horizontal: 300
+    //             }
+    //         }
+    //     },
+    // }, {
+    //     headerMode: 'none',
+    //     initialRouteName: 'UserProfile',
+    //     defaultNavigationOptions: {
+    //         cardStyle: {
+    //             backgroundColor: 'transparent'
+    //         }
+    //     }
+    // }),
     Connections: {
         screen: ConnectionsScreen,
         navigationOptions: {
@@ -129,12 +158,21 @@ const HomeStack = createStackNavigator({
 
 
 
+
 const BulletinStack = createStackNavigator({
     Bulletin: {
         screen: BulletinScreen,
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    UserProfilePicture: {
+        screen: UserProfilePictureScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -173,6 +211,14 @@ const NotificationsStack = createStackNavigator({
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    UserProfilePicture: {
+        screen: UserProfilePictureScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -219,6 +265,14 @@ const ConnectStack = createStackNavigator({
     },
     UserProfile: {
         screen: UserProfileScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    UserProfilePicture: {
+        screen: UserProfilePictureScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -403,8 +457,6 @@ const MessagesStack = createStackNavigator({
     }
 }, {headerMode: 'none'})
 
-
-
 const DrawerNav = createDrawerNavigator({
     Main: {
         screen: BottomTabStackContainer,
@@ -425,7 +477,7 @@ const DrawerNav = createDrawerNavigator({
                         title='Logout'
                         color={Colors.primary}
                         onPress={() => {
-                            dispatch(logout)
+                            dispatch(logout())
                             props.navigation.navigate('Auth')
                         }}
                     />

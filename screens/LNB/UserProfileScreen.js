@@ -12,8 +12,12 @@ import {
     ScrollView,
     FlatList,
     ActivityIndicator,
-    Alert
+    Alert,
+    TouchableWithoutFeedback,
+    Animated,
+    Dimensions
 } from 'react-native'
+import { SharedElement } from 'react-navigation-shared-element'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
@@ -22,6 +26,7 @@ import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
 import * as firebase from 'firebase'
 import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
@@ -31,6 +36,9 @@ import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 
 const db = firebase.firestore()
+
+let SCREEN_WIDTH = Dimensions.get('window').width
+let SCREEN_HEIGHT = Dimensions.get('window').height
 
 let themeColor
 let text
@@ -197,12 +205,6 @@ const UserProfileScreen = props => {
         )
     }
 
-    
-
-    let TouchableCmp = TouchableOpacity
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
 
     let websiteIcon
     if (user) {    
@@ -260,12 +262,26 @@ const UserProfileScreen = props => {
                 </View>
                 
                 {/* PROFILE HEADER */}
+                {/* https://youtu.be/S-HVfH7BVIQ?t=2743 */}
+                {/* SwipeTab under profile header with options: needs, bio/skillset, third option */}
                 <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingVertical:5}}>
                     <View style={{paddingHorizontal:20, alignItems:'flex-start', flexDirection:'row'}}>
                         <View style={{flexDirection:'column', width:'40%'}}>
-                            <View style={styles.avatarContainer}>
-                                <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
-                            </View>
+                            <TouchableWithoutFeedback onPress={() => {
+                                props.navigation.navigate({
+                                    routeName: 'UserProfilePicture',
+                                    params: {
+                                        profilePic: user.credentials.imageUrl,
+                                        userId: userId
+                                    } 
+                                })
+                            }}>
+                                <View style={styles.avatarContainer}>
+                                    <Animated.View>
+                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
+                                    </Animated.View>
+                                </View>
+                            </TouchableWithoutFeedback>
                             <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
                             <Text style={styles.infoTitle}>{user.credentials.headline}</Text>
                             {userId !== authUser.userId ? (
@@ -418,11 +434,6 @@ const UserProfileScreen = props => {
 }
 
 
-UserProfileScreen.navigationOptions = (navData) => {
-    return {
-        headerTitle: 'Profile'
-    }
-}
 
 const styles = StyleSheet.create({
     screen: {
