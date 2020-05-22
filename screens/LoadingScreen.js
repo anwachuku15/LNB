@@ -15,17 +15,12 @@ const LoadingScreen = props => {
     useEffect(() => {
         const tryLogin = async () => {
             const authData = await AsyncStorage.getItem('authData')
-
-            firebase.auth().onIdTokenChanged(async user => {
+            console.log('tryLogin')
+            firebase.auth().onAuthStateChanged(async user => {
                 if (authData) {
                     const transformedData = JSON.parse(authData)
                     const {token, userId, expDate} = transformedData
-                    if (new Date(expDate).getTime() < new Date() || !token || !userId) { 
-                        props.navigation.navigate('Auth')
-                        return
-                    }
-
-                    // const expiresIn = new Date(expDate).getTime() - (new Date().getTime())
+                    
                     dispatch(authenticate(token, userId))
                     db.doc(`/users/${userId}`)
                         .get()
