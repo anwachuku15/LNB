@@ -36,7 +36,7 @@ export default function App() {
     setIsMounted(true)
     return () => {
       setIsMounted(false)
-      console.log('App Unmounted')
+      // console.log('App Unmounted')
     }
   })
 

@@ -50,6 +50,7 @@ export const createNeed = (userName, body, localUri) => {
         const uid = getState().auth.userId
         const userImage = getState().auth.credentials.imageUrl
         let remoteUri, postId
+
         const timestamp = moment(Date.now()).toISOString()
         if (localUri !== '') {
             remoteUri = await uploadPhotoAsyn(localUri)
@@ -278,9 +279,9 @@ export const getNeed = (needId) => {
     }
 }
 
-const uploadPhotoAsyn = async uri => (getState) => {
-    // const path = `photos/${this.uid}/${Date.now()}.jpg`
-    const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
+const uploadPhotoAsyn = async uri => {
+    const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
+    // const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
     return new Promise(async (res, rej) => {
         const response = await fetch(uri)
         const file = await response.blob()

@@ -31,6 +31,7 @@ import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
 import { appId, key } from '../../secrets/algolia'
 import MenuAvatar from '../../components/LNB/MenuAvatar'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
 
 const client = algoliasearch(appId, key)
 const index = client.initIndex('LNBmembers')
@@ -159,10 +160,7 @@ const ConnectScreen = props => {
         </TouchableCmp>
     )
 
-    let TouchableCmp = TouchableOpacity
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
+
     return (
             <SafeAreaView style={{...styles.screen, ...{backgroundColor: ''}}}>
                 <View style={{...styles.header, ...{backgroundColor: scheme==='dark' ? 'black' : 'white'}}}>

@@ -20,6 +20,7 @@ import {
     SafeAreaView, 
     KeyboardAvoidingView 
 } from 'react-native'
+import { SharedElement } from 'react-navigation-shared-element'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
@@ -337,26 +338,7 @@ const PostDetailScreen = props => {
     )
 }
 
-PostDetailScreen.navigationOptions = navData => {
-    return {
-        headerTitle: navData.navigation.getParam('productTitle'),
-        headerLeft: () => {
-            return (
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Go Back'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {
-                            navData.navigation.navigate({
-                                routeName: 'ProductCartTab'
-                            })
-                        }}
-                    />
-                </HeaderButtons>
-            )
-        }
-    }
-}
+
 
 const styles = StyleSheet.create({
     touchable: {

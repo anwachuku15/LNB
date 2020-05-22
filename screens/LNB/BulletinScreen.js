@@ -42,7 +42,6 @@ const BulletinScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
     return (
-        
         <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
                 <View>

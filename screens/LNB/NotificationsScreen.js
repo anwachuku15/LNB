@@ -28,6 +28,8 @@ import firebase from 'firebase'
 import moment from 'moment'
 import { LayoutAnimation } from 'react-native'
 import MenuAvatar from '../../components/LNB/MenuAvatar'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
+
 
 const db = firebase.firestore()
 
@@ -109,10 +111,6 @@ const NotificationsScreen = props => {
         })
     }
 
-    let TouchableCmp = TouchableOpacity
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
 
     const CustomLayout = {
         duration: 300,

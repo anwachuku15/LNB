@@ -26,6 +26,7 @@ import {
     SafeAreaView,
     UIManager
 } from 'react-native'
+
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
@@ -75,6 +76,7 @@ const HomeScreen = props => {
         //     registerForPushNotificationsAsync.remove()
         // }
     }, [registerForPushNotificationsAsync])
+    
     const registerForPushNotificationsAsync = async () => {
         if (Constants.isDevice) {
             const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
@@ -357,7 +359,7 @@ const HomeScreen = props => {
                                         >
                                             <View style={styles.modalView}>
                                                 <View style={styles.modal}>
-                                                    <Text style={styles.modalText}>what</Text>
+                                                    <Text style={styles.modalText}>Coming soon...</Text>
                                                     <TouchableHighlight
                                                         style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
                                                         onPress={() => {

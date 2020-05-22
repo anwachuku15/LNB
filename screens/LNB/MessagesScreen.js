@@ -28,6 +28,8 @@ import firebase from 'firebase'
 import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
 import { appId, key } from '../../secrets/algolia'
+import * as FileSystem from 'expo-file-system'
+import shorthash from 'shorthash'
 
 const client = algoliasearch(appId, key)
 const index = client.initIndex('LNBmembers')
