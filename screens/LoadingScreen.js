@@ -15,7 +15,6 @@ const LoadingScreen = props => {
     useEffect(() => {
         const tryLogin = async () => {
             const authData = await AsyncStorage.getItem('authData')
-            console.log('tryLogin')
             firebase.auth().onAuthStateChanged(async user => {
                 if (authData) {
                     const transformedData = JSON.parse(authData)
