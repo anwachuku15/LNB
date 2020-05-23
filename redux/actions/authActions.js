@@ -81,6 +81,7 @@ firebase.auth().onIdTokenChanged(async user => {
     console.log('onIdTokenChange - USER:')
     console.log(user)
     console.log('\n')
+    if (user == null) return AsyncStorage.removeItem('authData')
     if (user !== null) {
         const uid = user.uid
         const newToken = await user.getIdToken()
