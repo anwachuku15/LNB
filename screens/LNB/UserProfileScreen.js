@@ -145,10 +145,14 @@ const UserProfileScreen = props => {
                                                                 }
                                                             })
         
-        connectionsSnapshot
-        acceptButton
-        connectedButton
-        requestedButton
+        connectionsSnapshot()
+        acceptButton()
+        connectedButton()
+        requestedButton()
+
+        return () => {
+            loadUser()
+        }
     }, [dispatch, loadUser])
     
     

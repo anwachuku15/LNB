@@ -149,38 +149,31 @@ const HomeScreen = props => {
     },[dispatch, setIsRefreshing, setError])
 
     useEffect(() => {
-
         setShowNeedActions(true)
         setIsMounted(true)
 
+        setIsLoading(true)
+        if (isMounted) {
+            loadData().then(() => {
+                setIsLoading(false)
+            })
+        }
         return () => {
             setShowNeedActions(false)
             setIsMounted(false)
-            // console.log('HomeScreen unmounted - loadData')
         }
-    }, [isMounted, showNeedActions, isMounted])
+    }, [dispatch, loadData, isMounted, showNeedActions, isMounted])
 
     // NAV LISTENER
     useEffect(() => {
-        const willFocusSub = props.navigation.addListener(
-            'willFocus',
-            loadData
-        )
+        const willFocusSub = props.navigation.addListener('willFocus', loadData)
+        const willBlurSub = props.navigation.addListener('willBlur', loadData)
         // Clean up listener when function re-runs https://reactjs.org/docs/hooks-effect.html
         return () => {
             willFocusSub
+            willBlurSub
         }
     }, [loadData])
-
-    useEffect(() => {
-        setIsLoading(true)
-        loadData().then(() => {
-            setIsLoading(false)
-        })
-        return () => {
-            loadData()
-        }
-    }, [dispatch, loadData])
     
 
 

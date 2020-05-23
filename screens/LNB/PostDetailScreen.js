@@ -126,7 +126,7 @@ const PostDetailScreen = props => {
             })
 
         return () => {
-            setLikeIcon
+            setLikeIcon()
         }
     },[dispatch])
 

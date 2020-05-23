@@ -43,8 +43,8 @@ const NeedActions = props => {
         })
 
         return () => {
-            needDataListener
-            setLikeIcon
+            needDataListener()
+            setLikeIcon()
         }
     },[dispatch])
 
