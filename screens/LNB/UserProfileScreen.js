@@ -151,7 +151,7 @@ const UserProfileScreen = props => {
         requestedButton()
 
         return () => {
-            loadUser()
+            loadUser
         }
     }, [dispatch, loadUser])
     
