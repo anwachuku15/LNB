@@ -81,7 +81,8 @@ const AdminScreen = props => {
                         <Text style={{color:text}}>-    </Text>
                         <Text style={{color:Colors.orange, fontWeight: '600'}}>Misc Notes Notes:    <CheckMark/>{"\n"}
                         <Text style={{color:text, fontWeight:'400'}}>    -    Build Admin Page (allow Admins to add new admins){"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Implement refresh token{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Mass messaging from Admins{"\n"}</Text>
+                        <Text style={{color:text, fontWeight:'400'}}>    -    Redesign User Profile{"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Implement useMemo when necessary to cache images{"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Start Events App{"\n"}</Text>
                         <Text style={{color:text, fontWeight:'400'}}>    -    Start planning how best to migrate shopping app into LNBapp (Stripe payments){"\n"}</Text>
