@@ -68,6 +68,7 @@ export const createNeed = (userName, body, localUri) => {
             .then(doc => {
                 postId = doc.id
             })
+            .catch(err => console.log(err))
 
             dispatch({
                 type: CREATE_NEED,
@@ -97,6 +98,7 @@ export const createNeed = (userName, body, localUri) => {
             .then(doc => {
                 postId = doc.id
             })
+            .catch(err => console.log(err))
             dispatch({
                 type: CREATE_NEED,
                 postData: {
@@ -134,6 +136,8 @@ export const createNeedNoImg = (userName, body) => {
         .then(doc => {
             postId = doc.id
         })
+        .catch(err => console.log(err))
+        
         dispatch({
             type: CREATE_NEED_NOIMG,
             postData: {
