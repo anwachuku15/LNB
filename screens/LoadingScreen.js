@@ -16,7 +16,7 @@ const LoadingScreen = props => {
         const tryLogin = async () => {
             const authData = await AsyncStorage.getItem('authData')
             firebase.auth().onAuthStateChanged(async user => {
-                if (authData) {
+                if (authData && user) {
                     const transformedData = JSON.parse(authData)
                     const {token, userId, expDate} = transformedData
                     
