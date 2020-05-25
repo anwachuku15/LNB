@@ -434,6 +434,15 @@ const BottomTabStackContainer = createStackNavigator({
     headerMode: 'none',
 })
 
+const SwipeableUserProfile = createMaterialTopTabNavigator({
+    Main: UserProfileScreen,
+    Picture: UserProfilePictureScreen
+}, {
+    swipeEnabled: true,
+    tabBarOptions: {
+        style: {display: 'none'}
+    }
+})
 
 const MessagesStack = createStackNavigator({
     MessagesScreen: {
@@ -523,7 +532,6 @@ DrawerNav.navigationOptions = ({navigation}) => {
         swipeEnabled
     }
 }
-
 
 
 const SwipeTabNavigator = createMaterialTopTabNavigator({
