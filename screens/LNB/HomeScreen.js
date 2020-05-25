@@ -18,7 +18,6 @@ import {
     TouchableWithoutFeedback,
     Text, 
     Button, 
-    FlatList, 
     ActivityIndicator, 
     View, 
     StyleSheet, 
@@ -26,6 +25,7 @@ import {
     SafeAreaView,
     UIManager
 } from 'react-native'
+import { FlatList } from 'react-navigation'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
@@ -39,6 +39,9 @@ import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
+import Hyperlink from 'react-native-hyperlink'
+import * as Linking from 'expo-linking'
+import * as WebBrowser from 'expo-web-browser'
 
 const db = firebase.firestore()
 
@@ -256,6 +259,10 @@ const HomeScreen = props => {
         })
     }
 
+    const handleOpenLink = (link) => {
+        // Linking.openURL(link)
+        WebBrowser.openBrowserAsync(link)
+    }
     
     
     // if(Platform.OS === 'android') {
@@ -362,7 +369,12 @@ const HomeScreen = props => {
                                             </View>
                                         </Modal>
                                     </View>
-                                    <Text style={styles.post}>{itemData.item.body}</Text>
+                                    <Hyperlink
+                                        linkDefault={true}
+                                        linkStyle={{color:Colors.primary}}
+                                    >
+                                        <Text style={styles.post}>{itemData.item.body}</Text>
+                                    </Hyperlink>
                                     {itemData.item.imageUrl ? (
                                         <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
                                     ) : (
