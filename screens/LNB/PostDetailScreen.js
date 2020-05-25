@@ -246,45 +246,6 @@ const PostDetailScreen = props => {
                 </HeaderButtons>
             </View>
             
-            <View style={styles.feedItem}>
-                <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
-                    <Image source={{uri: need.userImage}} style={styles.avatar} />
-                </TouchableCmp>
-                <View style={{flex: 1}}>
-                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                        <View>
-                            <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
-                                <Text style={styles.name}>
-                                    {need.userName}
-                                    <Text style={styles.timestamp}>  ·  {moment(need.timestamp).fromNow()}</Text>
-                                </Text>
-                            </TouchableCmp>
-                        </View>
-                        <Ionicons name='ios-more' size={24} color='#73788B'/>
-                    </View>
-                    <Text style={styles.post}>{need.body}</Text>
-                    {need.imageUrl ? (
-                        <Image source={{uri: need.imageUrl}} style={styles.postImage} resizeMode='cover'/>
-                    ) : (
-                        null
-                    )}
-                    {/* <NeedActions needId={need.id} leaveComment={commentButtonHandler}/> */}
-                    <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
-                        <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
-                            <View style={{flexDirection:'row'}}>
-                                <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
-                                {/* {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>} */}
-                            </View>
-                        </TouchableCmp>
-                        <TouchableCmp onPress={() => {}}>
-                            <View style={{flexDirection:'row'}}>
-                                <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
-                                {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}
-                            </View>
-                        </TouchableCmp>
-                    </View>
-                </View>
-            </View>
 
             {/* Comments */}
             {isLoading && (
@@ -295,13 +256,54 @@ const PostDetailScreen = props => {
                     />
                 </View>
             )}
-            {!isLoading && comments.length > 0 ? (
+            {!isLoading && comments.length > -1 ? (
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
                     data={comments}
                     renderItem={renderComment}
                     onRefresh={loadComments}
                     refreshing={isRefreshing}
+                    ListHeaderComponent={() => (
+                        <View style={styles.feedItem}>
+                            <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
+                                <Image source={{uri: need.userImage}} style={styles.avatar} />
+                            </TouchableCmp>
+                            <View style={{flex: 1}}>
+                                <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+                                    <View>
+                                        <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
+                                            <Text style={styles.name}>
+                                                {need.userName}
+                                                <Text style={styles.timestamp}>  ·  {moment(need.timestamp).fromNow()}</Text>
+                                            </Text>
+                                        </TouchableCmp>
+                                    </View>
+                                    <Ionicons name='ios-more' size={24} color='#73788B'/>
+                                </View>
+                                <Text style={styles.post}>{need.body}</Text>
+                                {need.imageUrl ? (
+                                    <Image source={{uri: need.imageUrl}} style={styles.postImage} resizeMode='cover'/>
+                                ) : (
+                                    null
+                                )}
+                                {/* <NeedActions needId={need.id} leaveComment={commentButtonHandler}/> */}
+                                <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                                    <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
+                                        <View style={{flexDirection:'row'}}>
+                                            <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
+                                            {/* {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>} */}
+                                        </View>
+                                    </TouchableCmp>
+                                    <TouchableCmp onPress={() => {}}>
+                                        <View style={{flexDirection:'row'}}>
+                                            <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
+                                            {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}
+                                        </View>
+                                    </TouchableCmp>
+                                </View>
+                            </View>
+                        </View>
+                    )}
                 />
             ) : (
                 <View style={{alignSelf:'center', flex:1}}></View>
