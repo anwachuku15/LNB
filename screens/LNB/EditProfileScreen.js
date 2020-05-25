@@ -219,7 +219,7 @@ const EditProfileScreen = props => {
                                 <Input
                                     id='bio'
                                     label='Bio'
-                                    errorText='Please enter your bio (160 character max)'
+                                    errorText='Please enter your bio (150 character max)'
                                     keyboardType='default'
                                     autoCapitalize='sentences'
                                     autoCorrect
@@ -248,7 +248,7 @@ const EditProfileScreen = props => {
                                 <Input
                                     id='website'
                                     website
-                                    label='Website'
+                                    label='LinkedIn'
                                     errorText='Please enter a valid website'
                                     keyboardType='default'
                                     autoCapitalize='none'
