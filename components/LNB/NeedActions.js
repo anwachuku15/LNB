@@ -38,8 +38,10 @@ const NeedActions = props => {
                 }
             })
         const needDataListener = db.doc(`/needs/${props.needId}`).onSnapshot(snapshot => {
-            setLikeCount(snapshot.data().likeCount)
-            setCommentCount(snapshot.data().commentCount)
+            if (snapshot.exists) {
+                setLikeCount(snapshot.data().likeCount)
+                setCommentCount(snapshot.data().commentCount)
+            }
         })
 
         return () => {
