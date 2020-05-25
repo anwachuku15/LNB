@@ -371,7 +371,7 @@ const HomeScreen = props => {
                                     </View>
                                     <Hyperlink
                                         linkDefault={true}
-                                        linkStyle={{color:Colors.primary}}
+                                        linkStyle={{color:Colors.blue}}
                                     >
                                         <Text style={styles.post}>{itemData.item.body}</Text>
                                     </Hyperlink>
