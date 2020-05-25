@@ -35,7 +35,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 // import '@firebase/firestore'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
-import NeedActions from '../../components/LNB/NeedActions' 
+import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
@@ -175,6 +175,7 @@ const HomeScreen = props => {
         }
     }, [loadData])
     
+    
 
 
     const selectUserHandler = (userId) => {
@@ -277,11 +278,6 @@ const HomeScreen = props => {
                                 onPress={() => {props.navigation.toggleDrawer()}}
                             />
                         </HeaderButtons> */}
-                        {/* <View>
-                            <TouchableCmp onPress={() => props.navigation.toggleDrawer()}>
-                                <Image source={{uri: authUser.imageUrl}} style={styles.menuAvatar} />
-                            </TouchableCmp>
-                        </View> */}
                         <MenuAvatar 
                             toggleDrawer={() => props.navigation.toggleDrawer()}
                         />
@@ -306,6 +302,7 @@ const HomeScreen = props => {
 
                 {/* NEED POSTS */}
                 
+                {/* Large list, slow to update - make sure renderItem function follows best practices: PureComponent, shouldComponentUpdate, etc */}
                 <FlatList
                     ref={flatListRef}
                     keyExtractor={(item, index) => index.toString()}
