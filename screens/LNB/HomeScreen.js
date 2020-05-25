@@ -23,6 +23,7 @@ import {
     StyleSheet, 
     Image, 
     SafeAreaView,
+    Dimensions,
     UIManager
 } from 'react-native'
 import { FlatList } from 'react-navigation'
@@ -39,11 +40,17 @@ import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
+import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
+import { ListItem } from 'react-native-elements'
 
 const db = firebase.firestore()
+
+const WINDOW_WIDTH = Dimensions.get('window').width
+const WINDOW_HEIGHT = Dimensions.get('window').height
+const BASE_PADDING = 10
 
 let themeColor
 let text
@@ -263,6 +270,96 @@ const HomeScreen = props => {
         // Linking.openURL(link)
         WebBrowser.openBrowserAsync(link)
     }
+
+    const renderItem = ({item}) => (
+        <TouchableCmp onPress={() => {
+            props.navigation.navigate({
+                routeName: 'PostDetail',
+                params: {
+                    needId: item.id
+                }
+            })
+        }} useForeground>
+            <View style={{...styles.feedItem, ...{backgroundColor: themeColor}}} key={item.id}>
+                <TouchableCmp 
+                    onPress={() => selectUserHandler(item.uid)}
+                    style={{alignSelf:'flex-start'}}
+                >
+                    <Image source={{uri: item.userImage}} style={styles.avatar} />
+                </TouchableCmp>
+                <View style={{flex: 1}}>
+                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+                        <View>
+                            <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
+                                <Text style={{...styles.name, ...{color:text}}}>
+                                    {item.userName}
+                                    <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
+                                </Text>
+                            </TouchableCmp>
+                        </View>
+                        <TouchableCmp onPress={() => {
+                            console.log(item.id)
+                            setIsModalVisible(!isModalVisible)
+                        }}>
+                            <Ionicons name='ios-more' size={24} color='#73788B'/>
+                        </TouchableCmp>
+                        <Modal
+                            animationType='slide'
+                            transparent={true}
+                            visible={isModalVisible}
+                            onDismiss={() => {}}
+                        >
+                            <View style={styles.modalView}>
+                                <View style={styles.modal}>
+                                    <Text style={styles.modalText}>Coming soon...</Text>
+                                    <TouchableHighlight
+                                        style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
+                                        onPress={() => {
+                                            setIsModalVisible(!isModalVisible);
+                                        }}
+                                    >
+                                        <Text style={styles.modalButtonText}>Hide Modal</Text>
+                                    </TouchableHighlight>
+                                </View>
+                            </View>
+                        </Modal>
+                    </View>
+                    <Hyperlink
+                        linkDefault={true}
+                        linkStyle={{color:Colors.bluesea}}
+                    >
+                        <Text style={{...styles.post, ...{color:text}}}>{item.body}</Text>
+                    </Hyperlink>
+                    {item.imageUrl ? (
+                        <Lightbox
+                            backgroundColor='rgba(0, 0, 0, 0.8)'
+                            renderHeader={(close) => (
+                                <TouchableCmp 
+                                    onPress={close}
+                                    style={styles.closeButton}
+                                >
+                                    <Ionicons 
+                                        name='ios-close'
+                                        size={36}
+                                        color='white'
+                                    />
+                                </TouchableCmp >
+                            )}
+                            underlayColor={themeColor}
+                            renderContent={() => (
+                                <Image source={{uri: item.imageUrl}} style={styles.lightboxImage} resizeMode='contain' />
+                            )}
+                        >
+                            <Image source={{uri: item.imageUrl}} style={{...styles.postImage, ...{borderColor:Colors.disabled}}} resizeMethod='auto' />
+                        </Lightbox>
+                    ) : (
+                        null
+                    )}
+                    {showNeedActions && item.id && (<NeedActions needId={item.id} leaveComment={() => commentButtonHandler(item.id)}/>)}
+                </View>
+            </View>
+        </TouchableCmp>
+    )
     
     
     // if(Platform.OS === 'android') {
@@ -319,72 +416,7 @@ const HomeScreen = props => {
                     style={styles.feed}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={itemData => (
-                        <TouchableCmp onPress={() => {
-                            props.navigation.navigate({
-                                routeName: 'PostDetail',
-                                params: {
-                                    needId: itemData.item.id
-                                }
-                            })
-                        }} useForeground>
-                            <View style={styles.feedItem} key={itemData.item.id}>
-                                <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
-                                    <Image source={{uri: itemData.item.userImage}} style={styles.avatar} />
-                                </TouchableCmp>
-                                <View style={{flex: 1}}>
-                                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                                        <View>
-                                            <TouchableCmp onPress={() => selectUserHandler(itemData.item.uid)}>
-                                                <Text style={styles.name}>
-                                                    {itemData.item.userName}
-                                                    <Text style={styles.timestamp}>  ·  {moment(itemData.item.timestamp).fromNow()}</Text>
-                                                </Text>
-                                            </TouchableCmp>
-                                        </View>
-                                        <TouchableCmp onPress={() => {
-                                            console.log(itemData.item.id)
-                                            setIsModalVisible(!isModalVisible)
-                                        }}>
-                                            <Ionicons name='ios-more' size={24} color='#73788B'/>
-                                        </TouchableCmp>
-                                        <Modal
-                                            animationType='slide'
-                                            transparent={true}
-                                            visible={isModalVisible}
-                                            onDismiss={() => {}}
-                                        >
-                                            <View style={styles.modalView}>
-                                                <View style={styles.modal}>
-                                                    <Text style={styles.modalText}>Coming soon...</Text>
-                                                    <TouchableHighlight
-                                                        style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
-                                                        onPress={() => {
-                                                            setIsModalVisible(!isModalVisible);
-                                                        }}
-                                                    >
-                                                        <Text style={styles.modalButtonText}>Hide Modal</Text>
-                                                    </TouchableHighlight>
-                                                </View>
-                                            </View>
-                                        </Modal>
-                                    </View>
-                                    <Hyperlink
-                                        linkDefault={true}
-                                        linkStyle={{color:Colors.blue}}
-                                    >
-                                        <Text style={styles.post}>{itemData.item.body}</Text>
-                                    </Hyperlink>
-                                    {itemData.item.imageUrl ? (
-                                        <Image source={{uri: itemData.item.imageUrl}} style={styles.postImage} resizeMode='cover'/>
-                                    ) : (
-                                        null
-                                    )}
-                                    {showNeedActions && itemData.item.id && (<NeedActions needId={itemData.item.id} leaveComment={() => commentButtonHandler(itemData.item.id)}/>)}
-                                </View>
-                            </View>
-                        </TouchableCmp>
-                    )}
+                    renderItem={renderItem}
                 />
             </SafeAreaView>
         )
@@ -470,17 +502,10 @@ const styles = StyleSheet.create({
     },
     feedItem: {
         backgroundColor: '#FFF',
-        borderRadius: 5,
         padding: 8,
         flexDirection: 'row',
-        marginVertical: 5,
-        backgroundColor: 'white',
-        shadowColor: 'black',
-        shadowOpacity: 0.26,
-        shadowOffset: {width: 0, height: 2},
-        // shadowRadius: 8,
-        elevation: 5,
-        // borderRadius: 10,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: Colors.placeholder
     },
     avatar: {
         width: 36,
@@ -490,8 +515,7 @@ const styles = StyleSheet.create({
     },
     name: {
         fontSize: 15,
-        fontWeight: '500',
-        color: "#454D65",
+        fontWeight: '500'
     },
     timestamp: {
         fontSize: 14,
@@ -499,16 +523,33 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
     post: {
-        marginTop: 16,
+        marginTop: 5,
         fontSize: 14,
-        color: '#838899'
+        lineHeight: 18
     },
     postImage: {
         width: undefined,
-        height: 150,
+        minHeight: 200,
+        maxHeight: 300,
         borderRadius: 5,
-        marginVertical: 16
-    }
+        borderWidth: StyleSheet.hairlineWidth,
+        marginTop: 10,
+        marginRight: 20
+    },
+    lightboxImage: {
+        width: WINDOW_WIDTH,
+        height: WINDOW_HEIGHT - BASE_PADDING,
+        borderRadius: 5,
+        marginVertical: 10
+    },
+    closeButton: {
+        color: 'white',
+        paddingHorizontal: 18,
+        paddingVertical: 32,
+        textAlign: 'center',
+        margin: 10,
+        alignSelf: 'flex-start',
+      },
 })
 
 export default HomeScreen
