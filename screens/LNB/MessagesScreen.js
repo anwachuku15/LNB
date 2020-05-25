@@ -7,8 +7,10 @@ import {
     StyleSheet, 
     Image, 
     Button, 
+    Modal,
     ScrollView,
     FlatList,
+    TouchableHighlight,
     TouchableNativeFeedback,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -81,6 +83,8 @@ const MessagesScreen = props => {
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
     const [isFocused, setIsFocused] = useState(false)
+    const [isModalVisible, setIsModalVisible] = useState(false)
+
     const searchInput = useRef(null)
 
     const loadMessageNotifications = useCallback(async () => {
@@ -270,9 +274,29 @@ const MessagesScreen = props => {
                         <Item
                             title='Direct'
                             iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                            onPress={() => {}}
+                            onPress={() => {setIsModalVisible(!isModalVisible)}}
                         />
                     </HeaderButtons>
+                    <Modal
+                        animationType='slide'
+                        transparent={true}
+                        visible={isModalVisible}
+                        onDismiss={() => {}}
+                    >
+                        <View style={styles.modalView}>
+                            <View style={styles.modal}>
+                                <Text style={styles.modalText}>Nothing to see here just yet...</Text>
+                                <TouchableHighlight
+                                    style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
+                                    onPress={() => {
+                                        setIsModalVisible(!isModalVisible);
+                                    }}
+                                >
+                                    <Text style={styles.modalButtonText}>Hide Modal</Text>
+                                </TouchableHighlight>
+                            </View>
+                        </View>
+                    </Modal>
                 </View>
 
                 <View style={{...styles.searchContainer, ...{marginHorizontal: 15, marginTop:10, alignSelf: 'center'}}}>
@@ -323,7 +347,7 @@ const MessagesScreen = props => {
                 )}
                 {!isFocused && chats && chats.length === 0 && (
                     <View style={{flex:1, alignItems:'center', marginTop:30}}>
-                        <Text style={{color:Colors.placeholder}}>No messages... yet</Text>
+                        <Text style={{color:Colors.placeholder}}>No messages</Text>
                     </View>
                 )}
                 {search.length > 0 && (
@@ -386,6 +410,42 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 20,
         marginBottom:10,
+    },
+    modalView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22
+    },
+    modal: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    modalButton: {
+        backgroundColor: "#F194FF",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+    },
+    modalButtonText: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
     },
 })
 
