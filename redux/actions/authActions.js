@@ -60,7 +60,7 @@ export const logout = () => {
     return {type: LOGOUT }
 }
 
-const saveDataToStorage = (token, userId, expDate) => {
+export const saveDataToStorage = (token, userId, expDate) => {
     AsyncStorage.setItem('authData', JSON.stringify({
         token: token,
         userId: userId,
@@ -78,9 +78,7 @@ const updateStorageData = (newToken, userId, newDate) => {
 
 
 firebase.auth().onIdTokenChanged(async user => {
-    console.log('onIdTokenChange - USER:')
-    console.log(user)
-    console.log('\n')
+    
     if (user == null) return AsyncStorage.removeItem('authData')
     if (user !== null) {
         const uid = user.uid
@@ -89,17 +87,11 @@ firebase.auth().onIdTokenChanged(async user => {
 
         const authData = await AsyncStorage.getItem('authData')
         if (authData) {
-            console.log(authData)
             const transformedData = JSON.parse(authData)
             const {token, userId, expDate} = transformedData
-            console.log(new Date(expDate).getTime())
             if (token != newToken) {
-                console.log('Token Refresh: updateStorageData -> authenticate')
-                
                 updateStorageData(newToken, uid, newDate)
                 authenticate(newToken, uid)
-                
-                console.log('\n')
             }
         }
     }
@@ -224,7 +216,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                                 .onSnapshot(snapshot => {
                                     dispatch(setNotifications())
                                 })
-        unreadListener()
+        unreadListener
 
         let lastReadMessages = []
         await (await db.collection('chats').get()).docs
