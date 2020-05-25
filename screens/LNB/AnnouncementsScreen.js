@@ -22,7 +22,7 @@ import MenuAvatar from '../../components/LNB/MenuAvatar'
 
 let themeColor
 let text
-const BulletinScreen = props => {
+const AnnouncementsScreen = props => {
     const scheme = useColorScheme()
 
     const authUser = useSelector(state => state.auth.credentials)
@@ -49,7 +49,7 @@ const BulletinScreen = props => {
                         toggleDrawer={() => props.navigation.toggleDrawer()}
                     />
                 </View>
-                <Text style={styles.headerTitle}>Bulletin</Text>
+                <Text style={styles.headerTitle}>Announcements</Text>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         ButtonElement={<MessageIcon/>}
@@ -69,9 +69,9 @@ const BulletinScreen = props => {
 }
 
 
-BulletinScreen.navigationOptions = (navData) => {
+AnnouncementsScreen.navigationOptions = (navData) => {
     return {
-        headerTitle: 'Bulletin'
+        headerTitle: 'Announcements'
     }
 }
 
@@ -103,4 +103,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default BulletinScreen
+export default AnnouncementsScreen

@@ -13,10 +13,10 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 import Colors from '../constants/Colors'
 
 import HomeScreen from '../screens/LNB/HomeScreen'
-import { Ionicons, FontAwesome, SimpleLineIcons, Feather } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
-import BulletinScreen from '../screens/LNB/BulletinScreen'
+import AnnouncementsScreen from '../screens/LNB/AnnouncementsScreen'
 import ConnectScreen from '../screens/LNB/ConnectScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
@@ -159,9 +159,9 @@ const HomeStack = createStackNavigator({
 
 
 
-const BulletinStack = createStackNavigator({
-    Bulletin: {
-        screen: BulletinScreen,
+const AnnouncementsStack = createStackNavigator({
+    Announcements: {
+        screen: AnnouncementsScreen,
     },
     UserProfile: {
         screen: UserProfileScreen,
@@ -341,23 +341,23 @@ const BottomTabStackContainer = createStackNavigator({
                                 : 'Home'
             }
         },
-        Bulletin: {
-            screen: BulletinStack,
+        Announcements: {
+            screen: AnnouncementsStack,
             navigationOptions: {
-                tabBarLabel: 'Bulletin',
+                tabBarLabel: 'Announcements',
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <SimpleLineIcons 
-                            name='event'
-                            size={20} 
+                        <AntDesign 
+                            name='notification'
+                            size={23} 
                             color={tabInfo.tintColor}
                         />
                     )
                 },
                 tabBarColor: Colors.secondaryColor,
                 tabBarLabel: Platform.OS === 'android' 
-                                ? <Text style={{fontFamily: 'open-sans-bold'}}>Bulletin</Text>
-                                : 'Bulletin'
+                                ? <Text style={{fontFamily: 'open-sans-bold'}}>Announcements</Text>
+                                : 'Announcements'
             }
         },
         Post: {
@@ -512,7 +512,7 @@ BottomTabStackContainer.navigationOptions = ({navigation}) => {
 DrawerNav.navigationOptions = ({navigation}) => {
     let swipeEnabled = true
     const HomeStack = navigation.state.routes[0].routes[0].routes[0]
-    const BulletinStack = navigation.state.routes[0].routes[0].routes[1]
+    const AnnouncementsStack = navigation.state.routes[0].routes[0].routes[1]
     const NotificationsStack = navigation.state.routes[0].routes[0].routes[3]
     const ConnectStack = navigation.state.routes[0].routes[0].routes[4]
     
@@ -520,7 +520,7 @@ DrawerNav.navigationOptions = ({navigation}) => {
         navigation.state.isDrawerOpen || 
         navigation.state.routes[0].routes.length > 1 || 
         HomeStack.index > 0 ||
-        BulletinStack.index > 0 ||
+        AnnouncementsStack.index > 0 ||
         NotificationsStack.index > 0 ||
         ConnectStack.index > 0
     ) {
