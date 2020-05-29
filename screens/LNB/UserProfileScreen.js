@@ -33,12 +33,14 @@ import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, set
 import moment from 'moment'
 import { fetchNeeds } from '../../redux/actions/postsActions'
 import * as Linking from 'expo-linking'
-import * as WebBrowser from 'expo-web-browser'
+import Lightbox from 'react-native-lightbox'
+import Hyperlink from 'react-native-hyperlink'
 
 const db = firebase.firestore()
 
 let SCREEN_WIDTH = Dimensions.get('window').width
 let SCREEN_HEIGHT = Dimensions.get('window').height
+const BASE_PADDING = 10
 
 let themeColor
 let text
@@ -283,9 +285,45 @@ const UserProfileScreen = props => {
                                     })
                                 }}>
                                     <View style={styles.avatarContainer}>
-                                        <Animated.View>
+                                        <Lightbox
+                                            // backgroundColor='rgba(0, 0, 0, 0.8)'
+                                            backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
+                                            underlayColor='rgba(255, 255, 255, 0.1)'
+                                            springConfig={{tension: 15, friction: 7}}
+                                            // activeProps={{
+                                            //     style: {
+                                            //         width: Dimensions.get('window').width, 
+                                            //         height: Dimensions.get('window').height,
+                                            //         borderRadius: 20
+                                            //     },
+                                            //     resizeMode: 'contain'
+                                            // }}
+                                            renderHeader={(close) => (
+                                                <TouchableCmp 
+                                                    onPress={close}
+                                                    style={styles.closeButton}
+                                                >
+                                                    <Ionicons 
+                                                        name='ios-close'
+                                                        size={36}
+                                                        color={Colors.placeholder}
+                                                    />
+                                                </TouchableCmp >
+                                            )}
+                                            renderContent={() => (
+                                                <Image 
+                                                    source={{uri: user.credentials.imageUrl}}
+                                                    style={{
+                                                        alignSelf: 'center',
+                                                        width: SCREEN_WIDTH - 20, 
+                                                        height: SCREEN_WIDTH - 20,
+                                                        borderRadius: (SCREEN_WIDTH - 20) /2,
+                                                    }}
+                                                />
+                                            )}
+                                        >
                                             <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
-                                        </Animated.View>
+                                        </Lightbox>
                                     </View>
                                 </TouchableWithoutFeedback>
                                 <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
@@ -559,7 +597,15 @@ const styles = StyleSheet.create({
         height: 150,
         borderRadius: 5,
         marginVertical: 16
-    }
+    },
+    closeButton: {
+        color: 'white',
+        paddingHorizontal: 18,
+        paddingVertical: 32,
+        textAlign: 'center',
+        margin: 10,
+        alignSelf: 'flex-start',
+    },
 })
 
 

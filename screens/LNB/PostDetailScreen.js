@@ -18,6 +18,7 @@ import {
     StyleSheet, 
     Image, 
     SafeAreaView, 
+    Dimensions,
     KeyboardAvoidingView 
 } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
@@ -31,7 +32,15 @@ import moment from 'moment'
 import { Avatar, ListItem } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker'
 import { createComment } from '../../redux/actions/postsActions'
+import Lightbox from 'react-native-lightbox'
+import Hyperlink from 'react-native-hyperlink'
+
+
 const db = firebase.firestore()
+
+const WINDOW_WIDTH = Dimensions.get('window').width
+const WINDOW_HEIGHT = Dimensions.get('window').height
+const BASE_PADDING = 10
 
 let themeColor
 let text
@@ -264,15 +273,18 @@ const PostDetailScreen = props => {
                     onRefresh={loadComments}
                     refreshing={isRefreshing}
                     ListHeaderComponent={() => (
-                        <View style={styles.feedItem}>
-                            <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
+                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.placeholder : 'white'}}}>
+                            <TouchableCmp 
+                                onPress={() => selectUserHandler(need.uid)}
+                                style={{alignSelf:'flex-start'}}
+                            >
                                 <Image source={{uri: need.userImage}} style={styles.avatar} />
                             </TouchableCmp>
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
                                     <View>
                                         <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
-                                            <Text style={styles.name}>
+                                            <Text style={{...styles.name, ...{color:Colors.primary}}}>
                                                 {need.userName}
                                                 <Text style={styles.timestamp}>  ·  {moment(need.timestamp).fromNow()}</Text>
                                             </Text>
@@ -280,7 +292,7 @@ const PostDetailScreen = props => {
                                     </View>
                                     <Ionicons name='ios-more' size={24} color='#73788B'/>
                                 </View>
-                                <Text style={styles.post}>{need.body}</Text>
+                                <Text style={{...styles.post, ...{color:text}}}>{need.body}</Text>
                                 {need.imageUrl ? (
                                     <Image source={{uri: need.imageUrl}} style={styles.postImage} resizeMode='cover'/>
                                 ) : (
@@ -388,7 +400,6 @@ const styles = StyleSheet.create({
         // marginHorizontal: 16
     },
     feedItem: {
-        backgroundColor: '#FFF',
         borderRadius: 5,
         padding: 8,
         flexDirection: 'row',
@@ -415,8 +426,7 @@ const styles = StyleSheet.create({
     },
     name: {
         fontSize: 15,
-        fontWeight: '500',
-        color: "#454D65",
+        fontWeight: '500'
     },
     timestamp: {
         fontSize: 14,
@@ -426,14 +436,30 @@ const styles = StyleSheet.create({
     post: {
         marginTop: 12,
         fontSize: 14,
-        color: '#838899'
     },
     postImage: {
         width: undefined,
-        height: 150,
+        minHeight: 200,
+        maxHeight: 300,
         borderRadius: 5,
-        marginVertical: 16
-    }
+        borderWidth: StyleSheet.hairlineWidth,
+        marginTop: 10,
+        marginRight: 20
+    },
+    lightboxImage: {
+        width: WINDOW_WIDTH,
+        height: WINDOW_HEIGHT - BASE_PADDING,
+        borderRadius: 5,
+        marginVertical: 10
+    },
+    closeButton: {
+        color: 'white',
+        paddingHorizontal: 18,
+        paddingVertical: 32,
+        textAlign: 'center',
+        margin: 10,
+        alignSelf: 'flex-start',
+    },
 })
 
 export default PostDetailScreen
