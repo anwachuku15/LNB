@@ -15,7 +15,6 @@ const MenuAvatar = props => {
         const path = `${FileSystem.cacheDirectory}${name}`
         const image = await FileSystem.getInfoAsync(path)
         if (image.exists) {
-            console.log('read image from cache')
             setAvatar(image.uri)
             return
         } else {

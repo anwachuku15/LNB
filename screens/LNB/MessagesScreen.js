@@ -79,6 +79,7 @@ const MessagesScreen = props => {
 
     const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
+    const [isLoading, setIsLoading] = useState(true)
     const [isMounted, setIsMounted] = useState(true)
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
@@ -144,6 +145,7 @@ const MessagesScreen = props => {
             willFocusSub
         }
     }, [loadMessageNotifications])
+    
     useEffect(() => {
         const willFocusSubscription = props.navigation.addListener('willFocus', loadChats)
         return () => {

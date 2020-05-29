@@ -51,7 +51,7 @@ const MessageIcon = props => {
                     />
                     <Badge 
                         value={unread.length} 
-                        status='error'
+                        badgeStyle={{backgroundColor:Colors.raspberry, borderColor:Colors.raspberry}}
                         containerStyle={{position: 'absolute', top: -4, right: 0}}
                     />
                 </View>

@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { useSelector, useDispatch } from 'react-redux'
 import { Ionicons } from '@expo/vector-icons'
 import firebase from 'firebase'
+import Colors from '../../constants/Colors'
 
 
 const db = firebase.firestore()
@@ -36,11 +37,17 @@ const NotificationIcon = props => {
         <View>
             {/* {unreadCount > 0 ? (    */}
             {unread && unread.length > 0 ? (
-                <BadgedIcon 
-                    type='ionicon'
-                    color={props.tabInfo.tintColor}
-                    name={Platform.OS==='android' ? 'md-notifications-outline' : 'ios-notifications-outline'}
-                />
+                <View>
+                    <Ionicons 
+                        name={Platform.OS==='android' ? 'md-notifications-outline' : 'ios-notifications-outline'} 
+                        size={25} 
+                        color={props.tabInfo.tintColor}
+                    />
+                    <Badge
+                        containerStyle={{position: 'absolute', top: 0, right: -1}}
+                        badgeStyle={{backgroundColor:Colors.raspberry, borderColor:Colors.raspberry}}
+                    />
+                </View>
             ) : (
                 <Ionicons 
                     name={Platform.OS==='android' ? 'md-notifications-outline' : 'ios-notifications-outline'} 

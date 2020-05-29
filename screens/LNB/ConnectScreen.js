@@ -58,28 +58,27 @@ const ConnectScreen = props => {
 
 
     
-    const readNotifications = useCallback(async () => {
-        try {
-            await dispatch(markConnectNotificationsAsRead())
-        } catch (err) {
-            console.log(err)
-        }
-    }, [dispatch])
+    // const readNotifications = useCallback(async () => {
+    //     try {
+    //         await dispatch(markConnectNotificationsAsRead())
+    //     } catch (err) {
+    //         console.log(err)
+    //     }
+    // }, [dispatch])
     
-    useEffect(() => {
-        const willFocusSub = props.navigation.addListener('willFocus', readNotifications)
-        return () => {
-            willFocusSub
-        }
-    }, [readNotifications])
+    // useEffect(() => {
+    //     const willFocusSub = props.navigation.addListener('willFocus', readNotifications)
+    //     return () => {
+    //         willFocusSub
+    //     }
+    // }, [readNotifications])
     
-    useEffect(() => {
-        const read = readNotifications()
-        // console.log(notifications)
-        return () => {
-            read
-        }
-    }, [dispatch, readNotifications])
+    // useEffect(() => {
+    //     const read = readNotifications()
+    //     return () => {
+    //         read
+    //     }
+    // }, [dispatch, readNotifications])
     
 
     const navToUserProfile = (id) => {

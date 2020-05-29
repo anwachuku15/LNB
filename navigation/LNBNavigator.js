@@ -34,6 +34,7 @@ import AdminScreen from '../screens/LNB/AdminScreen'
 import ConnectionsScreen from '../screens/LNB/ConnectionsScreen'
 import ConnectRequestsScreen from '../screens/LNB/ConnectRequestsScreen'
 import UserProfilePictureScreen from '../screens/LNB/UserProfilePictureScreen'
+// import ConnectIcon from '../components/LNB/ConnectIcon'
 
 export const defaultNavOptions = {
     headerTitleStyle: {

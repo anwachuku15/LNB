@@ -42,9 +42,6 @@ import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
-import * as Linking from 'expo-linking'
-import * as WebBrowser from 'expo-web-browser'
-import { ListItem } from 'react-native-elements'
 
 const db = firebase.firestore()
 
@@ -266,10 +263,7 @@ const HomeScreen = props => {
         })
     }
 
-    const handleOpenLink = (link) => {
-        // Linking.openURL(link)
-        WebBrowser.openBrowserAsync(link)
-    }
+
 
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {
@@ -333,6 +327,8 @@ const HomeScreen = props => {
                     {item.imageUrl ? (
                         <Lightbox
                             backgroundColor='rgba(0, 0, 0, 0.8)'
+                            underlayColor={themeColor}
+                            springConfig={{tension: 15, friction: 7}}
                             renderHeader={(close) => (
                                 <TouchableCmp 
                                     onPress={close}
@@ -345,12 +341,15 @@ const HomeScreen = props => {
                                     />
                                 </TouchableCmp >
                             )}
-                            underlayColor={themeColor}
                             renderContent={() => (
                                 <Image source={{uri: item.imageUrl}} style={styles.lightboxImage} resizeMode='contain' />
                             )}
                         >
-                            <Image source={{uri: item.imageUrl}} style={{...styles.postImage, ...{borderColor:Colors.disabled}}} resizeMethod='auto' />
+                            <Image 
+                                source={{uri: item.imageUrl}} 
+                                style={{...styles.postImage, ...{borderColor:Colors.disabled}}} 
+                                resizeMethod='auto' 
+                            />
                         </Lightbox>
                     ) : (
                         null
@@ -532,7 +531,7 @@ const styles = StyleSheet.create({
         minHeight: 200,
         maxHeight: 300,
         borderRadius: 5,
-        borderWidth: StyleSheet.hairlineWidth,
+        borderWidth: 0.1,
         marginTop: 10,
         marginRight: 20
     },
@@ -549,7 +548,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         margin: 10,
         alignSelf: 'flex-start',
-      },
+    },
 })
 
 export default HomeScreen
