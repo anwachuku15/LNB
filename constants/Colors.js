@@ -27,5 +27,6 @@ export default {
     pink: '#F200C5',
     lightHeader: '#F4F4F4',
     darkHeader: '#2B2B2B',
-    placeholder: '#838383'
+    placeholder: '#838383',
+    opaquedark: 'rgba(30, 30, 30, 1)'
 }
