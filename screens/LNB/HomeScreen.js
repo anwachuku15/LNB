@@ -18,15 +18,17 @@ import {
     TouchableWithoutFeedback,
     Text, 
     Button, 
-    ActivityIndicator, 
+    ActivityIndicator,
+    Alert, 
     View, 
     StyleSheet, 
     Image, 
     SafeAreaView,
     Dimensions,
-    UIManager
+    UIManager,
+    Vibration
 } from 'react-native'
-import { FlatList } from 'react-navigation'
+import { FlatList, NavigationActions } from 'react-navigation'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
@@ -38,6 +40,7 @@ import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import moment from 'moment'
 import NeedActions from '../../components/LNB/NeedActions'
 import { setLikes } from '../../redux/actions/authActions';
+import { deleteNeed } from '../../redux/actions/postsActions'
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
 import Lightbox from 'react-native-lightbox'
@@ -79,10 +82,34 @@ const HomeScreen = props => {
     // PUSH NOTIFICATIONS
     useEffect(() => {
         registerForPushNotificationsAsync()
-        // return () => {
-        //     registerForPushNotificationsAsync.remove()
-        // }
+        const notificationsSub = Notifications.addListener(handleNotification)
+        return () => {
+            // registerForPushNotificationsAsync.remove()
+            notificationsSub && Notifications.removeListener()
+        }
     }, [registerForPushNotificationsAsync])
+
+    const handleNotification = async notification => {
+        // Vibration.vibrate()
+        const { origin, data } = notification
+        const { type, needId, senderName } = data
+        if (origin === 'selected') {
+            if (type === 'likeNeed' || type === 'commentNeed' || type === 'commentThread') {
+                props.navigation.navigate('Notifications')
+                props.navigation.navigate({
+                    routeName: 'PostDetail',
+                    params: {
+                        needId,
+                        senderName,
+                        type
+                    }
+                })
+            }
+        } else if (origin === 'received') {
+            console.log(origin)
+        }
+        
+    }
     
     const registerForPushNotificationsAsync = async () => {
         if (Constants.isDevice) {
@@ -130,7 +157,9 @@ const HomeScreen = props => {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
     const [isModalVisible, setIsModalVisible] = useState(false)
-    
+    const [selectedNeed, setSelectedNeed] = useState()
+    const [isDeletable, setIsDeletable] = useState(false)
+
     const authUser = useSelector(state => state.auth.credentials)
     const userId = useSelector(state => state.auth.userId)
     const needs = useSelector(state => state.posts.allNeeds)
@@ -242,11 +271,52 @@ const HomeScreen = props => {
                     >
                         <Text style={styles.modalButtonText}>Hide Modal</Text>
                     </TouchableHighlight>
+                    {item.uid === userId && (
+                        <TouchableHighlight
+                        style={{ ...styles.modalButton, backgroundColor: Colors.redcrayola }}
+                        onPress={() => {
+                            setIsModalVisible(!isModalVisible);
+                        }}
+                        >
+                            <Text style={styles.modalButtonText}>Delete</Text>
+                        </TouchableHighlight>
+                    )}
+
                 </View>
             </View>
         </Modal>
     )
    
+    const deleteHandler = (needId) => {
+        console.log(needId)
+        Alert.alert('Delete', 'Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                }
+            },
+            {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        deleteNeed(needId)
+                        setIsModalVisible(!isModalVisible)
+                        setIsRefreshing(true)
+                        loadData().then(() => {
+                            setIsRefreshing(false)
+                        })
+                    } catch (err) {
+                        alert(err)
+                        console.log(err)
+                    }
+                    
+                }
+            }
+        ])
+    }
 
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
@@ -292,8 +362,9 @@ const HomeScreen = props => {
                             </TouchableCmp>
                         </View>
                         <TouchableCmp onPress={() => {
-                            console.log(item.id)
+                            item.uid === userId ? setIsDeletable(true) : setIsDeletable(false)
                             setIsModalVisible(!isModalVisible)
+                            setSelectedNeed(item.id)
                         }}>
                             <Ionicons name='ios-more' size={24} color='#73788B'/>
                         </TouchableCmp>
@@ -314,6 +385,14 @@ const HomeScreen = props => {
                                     >
                                         <Text style={styles.modalButtonText}>Hide Modal</Text>
                                     </TouchableHighlight>
+                                    {isDeletable && (
+                                        <TouchableHighlight
+                                            style={{ ...styles.modalButton, marginTop: 5, backgroundColor: Colors.redcrayola }}
+                                            onPress={() => {deleteHandler(selectedNeed)}}
+                                        >
+                                            <Text style={styles.modalButtonText}>Delete</Text>
+                                        </TouchableHighlight>
+                                    )}
                                 </View>
                             </View>
                         </Modal>
