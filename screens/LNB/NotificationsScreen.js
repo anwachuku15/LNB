@@ -1,4 +1,4 @@
-import React, {useCallback, useState, useEffect} from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { 
     Platform,
     Animated,
@@ -13,6 +13,7 @@ import {
     TouchableOpacity,
     FlatList
 } from 'react-native'
+import { Notifications } from 'expo';
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -70,7 +71,6 @@ const NotificationsScreen = props => {
     const loadNotifications = useCallback(async () => {
         try {
             await dispatch(markNotificationsAsRead())
-            console.log(connectReqs)
         } catch (err) {
             console.log(err)
         }
@@ -84,6 +84,24 @@ const NotificationsScreen = props => {
         }
     }, [loadNotifications])
 
+    // useEffect(() => {
+    //     const notificationsSub = Notifications.addListener(handleNotification)
+    //     return () => {
+    //         notificationsSub && Notifications.removeListener()
+    //     }
+    // }, [handleNotification])
+
+    // const handleNotification = async notification => {
+    //     // Vibration.vibrate()
+    //     const { origin, data } = notification
+    //     console.log(origin)
+    //     console.log(data)
+    //     if (data.type === 'likeNeed') {
+    //         props.navigation.navigate({
+    //             routeName: 
+    //         })
+    //     }
+    // }
 
 
     // UNMOUNT
@@ -101,12 +119,13 @@ const NotificationsScreen = props => {
         })
     }
 
-    const navToNeed = (id, senderName) => {
+    const navToNeed = (id, senderName, type) => {
         props.navigation.navigate({
             routeName: 'PostDetail',
             params: {
                 needId: id,
-                senderName
+                senderName,
+                type
             }
         })
     }
@@ -124,8 +143,9 @@ const NotificationsScreen = props => {
         // <Animated.View>
             <TouchableCmp onPress={() => {
                 item.type === 'new connection' && (navToUserProfile(item.senderId))
-                item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName))
-                item.type === 'commentNeed' && (navToNeed(item.needId, item.senderName))
+                item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName, item.type))
+                item.type === 'commentNeed' && (navToNeed(item.needId, item.senderName, item.type))
+                item.type === 'commentThread' && (navToNeed(item.needId, item.senderName, item.type))
             }}>
                 <ListItem
                     containerStyle={{backgroundColor:background, paddingLeft: 0}}
@@ -204,6 +224,32 @@ const NotificationsScreen = props => {
                                         <Text style={{color:text, marginTop: 3}}>
                                             <Text style={{fontWeight:'500'}}>{item.senderName} </Text>
                                             commented on one of your needs.
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+                            {item.type === 'commentThread' && (
+                                <View style={{flexDirection:'row', width:'90%'}}>
+                                    <View style={{width:'20%', alignItems:'center', justifyContent:'center'}}>
+                                        <MaterialCommunityIcons
+                                            name='comment-text-outline'
+                                            size={23}
+                                            color={Colors.green}
+                                        />
+                                    </View>
+                                    <View style={{width: '80%'}}>
+                                        <TouchableCmp
+                                            style={{alignSelf:'flex-start'}}
+                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                        >
+                                            <Image
+                                                source={{uri: item.senderImage}}
+                                                style={styles.avatar}
+                                            />
+                                        </TouchableCmp>
+                                        <Text style={{color:text, marginTop: 3}}>
+                                            <Text style={{fontWeight:'500'}}>{item.senderName} </Text>
+                                            replied to a need you commented on.
                                         </Text>
                                     </View>
                                 </View>
