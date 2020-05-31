@@ -154,6 +154,11 @@ export const createNeedNoImg = (userName, body) => {
     }
 }
 
+export const deleteNeed = (needId) => {
+    db.doc(`/needs/${needId}`).delete()
+    .catch(err => console.log(err))
+}
+
 export const createComment = (postId, body, localUri) => {
     return async (dispatch, getState) => {
         const uid = getState().auth.userId
@@ -213,9 +218,22 @@ export const createComment = (postId, body, localUri) => {
                 needUserId = doc.data().uid
                 if (needUserId !== authUserId) {
                     const pushToken = (await db.doc(`/users/${needUserId}`).get()).data().pushToken
-                    if (pushToken) {
-                        sendCommentNeedNotification(postId, needUserId, pushToken, authUserId, authUserName, authUserImage)
-                    }
+                    sendCommentNeedNotification(postId, needUserId, pushToken, authUserId, authUserName, authUserImage)
+                }
+            })
+            return db.collection('comments').where('postId', '==', postId).get()
+        })
+        .then(data => {
+            const commenters = []
+            data.forEach(doc => {
+                if (!commenters.includes(doc.data().uid)) {
+                    commenters.push(doc.data().uid)
+                }
+            })
+            commenters.forEach(async uid => {
+                if ((uid !== needUserId) && (uid !== authUserId)) {
+                    const pushToken = (await db.doc(`/users/${uid}`).get()).data().pushToken
+                    sendCommentNotificationBatch(postId, needData.userName, uid, pushToken, authUserId, authUserName, authUserImage)
                 }
             })
         })
@@ -239,7 +257,6 @@ export const createComment = (postId, body, localUri) => {
             }
         })
         dispatch(getNeed(postId))
-
     } 
 }
 
@@ -254,19 +271,60 @@ const sendCommentNeedNotification = (needId, recipientId, pushToken, authId, aut
         senderImage: authImage,
         read: false
     })
-    let res = fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            to: pushToken,
-            sound: 'default',
-            title: 'New Comment',
-            body: authName + ' commented on one of your needs.'
-        })
-    }) 
+    if (pushToken) {
+        let res = fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                to: pushToken,
+                sound: 'default',
+                title: 'New Comment',
+                body: authName + ' commented on one of your needs.',
+                data: {
+                    type: 'commentNeed',
+                    needId: needId,
+                    senderName: authName
+                }
+            })
+        }) 
+    }
+}
+
+const sendCommentNotificationBatch = (needId, needUserName, recipientId, pushToken, authId, authName, authImage) => {
+    db.collection('notifications').add({
+        timestamp: new Date().toISOString(),
+        type: 'commentThread',
+        needId,
+        needUserName,
+        recipientId,
+        senderId: authId,
+        senderName: authName,
+        senderImage: authImage,
+        read: false
+    })
+    if (pushToken) {
+        let res = fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                to: pushToken,
+                sound: 'default',
+                title: 'New Comment',
+                body: authName + ' replied to a need you commented on.',
+                data: {
+                    type: 'commentThread',
+                    needId: needId,
+                    senderName: authName
+                }
+            })
+        }) 
+    }
 }
 
 export const getNeed = (needId) => {
@@ -390,7 +448,12 @@ const sendLikeNeedNotification = (needId, recipientId, pushToken, authId, authNa
             to: pushToken,
             sound: 'default',
             title: 'New Like',
-            body: authName + ' liked one of your needs.'
+            body: authName + ' liked one of your needs.',
+            data: {
+                type: 'likeNeed',
+                needId: needId,
+                senderName: authName
+            }
         })
     })
 }
