@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { 
+    Platform,
     View, 
     Text, 
     StyleSheet, 
-    Image, 
+    Image,
+    ImageBackground, 
     Button, 
     ScrollView,
     TouchableOpacity,
@@ -23,6 +25,7 @@ import * as ImagePicker from 'expo-image-picker'
 import Fire from '../../Firebase/Firebase'
 import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
 import UserPermissions from '../../util/UserPermissions'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
 
 const CreatePostScreen = props => {
     const scheme = useColorScheme()
@@ -106,8 +109,8 @@ const CreatePostScreen = props => {
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>
                 </TouchableOpacity>
                 <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
-                <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost}>
-                    <Text style={{fontWeight:'500', color:text}}>Post</Text>
+                <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost} disabled={!body.trim().length && !image}>
+                    <Text style={{fontWeight:'500', color: (!body.trim().length && !image) ? Colors.disabled : Colors.primary}}>Post</Text>
                 </TouchableOpacity>
             </View>
 
@@ -134,9 +137,20 @@ const CreatePostScreen = props => {
                 <Ionicons name='ios-camera' size={32} color={'#838383'}/>
             </TouchableOpacity>
 
-            <View style={{marginHorizontal: 32, marginTop: 32, height: 150}}>
+            <View style={{marginHorizontal: 32, marginTop: 10, height: 150}}>
                 {image ? (
-                    <Image source={{uri: image}} style={{width: '100%', height: '100%'}} />
+                    <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={{width: '100%', height: '100%', alignItems:'flex-end'}}>
+                        <TouchableCmp
+                            style={styles.removeImageButton}
+                            onPress={() => setImage()}
+                        >
+                            <Ionicons
+                                name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
+                                color='white'
+                                size={24}
+                            />
+                        </TouchableCmp>
+                    </ImageBackground>
                 ) : (
                     null
                 )}
@@ -157,6 +171,15 @@ CreatePostScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    removeImageButton: {
+        alignItems: 'center',
+        marginRight: 7,
+        marginTop: 7,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        height: 24,
+        width: 24,
+        borderRadius: 12
     },
     header: {
         flexDirection: 'row',
