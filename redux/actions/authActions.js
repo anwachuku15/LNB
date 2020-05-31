@@ -441,7 +441,10 @@ const sendRequestNotification = (authId, authName, authImg, authHeadline, select
             to: pushToken,
             sound: 'default',
             title: 'New Connect Request',
-            body: authName + ' wants to connect.'
+            body: authName + ' wants to connect.',
+            data: {
+                type: 'connection request'
+            }
         })
     })
 }
@@ -546,7 +549,10 @@ const sendConnectionNotification = (authId, authName, authImg, authHeadline, sel
             to: pushToken,
             sound: 'default',
             title: 'New Connection',
-            body: 'You are now connected with ' + authName + '.'
+            body: 'You are now connected with ' + authName + '.',
+            data: {
+                type: 'new connection'
+            }
         })
     })
 }
@@ -614,6 +620,18 @@ export const setNotifications = () => {
                     needId: doc.data().needId,
                     read: doc.data().read,
                     timestamp: doc.data().timestamp,
+                })
+            } else if (doc.data().type == 'commentThread') {
+                userNotifications.push({
+                    id: doc.id,
+                    type: doc.data().type,
+                    senderId: doc.data().senderName,
+                    senderName: doc.data().senderName,
+                    senderImage: doc.data().senderImage,
+                    needId: doc.data().needId,
+                    needUserName: doc.data().needUserName,
+                    read: doc.data().read,
+                    timestamp: doc.data().timestamp
                 })
             } else if (doc.data().type == 'new connection') {
                 userNotifications.push({
