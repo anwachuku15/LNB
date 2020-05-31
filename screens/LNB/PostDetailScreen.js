@@ -61,6 +61,7 @@ const PostDetailScreen = props => {
     const uid = useSelector(state => state.auth.userId)
     const needId = props.navigation.getParam('needId')
     const senderName = props.navigation.getParam('senderName')
+    const type = props.navigation.getParam('type')
 
     const need = useSelector(state => state.posts.allNeeds.find(need => need.id === needId))
     const dispatch = useDispatch()
@@ -214,6 +215,8 @@ const PostDetailScreen = props => {
         </TouchableCmp>
     )
 
+    // const renderUser = 
+
     const likeHandler = () => {
         dispatch(likeNeed(needId))
     }
@@ -239,8 +242,10 @@ const PostDetailScreen = props => {
                     />
                 </HeaderButtons>
                 {senderName ? (
-                    <View>
-                        <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>Liked</Text>
+                    <View style={{alignItems:'center'}}>
+                        {type === 'likeNeed' && <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>Liked</Text>}
+                        {type === 'commentNeed' && <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>New Comment</Text>}
+                        {type === 'commentThread' && <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>New Comment</Text>}
                         <Text style={{color:Colors.disabled, fontFamily: 'open-sans', fontSize:12}}>by {senderName}</Text>
                     </View>
                 ) : (
