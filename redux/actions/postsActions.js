@@ -74,6 +74,7 @@ export const createNeed = (userName, body, localUri) => {
                 type: CREATE_NEED,
                 postData: {
                     id: postId,
+                    uid: uid,
                     timestamp: timestamp,
                     userName: userName,
                     userImage: userImage,
