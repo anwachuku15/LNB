@@ -2,6 +2,8 @@ export default {
     primaryColor: '#ff4081',
     secondaryColor: '#06d4cd',
     primary: '#fbbc04',
+    primaryDark: '#8D6A02',
+    primaryLight: '#FDD55E',
     gunmetal: '#2F4550',
     blacksmoke: '#08090A',
     olive: '#3F3F37',
@@ -28,5 +30,6 @@ export default {
     lightHeader: '#F4F4F4',
     darkHeader: '#2B2B2B',
     placeholder: '#838383',
-    opaquedark: 'rgba(30, 30, 30, 1)'
+    opaquedark: 'rgba(30, 30, 30, 1)',
+    timestamp: '#C4C6CE'
 }
