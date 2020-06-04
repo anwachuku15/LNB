@@ -13,7 +13,9 @@ import {
     MARK_NOTIFICATIONS_READ,
     MARK_MESSAGE_NOTIFICATIONS_READ,
     MARK_CONNECT_NOTIFICATIONS_READ,
-    LAST_READ_TIMESTAMP
+    LAST_READ_TIMESTAMP,
+    SET_ANNOUNCEMENTS,
+    // SET_ANNOUNCEMENT
 } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
@@ -29,7 +31,7 @@ const initialState = {
     likes: [],
     notifications: [],
     messageNotifications: [],
-    lastReadMessages: []
+    lastReadMessages: [],
 }
 
 export default (state = initialState, action) => {
