@@ -297,7 +297,12 @@ const PostDetailScreen = props => {
                                     </View>
                                     <Ionicons name='ios-more' size={24} color='#73788B'/>
                                 </View>
-                                <Text style={{...styles.post, ...{color:text}}}>{need.body}</Text>
+                                <Hyperlink
+                                    linkDefault={true}
+                                    linkStyle={{color:Colors.bluesea}}
+                                >
+                                    <Text style={{...styles.post, ...{color:text}}}>{need.body}</Text>
+                                </Hyperlink>
                                 {need.imageUrl ? (
                                     <Image source={{uri: need.imageUrl}} style={styles.postImage} resizeMode='cover'/>
                                 ) : (
