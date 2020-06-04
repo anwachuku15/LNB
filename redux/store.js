@@ -7,13 +7,15 @@ import ordersReducer from '../redux/reducers/ordersReducer'
 
 import authReducer from './reducers/authReducer'
 import postsReducer from './reducers/postsReducer'
+import adminReducer from './reducers/adminReducer'
 
 const rootReducer = combineReducers({
     posts: postsReducer,
     products: productsReducer,
     cart: cartReducer,
     orders: ordersReducer,
-    auth: authReducer
+    auth: authReducer,
+    admin: adminReducer
 })
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
