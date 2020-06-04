@@ -17,6 +17,9 @@ import Placeholder from '../../components/UI/HeaderButtonPlaceholder'
 import MessageIcon from '../../components/LNB/MessageIcon'
 import { CheckBox } from 'react-native-elements'
 import { Ionicons } from '@expo/vector-icons'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
+// import LinearGradient from 'react-native-linear-gradient'
+
 let themeColor
 let text
 
@@ -50,7 +53,7 @@ const AdminScreen = props => {
                     <Item
                         title='Direct'
                         iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {props.navigation.goBack()}}
+                        onPress={() => {props.navigation.pop()}}
                     />
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Admin</Text>
@@ -62,6 +65,15 @@ const AdminScreen = props => {
                 </HeaderButtons>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} style={{paddingRight:10}}>
+                <TouchableCmp 
+                    style={{...styles.adminButton, backgroundColor:Colors.primaryColor}}
+                    onPress={() => {
+                        props.navigation.navigate('CreateAnnouncement')
+                    }}
+                >
+                    <Text style={{color:'white', fontWeight:'bold', fontSize: 18}}>Make Announcement</Text>
+                </TouchableCmp>
+
                 <View style={{flex:1, alignItems:'flex-start', padding:20}}>
                     <View style={{flexDirection: 'row', marginVertical: 5, alignSelf: 'center'}}>
                         <Text style={{color:Colors.redcrayola, fontWeight:'600', fontSize: 20}}>Notes</Text>
@@ -116,6 +128,15 @@ AdminScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1
+    },
+    adminButton: {
+        justifyContent: 'center',
+        alignSelf:'flex-start',
+        marginLeft: 10,
+        marginTop: 10,
+        padding: 10,
+        borderRadius: 10
+
     },
     header: {
         flexDirection:'row',
