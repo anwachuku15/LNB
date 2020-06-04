@@ -45,6 +45,7 @@ import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
+import Animated from 'react-native-reanimated';
 
 const db = firebase.firestore()
 
@@ -90,8 +91,7 @@ const HomeScreen = props => {
     }, [registerForPushNotificationsAsync])
 
     const handleNotification = async notification => {
-        // Vibration.vibrate()
-        const { origin, data } = notification
+        const { origin, data, remote } = notification
         const { type, needId, senderName } = data
         if (origin === 'selected') {
             if (type === 'likeNeed' || type === 'commentNeed' || type === 'commentThread') {
@@ -104,11 +104,14 @@ const HomeScreen = props => {
                         type
                     }
                 })
+            } else if (type === 'announcement') {
+                props.navigation.navigate('Announcements')
             }
-        } else if (origin === 'received') {
-            console.log(origin)
+        } else if (origin === 'received' && type === 'announcement') {
+            Vibration.cancel()
+            props.navigation.navigate('Announcements')
         }
-        
+
     }
     
     const registerForPushNotificationsAsync = async () => {
@@ -451,6 +454,7 @@ const HomeScreen = props => {
         isMounted && (
             <SafeAreaView style={styles.screen}>
                 {/* HEADER */}
+                
                 <TouchableWithoutFeedback onPress={toTop}>
                     <View style={styles.header}>
                         {/* <HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -504,6 +508,20 @@ const HomeScreen = props => {
 
 
 const styles = StyleSheet.create({
+    inAppNotification: {
+        position: 'absolute',
+        marginTop: 50,
+        marginHorizontal: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 30,
+        left: 0,
+        top: 0,
+        right: 0,
+        backgroundColor: 'gray'
+    },
+    inAppNotificationText: {
+        color: 'white'
+    },
     touchable: {
         overflow: 'hidden',
         borderRadius: 10,
