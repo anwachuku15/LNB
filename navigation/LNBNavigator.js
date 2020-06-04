@@ -34,6 +34,8 @@ import AdminScreen from '../screens/LNB/AdminScreen'
 import ConnectionsScreen from '../screens/LNB/ConnectionsScreen'
 import ConnectRequestsScreen from '../screens/LNB/ConnectRequestsScreen'
 import UserProfilePictureScreen from '../screens/LNB/UserProfilePictureScreen'
+import CreateAnnouncementScreen from '../screens/LNB/CreateAnnouncementScreen'
+import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
 // import ConnectIcon from '../components/LNB/ConnectIcon'
 
 export const defaultNavOptions = {
@@ -46,6 +48,24 @@ export const defaultNavOptions = {
     headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
     headerBackTitleVisible: false
 }
+
+const AdminStack = createStackNavigator({
+    Admin: {
+        screen: AdminScreen,
+        // navigationOptions: {
+        //     gestureResponseDistance: {
+        //         horizontal: 300
+        //     }
+        // }
+    },
+    CreateAnnouncement: {
+        screen: CreateAnnouncementScreen,
+    }
+}, {
+    headerMode: 'none',
+    mode: 'modal'
+})
+
 
 const HomeStack = createStackNavigator({
     Home: {
@@ -143,7 +163,7 @@ const HomeStack = createStackNavigator({
         }
     },
     Admin: {
-        screen: AdminScreen,
+        screen: AdminStack,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -163,6 +183,11 @@ const HomeStack = createStackNavigator({
 const AnnouncementsStack = createStackNavigator({
     Announcements: {
         screen: AnnouncementsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
     },
     UserProfile: {
         screen: UserProfileScreen,
@@ -197,7 +222,7 @@ const AnnouncementsStack = createStackNavigator({
         }
     },
     Admin: {
-        screen: AdminScreen,
+        screen: AdminStack,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -251,7 +276,7 @@ const NotificationsStack = createStackNavigator({
         }
     },
     Admin: {
-        screen: AdminScreen,
+        screen: AdminStack,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -313,7 +338,7 @@ const ConnectStack = createStackNavigator({
         }
     },
     Admin: {
-        screen: AdminScreen,
+        screen: AdminStack,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -353,6 +378,7 @@ const BottomTabStackContainer = createStackNavigator({
                             size={23} 
                             color={tabInfo.tintColor}
                         />
+                        // <AnnouncementsIcon tabInfo={tabInfo} />
                     )
                 },
                 tabBarColor: Colors.secondaryColor,
