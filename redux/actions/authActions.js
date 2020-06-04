@@ -22,6 +22,10 @@ export const MARK_MESSAGE_NOTIFICATIONS_READ = 'MARK_MESSAGE_NOTIFICATIONS_READ'
 export const MARK_CONNECT_NOTIFICATIONS_READ = 'MARK_CONNECT_NOTIFICATIONS_READ'
 export const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
 export const LAST_READ_TIMESTAMP = 'LAST_READ_TIMESTAMP'
+export const SET_ANNOUNCEMENTS = 'SET_ANNOUNCEMENTS'
+export const SET_ANNOUNCEMENT = 'SET_ANNOUNCEMENT'
+export const LIKE_ANNOUNCEMENT = 'LIKE_ANNOUNCEMENT'
+export const UNLIKE_ANNOUNCEMENT = 'UNLIKE_ANNOUNCEMENT'
 
 
 const db = firebase.firestore()
@@ -218,6 +222,12 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                                 })
         unreadListener
 
+        const announcementListner = db.collection('announcements')
+                                      .onSnapshot(snapshot => {
+                                          dispatch(setAnnouncements())
+                                      })
+        announcementListner
+                
         let lastReadMessages = []
         await (await db.collection('chats').get()).docs
         .forEach(doc => {
@@ -245,6 +255,20 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                 }
             }
         })
+    }
+}
+
+export const getAnnouncement = (announcementId) => {
+    return async dispatch => {
+        try {
+            const announcementData = await db.doc(`/announcements/${announcementId}`).get()
+            dispatch({
+                type: SET_ANNOUNCEMENT,
+                announcement: announcementData.data()
+            })
+        } catch (err) {
+            throw err
+        }
     }
 }
 
@@ -600,6 +624,40 @@ export const setLikes = () => {
             type: SET_LIKES,
             likes: likes
         })
+    }
+}
+
+export const setAnnouncements = () => {
+    return async (dispatch, getState) => {
+        try {
+            const announcements = []
+            const announcementsData = await db.collection('announcements').orderBy('timestamp', 'desc').get()
+            announcementsData.forEach(doc => {
+                announcements.push({
+                    id: doc.id,
+                    timestamp: doc.data().timestamp,
+                    uid: doc.data().uid,
+                    admin: doc.data().admin,
+                    adminHeadline: doc.data().adminHeadline,
+                    adminImage: doc.data().adminImage,
+                    body: doc.data().body,
+                    imageUrl: doc.data().imageUrl,
+                    likeCount: doc.data().likeCount,
+                    commentCount: doc.data().commentCount,
+                })
+                if (doc.data().imageUrl) {
+                    announcements.concat({
+                        imageUrl: doc.data().imageUrl
+                    })
+                }
+            })
+            dispatch({
+                type: SET_ANNOUNCEMENTS,
+                announcements: announcements
+            })
+        } catch (err) {
+            throw err
+        }
     }
 }
 
