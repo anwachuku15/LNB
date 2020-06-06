@@ -42,7 +42,7 @@ const NavContainer = props => {
     }, [isAuth, mounted])
     
     return (
-        <LNBNavigator theme={props.theme} ref={navRef}/>
+        <LNBNavigator theme={props.theme} ref={navRef} screenProps={{theme: props.theme}}/>
     )
 }
 
