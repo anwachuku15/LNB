@@ -7,7 +7,8 @@ import {
     StyleSheet, 
     Image, 
     Button, 
-    ScrollView 
+    ScrollView, 
+    Settings
 } from 'react-native'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -40,7 +41,7 @@ const SettingsScreen = props => {
     return (
         
         <SafeAreaView style={styles.screen}>
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Direct'
@@ -55,7 +56,7 @@ const SettingsScreen = props => {
                         iconName='md-more'
                     />
                 </HeaderButtons>
-            </View>
+            </View> */}
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
                 <Text style={{color:Colors.socialdark}}>Under Construction</Text>
                 <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
@@ -67,9 +68,33 @@ const SettingsScreen = props => {
 }
 
 
+
+
 SettingsScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
     return {
-        headerTitle: 'Settings'
+        headerLeft: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='Back'
+                    iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                    onPress={() => {navData.navigation.goBack()}}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: 'Settings',
+        headerTitleStyle: {
+            fontFamily: 'open-sans-bold',
+        },
+        headerBackTitleStyle: {
+            fontFamily: 'open-sans',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+        headerBackTitleVisible: false,
+        headerStyle: {
+            backgroundColor: background === 'dark' ? Colors.darkHeader : 'white',
+            borderBottomColor: Colors.primary
+        },
     }
 }
 
