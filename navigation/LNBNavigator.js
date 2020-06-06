@@ -88,10 +88,53 @@ const AdminStack = createStackNavigator({
     mode: 'modal'
 })
 
+const ConnectionsSwipeTab = createMaterialTopTabNavigator({
+    Connections: ConnectionsScreen,
+    Directory: DirectoryScreen
+}, {
+    swipeEnabled: true,
+    tabBarPosition: 'top',
+})
+
+ConnectionsSwipeTab.navigationOptions = ({navigation}) => {
+    const index = navigation.state.index
+    const screens = navigation.state.routes
+    const connections = navigation.state.routes[0].routeName
+    const directory = navigation.state.routes[1].routeName
+    const userName = navigation.state.routes[0].params.userName
+    
+    let headerTitle, headerLeft, gestureResponseDistance
+    headerLeft = () => (
+        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            <Item
+                title='Back'
+                iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                onPress={() => {navigation.goBack()}}
+            />
+        </HeaderButtons>
+    )
+
+    if (index === 0) {
+        headerTitle = userName
+        gestureResponseDistance = {
+            horizontal: 300
+        }
+    } else if (index === 1) {
+        headerTitle = 'LNB Directory'
+    }
+
+    return {
+        headerTitle,
+        gestureResponseDistance,
+        headerLeft
+    }
+}
+
 const DirectorySwipeTab = createMaterialTopTabNavigator({
     Connections: ConnectionsScreen,
     Directory: DirectoryScreen
 }, {
+    initialRouteName: 'Directory',
     swipeEnabled: true,
     tabBarPosition: 'top',
 })
@@ -131,7 +174,6 @@ DirectorySwipeTab.navigationOptions = ({navigation}) => {
 }
 
 
-
 const HomeStack = createStackNavigator({
     Home: {
         screen: HomeScreen
@@ -169,6 +211,19 @@ const HomeStack = createStackNavigator({
         }
     },
     Connections: {
+        screen: ConnectionsSwipeTab,
+        navigationOptions: {
+            headerTitleStyle: {
+                fontFamily: 'open-sans-bold',
+            },
+            headerBackTitleStyle: {
+                fontFamily: 'open-sans',
+            },
+            headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+            headerBackTitleVisible: false,
+        },
+    },
+    Directory: {
         screen: DirectorySwipeTab,
         navigationOptions: {
             headerTitleStyle: {
