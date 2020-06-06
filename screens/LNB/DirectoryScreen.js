@@ -72,6 +72,7 @@ const DirectoryScreen = props => {
     
     useEffect(() => {
         const willFocusSub = props.navigation.addListener('willFocus', loadIndex)
+        // console.log(props.navigation.state)
         return () => {
             willFocusSub
         }
@@ -215,9 +216,7 @@ const DirectoryScreen = props => {
 
 
 DirectoryScreen.navigationOptions = (navData) => {
-    // return {
-    //     headerTitle: 'Directory'
-    // }
+    // console.log('DirectoryScreen ' + navData.navigation.isFocused())
 }
 
 const styles = StyleSheet.create({
@@ -249,4 +248,4 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
 })
-export default withNavigationFocus(DirectoryScreen)
+export default DirectoryScreen
