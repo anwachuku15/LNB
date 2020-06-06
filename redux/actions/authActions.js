@@ -26,6 +26,7 @@ export const SET_ANNOUNCEMENTS = 'SET_ANNOUNCEMENTS'
 export const SET_ANNOUNCEMENT = 'SET_ANNOUNCEMENT'
 export const LIKE_ANNOUNCEMENT = 'LIKE_ANNOUNCEMENT'
 export const UNLIKE_ANNOUNCEMENT = 'UNLIKE_ANNOUNCEMENT'
+export const SET_CONNECTIONS = 'SET_CONNECTIONS'
 
 
 const db = firebase.firestore()
@@ -255,6 +256,44 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                 }
             }
         })
+    }
+}
+
+export const fetchConnections = (uid) => {
+    return async (dispatch, getState) => {
+        try {
+            const userConnectionIds = []
+            const userConnections = []
+            const allConnections = await db.collection('connections').get()
+            const users = await db.collection('users').get()
+            
+            allConnections.forEach(doc => {
+                if (doc.id.includes(uid)) {
+                    userConnectionIds.push(doc.id.replace(uid,''))
+                }
+            })
+            
+            users.forEach(doc => {
+                if (userConnectionIds.includes(doc.id)) {
+                    userConnections.push({
+                        uid: doc.data().userId,
+                        name: doc.data().displayName,
+                        headline: doc.data().headline,
+                        location: doc.data().location,
+                        bio: doc.data().bio,
+                        imageUrl: doc.data().imageUrl,
+                        website: doc.data().website,
+                        connections: doc.data().connections
+                    })
+                }
+            })
+            dispatch({
+                type: SET_CONNECTIONS,
+                userConnections: userConnections
+            })
+        } catch (err) {
+            throw err
+        }
     }
 }
 

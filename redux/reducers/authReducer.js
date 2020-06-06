@@ -15,7 +15,8 @@ import {
     MARK_CONNECT_NOTIFICATIONS_READ,
     LAST_READ_TIMESTAMP,
     SET_ANNOUNCEMENTS,
-    // SET_ANNOUNCEMENT
+    // SET_ANNOUNCEMENT,
+    SET_CONNECTIONS,
 } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
@@ -111,6 +112,12 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 connections: action.connections
+            }
+        }
+        case SET_CONNECTIONS: {
+            return {
+                ...state,
+                userConnections: action.userConnections
             }
         }
         case LAST_READ_TIMESTAMP: {
