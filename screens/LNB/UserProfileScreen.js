@@ -94,7 +94,7 @@ const UserProfileScreen = props => {
             'willFocus', loadUser
         )
         return () => {
-            willFocusSub.remove()
+            willFocusSub
         }
     }, [dispatch, loadUser])
 
@@ -250,7 +250,7 @@ const UserProfileScreen = props => {
             <View style={styles.screen}>
                 {/* <LinearGradient colors={[scheme==='dark' ? 'black' : 'white', Colors.primary]}> */}
                 {/* HEADER */}
-                    <View style={styles.header}>
+                    {/* <View style={styles.header}>
                         <HeaderButtons HeaderButtonComponent={HeaderButton}>
                             <Item
                                 title='Back'
@@ -266,7 +266,7 @@ const UserProfileScreen = props => {
                                 onPress={() => {authUser.userId === userId ? props.navigation.navigate('Settings') : {}}}
                             />
                         </HeaderButtons>
-                    </View>
+                    </View> */}
                 
                 {/* PROFILE HEADER */}
                 {/* https://youtu.be/S-HVfH7BVIQ?t=2743 */}
@@ -471,9 +471,47 @@ const UserProfileScreen = props => {
             </View>
             )}
         </SafeAreaView>
-
-            
     )
+}
+
+UserProfileScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    const userId = navData.navigation.getParam('userId')
+    const uid = firebase.auth().currentUser.uid
+    return {
+        headerLeft: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='Back'
+                    iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                    onPress={() => {navData.navigation.goBack()}}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: navData.navigation.getParam('name'),
+        headerRight: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='More'
+                    iconName={uid === userId ? (Platform.OS==='android' ? 'md-settings' : 'ios-settings') : Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                    onPress={() => {uid === userId ? navData.navigation.navigate('Settings') : {}}}
+                />
+            </HeaderButtons>
+        ),
+        headerTitleStyle: {
+            fontFamily: 'open-sans-bold',
+        },
+        headerBackTitleStyle: {
+            fontFamily: 'open-sans',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+        headerBackTitleVisible: false,
+        headerStyle: {
+            backgroundColor: background === 'dark' ? Colors.darkHeader : 'white',
+            borderBottomColor: Colors.primary
+        },
+        
+    }
 }
 
 
