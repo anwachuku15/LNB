@@ -209,7 +209,12 @@ const PostDetailScreen = props => {
                             </TouchableCmp>
                         </View>
                     </View>
-                    <Text style={{marginTop:12, fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.body}</Text>
+                    <Hyperlink
+                        linkDefault={true}
+                        linkStyle={{color:Colors.blue}}
+                    >
+                        <Text style={{marginTop:12, fontSize: 14, color: scheme === 'light' ? 'black' : 'white'}}>{item.body}</Text>
+                    </Hyperlink>
                 </View>
             </View>
         </TouchableCmp>
@@ -233,7 +238,7 @@ const PostDetailScreen = props => {
     return (
         <View style={styles.screen}>
             {/* HEADER */}
-            <View style={{...styles.header, ...{paddingBottom: senderName ? 1 : 16}}}>
+            {/* <View style={{...styles.header, ...{paddingBottom: senderName ? 1 : 16}}}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
                         title='Back'
@@ -258,7 +263,7 @@ const PostDetailScreen = props => {
                         onPress={() => {}}
                     />
                 </HeaderButtons>
-            </View>
+            </View> */}
             
 
             {/* Comments */}
@@ -362,6 +367,46 @@ const PostDetailScreen = props => {
     )
 }
 
+PostDetailScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    return {
+        headerLeft: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='Back'
+                    iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                    onPress={() => {props.navigation.goBack()}}
+                />
+            </HeaderButtons>
+        ),
+        // headerRight: () => (
+        //     <HeaderButtons HeaderButtonComponent={HeaderButton}>
+        //         <Item
+        //             ButtonElement={<MessageIcon/>}
+        //             title='Messages'
+        //             onPress={() => {
+        //                 props.navigation.navigate('Messages')
+        //             }}
+        //         />
+        //     </HeaderButtons>
+        // ),
+        headerTitle: () => (
+            <Text style={styles.headerTitle}>Need Detail</Text>
+        ),
+        headerTitleStyle: {
+            fontFamily: 'open-sans-bold',
+        },
+        headerBackTitleStyle: {
+            fontFamily: 'open-sans',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+        headerBackTitleVisible: false,
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white'
+        },
+        
+    }
+}
 
 
 const styles = StyleSheet.create({
