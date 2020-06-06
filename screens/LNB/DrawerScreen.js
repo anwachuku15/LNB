@@ -60,7 +60,8 @@ const DrawerScreen = props => {
                   props.navigation.navigate({
                     routeName: 'UserProfile',
                     params: {
-                      userId: uid
+                      userId: uid,
+                      name: user.credentials.displayName
                     }
                   })
                 }
@@ -78,7 +79,8 @@ const DrawerScreen = props => {
                         props.navigation.navigate({
                           routeName: 'UserProfile',
                           params: {
-                            userId: uid
+                            userId: uid,
+                            name: user.credentials.displayName
                           }
                         })
                       }
@@ -97,7 +99,8 @@ const DrawerScreen = props => {
                     props.navigation.navigate({
                       routeName: 'UserProfile',
                       params: {
-                        userId: uid
+                        userId: uid,
+                        name: user.credentials.displayName
                       }
                     })
                   }
@@ -128,12 +131,13 @@ const DrawerScreen = props => {
                   onPress={() => {}}
                 >
                     <View>
-                    <MaterialIcons
-                        style={styles.icon}
-                        name='group'
-                        size={23}
-                        color="rgb(136, 153, 166)"/>
-                    <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Network </Text>
+                    <MaterialCommunityIcons
+                      style={styles.icon}
+                      name='account-card-details'
+                      size={23}
+                      color="rgb(136, 153, 166)"
+                    />
+                    <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Directory </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -178,7 +182,7 @@ const DrawerScreen = props => {
                       <View>
                           <MaterialCommunityIcons
                               style={styles.icon}
-                              name="account-card-details"
+                              name="account-key-outline"
                               size={23}
                               color={Colors.redcrayola}
                             />
