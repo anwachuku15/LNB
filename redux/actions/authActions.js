@@ -488,8 +488,6 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
 
         let authPendingState = getState().auth.pendingConnections
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
-        
-
 
         // Remove from pendingConnections
         const index = authData.pendingConnections.indexOf(selectedUserId)
@@ -523,6 +521,32 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             acceptedBy: authId,
             timestamp: new Date().toISOString()
         })
+
+        // db.doc(`/connections/${connectionId}`).set({
+        //     requestedBy: {
+        //         isAdmin: selectedUserData.isAdmin,
+        //         userId: selectedUserId,
+        //         email: selectedUserData.email,
+        //         displayName: selectedUserName,
+        //         headline: selectedUserData.headline,
+        //         imageUrl: selectedUserData.imageUrl,
+        //         location: selectedUserData.location,
+        //         bio: selectedUserData.bio,
+        //         website: selectedUserData.website
+        //     },
+        //     acceptedBy: {
+        //         isAdmin: authData.isAdmin,
+        //         userId: authId,
+        //         email: authData.email,
+        //         displayName: authName,
+        //         headline: authData.headline,
+        //         imageUrl: authData.imageUrl,
+        //         location: authData.location,
+        //         bio: authData.bio,
+        //         website: authData.website
+        //     },
+        //     timestamp: new Date().toISOString()
+        // })
 
         dispatch({
             type: SET_SELECTED_USER,
@@ -892,6 +916,16 @@ export const disconnect = (authId, selectedUserId) => {
         } else {
             db.doc(`/connections/${selectedUserId+authId}`).delete()
         }
+        const users = [authId, selectedUserId]
+        const notifications = await db.collection('notifications')
+            .where('type', '==', 'new connection')
+            .get()
+        notifications.forEach(doc => {
+            if (users.includes(doc.data().recipientId) && users.includes(doc.data().senderId)) {
+                db.doc(`/notifications/${doc.id}`).delete()
+            }
+        })
+
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
         const selectedUserData = await (await db.doc(`/users/${selectedUserId}`).get()).data()
 
