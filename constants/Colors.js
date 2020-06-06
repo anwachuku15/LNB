@@ -31,5 +31,6 @@ export default {
     darkHeader: '#131313',
     placeholder: '#838383',
     opaquedark: 'rgba(30, 30, 30, 1)',
-    timestamp: '#C4C6CE'
+    timestamp: '#C4C6CE',
+    drawericon: 'rgb(136, 153, 166)'
 }
