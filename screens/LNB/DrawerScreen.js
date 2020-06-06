@@ -111,7 +111,7 @@ const DrawerScreen = props => {
                           style={styles.icon}
                           name='user-o'
                           size={20}
-                          color='rgb(136, 153, 166)'
+                          color={Colors.gunmetal}
                       />
                       <Text style={{...styles.text, ...{color:text}}}> Profile </Text>
                   </View>
@@ -122,22 +122,30 @@ const DrawerScreen = props => {
                   })
                 }} style={styles.list}>
                     <View>
-                        <Ionicons style={styles.icon} name='ios-calendar' size={20} color='rgb(136, 153, 166)' />
+                        <Ionicons style={styles.icon} name='ios-calendar' size={20} color={Colors.gunmetal} />
                         <Text style={{...styles.text, ...{color:text}}}> Events </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.list} 
-                  onPress={() => {}}
+                  onPress={() => {
+                    props.navigation.navigate({
+                      routeName: 'Directory',
+                      params: {
+                          userId: uid,
+                          userName: user.credentials.displayName
+                      }
+                    })
+                  }}
                 >
                     <View>
                     <MaterialCommunityIcons
                       style={styles.icon}
                       name='account-card-details'
                       size={23}
-                      color="rgb(136, 153, 166)"
+                      color={Colors.gunmetal}
                     />
-                    <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Directory </Text>
+                    <Text style={{...styles.text, ...{color:text}}}> Directory </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -153,7 +161,7 @@ const DrawerScreen = props => {
                           style={styles.icon}
                           name='md-analytics'
                           size={20}
-                          color="rgb(136, 153, 166)"/>
+                          color={Colors.gunmetal}/>
                       <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
@@ -168,7 +176,7 @@ const DrawerScreen = props => {
                             style={styles.icon}
                             name="ios-cog"
                             size={23}
-                            color="rgb(136, 153, 166)"/>
+                            color={Colors.gunmetal}/>
                         <Text style={{...styles.text, ...{color:text}}}> Settings </Text>
                     </View>
                 </TouchableOpacity>
