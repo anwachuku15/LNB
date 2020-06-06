@@ -43,8 +43,6 @@ import DirectoryScreen from '../screens/LNB/DirectoryScreen'
 import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
 // import ConnectIcon from '../components/LNB/ConnectIcon'
 
-// import DirectorySwipeScreen from '../screens/LNB/DirectorySwipeScreen'
-
 import { useColorScheme } from 'react-native-appearance'
 
 export const defaultNavOptions = {
