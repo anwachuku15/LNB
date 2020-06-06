@@ -32,7 +32,6 @@ const client = algoliasearch(appId, adminkey)
 const connectionsIndex = client.initIndex('Connections')
 const index = client.initIndex('LNBmembers')
 
-// SET UP STATE (ON MOUNT) TO SOLVE CONNECTION SEARCH PROBLEM
 
 let themeColor
 let text, background
@@ -53,6 +52,8 @@ const ConnectionsScreen = props => {
     
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
+    const [allConnections, setAllConnections] = useState([])
+    // const 
     const [isFocused, setIsFocused] = useState(false)
     const searchInput = useRef(null)
     
@@ -91,54 +92,32 @@ const ConnectionsScreen = props => {
                 }
             })
             setResults(searchResults)
+            if (allConnections.length === 0) {
+                setAllConnections(searchResults)
+            }
         })
         .catch(err => console.log(err))
     }, [])
 
     useEffect(() => {
-        if (props.isFocused) {
+        if (props.navigation.isFocused) {
             loadIndex()
         }
     }, [loadIndex])
 
-
     const updateSearch = (text) => {
         setSearch(text)
-        const query = text
-
-        index.browseObjects({
-            query: query,
-            batch: batch => {
-                hits = hits.concat(batch)
-            }
-        })
-        connectionsIndex.browseObjects({
-            query: query,
-            batch: batch => {
-                connectionHits = connectionHits.concat(batch)
-            }
-        })
-        .then(() => {
-            const authId = auth.userId
-            connectionHits.forEach(hit => {
-                if (hit.objectID.includes(authId)) {
-                    connectionIds.push(hit.objectID.replace(authId,''))
-                }
+        if (text === '') {
+            setResults(allConnections)
+        } else {
+            const newResults = allConnections.filter(result => {
+                const resultData = `${result.name.toUpperCase()}`
+                const query = text.toUpperCase()
+    
+                return resultData.includes(query)
             })
-            return connectionIds
-        })
-        .then(ids => {
-            console.log(ids)
-            hits.forEach(hit => {
-                const newHit = hit.newData.uid
-                console.log(newHit)
-                if (ids.includes(hit.newData.uid)) {
-                    searchResults.push(hit.newData)
-                }
-            })
-            console.log('---')
-            setResults(searchResults)
-        }).catch(err => console.log(err))
+            setResults(newResults)
+        }
     }
 
     const cancelSearch = () => {
@@ -232,38 +211,20 @@ const ConnectionsScreen = props => {
                     null
                 )}
             </View>
-            {/* {!isFocused && (
-                <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-                    <Text style={{color:Colors.socialdark}}>Under Construction</Text>
-                    <Text style={{color:Colors.socialdark, fontSize: 12, marginTop:5}}>You can still search though :)</Text>
-                    <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
-                </View>
-            )} */}
-            {/* {isFocused && search.length === 0 && (
-                <DismissKeyboard>
-                    <View style={{flex: 1, alignItems:'center', paddingTop: 10}}>
-                        <Text style={{color:Colors.placeholder}}>Search for someone you'd like to connect with</Text>
-                    </View>
-                </DismissKeyboard>
-            )} */}
-            {/* {search.length > 0 && ( */}
-                <FlatList
-                    keyExtractor={(item, index) => index.toString()}
-                    data={results}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                />
-            {/* )} */}
+            <FlatList
+                keyExtractor={(item, index) => index.toString()}
+                data={results}
+                renderItem={renderItem}
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+            />
         </View>
     )
 }
 
 
 ConnectionsScreen.navigationOptions = (navData) => {
-    // return {
-    //     headerTitle: 'Connections'
-    // }
+    // console.log('ConnectionsScreen ' + navData.navigation.isFocused())
 }
 
 const styles = StyleSheet.create({
@@ -295,4 +256,4 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
 })
-export default withNavigationFocus(ConnectionsScreen)
+export default ConnectionsScreen
