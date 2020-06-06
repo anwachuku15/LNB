@@ -3,10 +3,14 @@ import { useDispatch } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
 import { Platform, View, Button, SafeAreaView, Text } from 'react-native'
-import { createAppContainer, createSwitchNavigator } from 'react-navigation'
-import { createStackNavigator } from 'react-navigation-stack'
+import { createAppContainer, createSwitchNavigator, ThemeContext } from 'react-navigation'
+import { createStackNavigator, Header, HeaderBackButton, } from 'react-navigation-stack'
+
+import { HeaderButtons, Item } from 'react-navigation-header-buttons'
+import HeaderButton from '../components/UI/HeaderButton'
+
 import { createDrawerNavigator } from 'react-navigation-drawer'
-import { createMaterialTopTabNavigator, createBottomTabNavigator } from 'react-navigation-tabs'
+import { createMaterialTopTabNavigator, createBottomTabNavigator, BottomTabBar } from 'react-navigation-tabs'
 
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
@@ -35,8 +39,13 @@ import ConnectionsScreen from '../screens/LNB/ConnectionsScreen'
 import ConnectRequestsScreen from '../screens/LNB/ConnectRequestsScreen'
 import UserProfilePictureScreen from '../screens/LNB/UserProfilePictureScreen'
 import CreateAnnouncementScreen from '../screens/LNB/CreateAnnouncementScreen'
+import DirectoryScreen from '../screens/LNB/DirectoryScreen'
 import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
 // import ConnectIcon from '../components/LNB/ConnectIcon'
+
+// import DirectorySwipeScreen from '../screens/LNB/DirectorySwipeScreen'
+
+import { useColorScheme } from 'react-native-appearance'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -46,7 +55,22 @@ export const defaultNavOptions = {
         fontFamily: 'open-sans',
     },
     headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
-    headerBackTitleVisible: false
+    headerBackTitleVisible: false,
+    headerStyle: {
+        // backgroundColor: theme
+    }
+}
+
+export const defaultHeader = {
+    headerTitleStyle: {
+        fontFamily: 'open-sans-bold',
+    },
+    headerBackTitleStyle: {
+        fontFamily: 'open-sans',
+    },
+    headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+    headerBackTitleVisible: false,
+    headerBackground: 'black'
 }
 
 const AdminStack = createStackNavigator({
@@ -65,6 +89,49 @@ const AdminStack = createStackNavigator({
     headerMode: 'none',
     mode: 'modal'
 })
+
+const DirectorySwipeTab = createMaterialTopTabNavigator({
+    Connections: ConnectionsScreen,
+    Directory: DirectoryScreen
+}, {
+    swipeEnabled: true,
+    tabBarPosition: 'top',
+})
+
+DirectorySwipeTab.navigationOptions = ({navigation}) => {
+    const index = navigation.state.index
+    const screens = navigation.state.routes
+    const connections = navigation.state.routes[0].routeName
+    const directory = navigation.state.routes[1].routeName
+    const userName = navigation.state.routes[0].params.userName
+    
+    let headerTitle, headerLeft, gestureResponseDistance
+    headerLeft = () => (
+        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            <Item
+                title='Back'
+                iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                onPress={() => {navigation.goBack()}}
+            />
+        </HeaderButtons>
+    )
+
+    if (index === 0) {
+        headerTitle = userName
+        gestureResponseDistance = {
+            horizontal: 300
+        }
+    } else if (index === 1) {
+        headerTitle = 'LNB Directory'
+    }
+
+    return {
+        headerTitle,
+        gestureResponseDistance,
+        headerLeft
+    }
+}
+
 
 
 const HomeStack = createStackNavigator({
@@ -85,7 +152,6 @@ const HomeStack = createStackNavigator({
             gestureResponseDistance: {
                 horizontal: 300
             },
-            
         }
     },
     UserProfile: {
@@ -104,39 +170,18 @@ const HomeStack = createStackNavigator({
             }
         }
     },
-    // sharedUserProfile: createSharedElementStackNavigator({
-    //     UserProfile: {
-    //         screen: UserProfileScreen,
-    //         navigationOptions: {
-    //             gestureResponseDistance: {
-    //                 horizontal: 300
-    //             }
-    //         }
-    //     },
-    //     UserProfilePicture: {
-    //         screen: UserProfilePictureScreen,
-    //         navigationOptions: {
-    //             gestureResponseDistance: {
-    //                 horizontal: 300
-    //             }
-    //         }
-    //     },
-    // }, {
-    //     headerMode: 'none',
-    //     initialRouteName: 'UserProfile',
-    //     defaultNavigationOptions: {
-    //         cardStyle: {
-    //             backgroundColor: 'transparent'
-    //         }
-    //     }
-    // }),
     Connections: {
-        screen: ConnectionsScreen,
+        screen: DirectorySwipeTab,
         navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
+            headerTitleStyle: {
+                fontFamily: 'open-sans-bold',
+            },
+            headerBackTitleStyle: {
+                fontFamily: 'open-sans',
+            },
+            headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+            headerBackTitleVisible: false,
+        },
     },
     ChatScreen: {
         screen: ChatScreen,
@@ -174,7 +219,8 @@ const HomeStack = createStackNavigator({
         screen: CreateCommentScreen
     }
 }, {
-    headerMode:'none',
+    // headerMode:'screen',
+    defaultNavigationOptions: defaultNavOptions
 })
 
 
@@ -347,6 +393,24 @@ const ConnectStack = createStackNavigator({
     },
 }, {headerMode: 'none'})
 
+
+const ThemedBottomBar = props => {
+    const scheme = useColorScheme()
+    let theme
+    if (scheme === 'dark') {
+        theme = Colors.darkHeader
+    } else theme = Colors.lightHeader
+    return (
+        <BottomTabBar
+            {...props}
+            activeTintColor={Colors.primary}
+            style={{backgroundColor: theme}}
+            keyboardHidesTabBar={false}
+            showLabel={false}
+        />
+    )
+}
+
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
         Home: {
@@ -445,13 +509,9 @@ const BottomTabStackContainer = createStackNavigator({
                 } else {
                     defaultHandler()
                 }
-            }
+            },
         },
-        tabBarOptions: {
-            activeTintColor: Colors.primary,
-            keyboardHidesTabBar: false,
-            showLabel: false
-        }
+        tabBarComponent: ThemedBottomBar
     }),
     postModal: {
         screen: CreatePostScreen
