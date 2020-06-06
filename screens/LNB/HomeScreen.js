@@ -196,7 +196,7 @@ const HomeScreen = props => {
             setShowNeedActions(false)
             setIsMounted(false)
         }
-    }, [dispatch, loadData, isMounted, showNeedActions, isMounted])
+    }, [dispatch, loadData, isMounted, showNeedActions])
 
     // NAV LISTENER
     useEffect(() => {
