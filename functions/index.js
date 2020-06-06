@@ -1,5 +1,8 @@
 /* eslint-disable consistent-return */
 /* eslint-disable promise/always-return */
+
+// firebase deploy --only functions  
+// https://www.youtube.com/watch?v=dTXzxSlhTDM&t=261s
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const firebaseConfig = {
@@ -21,6 +24,7 @@ const ADMIN_KEY = functions.config().algolia.key
 
 const client = algoliasearch(APP_ID, ADMIN_KEY)
 const index = client.initIndex('LNBmembers')
+const connectionsIndex = client.initIndex('Connections')
 
 exports.addToIndex = functions.firestore.document('/users/{userId}')
   .onCreate(snapshot => {
@@ -36,7 +40,7 @@ exports.addToIndex = functions.firestore.document('/users/{userId}')
     }
     const objectID = snapshot.id
 
-    return index.addObject({ data, objectID })
+    return index.saveObject({ data, objectID })
   })
 
 exports.updateIndex = functions.firestore.document('/users/{userId}')
@@ -58,6 +62,45 @@ exports.updateIndex = functions.firestore.document('/users/{userId}')
 
 exports.deleteFromIndex = functions.firestore.document('/users/{userId}')
   .onDelete(snapshot => index.deleteObject(snapshot.id))
+
+exports.addToConnectionsIndex = functions.firestore.document('/connections/{connectionId}')
+  .onCreate(snapshot => {
+    const data = {
+      id: snapshot.id,
+      acceptedBy: snapshot.data().acceptedBy,
+      requestedBy: snapshot.data().requestedBy
+    }
+    const objectID = snapshot.id
+    
+    return connectionsIndex.saveObject({ data, objectID })
+  })
+
+
+
+// exports.addToConnectionsIndex = functions.firestore.document('/connections/{connectionId}')
+//   .onCreate(snapshot => {
+//     let connections = []
+//     db.collection('connections')
+//     .get()
+//     .then(data => {
+//       data.forEach(doc => {
+//         const connection = {
+//           id: doc.id,
+//           acceptedBy: doc.data().acceptedBy,
+//           requestedBy: doc.data().requestedBy,
+//           timestamp: doc.data().timestamp
+//         }
+//         const objectID = doc.id
+//         connections.push({connection, objectID})
+//       })
+//       return connectionsIndex.saveObjects(connections)
+//     })
+//     .catch(err => console.error(err))
+//   })
+
+
+exports.deleteFromConnectionsIndex = functions.firestore.document('/connections/{connectionId}')
+  .onDelete(snapshot => connectionsIndex.deleteObject(snapshot.id))
 
 
 // UPDATE TWO COLLECTIONS: https://stackoverflow.com/questions/57653308/firestore-transaction-update-multiple-collections-in-a-single-transaction
