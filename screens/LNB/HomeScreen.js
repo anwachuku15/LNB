@@ -28,7 +28,7 @@ import {
     UIManager,
     Vibration
 } from 'react-native'
-import { FlatList, NavigationActions } from 'react-navigation'
+import { FlatList, withNavigationFocus } from 'react-navigation'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
@@ -88,7 +88,7 @@ const HomeScreen = props => {
         const notificationsSub = Notifications.addListener(handleNotification)
         return () => {
             // registerForPushNotificationsAsync.remove()
-            notificationsSub && Notifications.removeListener()
+            notificationsSub // && Notifications.removeListener()
         }
     }, [registerForPushNotificationsAsync])
 
@@ -130,7 +130,6 @@ const HomeScreen = props => {
             }
             try {
                 let token = await Notifications.getExpoPushTokenAsync();
-                // console.log(token);
                 db.doc(`/users/${userId}`)
                     .set(
                         {pushToken: token},
@@ -177,7 +176,6 @@ const HomeScreen = props => {
             await dispatch(fetchNeeds())
             dispatch(setLikes())
         } catch (err){
-            console.log('here it is')
             console.log(err)
             setError(err.message)
         }
@@ -246,7 +244,6 @@ const HomeScreen = props => {
     }
 
     if (isMounted && !isLoading && needs.length === 0) {
-        console.log('not loading')
         return (
             <View style={styles.spinner}>
                 <Text>No needs found.</Text>
@@ -289,7 +286,6 @@ const HomeScreen = props => {
     )
    
     const deleteHandler = (needId) => {
-        console.log(needId)
         Alert.alert('Delete', 'Are you sure?', [
             {
                 text: 'Cancel',
@@ -516,11 +512,10 @@ const TouchableHeader = () => {
 
 HomeScreen.navigationOptions = (navData) => {
     const background = navData.screenProps.theme
+    const isFocused = navData.navigation.isFocused()
     return {
         headerLeft: () => (
-            <MenuAvatar
-                toggleDrawer={() => navData.navigation.toggleDrawer()}
-            />
+            isFocused && <MenuAvatar toggleDrawer={() => navData.navigation.toggleDrawer()} />
         ),
         headerRight: () => (
             <HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -692,4 +687,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default HomeScreen
+export default withNavigationFocus(HomeScreen)
