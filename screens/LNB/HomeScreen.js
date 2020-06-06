@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, createRef } from 'react'
 import firebase from 'firebase'
 // EXPO
 import { Notifications } from 'expo';
@@ -34,6 +34,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
+import { useTheme, ThemeContext } from 'react-navigation'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 // import '@firebase/firestore'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
@@ -46,6 +47,7 @@ import MenuAvatar from '../../components/LNB/MenuAvatar'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 import Animated from 'react-native-reanimated';
+import TouchableCmp from '../../components/LNB/TouchableCmp';
 
 const db = firebase.firestore()
 
@@ -55,7 +57,7 @@ const BASE_PADDING = 10
 
 let themeColor
 let text
-
+let flatListRef
 const HomeScreen = props => {
     const scheme = useColorScheme()
     if (scheme === 'dark') {
@@ -166,11 +168,6 @@ const HomeScreen = props => {
     const authUser = useSelector(state => state.auth.credentials)
     const userId = useSelector(state => state.auth.userId)
     const needs = useSelector(state => state.posts.allNeeds)
-
-    const flatListRef = useRef()
-    const toTop = () => {
-        flatListRef.current.scrollToOffset({animated: true, offset: 0})
-    }
     
     const dispatch = useDispatch()
     const loadData = useCallback(async () => {
@@ -217,11 +214,12 @@ const HomeScreen = props => {
     
 
 
-    const selectUserHandler = (userId) => {
+    const selectUserHandler = (userId, userName) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
             params: {
-                userId: userId
+                userId: userId,
+                name: userName
             }
         })
     }
@@ -349,7 +347,7 @@ const HomeScreen = props => {
         }} useForeground>
             <View style={{...styles.feedItem, ...{backgroundColor: themeColor}}} key={item.id}>
                 <TouchableCmp 
-                    onPress={() => selectUserHandler(item.uid)}
+                    onPress={() => selectUserHandler(item.uid, item.userName)}
                     style={{alignSelf:'flex-start'}}
                 >
                     <Image source={{uri: item.userImage}} style={styles.avatar} />
@@ -357,7 +355,7 @@ const HomeScreen = props => {
                 <View style={{flex: 1}}>
                     <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
                         <View>
-                            <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
+                            <TouchableCmp onPress={() => selectUserHandler(item.uid, item.userName)}>
                                 <Text style={{...styles.name, ...{color:text}}}>
                                     {item.userName}
                                     <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
@@ -455,15 +453,8 @@ const HomeScreen = props => {
             <SafeAreaView style={styles.screen}>
                 {/* HEADER */}
                 
-                <TouchableWithoutFeedback onPress={toTop}>
+                {/* <TouchableWithoutFeedback onPress={toTop}>
                     <View style={styles.header}>
-                        {/* <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                            <Item
-                                title='Menu'
-                                iconName={Platform.OS==='android' ? 'md-menu' : 'ios-menu'}
-                                onPress={() => {props.navigation.toggleDrawer()}}
-                            />
-                        </HeaderButtons> */}
                         <MenuAvatar 
                             toggleDrawer={() => props.navigation.toggleDrawer()}
                         />
@@ -484,7 +475,7 @@ const HomeScreen = props => {
                             />
                         </HeaderButtons>
                     </View>
-                </TouchableWithoutFeedback>
+                </TouchableWithoutFeedback> */}
 
                 {/* NEED POSTS */}
                 
@@ -505,7 +496,60 @@ const HomeScreen = props => {
     )
 }
 
+const TouchableHeader = () => {
+    flatListRef = useRef()
+    const toTop = () => {
+        flatListRef.current.scrollToOffset({animated: true, offset: 0})
+    }
+    return (
+        <TouchableCmp onPress={toTop} activeOpacity={Platform.OS === 'ios' ? 0.6 : null}>
+            <View style={{width: WINDOW_WIDTH * 0.60, alignItems: 'center'}}>
+                <Image 
+                    source={require('../../assets/lnb.png')} 
+                    resizeMode='contain' 
+                    style={{width:38, height:38}}
+                />
+            </View>
+        </TouchableCmp>
+    )
+}
 
+HomeScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    return {
+        headerLeft: () => (
+            <MenuAvatar
+                toggleDrawer={() => navData.navigation.toggleDrawer()}
+            />
+        ),
+        headerRight: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    ButtonElement={<MessageIcon/>}
+                    title='Messages'
+                    onPress={() => {
+                        props.navigation.navigate('Messages')
+                    }}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: () => (
+            <TouchableHeader />
+        ),
+        headerTitleStyle: {
+            fontFamily: 'open-sans-bold',
+        },
+        headerBackTitleStyle: {
+            fontFamily: 'open-sans',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+        headerBackTitleVisible: false,
+        headerStyle: {
+            backgroundColor: background === 'dark' ? Colors.darkHeader : 'white',
+            borderBottomColor: Colors.primary
+        },
+    }
+}
 
 const styles = StyleSheet.create({
     inAppNotification: {
