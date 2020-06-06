@@ -10,11 +10,13 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
     TextInput,
-    FlatList
+    FlatList,
+    ActivityIndicator
 } from 'react-native'
 import { withNavigationFocus } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 // REDUX
+import { fetchConnections } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -35,6 +37,7 @@ const index = client.initIndex('LNBmembers')
 
 let themeColor
 let text, background
+
 const ConnectionsScreen = props => {
     const scheme = useColorScheme()
     let text
@@ -49,68 +52,56 @@ const ConnectionsScreen = props => {
     }
     
     const auth = useSelector(state => state.auth)
+    const userId = props.navigation.getParam('userId')
+    const userName = props.navigation.getParam('userName')
+
     
+    const dispatch = useDispatch()
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
-    const [allConnections, setAllConnections] = useState([])
-    // const 
+    // const [userConnections, setAllConnections] = useState([])
+    const [connections, setConnections] = useState([])
+    const [isMounted, setIsMounted] = useState(true)
     const [isFocused, setIsFocused] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const searchInput = useRef(null)
     
     let hits = []
     let connectionHits = []
-    let connectionIds = []
-    let connections = []
     let searchResults = []
 
-    const loadIndex = useCallback(async () => {
-        index.browseObjects({
-            query: '',
-            batch: batch => {
-                hits = hits.concat(batch)
-            }
-        })
-        connectionsIndex.browseObjects({
-            query: '',
-            batch: batch => {
-                connectionHits = connectionHits.concat(batch)
-            }
-        })
-        .then(() => {
-            const authId = auth.userId
-            connectionHits.forEach(hit => {
-                if (hit.objectID.includes(authId)) {
-                    connectionIds.push(hit.objectID.replace(authId,''))
-                }
-            })
-        })
-        .then(() => {
-            connections = connectionIds
-            hits.forEach(hit => {
-                if (connectionIds.includes(hit.objectID)) {
-                    searchResults.push(hit.newData)
-                }
-            })
-            setResults(searchResults)
-            if (allConnections.length === 0) {
-                setAllConnections(searchResults)
-            }
-        })
-        .catch(err => console.log(err))
-    }, [])
+    const userConnections = useSelector(state => state.auth.userConnections)
+
+    const loadConnections = useCallback(async () => {
+        try {
+            await dispatch(fetchConnections(userId))
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch])
+
+    
 
     useEffect(() => {
-        if (props.navigation.isFocused) {
-            loadIndex()
+        setIsMounted(true)
+        setIsLoading(true)
+        if (isMounted) {
+            loadConnections().then(() => {
+                setIsLoading(false)
+            }).then(() => console.log(results.length))
         }
-    }, [loadIndex])
+        
+        return () => {
+            setIsMounted(false)
+        }
+    }, [dispatch, loadConnections, isMounted])
 
     const updateSearch = (text) => {
         setSearch(text)
         if (text === '') {
-            setResults(allConnections)
+            setResults(userConnections)
         } else {
-            const newResults = allConnections.filter(result => {
+            const newResults = userConnections.filter(result => {
                 const resultData = `${result.name.toUpperCase()}`
                 const query = text.toUpperCase()
     
@@ -211,13 +202,28 @@ const ConnectionsScreen = props => {
                     null
                 )}
             </View>
-            <FlatList
-                keyExtractor={(item, index) => index.toString()}
-                data={results}
-                renderItem={renderItem}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-            />
+            {isLoading && (
+                <View style={styles.spinner}>
+                    <ActivityIndicator 
+                        size='large'
+                        color={Colors.primary}
+                    />
+                </View>
+            )}
+            {userConnections && userConnections.length === 0 && (
+                <Text style={{color:Colors.placeholder, alignSelf: 'center', marginTop: 10}}>
+                    {userId === auth.userId ? 'You have no connections' : `${userName} has no connections`}
+                </Text>
+            )}
+            {!isLoading && userConnections && userConnections.length > 0 &&(
+                <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={isFocused ? results : userConnections}
+                    renderItem={renderItem}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                />
+            )}
         </View>
     )
 }
@@ -230,6 +236,11 @@ ConnectionsScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    spinner: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     header: {
         flexDirection:'row',
