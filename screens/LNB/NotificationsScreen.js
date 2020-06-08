@@ -268,7 +268,7 @@ const NotificationsScreen = props => {
     return (
         
         <SafeAreaView style={styles.screen}>
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <MenuAvatar 
                     toggleDrawer={() => props.navigation.toggleDrawer()}
                 />
@@ -282,7 +282,7 @@ const NotificationsScreen = props => {
                         }}
                     />
                 </HeaderButtons>
-            </View>
+            </View> */}
             
             {notifications && notifications.length > 0 ? (
                 <FlatList
@@ -304,8 +304,28 @@ const NotificationsScreen = props => {
 
 
 NotificationsScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    const isFocused = navData.navigation.isFocused()
     return {
-        headerTitle: 'Notifications'
+        headerLeft: () => (
+            isFocused && <MenuAvatar toggleDrawer={() => navData.navigation.toggleDrawer()} />
+        ),
+        headerRight: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    ButtonElement={<MessageIcon/>}
+                    title='Messages'
+                    onPress={() => {
+                        navData.navigation.navigate('Messages')
+                    }}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: 'Notifications',
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
+        },
     }
 }
 
