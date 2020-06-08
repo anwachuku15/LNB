@@ -259,7 +259,8 @@ const UserProfileScreen = props => {
             props.navigation.push(
                 'UserProfile', {
                     userId: userId,
-                    name: userName
+                    name: userName,
+                    from: 'UserProfileScreen'
                 }
             )
         }
@@ -310,7 +311,8 @@ const UserProfileScreen = props => {
         <TouchableCmp onPress={() => {
             props.navigation.push(
                 'PostDetail', {
-                    needId: item.id
+                    needId: item.id,
+                    from: 'UserProfileScreen'
                 }
             )
         }} useForeground>
