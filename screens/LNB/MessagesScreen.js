@@ -16,6 +16,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'

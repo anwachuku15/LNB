@@ -13,6 +13,7 @@ import {
     FlatList,
     ActivityIndicator
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 // REDUX

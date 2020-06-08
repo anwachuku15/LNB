@@ -13,6 +13,7 @@ import {
     TouchableNativeFeedback,
     KeyboardAvoidingView
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import Input from '../../components/UI/Input'
 import { Ionicons } from '@expo/vector-icons'
 // REDUX

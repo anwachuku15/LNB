@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import {NavigationActions, DrawerActions} from 'react-navigation'
 import { useColorScheme } from 'react-native-appearance'
 

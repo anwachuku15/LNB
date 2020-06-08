@@ -17,6 +17,7 @@ import {
     Animated,
     Dimensions
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { LinearGradient } from 'expo-linear-gradient'
 import { SharedElement } from 'react-navigation-shared-element'

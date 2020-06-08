@@ -14,6 +14,7 @@ import {
     TouchableNativeFeedback,
     TouchableHighlight
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'

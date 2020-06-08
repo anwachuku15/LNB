@@ -14,6 +14,7 @@ import {
     Button, 
     ActivityIndicator
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { useDispatch, useSelector } from 'react-redux'

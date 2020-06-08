@@ -15,6 +15,7 @@ import {
     FlatList,
     Platform
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 // REDUX
 import { getUser, setLastReadMessage } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
@@ -28,6 +29,7 @@ import firebase, { firestore } from 'firebase'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import moment from 'moment'
+import Hyperlink from 'react-native-hyperlink'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 const db = firebase.firestore()
 
@@ -48,6 +50,7 @@ const ChatScreen = props => {
         background = 'white'
     }
 
+    
     const authUser = useSelector(state => state.auth)
     const uid = authUser.userId
     const user = useSelector(state => state.auth.selectedUser)
@@ -62,7 +65,7 @@ const ChatScreen = props => {
     
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
-    
+    const [copiedText, setCopiedText] = useState('')
     
     useEffect(() => {
         const createChat = async () => {
@@ -204,11 +207,14 @@ const ChatScreen = props => {
     const renderMessage = ({item}) => (
         item.user._id === uid ? (
             <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
-                
                 <View style={{alignSelf: 'flex-start', backgroundColor: scheme==='light' ? 'white' : 'black', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, borderColor: Colors.primary}}>
-                    <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                    <Hyperlink
+                        linkDefault={true}
+                        linkStyle={{color:Colors.blue}}
+                    >
+                        <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                    </Hyperlink>
                 </View>
-
             </View>
         ) : (
             <View style={{...styles.leftMessageView, ...{backgroundColor:background}}} key={item._id}>
@@ -216,7 +222,12 @@ const ChatScreen = props => {
                     <Image source={{uri: item.user.userImage}} style={styles.leftMessageAvatar}/>
                 </TouchableCmp>
                 <View style={{backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomRightRadius: 15}}>
-                    <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                    <Hyperlink
+                        linkDefault={true}
+                        linkStyle={{color:Colors.blue}}
+                    >
+                        <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                    </Hyperlink>
                 </View>
             </View>
         )

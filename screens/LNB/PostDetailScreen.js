@@ -21,6 +21,7 @@ import {
     Dimensions,
     KeyboardAvoidingView 
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { SharedElement } from 'react-navigation-shared-element'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'

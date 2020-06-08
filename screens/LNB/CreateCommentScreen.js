@@ -7,6 +7,7 @@ import {
     TextInput,
     SafeAreaView
 } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { Ionicons } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
