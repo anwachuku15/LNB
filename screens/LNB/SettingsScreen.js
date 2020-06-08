@@ -92,7 +92,7 @@ SettingsScreen.navigationOptions = (navData) => {
         headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
         headerBackTitleVisible: false,
         headerStyle: {
-            backgroundColor: background === 'dark' ? Colors.darkHeader : 'white',
+            backgroundColor: background === 'dark' ? 'black' : 'white',
             borderBottomColor: Colors.primary
         },
     }
