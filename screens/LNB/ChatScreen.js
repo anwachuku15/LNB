@@ -28,6 +28,7 @@ import firebase, { firestore } from 'firebase'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import moment from 'moment'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
 const db = firebase.firestore()
 
 let themeColor
@@ -194,6 +195,7 @@ const ChatScreen = props => {
             routeName: 'UserProfile',
             params: {
                 userId: id,
+                name: user.credentials.displayName,
                 from: 'ChatScreen'
             }
         })
@@ -221,16 +223,12 @@ const ChatScreen = props => {
     )
 
 
-    let TouchableCmp = TouchableOpacity
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
     
 
     return (
         <SafeAreaView style={styles.screen}>
 
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <View style={{flexDirection:'row', alignItems:'center'}}>
                     <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
@@ -239,18 +237,18 @@ const ChatScreen = props => {
                             onPress={() => {props.navigation.goBack()}}
                         />
                     </HeaderButtons>
-                        <TouchableCmp
-                            onPress={() => {props.navigation.navigate({
-                                routeName: 'UserProfile',
-                                params: {
-                                    userId: user.credentials.userId
-                                }
-                            })}}
-                            style={{flexDirection:'row'}}
-                        >
-                            <Image style={styles.headerAvatar} source={{uri: user.credentials.imageUrl}}/>
-                            <Text style={styles.headerTitle}>{user.credentials.displayName}</Text>
-                        </TouchableCmp>
+                    <TouchableCmp
+                        onPress={() => {props.navigation.navigate({
+                            routeName: 'UserProfile',
+                            params: {
+                                userId: user.credentials.userId
+                            }
+                        })}}
+                        style={{flexDirection:'row'}}
+                    >
+                        <Image style={styles.headerAvatar} source={{uri: user.credentials.imageUrl}}/>
+                        <Text style={styles.headerTitle}>{user.credentials.displayName}</Text>
+                    </TouchableCmp>
                 </View>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
@@ -259,7 +257,7 @@ const ChatScreen = props => {
                         onPress={() => {}}
                     />
                 </HeaderButtons>
-            </View>
+            </View> */}
             
             <FlatList
                 contentContainerStyle={styles.messages}
@@ -269,7 +267,7 @@ const ChatScreen = props => {
                 keyboardDismissMode={Platform.OS==='ios' ? 'interactive' : 'on-drag'}
                 inverted
             />
-            <KeyboardAvoidingView behavior='padding'>
+            <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.select({ios: 85, android:500})}>
                 <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
                     <View style={styles.inputContainer}>
                         {/* <TouchableCmp 
@@ -305,8 +303,40 @@ const ChatScreen = props => {
 
 
 ChatScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    const selectedUserId = navData.navigation.getParam('selectedUserId')
+    const userName = navData.navigation.getParam('userName')
+    const userImage = navData.navigation.getParam('userImage')
     return {
-        headerTitle: 'Chat',
+        headerLeft: () => (
+            <View style={{flexDirection:'row', alignItems:'center'}}>
+                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                    <Item
+                        title='Direct'
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {navData.navigation.goBack()}}
+                    />
+                </HeaderButtons>
+                <TouchableCmp
+                    onPress={() => {navData.navigation.navigate({
+                        routeName: 'UserProfile',
+                        params: {
+                            userId: selectedUserId,
+                            name: userName
+                        }
+                    })}}
+                    style={{flexDirection:'row'}}
+                >
+                    <Image style={styles.headerAvatar} source={{uri: userImage}}/>
+                    <Text style={styles.headerTitle}>{userName}</Text>
+                </TouchableCmp>
+
+            </View>
+        ),
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
+        },
     }
 }
 
@@ -350,7 +380,7 @@ const styles = StyleSheet.create({
     inputContainer: {
         margin: 10,
         paddingHorizontal: 5,
-        paddingVertical: 5,
+        paddingVertical: 10,
         borderColor: Colors.primary,
         borderWidth: 1,
         borderRadius: 20,
