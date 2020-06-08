@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
 import { Platform, View, Button, SafeAreaView, Text } from 'react-native'
+import TouchableCmp from '../components/LNB/TouchableCmp'
 import { createAppContainer, createSwitchNavigator, ThemeContext } from 'react-navigation'
 import { createStackNavigator, Header, HeaderBackButton, } from 'react-navigation-stack'
 
@@ -10,7 +11,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../components/UI/HeaderButton'
 
 import { createDrawerNavigator } from 'react-navigation-drawer'
-import { createMaterialTopTabNavigator, createBottomTabNavigator, BottomTabBar } from 'react-navigation-tabs'
+import { createMaterialTopTabNavigator, MaterialTopTabBar, createBottomTabNavigator, BottomTabBar } from 'react-navigation-tabs'
 
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
@@ -54,9 +55,6 @@ export const defaultNavOptions = {
     },
     headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
     headerBackTitleVisible: false,
-    headerStyle: {
-        // backgroundColor: theme
-    }
 }
 
 export const defaultHeader = {
@@ -74,11 +72,11 @@ export const defaultHeader = {
 const AdminStack = createStackNavigator({
     Admin: {
         screen: AdminScreen,
-        // navigationOptions: {
-        //     gestureResponseDistance: {
-        //         horizontal: 300
-        //     }
-        // }
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            },
+        }
     },
     CreateAnnouncement: {
         screen: CreateAnnouncementScreen,
@@ -88,22 +86,47 @@ const AdminStack = createStackNavigator({
     mode: 'modal'
 })
 
+const ThemedTopTabBar = props => {
+    const scheme = useColorScheme()
+    let theme
+    if (scheme === 'dark') {
+        theme = 'black'
+    } else theme = 'white'
+    return (
+        <MaterialTopTabBar
+            {...props}
+            showLabel={true}
+            activeTintColor='white'
+            inactiveTintColor={Colors.placeholder}
+            style={{backgroundColor: theme}}
+            indicatorStyle={{backgroundColor:'white'}}
+        />
+    )
+}
+
 const ConnectionsSwipeTab = createMaterialTopTabNavigator({
+    Directory: DirectoryScreen,
     Connections: ConnectionsScreen,
-    Directory: DirectoryScreen
 }, {
+    initialRouteName: 'Connections',
     swipeEnabled: true,
     tabBarPosition: 'top',
+    tabBarComponent: ThemedTopTabBar
 })
 
-ConnectionsSwipeTab.navigationOptions = ({navigation}) => {
+ConnectionsSwipeTab.navigationOptions = ({navigation, screenProps}) => {
     const index = navigation.state.index
     const screens = navigation.state.routes
     const connections = navigation.state.routes[0].routeName
     const directory = navigation.state.routes[1].routeName
     const userName = navigation.state.routes[0].params.userName
+    const background = screenProps.theme
     
-    let headerTitle, headerLeft, gestureResponseDistance
+    let headerTitle, headerLeft, gestureResponseDistance, headerStyle
+    headerStyle = {
+        backgroundColor: background === 'dark' ? 'black' : 'white',
+        borderBottomWidth: 0
+    }
     headerLeft = () => (
         <HeaderButtons HeaderButtonComponent={HeaderButton}>
             <Item
@@ -115,15 +138,16 @@ ConnectionsSwipeTab.navigationOptions = ({navigation}) => {
     )
 
     if (index === 0) {
-        headerTitle = userName
+        headerTitle = 'LNB Directory'
         gestureResponseDistance = {
             horizontal: 300
         }
     } else if (index === 1) {
-        headerTitle = 'LNB Directory'
+        headerTitle = userName
     }
 
     return {
+        headerStyle,
         headerTitle,
         gestureResponseDistance,
         headerLeft
@@ -131,22 +155,28 @@ ConnectionsSwipeTab.navigationOptions = ({navigation}) => {
 }
 
 const DirectorySwipeTab = createMaterialTopTabNavigator({
-    Connections: ConnectionsScreen,
-    Directory: DirectoryScreen
+    Directory: DirectoryScreen,
+    Connections: ConnectionsScreen
 }, {
-    initialRouteName: 'Directory',
     swipeEnabled: true,
     tabBarPosition: 'top',
+    tabBarComponent: ThemedTopTabBar
+    
 })
 
-DirectorySwipeTab.navigationOptions = ({navigation}) => {
+DirectorySwipeTab.navigationOptions = ({navigation, screenProps}) => {
     const index = navigation.state.index
     const screens = navigation.state.routes
     const connections = navigation.state.routes[0].routeName
     const directory = navigation.state.routes[1].routeName
     const userName = navigation.state.routes[0].params.userName
-    
-    let headerTitle, headerLeft, gestureResponseDistance
+    const background = screenProps.theme
+
+    let headerTitle, headerLeft, gestureResponseDistance, headerStyle
+    headerStyle = {
+        backgroundColor: background === 'dark' ? 'black' : 'white',
+        borderBottomWidth: 0
+    }
     headerLeft = () => (
         <HeaderButtons HeaderButtonComponent={HeaderButton}>
             <Item
@@ -158,15 +188,16 @@ DirectorySwipeTab.navigationOptions = ({navigation}) => {
     )
 
     if (index === 0) {
-        headerTitle = userName
+        headerTitle = 'LNB Directory'
         gestureResponseDistance = {
             horizontal: 300
         }
     } else if (index === 1) {
-        headerTitle = 'LNB Directory'
+        headerTitle = userName
     }
 
     return {
+        headerStyle,
         headerTitle,
         gestureResponseDistance,
         headerLeft
@@ -175,109 +206,110 @@ DirectorySwipeTab.navigationOptions = ({navigation}) => {
 
 
 const HomeStack = createStackNavigator({
-    Home: {
-        screen: HomeScreen
-    },
-    PostDetail: {
-        screen: PostDetailScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
-    EditProfile: {
-        screen: EditProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            },
-        }
-    },
-    UserProfile: {
-        screen: UserProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
-    UserProfilePicture: {
-        screen: UserProfilePictureScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
-    Connections: {
-        screen: ConnectionsSwipeTab,
-        navigationOptions: {
-            headerTitleStyle: {
-                fontFamily: 'open-sans-bold',
-            },
-            headerBackTitleStyle: {
-                fontFamily: 'open-sans',
-            },
-            headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
-            headerBackTitleVisible: false,
+    MainStack: createStackNavigator({
+        Home: {
+            screen: HomeScreen
         },
-    },
-    Directory: {
-        screen: DirectorySwipeTab,
-        navigationOptions: {
-            headerTitleStyle: {
-                fontFamily: 'open-sans-bold',
-            },
-            headerBackTitleStyle: {
-                fontFamily: 'open-sans',
-            },
-            headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
-            headerBackTitleVisible: false,
+        PostDetail: {
+            screen: PostDetailScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
         },
-    },
-    ChatScreen: {
-        screen: ChatScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
+        EditProfile: {
+            screen: EditProfileScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                },
             }
-        }
-    },
-    Settings: {
-        screen: SettingsScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
+        },
+        UserProfile: {
+            screen: UserProfileScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
             }
-        }
-    },
-    Events: {
-        screen: EventsScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
+        },
+        UserProfilePicture: {
+            screen: UserProfilePictureScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
             }
-        }
-    },
-    Admin: {
-        screen: AdminStack,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
+        },
+        Connections: {
+            screen: ConnectionsSwipeTab,
+            navigationOptions: {
+                headerTitleStyle: {
+                    fontFamily: 'open-sans-bold',
+                },
+                headerBackTitleStyle: {
+                    fontFamily: 'open-sans',
+                },
+                headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+                headerBackTitleVisible: false,
+            },
+        },
+        Directory: {
+            screen: DirectorySwipeTab,
+            navigationOptions: {
+                headerTitleStyle: {
+                    fontFamily: 'open-sans-bold',
+                },
+                headerBackTitleStyle: {
+                    fontFamily: 'open-sans',
+                },
+                headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+                headerBackTitleVisible: false,
+            },
+        },
+        ChatScreen: {
+            screen: ChatScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                },
+                // headerShown: false
             }
-        }
-    },
+        },
+        Settings: {
+            screen: SettingsScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
+        Events: {
+            screen: EventsScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
+        Admin: {
+            screen: AdminStack,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
+        
+    }, {defaultNavigationOptions: defaultNavOptions}),
     Comment: {
         screen: CreateCommentScreen
     }
-}, {
-    // headerMode:'screen',
-    defaultNavigationOptions: defaultNavOptions
+}, { 
+    mode: 'modal',
+    headerMode: 'none',
 })
-
-
-
 
 const AnnouncementsStack = createStackNavigator({
     Announcements: {
@@ -328,7 +360,9 @@ const AnnouncementsStack = createStackNavigator({
             }
         }
     },
-}, {headerMode:'none'})
+}, {
+    defaultNavigationOptions: defaultNavOptions
+})
 
 const NotificationsStack = createStackNavigator({
     Notifications: {
@@ -382,7 +416,9 @@ const NotificationsStack = createStackNavigator({
             }
         }
     },
-}, {headerMode:'none'})
+}, {
+    defaultNavigationOptions: defaultNavOptions
+})
 
 const ConnectStack = createStackNavigator({
     Connect: {
@@ -463,6 +499,7 @@ const ThemedBottomBar = props => {
         />
     )
 }
+
 
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
@@ -574,37 +611,36 @@ const BottomTabStackContainer = createStackNavigator({
     headerMode: 'none',
 })
 
-const SwipeableUserProfile = createMaterialTopTabNavigator({
-    Main: UserProfileScreen,
-    Picture: UserProfilePictureScreen
-}, {
-    swipeEnabled: true,
-    tabBarOptions: {
-        style: {display: 'none'}
-    }
-})
 
 const MessagesStack = createStackNavigator({
-    MessagesScreen: {
-        screen: MessagesScreen,
-    },
-    ChatScreen: {
-        screen: ChatScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
+    default: createStackNavigator({
+        MessagesScreen: {
+            screen: MessagesScreen,
+        },
+        ChatScreen: {
+            screen: ChatScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
+        UserProfile: {
+            screen: UserProfileScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
             }
         }
-    },
-    UserProfile: {
-        screen: UserProfileScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    }
-}, {headerMode: 'none'})
+    }, {
+        defaultNavigationOptions: defaultNavOptions
+    }),
+    Comment: CreateCommentScreen
+}, {
+    mode: 'modal',
+    headerMode: 'none'
+})
 
 const DrawerNav = createDrawerNavigator({
     Main: {
@@ -675,7 +711,7 @@ DrawerNav.navigationOptions = ({navigation}) => {
 
 
 const SwipeTabNavigator = createMaterialTopTabNavigator({
-    Drawer: {
+    Main: {
         screen: DrawerNav
     },
     Messages: {
