@@ -85,7 +85,7 @@ const DrawerScreen = props => {
                         })
                       }
                     >
-                      <Text style={{...styles.viewProfile, ...{color:Colors.primary}}}>View Profile</Text>
+                      <Text style={{...styles.viewProfile, ...{color:Colors.blue}}}>View Profile</Text>
                     </TouchableOpacity>
                     {/* <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
                       <Text style={{...styles.editProfile, ...{color:Colors.primary}}}>Edit Profile</Text>
@@ -111,7 +111,7 @@ const DrawerScreen = props => {
                           style={styles.icon}
                           name='user-o'
                           size={20}
-                          color={Colors.gunmetal}
+                          color={Colors.primary}
                       />
                       <Text style={{...styles.text, ...{color:text}}}> Profile </Text>
                   </View>
@@ -122,7 +122,7 @@ const DrawerScreen = props => {
                   })
                 }} style={styles.list}>
                     <View>
-                        <Ionicons style={styles.icon} name='ios-calendar' size={20} color={Colors.gunmetal} />
+                        <Ionicons style={styles.icon} name='ios-calendar' size={20} color={Colors.primary} />
                         <Text style={{...styles.text, ...{color:text}}}> Events </Text>
                     </View>
                 </TouchableOpacity>
@@ -143,7 +143,7 @@ const DrawerScreen = props => {
                       style={styles.icon}
                       name='account-card-details'
                       size={23}
-                      color={Colors.gunmetal}
+                      color={Colors.primary}
                     />
                     <Text style={{...styles.text, ...{color:text}}}> Directory </Text>
                     </View>
@@ -161,7 +161,7 @@ const DrawerScreen = props => {
                           style={styles.icon}
                           name='md-analytics'
                           size={20}
-                          color={Colors.gunmetal}/>
+                          color={Colors.primary}/>
                       <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
@@ -176,7 +176,7 @@ const DrawerScreen = props => {
                             style={styles.icon}
                             name="ios-cog"
                             size={23}
-                            color={Colors.gunmetal}/>
+                            color={Colors.primary}/>
                         <Text style={{...styles.text, ...{color:text}}}> Settings </Text>
                     </View>
                 </TouchableOpacity>
