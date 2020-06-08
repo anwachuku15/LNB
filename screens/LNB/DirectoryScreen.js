@@ -128,9 +128,10 @@ const DirectoryScreen = props => {
     )
 
     const navToUserProfile = (id, userName) => {
-        props.navigation.push('UserProfile', {
-            userId: id, 
-            name: userName
+        props.navigation.push(
+            'UserProfile', {
+                userId: id, 
+                name: userName
         })
         setSearch('')
         
