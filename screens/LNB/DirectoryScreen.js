@@ -56,16 +56,32 @@ const DirectoryScreen = props => {
     let searchResults = []
 
     const loadIndex = useCallback(async () => {
-        index.browseObjects({
-            query: '',
-            batch: batch => {
-                hits = hits.concat(batch)
-            }
+        index.setSettings({
+            customRanking: [
+                'asc(newData.name)'
+            ],
+            ranking: [
+                'custom',
+                'typo',
+                'geo',
+                'words',
+                'filters',
+                'proximity',
+                'attribute',
+                'exact'
+            ]
         }).then(() => {
-            hits.forEach(hit => {
-                searchResults.push(hit.newData)
+            index.browseObjects({
+                query: '',
+                batch: batch => {
+                    hits = hits.concat(batch)
+                }
+            }).then(() => {
+                hits.forEach(hit => {
+                    searchResults.push(hit.newData)
+                })
+                setResults(searchResults)
             })
-            setResults(searchResults)
         }).catch(err => console.log(err))
     }, [])
     
@@ -154,7 +170,7 @@ const DirectoryScreen = props => {
                         autoFocus={false}
                         multiline={true}
                         numberOfLines={4} 
-                        style={{flex:1, fontSize:14, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:4}}
+                        style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:5}}
                         placeholder={'Search...'}
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {updateSearch(text)}}
@@ -248,9 +264,10 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         flexDirection: 'row',
         paddingHorizontal: 5,
-        borderColor: Colors.primary,
+        backgroundColor:Colors.darkHeader,
         borderWidth: 1,
         borderRadius: 10,
+        marginBottom: 2,
     },
 })
 export default withNavigationFocus(DirectoryScreen)
