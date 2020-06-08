@@ -632,7 +632,15 @@ const MessagesStack = createStackNavigator({
                     horizontal: 300
                 }
             }
-        }
+        },
+        PostDetail: {
+            screen: PostDetailScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
     }, {
         defaultNavigationOptions: defaultNavOptions
     }),
