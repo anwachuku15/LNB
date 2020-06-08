@@ -212,7 +212,8 @@ const HomeScreen = props => {
             routeName: 'UserProfile',
             params: {
                 userId: userId,
-                name: userName
+                name: userName,
+                from: 'HomeScreen'
             }
         })
     }
@@ -333,7 +334,8 @@ const HomeScreen = props => {
             props.navigation.navigate({
                 routeName: 'PostDetail',
                 params: {
-                    needId: item.id
+                    needId: item.id,
+                    from: 'HomeScreen'
                 }
             })
         }} useForeground>
