@@ -4,7 +4,7 @@ import { logout } from '../redux/actions/authActions'
 
 import { Platform, View, Button, SafeAreaView, Text } from 'react-native'
 import TouchableCmp from '../components/LNB/TouchableCmp'
-import { createAppContainer, createSwitchNavigator, ThemeContext } from 'react-navigation'
+import { createAppContainer, createSwitchNavigator, StackActions } from 'react-navigation'
 import { createStackNavigator, Header, HeaderBackButton, } from 'react-navigation-stack'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
@@ -506,6 +506,13 @@ const BottomTabStackContainer = createStackNavigator({
         Home: {
             screen: HomeStack,
             navigationOptions: {
+                tabBarOnPress: ({navigation, defaultHandler}) => {
+                    console.log(navigation.state)
+                    if (navigation.state.routes[0].index > 0) {
+                        navigation.dispatch(StackActions.popToTop())
+                    }
+                    defaultHandler()
+                },
                 tabBarIcon: (tabInfo) => {
                     return (
                         <Feather 
