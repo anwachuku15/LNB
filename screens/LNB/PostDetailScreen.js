@@ -60,6 +60,7 @@ const PostDetailScreen = props => {
 
     const uid = useSelector(state => state.auth.userId)
     const needId = props.navigation.getParam('needId')
+    const from = props.navigation.getParam('from')
     const senderName = props.navigation.getParam('senderName')
     const type = props.navigation.getParam('type')
 
@@ -151,12 +152,35 @@ const PostDetailScreen = props => {
 
 
     const selectUserHandler = (userId, userName) => {
-        props.navigation.push(
-            'UserProfile', {
-                userId: userId,
-                name: userName
+        if (from === 'HomeScreen' || from === 'NotificationsScreen') {
+            props.navigation.push(
+                'UserProfile', {
+                    userId: userId,
+                    name: userName,
+                    from: 'PostDetailScreen'
+                }
+            )
+        } else if (from === 'UserProfileScreen') {
+            if (need.uid === userId) {
+                props.navigation.goBack()
+            } else {
+                props.navigation.push(
+                    'UserProfile', {
+                        userId: userId,
+                        name: userName,
+                        from: 'PostDetailScreen'
+                    }
+                ) 
             }
-        )
+        } else {
+            props.navigation.push(
+                'UserProfile', {
+                    userId: userId,
+                    name: userName,
+                    from: 'PostDetailScreen'
+                }
+            )
+        }
     }
 
     const pickImage = async () => {
@@ -312,13 +336,13 @@ const PostDetailScreen = props => {
                                 <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
                                     <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                                         <View style={{flexDirection:'row'}}>
-                                            <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
+                                            <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.blue} style={{marginRight: 7}} />
                                             {/* {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>} */}
                                         </View>
                                     </TouchableCmp>
                                     <TouchableCmp onPress={() => {}}>
                                         <View style={{flexDirection:'row'}}>
-                                            <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
+                                            <MaterialIcons name='comment' size={24} color={Colors.green} style={{}} />
                                             {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}
                                         </View>
                                     </TouchableCmp>
