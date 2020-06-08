@@ -53,11 +53,12 @@ const AnnouncementsScreen = props => {
         background = 'white'
     }
 
-    const selectUserHandler = (userId) => {
+    const selectUserHandler = (userId, name) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
             params: {
-                userId: userId
+                userId: userId,
+                name: name,
             }
         })
     }
@@ -69,13 +70,13 @@ const AnnouncementsScreen = props => {
             <View style={{...styles.announcementItem, backgroundColor: scheme==='dark' ? Colors.primaryDark : Colors.primaryLight}} key={item.id}>
                 <View style={{flexDirection:'row'}}>
                     <TouchableCmp
-                        onPress={() => selectUserHandler(item.uid)}
+                        onPress={() => selectUserHandler(item.uid, item.admin)}
                         style={{alignSelf:'flex-start'}}
                     >
                         <Image source={{uri: item.adminImage}} style={styles.avatar} />
                     </TouchableCmp>
                     
-                    <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
+                    <TouchableCmp onPress={() => selectUserHandler(item.uid, item.admin)}>
                         <Text style={{...styles.name, ...{color:text}}}>
                             {item.admin}
                             <Text style={{...styles.timestamp, color: scheme==='dark' ? Colors.timestamp : Colors.placeholder}}>  ·  {moment(item.timestamp).fromNow()}</Text>
@@ -129,23 +130,6 @@ const AnnouncementsScreen = props => {
 
     return (
         <SafeAreaView style={styles.screen}>
-            <View style={styles.header}>
-                <View>
-                    <MenuAvatar 
-                        toggleDrawer={() => props.navigation.toggleDrawer()}
-                    />
-                </View>
-                <Text style={styles.headerTitle}>Announcements</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        ButtonElement={<MessageIcon/>}
-                        title='Messages'
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
-                    />
-                </HeaderButtons>
-            </View>
 
             {announcements && announcements.length > 0 ? (
                 <FlatList
@@ -165,8 +149,28 @@ const AnnouncementsScreen = props => {
 
 
 AnnouncementsScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    const isFocused = navData.navigation.isFocused()
     return {
-        headerTitle: 'Announcements'
+        headerLeft: () => (
+            isFocused && <MenuAvatar toggleDrawer={() => navData.navigation.toggleDrawer()} />
+        ),
+        headerRight: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    ButtonElement={<MessageIcon/>}
+                    title='Messages'
+                    onPress={() => {
+                        navData.navigation.navigate('Messages')
+                    }}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: 'Announcements',
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
+        },
     }
 }
 
