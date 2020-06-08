@@ -325,11 +325,19 @@ const AnnouncementsStack = createStackNavigator({
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
-            }
+            },
         }
     },
     UserProfilePicture: {
         screen: UserProfilePictureScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    PostDetail: {
+        screen: PostDetailScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -361,8 +369,9 @@ const AnnouncementsStack = createStackNavigator({
         }
     },
 }, {
-    defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: defaultNavOptions,
 })
+
 
 const NotificationsStack = createStackNavigator({
     Notifications: {
@@ -507,7 +516,6 @@ const BottomTabStackContainer = createStackNavigator({
             screen: HomeStack,
             navigationOptions: {
                 tabBarOnPress: ({navigation, defaultHandler}) => {
-                    console.log(navigation.state)
                     if (navigation.state.routes[0].index > 0) {
                         navigation.dispatch(StackActions.popToTop())
                     }
@@ -691,7 +699,11 @@ const DrawerNav = createDrawerNavigator({
 // If current page is stacked on top of root tab screens or postModal is open
 BottomTabStackContainer.navigationOptions = ({navigation}) => {
     let drawerLockMode = 'unlocked'
-    if (navigation.state.routes[0].routes[0]['index'] > 0 || navigation.state.routes.length > 1) {
+    if (
+        navigation.state.routes[0].routes[0]['index'] > 0 || 
+        navigation.state.routes.length > 1 ||
+        navigation.state.routes[0].routes[0].routes[0].routes.length > 1
+    ) {
         drawerLockMode = 'locked-closed'
     }
     return {
