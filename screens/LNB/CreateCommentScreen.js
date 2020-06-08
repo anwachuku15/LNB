@@ -3,10 +3,7 @@ import {
     View, 
     Text, 
     StyleSheet, 
-    Image, 
-    Button, 
-    ScrollView,
-    TouchableOpacity,
+    Image,
     TextInput,
     SafeAreaView
 } from 'react-native'
@@ -15,13 +12,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { HeaderButtons, Item } from 'react-navigation-header-buttons'
-import HeaderButton from '../../components/UI/HeaderButton'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
-import Fire from '../../Firebase/Firebase'
-// import '@firebase/firestore'
 import { createComment } from '../../redux/actions/postsActions'
 
 const CreateCommentScreen = props => {
@@ -90,13 +84,13 @@ const CreateCommentScreen = props => {
         
         <SafeAreaView style={styles.screen}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={()=>props.navigation.goBack()}>
+                <TouchableCmp onPress={()=>props.navigation.goBack()}>
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>
-                </TouchableOpacity>
+                </TouchableCmp>
                 <Text style={{color:text, fontFamily:'open-sans-bold'}}>Reply to {user}</Text>
-                <TouchableOpacity onPress={handlePost}>
+                <TouchableCmp onPress={handlePost}>
                     <Text style={{fontWeight:'500', color:text}}>Reply</Text>
-                </TouchableOpacity>
+                </TouchableCmp>
             </View>
 
             <View style={styles.inputContainer}>
@@ -115,12 +109,12 @@ const CreateCommentScreen = props => {
                 />
             </View>
 
-            <TouchableOpacity 
+            <TouchableCmp 
                 style={styles.photo}
                 onPress={pickImage}
             >
                 <Ionicons name='ios-camera' size={32} color={'#838383'}/>
-            </TouchableOpacity>
+            </TouchableCmp>
 
             <View style={{marginHorizontal: 32, marginTop: 32, height: 150}}>
                 {image ? (
@@ -137,9 +131,7 @@ const CreateCommentScreen = props => {
 
 
 CreateCommentScreen.navigationOptions = (navData) => {
-    return {
-        headerTitle: 'Leave a Comment'
-    }
+    
 }
 
 const styles = StyleSheet.create({
