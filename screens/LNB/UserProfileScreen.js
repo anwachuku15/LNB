@@ -255,7 +255,7 @@ const UserProfileScreen = props => {
     )
 
     const selectUserHandler = (userId, userName) => {
-        if (userId !== authId) {
+        if (userId !== user.credentials.userId) {
             props.navigation.push(
                 'UserProfile', {
                     userId: userId,
