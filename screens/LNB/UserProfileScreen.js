@@ -255,14 +255,14 @@ const UserProfileScreen = props => {
     )
 
     const selectUserHandler = (userId, userName) => {
-        if (userId !== authId)
-        props.navigation.push({
-            routeName: 'UserProfile',
-            params: {
-                userId: userId,
-                name: userName
-            }
-        })
+        if (userId !== authId) {
+            props.navigation.push(
+                'UserProfile', {
+                    userId: userId,
+                    name: userName
+                }
+            )
+        }
     }
 
     const deleteHandler = (needId) => {
@@ -308,12 +308,11 @@ const UserProfileScreen = props => {
 
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {
-            props.navigation.navigate({
-                routeName: 'PostDetail',
-                params: {
+            props.navigation.push(
+                'PostDetail', {
                     needId: item.id
                 }
-            })
+            )
         }} useForeground>
             <NeedPost 
                 item={item} 
