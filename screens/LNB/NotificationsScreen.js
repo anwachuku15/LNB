@@ -125,7 +125,8 @@ const NotificationsScreen = props => {
             params: {
                 needId: id,
                 senderName,
-                type
+                type,
+                from: 'NotificationsScreen'
             }
         })
     }
@@ -268,22 +269,6 @@ const NotificationsScreen = props => {
     return (
         
         <SafeAreaView style={styles.screen}>
-            {/* <View style={styles.header}>
-                <MenuAvatar 
-                    toggleDrawer={() => props.navigation.toggleDrawer()}
-                />
-                <Text style={styles.headerTitle}>Notifications</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        ButtonElement={<MessageIcon/>}
-                        title='Messages'
-                        onPress={() => {
-                            props.navigation.navigate('Messages')
-                        }}
-                    />
-                </HeaderButtons>
-            </View> */}
-            
             {notifications && notifications.length > 0 ? (
                 <FlatList
                     keyExtractor={(item,index) => index.toString()}
