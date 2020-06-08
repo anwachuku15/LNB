@@ -150,11 +150,12 @@ const PostDetailScreen = props => {
     }
 
 
-    const selectUserHandler = (userId) => {
+    const selectUserHandler = (userId, userName) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
             params: {
-                userId: userId
+                userId: userId,
+                userName: userName
             }
         })
     }
@@ -187,10 +188,6 @@ const PostDetailScreen = props => {
         }
     }
 
-
-    const commentButtonHandler = () => {
-        props.navigation.navigate('Comment')
-    }
 
     const renderComment = ({item}) => (
         <TouchableCmp onPress={() => {}}>
@@ -336,7 +333,7 @@ const PostDetailScreen = props => {
                 <View style={{alignSelf:'center', flex:1}}></View>
             )}
 
-            <KeyboardAvoidingView behavior='padding'>
+            <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.select({ios: 85, android:500})}>
                 <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
                     <View style={styles.inputContainer}>
                         {/* <TouchableCmp onPress={pickImage} style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.primary, padding:0, borderRadius:20, width:30, height:30}}>
@@ -375,7 +372,7 @@ PostDetailScreen.navigationOptions = (navData) => {
                 <Item
                     title='Back'
                     iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                    onPress={() => {props.navigation.goBack()}}
+                    onPress={() => {navData.navigation.goBack()}}
                 />
             </HeaderButtons>
         ),
@@ -391,7 +388,7 @@ PostDetailScreen.navigationOptions = (navData) => {
         //     </HeaderButtons>
         // ),
         headerTitle: () => (
-            <Text style={styles.headerTitle}>Need Detail</Text>
+            <Text style={styles.headerTitle}>Need</Text>
         ),
         headerTitleStyle: {
             fontFamily: 'open-sans-bold',
