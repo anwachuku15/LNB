@@ -68,13 +68,13 @@ const NeedActions = props => {
         <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
             <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                 <View style={{flexDirection:'row'}}>
-                    <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.primary} style={{marginRight: 7}} />
+                    <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.blue} style={{marginRight: 7}} />
                     {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>}
                 </View>
             </TouchableCmp>
             <TouchableCmp onPress={props.leaveComment}>
                 <View style={{flexDirection:'row'}}>
-                    <MaterialIcons name='comment' size={24} color={Colors.primary} style={{}} />
+                    <MaterialIcons name='comment' size={24} color={Colors.green} style={{}} />
                     {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>}
                 </View>
             </TouchableCmp>
