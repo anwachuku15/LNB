@@ -88,11 +88,12 @@ const ConnectionsScreen = props => {
         if (isMounted) {
             loadConnections().then(() => {
                 setIsLoading(false)
-            }).then(() => console.log(results.length))
+            })
         }
         
         return () => {
             setIsMounted(false)
+            loadConnections()
         }
     }, [dispatch, loadConnections, isMounted])
 
@@ -164,7 +165,7 @@ const ConnectionsScreen = props => {
                         autoFocus={false}
                         multiline={true}
                         numberOfLines={4} 
-                        style={{flex:1, fontSize:14, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:4}}
+                        style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:5}}
                         placeholder={'Search...'}
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {updateSearch(text)}}
@@ -230,7 +231,12 @@ const ConnectionsScreen = props => {
 
 
 ConnectionsScreen.navigationOptions = (navData) => {
-    // console.log('ConnectionsScreen ' + navData.navigation.isFocused())
+    const background = navData.screenProps.theme
+    return {
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white'
+        }
+    }
 }
 
 const styles = StyleSheet.create({
@@ -262,9 +268,10 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         flexDirection: 'row',
         paddingHorizontal: 5,
-        borderColor: Colors.primary,
+        backgroundColor:Colors.darkHeader,
         borderWidth: 1,
         borderRadius: 10,
+        marginBottom: 2,
     },
 })
 export default ConnectionsScreen
