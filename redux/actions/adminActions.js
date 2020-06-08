@@ -72,8 +72,6 @@ export const createAnnouncement = (admin, body, localUri) => {
                 announcementId = doc.id
             })
             .catch(err => console.log(err))
-
-            sendAnnouncementNotification(announcementId)
             
             dispatch({
                 type: CREATE_ANNOUNCEMENT,
