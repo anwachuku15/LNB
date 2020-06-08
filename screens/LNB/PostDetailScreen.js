@@ -151,13 +151,12 @@ const PostDetailScreen = props => {
 
 
     const selectUserHandler = (userId, userName) => {
-        props.navigation.navigate({
-            routeName: 'UserProfile',
-            params: {
+        props.navigation.push(
+            'UserProfile', {
                 userId: userId,
-                userName: userName
+                name: userName
             }
-        })
+        )
     }
 
     const pickImage = async () => {
@@ -192,13 +191,13 @@ const PostDetailScreen = props => {
     const renderComment = ({item}) => (
         <TouchableCmp onPress={() => {}}>
             <View style={{...styles.commentView, ...{backgroundColor:background}}} key={item.commentId}>
-                <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
+                <TouchableCmp onPress={() => selectUserHandler(item.uid, item.userName)}>
                     <Image source={{uri: item.userImage}} style={styles.commentAvatar}/>
                 </TouchableCmp>
                 <View style={{flex: 1, backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderBottomLeftRadius: 15, borderBottomRightRadius: 15}}>
                     <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
                         <View>
-                            <TouchableCmp onPress={() => selectUserHandler(item.uid)}>
+                            <TouchableCmp onPress={() => selectUserHandler(item.uid, item.userName)}>
                                 <Text style={{fontSize: 15, fontWeight:'600', color: scheme==='light' ? 'black' : 'white'}}>
                                     {item.userName}
                                     <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
@@ -280,9 +279,9 @@ const PostDetailScreen = props => {
                     onRefresh={loadComments}
                     refreshing={isRefreshing}
                     ListHeaderComponent={() => (
-                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.placeholder : 'white'}}}>
+                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.blacksmoke : Colors.lightHeader}}}>
                             <TouchableCmp 
-                                onPress={() => selectUserHandler(need.uid)}
+                                onPress={() => selectUserHandler(need.uid, need.userName)}
                                 style={{alignSelf:'flex-start'}}
                             >
                                 <Image source={{uri: need.userImage}} style={styles.avatar} />
@@ -290,7 +289,7 @@ const PostDetailScreen = props => {
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
                                     <View>
-                                        <TouchableCmp onPress={() => selectUserHandler(need.uid)}>
+                                        <TouchableCmp onPress={() => selectUserHandler(need.uid, need.userName)}>
                                             <Text style={{...styles.name, ...{color:Colors.primary}}}>
                                                 {need.userName}
                                                 <Text style={styles.timestamp}>  ·  {moment(need.timestamp).fromNow()}</Text>
@@ -310,7 +309,6 @@ const PostDetailScreen = props => {
                                 ) : (
                                     null
                                 )}
-                                {/* <NeedActions needId={need.id} leaveComment={commentButtonHandler}/> */}
                                 <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
                                     <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                                         <View style={{flexDirection:'row'}}>
@@ -426,7 +424,7 @@ const styles = StyleSheet.create({
     inputContainer: {
         margin: 10,
         paddingHorizontal: 5,
-        paddingVertical: 5,
+        paddingVertical: 10,
         borderColor: Colors.primary,
         borderWidth: 1,
         borderRadius: 20,
@@ -456,7 +454,6 @@ const styles = StyleSheet.create({
         padding: 8,
         flexDirection: 'row',
         marginVertical: 5,
-        backgroundColor: 'white',
         shadowColor: 'black',
         shadowOpacity: 0.26,
         shadowOffset: {width: 0, height: 2},
