@@ -199,7 +199,9 @@ const MessagesScreen = props => {
                 props.navigation.navigate({
                     routeName: 'ChatScreen',
                     params: {
-                        selectedUserId: item.uid
+                        selectedUserId: item.uid,
+                        userName: item.name,
+                        userImage: item.imageUrl
                     }
                 })
             }}
@@ -231,7 +233,9 @@ const MessagesScreen = props => {
             props.navigation.navigate({
                 routeName: 'ChatScreen',
                 params: {
-                    selectedUserId: item.chatWith.uid
+                    selectedUserId: item.chatWith.uid,
+                    userName: item.chatWith.name,
+                    userImage: item.chatWith.image
                 }
             })
         }}>
@@ -259,7 +263,7 @@ const MessagesScreen = props => {
         (isMounted && 
             <SafeAreaView style={styles.screen}>
 
-                <View style={styles.header}>
+                {/* <View style={styles.header}>
                     <View style={{flexDirection:'row', alignItems:'center'}}>
                         <HeaderButtons HeaderButtonComponent={HeaderButton}>
                             <Item
@@ -299,7 +303,7 @@ const MessagesScreen = props => {
                             </View>
                         </View>
                     </Modal>
-                </View>
+                </View> */}
 
                 <View style={{...styles.searchContainer, ...{marginHorizontal: 15, marginTop:10, alignSelf: 'center'}}}>
                     <View style={{justifyContent:'center'}}>
@@ -375,8 +379,36 @@ const MessagesScreen = props => {
 
 
 MessagesScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
     return {
-        headerTitle: 'Messages'
+        headerLeft: () => (
+            <View style={{flexDirection:'row', alignItems:'center'}}>
+                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                    <Item
+                        title='Direct'
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {navData.navigation.navigate({
+                            routeName: 'Main'
+                        })}}
+                    />
+                </HeaderButtons>
+            </View>
+        ),
+        headerTitle: 'Messages',
+        // headerRight: () => (
+        //     <HeaderButtons HeaderButtonComponent={HeaderButton}>
+        //         <Item
+        //             title='Direct'
+        //             iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
+        //             onPress={() => {setIsModalVisible(!isModalVisible)}}
+        //         />
+        //     </HeaderButtons>
+        // ),
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
+        },
+        
     }
 }
 
