@@ -34,18 +34,13 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { useTheme, ThemeContext } from 'react-navigation'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 // import '@firebase/firestore'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
-import moment from 'moment'
-import NeedActions from '../../components/LNB/NeedActions'
+import NeedPost from '../../components/LNB/NeedPost'
 import { setLikes } from '../../redux/actions/authActions';
 import { deleteNeed } from '../../redux/actions/postsActions'
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
-import Lightbox from 'react-native-lightbox'
-import Hyperlink from 'react-native-hyperlink'
 import Animated from 'react-native-reanimated';
 import TouchableCmp from '../../components/LNB/TouchableCmp';
 
@@ -320,12 +315,13 @@ const HomeScreen = props => {
         TouchableCmp = TouchableNativeFeedback
     }
 
-    const commentButtonHandler = (needId) => {
+    const commentButtonHandler = (needId, userName) => {
         dispatch(getNeed(needId))
         props.navigation.navigate({
             routeName: 'Comment',
             params: {
-                needId: needId
+                needId: needId,
+                userName: userName
             }
         })
     }
@@ -341,98 +337,20 @@ const HomeScreen = props => {
                 }
             })
         }} useForeground>
-            <View style={{...styles.feedItem, ...{backgroundColor: themeColor}}} key={item.id}>
-                <TouchableCmp 
-                    onPress={() => selectUserHandler(item.uid, item.userName)}
-                    style={{alignSelf:'flex-start'}}
-                >
-                    <Image source={{uri: item.userImage}} style={styles.avatar} />
-                </TouchableCmp>
-                <View style={{flex: 1}}>
-                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                        <View>
-                            <TouchableCmp onPress={() => selectUserHandler(item.uid, item.userName)}>
-                                <Text style={{...styles.name, ...{color:text}}}>
-                                    {item.userName}
-                                    <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
-                                </Text>
-                            </TouchableCmp>
-                        </View>
-                        <TouchableCmp onPress={() => {
-                            item.uid === userId ? setIsDeletable(true) : setIsDeletable(false)
-                            setIsModalVisible(!isModalVisible)
-                            setSelectedNeed(item.id)
-                        }}>
-                            <Ionicons name='ios-more' size={24} color='#73788B'/>
-                        </TouchableCmp>
-                        <Modal
-                            animationType='slide'
-                            transparent={true}
-                            visible={isModalVisible}
-                            onDismiss={() => {}}
-                        >
-                            <View style={styles.modalView}>
-                                <View style={styles.modal}>
-                                    <Text style={styles.modalText}>Coming soon...</Text>
-                                    <TouchableHighlight
-                                        style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
-                                        onPress={() => {
-                                            setIsModalVisible(!isModalVisible);
-                                        }}
-                                    >
-                                        <Text style={styles.modalButtonText}>Hide Modal</Text>
-                                    </TouchableHighlight>
-                                    {isDeletable && (
-                                        <TouchableHighlight
-                                            style={{ ...styles.modalButton, marginTop: 5, backgroundColor: Colors.redcrayola }}
-                                            onPress={() => {deleteHandler(selectedNeed)}}
-                                        >
-                                            <Text style={styles.modalButtonText}>Delete</Text>
-                                        </TouchableHighlight>
-                                    )}
-                                </View>
-                            </View>
-                        </Modal>
-                    </View>
-                    <Hyperlink
-                        linkDefault={true}
-                        linkStyle={{color:Colors.bluesea}}
-                    >
-                        <Text style={{...styles.post, ...{color:text}}}>{item.body}</Text>
-                    </Hyperlink>
-                    {item.imageUrl ? (
-                        <Lightbox
-                            backgroundColor='rgba(0, 0, 0, 0.8)'
-                            underlayColor={themeColor}
-                            springConfig={{tension: 15, friction: 7}}
-                            renderHeader={(close) => (
-                                <TouchableCmp 
-                                    onPress={close}
-                                    style={styles.closeButton}
-                                >
-                                    <Ionicons 
-                                        name='ios-close'
-                                        size={36}
-                                        color='white'
-                                    />
-                                </TouchableCmp >
-                            )}
-                            renderContent={() => (
-                                <Image source={{uri: item.imageUrl}} style={styles.lightboxImage} resizeMode='contain' />
-                            )}
-                        >
-                            <Image 
-                                source={{uri: item.imageUrl}} 
-                                style={{...styles.postImage, ...{borderColor:Colors.disabled}}} 
-                                resizeMethod='auto' 
-                            />
-                        </Lightbox>
-                    ) : (
-                        null
-                    )}
-                    {showNeedActions && item.id && (<NeedActions needId={item.id} leaveComment={() => commentButtonHandler(item.id)}/>)}
-                </View>
-            </View>
+            <NeedPost 
+                item={item} 
+                selectUserHandler={selectUserHandler}
+                isDeletable={isDeletable}
+                setIsDeletable={setIsDeletable}
+                selectedNeed={selectedNeed}
+                setSelectedNeed={setSelectedNeed}
+                isModalVisible={isModalVisible}
+                setIsModalVisible={setIsModalVisible}
+                deleteHandler={deleteHandler}
+                commentButtonHandler={commentButtonHandler}
+                showNeedActions={showNeedActions}
+                setShowNeedActions={setShowNeedActions}
+            />
         </TouchableCmp>
     )
     
@@ -447,34 +365,6 @@ const HomeScreen = props => {
     return (
         isMounted && (
             <SafeAreaView style={styles.screen}>
-                {/* HEADER */}
-                
-                {/* <TouchableWithoutFeedback onPress={toTop}>
-                    <View style={styles.header}>
-                        <MenuAvatar 
-                            toggleDrawer={() => props.navigation.toggleDrawer()}
-                        />
-                        <View>
-                            <Image 
-                                source={require('../../assets/lnb.png')} 
-                                resizeMode='contain' 
-                                style={{width:38, height:38}}
-                            />
-                        </View>
-                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                            <Item
-                                ButtonElement={<MessageIcon/>}
-                                title='Messages'
-                                onPress={() => {
-                                    props.navigation.navigate('Messages')
-                                }}
-                            />
-                        </HeaderButtons>
-                    </View>
-                </TouchableWithoutFeedback> */}
-
-                {/* NEED POSTS */}
-                
                 {/* Large list, slow to update - make sure renderItem function follows best practices: PureComponent, shouldComponentUpdate, etc */}
                 <FlatList
                     ref={flatListRef}
@@ -523,7 +413,7 @@ HomeScreen.navigationOptions = (navData) => {
                     ButtonElement={<MessageIcon/>}
                     title='Messages'
                     onPress={() => {
-                        props.navigation.navigate('Messages')
+                        navData.navigation.navigate('Messages')
                     }}
                 />
             </HeaderButtons>
@@ -540,7 +430,7 @@ HomeScreen.navigationOptions = (navData) => {
         headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
         headerBackTitleVisible: false,
         headerStyle: {
-            backgroundColor: background === 'dark' ? Colors.darkHeader : 'white',
+            backgroundColor: background === 'dark' ? 'black' : 'white',
             borderBottomColor: Colors.primary
         },
     }
