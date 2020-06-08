@@ -120,8 +120,29 @@ const AdminScreen = props => {
 
 
 AdminScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
     return {
-        headerTitle: 'Developer'
+        headerLeft: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='Back'
+                    iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                    onPress={() => {navData.navigation.pop()}}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: 'Admin',
+        headerTitleStyle: {
+            fontFamily: 'open-sans-bold',
+        },
+        headerBackTitleStyle: {
+            fontFamily: 'open-sans',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+        headerBackTitleVisible: false,
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white'
+        },
     }
 }
 
