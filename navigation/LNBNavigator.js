@@ -713,8 +713,10 @@ BottomTabStackContainer.navigationOptions = ({navigation}) => {
 
 // Disable swipe to Messages if the Drawer or Post Modal is open or if HomeStack is past home page
 DrawerNav.navigationOptions = ({navigation}) => {
+    console.log(navigation.state.routes[0].routes[0].routes[0].routes[0])
+    console.log('--------------')
     let swipeEnabled = true
-    const HomeStack = navigation.state.routes[0].routes[0].routes[0]
+    const HomeStack = navigation.state.routes[0].routes[0].routes[0].routes[0]
     const AnnouncementsStack = navigation.state.routes[0].routes[0].routes[1]
     const NotificationsStack = navigation.state.routes[0].routes[0].routes[3]
     const ConnectStack = navigation.state.routes[0].routes[0].routes[4]
