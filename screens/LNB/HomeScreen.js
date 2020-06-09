@@ -29,7 +29,6 @@ import {
     Vibration
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
-import Clipboard from '@react-native-community/clipboard'
 import { FlatList, withNavigationFocus } from 'react-navigation'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
