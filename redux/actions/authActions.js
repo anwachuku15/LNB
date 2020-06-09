@@ -766,7 +766,7 @@ export const setNotifications = () => {
                     timestamp: doc.data().timestamp,
                 })
             } else if (doc.data().type == 'connection request') {
-                userConnectNotifications.push({
+                userNotifications.push({
                     id: doc.id,
                     type: doc.data().type,
                     senderId: doc.data().senderId,
