@@ -377,6 +377,14 @@ const NotificationsStack = createStackNavigator({
     Notifications: {
         screen: NotificationsScreen,
     },
+    ConnectRequests: {
+        screen: ConnectRequestsScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
     UserProfile: {
         screen: UserProfileScreen,
         navigationOptions: {
@@ -443,14 +451,6 @@ const ConnectStack = createStackNavigator({
     },
     UserProfilePicture: {
         screen: UserProfilePictureScreen,
-        navigationOptions: {
-            gestureResponseDistance: {
-                horizontal: 300
-            }
-        }
-    },
-    ConnectRequests: {
-        screen: ConnectRequestsScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
