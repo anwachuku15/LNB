@@ -116,11 +116,13 @@ const ChatScreen = props => {
 
     // const [chatData, setChatData] = useState()
     const [messages, setMessages] = useState([])
-    useEffect(() => {
+    useEffect(() => { // synchronous issue leads to TypeError (can't read snapshot fast enough)
         const updateChat = db.doc(`/chats/${chatId}`).onSnapshot(snapshot => {
-            if (snapshot.data().messages) {
+            if (snapshot) {
                 const thread = snapshot.data().messages
                 setMessages(thread.reverse())
+            } else {
+                console.log('snapshot not accounted for yet')
             }
         })
         return () => {
@@ -160,13 +162,16 @@ const ChatScreen = props => {
 
         const pushToken = (await db.doc(`/users/${user.credentials.userId}`).get()).data().pushToken
         if (pushToken) {
-            sendMessageNotification(uid, authUser.credentials.displayName, message.text, user.credentials.userId, pushToken)
+            const authName = authUser.credentials.displayName
+            const authImage = authUser.credentials.imageUrl
+            const selectedUserId = user.credentials.userId
+            sendMessageNotification(uid, authName, authImage, message.text, selectedUserId, pushToken)
         }
         setBody('')
     }
 
 
-    const sendMessageNotification = (authId, authName, message, selectedUserId, pushToken) => {
+    const sendMessageNotification = (authId, authName, authImage, message, selectedUserId, pushToken) => {
         db.collection('notifications').add({
             timestamp: new Date().toISOString(),
             type: 'message',
@@ -184,7 +189,13 @@ const ChatScreen = props => {
                 to: pushToken,
                 sound: 'default',
                 title: authName,
-                body: message
+                body: message,
+                data: {
+                    type: 'message',
+                    selectedUserId: authId,
+                    senderName: authName,
+                    senderImage: authImage
+                }
             })
         })
     }
