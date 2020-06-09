@@ -38,7 +38,7 @@ import { useColorScheme } from 'react-native-appearance'
 // import '@firebase/firestore'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import NeedPost from '../../components/LNB/NeedPost'
-import { setLikes } from '../../redux/actions/authActions';
+import { setLikes, getUser } from '../../redux/actions/authActions';
 import { deleteNeed } from '../../redux/actions/postsActions'
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
@@ -90,7 +90,7 @@ const HomeScreen = props => {
 
     const handleNotification = async notification => {
         const { origin, data, remote } = notification
-        const { type, needId, senderName } = data
+        const { type, needId, senderName, senderImage, selectedUserId } = data
         if (origin === 'selected') {
             if (type === 'likeNeed' || type === 'commentNeed' || type === 'commentThread') {
                 props.navigation.navigate('Notifications')
@@ -102,6 +102,18 @@ const HomeScreen = props => {
                         type
                     }
                 })
+            } else if (type === 'message') {
+                await dispatch(getUser(selectedUserId))
+                props.navigation.navigate('Messages')
+                props.navigation.navigate({
+                    routeName: 'ChatScreen',
+                    params: {
+                        selectedUserId: selectedUserId,
+                        userName: senderName,
+                        userImage: senderImage,
+                    }
+                })
+
             } else if (type === 'announcement') {
                 props.navigation.navigate('Announcements')
             }
