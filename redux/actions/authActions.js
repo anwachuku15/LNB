@@ -506,7 +506,7 @@ const sendRequestNotification = (authId, authName, authImg, authHeadline, select
             title: 'New Connect Request',
             body: authName + ' wants to connect.',
             data: {
-                type: 'connection request'
+                type: 'connection request',
             }
         })
     })
