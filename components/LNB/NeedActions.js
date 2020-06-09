@@ -68,7 +68,7 @@ const NeedActions = props => {
         <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
             <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                 <View style={{flexDirection:'row'}}>
-                    <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.blue} style={{marginRight: 7}} />
+                    <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.pink} style={{marginRight: 7}} />
                     {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>}
                 </View>
             </TouchableCmp>
