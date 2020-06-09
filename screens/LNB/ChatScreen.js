@@ -15,7 +15,7 @@ import {
     FlatList,
     Platform
 } from 'react-native'
-import Clipboard from '@react-native-community/clipboard'
+import { Clipboard, useClipboard} from '@react-native-community/clipboard'
 // REDUX
 import { getUser, setLastReadMessage } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
@@ -65,7 +65,17 @@ const ChatScreen = props => {
     
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
-    const [copiedText, setCopiedText] = useState('')
+    
+    // const [copiedText, setCopiedText] = useState('')
+    // const [data, setString] = useClipboard()
+    // const copyToClipboard = () => {
+    //     Clipboard.setString('hello world')
+    // }
+
+    // const fetchCopiedText = async () => {
+    //     const text = await Clipboard.getString()
+    //     setCopiedText(text)
+    // }
     
     useEffect(() => {
         const createChat = async () => {
@@ -128,6 +138,8 @@ const ChatScreen = props => {
             dispatch(setLastReadMessage(chatId, selectedUserId, readTimestamp))
         }
     }, [readTimestamp])
+
+    
 
     const sendMessage = async (body) => {
         const message = {
