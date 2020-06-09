@@ -23,8 +23,8 @@ const NotificationIcon = props => {
     const dispatch = useDispatch()
     const uid = useSelector(state => state.auth.userId)
     const notifications = useSelector(state => state.auth.notifications)
-    // SET UNREAD NOTIFICATION COUNT WITH STATE
     let unread = notifications.filter(notification => notification.read === false)
+
     const BadgedIcon = withBadge(unread.length)(Icon)
 
 
@@ -35,7 +35,7 @@ const NotificationIcon = props => {
 
     return (
         <View>
-            {/* {unreadCount > 0 ? (    */}
+            {/* {unread && unreadReqs && (unread.length > 0 || unreadReqs.length > 0) ? ( */}
             {unread && unread.length > 0 ? (
                 <View>
                     <Ionicons 
