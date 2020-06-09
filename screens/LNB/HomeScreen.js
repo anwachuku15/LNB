@@ -114,6 +114,10 @@ const HomeScreen = props => {
                     }
                 })
 
+            } else if (type === 'connection request') {
+                props.navigation.navigate('Notifications')
+                props.navigation.navigate('ConnectRequests')
+
             } else if (type === 'announcement') {
                 props.navigation.navigate('Announcements')
             }
