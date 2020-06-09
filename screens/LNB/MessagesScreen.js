@@ -14,7 +14,8 @@ import {
     TouchableNativeFeedback,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    Keyboard
+    Keyboard,
+    ActivityIndicator
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { ListItem } from 'react-native-elements'
@@ -80,25 +81,28 @@ const MessagesScreen = props => {
 
     const uid = useSelector(state => state.auth.userId)
     const [chats, setChats] = useState()
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
     const [isMounted, setIsMounted] = useState(true)
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
     const [isFocused, setIsFocused] = useState(false)
     const [isModalVisible, setIsModalVisible] = useState(false)
+    const [error, setError] = useState()
 
     const searchInput = useRef(null)
 
-    const loadMessageNotifications = useCallback(async () => {
-        try {
-            await dispatch(markMessageNotificationsAsRead())
-        } catch (err) {
-            console.log(err)
-        }
-    }, [dispatch])
+    // const loadMessageNotifications = useCallback(async () => {
+    //     try {
+    //         await dispatch(markMessageNotificationsAsRead())
+    //     } catch (err) {
+    //         console.log(err)
+    //     }
+    // }, [dispatch])
 
     const loadChats = useCallback(async () => {
+        // setIsLoading(true)
         try {
+            await dispatch(markMessageNotificationsAsRead())
             let userChats = []
             const allChats = await (await db.collection('chats').orderBy('lastMessageTimestamp', 'desc').get())
                                                                 .docs
@@ -130,22 +134,15 @@ const MessagesScreen = props => {
                                                                         }
                                                                     }
                                                                 })
-            // userChats.sort((a,b) => {
-            //     a.lastMessageTimestamp > b.lastMessageTimestamp ? -1 : 1
-            // })
+            // setIsLoading(false)
             setChats(userChats)
         } catch (err) {
             console.log(err)
+            setError(err.message)
         }
-        
+        // setIsLoading(false)
     }, [setChats])
 
-    useEffect(() => {
-        const willFocusSub = props.navigation.addListener('willFocus', loadMessageNotifications)
-        return () => {
-            willFocusSub
-        }
-    }, [loadMessageNotifications])
     
     useEffect(() => {
         const willFocusSubscription = props.navigation.addListener('willFocus', loadChats)
@@ -260,51 +257,29 @@ const MessagesScreen = props => {
         </TouchableCmp>
     )
 
+
+    if (error) {
+        return (
+            <View style={styles.spinner}>
+                <Text>An error occured</Text>
+                <Button title='try again' onPress={() => {}} color={Colors.primary}/>
+            </View>
+        )
+    }
+    if (isLoading) {
+        return (
+            <View style={styles.spinner}>
+                <ActivityIndicator 
+                    size='large'
+                    color={Colors.primary}
+                />
+            </View>
+        )
+    }
+
     return (
         (isMounted && 
             <SafeAreaView style={styles.screen}>
-
-                {/* <View style={styles.header}>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                        <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                            <Item
-                                title='Direct'
-                                iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                                onPress={() => {props.navigation.navigate({
-                                    routeName: 'Drawer'
-                                })}}
-                            />
-                        </HeaderButtons>
-                    </View>
-                    <Text style={styles.headerTitle}>Messages</Text>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            title='Direct'
-                            iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                            onPress={() => {setIsModalVisible(!isModalVisible)}}
-                        />
-                    </HeaderButtons>
-                    <Modal
-                        animationType='slide'
-                        transparent={true}
-                        visible={isModalVisible}
-                        onDismiss={() => {}}
-                    >
-                        <View style={styles.modalView}>
-                            <View style={styles.modal}>
-                                <Text style={styles.modalText}>Nothing to see here just yet...</Text>
-                                <TouchableHighlight
-                                    style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
-                                    onPress={() => {
-                                        setIsModalVisible(!isModalVisible);
-                                    }}
-                                >
-                                    <Text style={styles.modalButtonText}>Hide Modal</Text>
-                                </TouchableHighlight>
-                            </View>
-                        </View>
-                    </Modal>
-                </View> */}
 
                 <View style={{...styles.searchContainer, ...{marginHorizontal: 15, marginTop:10, alignSelf: 'center'}}}>
                     <View style={{justifyContent:'center'}}>
@@ -416,8 +391,11 @@ MessagesScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center'
+    },
+    spinner: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     header: {
         flexDirection:'row',
