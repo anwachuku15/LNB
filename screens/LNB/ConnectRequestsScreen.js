@@ -43,9 +43,9 @@ const ConnectRequestsScreen = props => {
     const uid = useSelector(state => state.auth.userId)
 
     const pendingConnections = useSelector(state => state.auth.pendingConnections)
-    let notifications = useSelector(state => state.auth.connectNotifications.filter(notification => (notification.type === 'connection request')))
-    notifications = notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
     
+    let connectNotifications = useSelector(state => state.auth.notifications.filter(notification => (notification.type === 'connection request')))
+    connectNotifications = connectNotifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
 
 
     
@@ -66,15 +66,16 @@ const ConnectRequestsScreen = props => {
     
     useEffect(() => {
         readNotifications()
-        console.log(notifications)
     }, [dispatch, readNotifications])
     
 
-    const navToUserProfile = (id) => {
+    const navToUserProfile = (id, name) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
             params: {
                 userId: id,
+                name: name,
+                from: 'ConnectRequestsScreen'
             }
         })
     }
@@ -112,7 +113,7 @@ const ConnectRequestsScreen = props => {
     )
     
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={() => {navToUserProfile(item.senderId)}}>
+        <TouchableCmp onPress={() => {navToUserProfile(item.senderId, item.senderName)}}>
             <ListItem
                 containerStyle={{backgroundColor:background, paddingLeft: 0}}
                 title={
@@ -175,27 +176,11 @@ const ConnectRequestsScreen = props => {
     }
     return (
         <SafeAreaView style={{...styles.screen, ...{backgroundColor: ''}}}>
-            <View style={{...styles.header, ...{backgroundColor: themeColor}}}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Back'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {props.navigation.goBack()}}
-                    />
-                </HeaderButtons>
-                <Text style={styles.headerTitle}>Requests</Text>
-                <HeaderButtons HeaderButtonComponent={Placeholder}>
-                    <Item
-                        title='More'
-                        iconName='md-more'
-                    />
-                </HeaderButtons>
-            </View>
-            {notifications && notifications.length > 0 && (
+            {connectNotifications && connectNotifications.length > 0 && (
                 <FlatList
                     style={styles.requests}
                     keyExtractor={(item,index) => index.toString()}
-                    data={notifications}
+                    data={connectNotifications}
                     renderItem={renderItem}
                 />
             )}
@@ -205,8 +190,23 @@ const ConnectRequestsScreen = props => {
 
 
 ConnectRequestsScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
+    const isFocused = navData.navigation.isFocused()
     return {
-        headerTitle: 'Needs'
+        headerLeft: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='Back'
+                    iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                    onPress={() => {navData.navigation.goBack()}}
+                />
+            </HeaderButtons>
+        ),
+        headerTitle: 'Connect Requests',
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
+        },
     }
 }
 
