@@ -25,7 +25,7 @@ import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
-import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
 import { LayoutAnimation } from 'react-native'
@@ -59,12 +59,17 @@ const NotificationsScreen = props => {
     const authUser = useSelector(state => state.auth.credentials)
     
     // GET NOTIFICATIONS FROM STATE
-    let notifications = useSelector(state => state.auth.notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))
-    const connectReqs = useSelector(state => state.auth.notifications.filter(notification => notification.type === 'connection request'))
-    const connectReqIds = []
-    connectReqs.forEach(req => {
-        connectReqIds.push(req.senderId)
-    })
+    let notifications = useSelector(state => state.auth.notifications.filter(notification => (notification.type !== 'connection request')))
+    notifications = notifications.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
+
+    let connectReqs = useSelector(state => state.auth.notifications.filter(notification => (notification.type === 'connection request')))
+    connectReqs = connectReqs.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1)
+    
+    // const connectReqs = useSelector(state => state.auth.notifications.filter(notification => notification.type === 'connection request'))
+    // const connectReqIds = []
+    // connectReqs.forEach(req => {
+    //     connectReqIds.push(req.senderId)
+    // })
 
     const [isAccepted, setIsAccepted] = useState(false)
     const [isDeclined, setIsDeclined] = useState(false)
@@ -267,13 +272,41 @@ const NotificationsScreen = props => {
         // </View>
     )
 
+    const renderConnectReqs = () => (
+        connectReqs.length > 0 && (
+            <TouchableCmp
+                onPress={() => {
+                    props.navigation.navigate('ConnectRequests')
+                }}
+            >
+                <View style={styles.requestsContainer}>
+                    <View style={{flexDirection:'row'}}>
+                        <Text style={{color:Colors.blue, fontWeight:'bold', alignSelf:'center'}}>
+                            Connect requests
+                        </Text>
+                        <View style={styles.requestCountContainer}>
+                            <Text style={styles.requestCount}>{connectReqs.length}</Text>
+                        </View>
+                    </View>
+                    <MaterialIcons
+                        name='navigate-next'
+                        color={Colors.blue}
+                        size={24}
+                    />
+                </View>
+            </TouchableCmp>
+        )
+    )
+
     return (
         
         <SafeAreaView style={styles.screen}>
+            
             {notifications && notifications.length > 0 ? (
                 <FlatList
                     keyExtractor={(item,index) => index.toString()}
                     data={notifications}
+                    ListHeaderComponent={renderConnectReqs}
                     renderItem={renderItem}
                 />
             ) : (
@@ -348,12 +381,6 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         marginLeft: 16
     },
-    connectReqText: {
-        fontWeight: '500',
-        color:Colors.primary, 
-        marginTop: 3,
-        fontSize: 14
-    },
     avatar: {
         width: 48,
         height: 48,
@@ -395,6 +422,39 @@ const styles = StyleSheet.create({
     declineButtonText: {
         fontSize: 12,
         color: Colors.raspberry
+    },
+    requestsContainer: {
+        height: 40,
+        borderColor: Colors.blue,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        flexDirection:'row', 
+        paddingHorizontal:20, 
+        alignItems:'center', 
+        justifyContent:'space-between'
+    },
+    requestCountContainer: {
+        justifyContent:'center',
+        alignItems: 'center',
+        paddingHorizontal: 5,
+        marginLeft: 10,
+        backgroundColor: Colors.blue,
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10
+    },
+    requestCount: {
+        color:'white',
+        fontSize: 14
+    },
+    requests: {
+        marginVertical: 3,
+    },
+    connectReqText: {
+        fontWeight: '500',
+        color:Colors.primary, 
+        marginTop: 3,
+        fontSize: 14
     },
 })
 export default NotificationsScreen
