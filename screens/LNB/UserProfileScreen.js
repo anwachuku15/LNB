@@ -474,7 +474,12 @@ const UserProfileScreen = props => {
                                     {authUser.userId === userId && <EditProfileButton key={userId}/>}
                                     <View style={{flex: 3}}>
                                         <Text style={styles.infoTitle}>Bio</Text>
-                                        <Text style={{color:text}}>{user.credentials.bio}</Text>
+                                        <Hyperlink
+                                            linkDefault={true}
+                                            linkStyle={{color: scheme==='dark' ? Colors.bluesea : Colors.blue}}
+                                        >
+                                            <Text style={{color:text}}>{user.credentials.bio}</Text>
+                                        </Hyperlink>
                                     </View>
                                     <View style={{flex:1, flexDirection:'row', justifyContent:'space-between', }}>
                                         <View style={{alignItems:'center'}}>
