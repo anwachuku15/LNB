@@ -1,4 +1,4 @@
 
 # Screenshots
 
-![alt]('./screenshots/profile_dark.PNG')
+<img src="./screenshots/profile_dark.PNG">
