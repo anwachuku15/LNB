@@ -162,7 +162,7 @@ const DrawerScreen = props => {
                           style={styles.icon}
                           name='md-analytics'
                           size={20}
-                          color={Colors.primary}/>
+                          color={Colors.disabled}/>
                       <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Trending </Text>
                     </View>
                 </TouchableOpacity>
