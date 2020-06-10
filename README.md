@@ -1,4 +1,7 @@
 
 # Screenshots
 
-<img src="./screenshots/profile_dark.PNG">
+<div>
+    <img src="./screenshots/profile_dark.PNG">
+    <img src="./screenshots/profile_light.PNG">
+</div>
