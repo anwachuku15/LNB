@@ -1,6 +1,9 @@
 
 # Current Features
 
+- **Live Feed**
+- **Instant Message Chat**
+
 ## Feed
 <div>
     <img src="./screenshots/feed_dark.PNG" width='25%' height='25%'>
