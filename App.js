@@ -44,13 +44,13 @@ export default function App() {
     return <AppLoading />
   } else {
     return (
-      <AppearanceProvider>
-        {isMounted &&
-          <Provider store={store}>
-              <NavContainer theme={colorScheme}/>
-          </Provider>
-        }
-      </AppearanceProvider>
+      isMounted && (
+        <AppearanceProvider>
+            <Provider store={store}>
+                <NavContainer theme={colorScheme}/>
+            </Provider>
+        </AppearanceProvider>
+      )
     )
   }
 }
