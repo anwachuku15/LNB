@@ -1,16 +1,17 @@
 
-# Features
-
-## Current
+# App Description
+- **Front-end built with React Native, using Redux & React-Redux for state management**
+- **Integrated Firebase for Authentication, Database, Storage, & Functions**
+## Current Features
 **Build a network by connecting and collaborating with like-minded people**
 - Live Feed
 - Instant Message Chat
 
-- **Integrated Firebase for Authentication, Database, Storage, & Functions**
+
 
 ## Coming soon...
-- **In-App Marketplace for users to buy and sell products/services**
-- **Plan and Share Events for users to be a part of**
+- *In-App Marketplace for users to buy and sell products/services*
+- *Plan and Share Events for users to be a part of*
 
 ## Feed
 <div>
