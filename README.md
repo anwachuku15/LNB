@@ -1,5 +1,5 @@
 
-# App Description
+# Mobile Social Networking App
 - **Optimized for iOS**
 - **Front-end built with React Native, using Redux & React-Redux for state management**
 - **Integrated Firebase for Authentication, Database, Storage, & Functions**
