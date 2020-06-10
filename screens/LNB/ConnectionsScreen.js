@@ -35,21 +35,21 @@ const client = algoliasearch(appId, adminkey)
 const connectionsIndex = client.initIndex('Connections')
 const index = client.initIndex('LNBmembers')
 
-
 let themeColor
-let text, background
 
 const ConnectionsScreen = props => {
     const scheme = useColorScheme()
-    let text
+    let text, background, searchBar
     if (scheme === 'dark') {
         themeColor = 'black'
         text = 'white'
         background = 'black'
+        searchBar = Colors.darkSearch
     } else {
         themeColor = 'white'
         text = 'black'
         background = 'white'
+        searchBar = Colors.lightSearch
     }
     
     const auth = useSelector(state => state.auth)
@@ -135,25 +135,96 @@ const ConnectionsScreen = props => {
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {navToUserProfile(item.uid, item.name)}}>
             <ListItem
-                containerStyle={{backgroundColor:background}}
-                leftAvatar={{source: {uri: item.imageUrl}}}
+                containerStyle={{
+                    backgroundColor:background,
+                    paddingHorizontal: 14,
+                    paddingVertical: 5,
+
+                }}
+                leftAvatar={{
+                    source: {uri: item.imageUrl},
+                    containerStyle: {
+                        height: 64,
+                        width: 64,
+                        borderRadius: 32
+                    },
+                    rounded: true
+                }}
                 title={
                     <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
                 }
                 subtitle={
-                    <Text style={{color:Colors.disabled}}>
-                        {item.headline}{'\n'}<Text style={{fontSize:12}}>{item.location}</Text>
-                    </Text>
+                    <View style={{flexDirection:'column'}}>
+                        {item.headline.length > 0 && 
+                            <Text 
+                                numberOfLines={1}
+                                ellipsizeMode='tail'
+                                style={{color:Colors.disabled, fontSize: 14}}
+                            >
+                                {item.headline}
+                            </Text>
+                        }
+                        {item.location.length > 0 && <Text style={{color:Colors.disabled, fontSize:12}}>{item.location}</Text>}
+                    </View>
                 }
-                bottomDivider
+                rightElement={
+                    <TouchableCmp
+                        onPress={() => {}}
+                        style={{...styles.connectButton, borderColor: Colors.primary}}
+                    >
+                        <Text style={{...styles.connectText, color:Colors.primary}}>Connected</Text>
+                    </TouchableCmp>
+                }
+                // bottomDivider
             />
         </TouchableCmp>
     )
+
+    const renderSearchBar = () => (
+        <View style={{flexDirection:'row', paddingHorizontal: 10, marginTop: 10}}>
+            <View style={{...styles.searchContainer, backgroundColor: searchBar, width: '100%', alignSelf: 'center'}}>
+                <View style={{justifyContent:'center'}}>
+                    <Feather
+                        name='search'
+                        size={14}
+                        color={Colors.placeholder}
+                    />
+                </View>
+                <TextInput
+                    ref={searchInput}
+                    autoFocus={false}
+                    multiline={true}
+                    numberOfLines={4} 
+                    style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:5}}
+                    placeholder={'Search...'}
+                    placeholderTextColor={Colors.placeholder}
+                    onChangeText={text => {updateSearch(text)}}
+                    value={search}
+                    // onFocus={() => setIsFocused(true)}
+                    onBlur={cancelSearch()}
+                />
+                {search.length > 0 && (
+                    <TouchableCmp
+                        style={{justifyContent:'center'}}
+                        onPress={() => {
+                            setSearch('')
+                            updateSearch('')
+                        }}
+                    >
+                        <MaterialIcons
+                            name='cancel'
+                            size={16}
+                            color={Colors.disabled}
+                        />
+                    </TouchableCmp>
+                )}
+            </View>
+        </View>
+    )
     return (
-        
         <View style={styles.screen}>
             <View style={{flexDirection:'row', paddingHorizontal: 10, marginTop: 10}}>
-                <View style={{...styles.searchContainer, width: isFocused ? '85%' : '100%', alignSelf: 'center'}}>
+                <View style={{...styles.searchContainer, backgroundColor: searchBar, width: '100%', alignSelf: 'center'}}>
                     <View style={{justifyContent:'center'}}>
                         <Feather
                             name='search'
@@ -184,25 +255,12 @@ const ConnectionsScreen = props => {
                         >
                             <MaterialIcons
                                 name='cancel'
-                                size={16}
+                                size={20}
                                 color={Colors.disabled}
                             />
                         </TouchableCmp>
                     )}
                 </View>
-                {isFocused ? (
-                    <TouchableCmp 
-                        onPress={() => {
-                            cancelSearch()
-                            updateSearch('')
-                        }}
-                        style={{width:'15%', alignItems:'center', alignSelf:'center', justifyContent:'center'}}
-                    >
-                        <Text style={{color: Colors.primary}}>Cancel</Text>
-                    </TouchableCmp>
-                ) : (
-                    null
-                )}
             </View>
             {isLoading && (
                 <View style={styles.spinner}>
@@ -249,6 +307,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    connectButton: {
+        height: 24,
+        width: '25%',
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    connectText: {
+        alignSelf:'center',
+        fontSize: 12, 
+    },
     header: {
         flexDirection:'row',
         justifyContent:'space-between',
@@ -268,9 +338,8 @@ const styles = StyleSheet.create({
     searchContainer: {
         justifyContent: 'flex-end',
         flexDirection: 'row',
-        paddingHorizontal: 5,
-        backgroundColor:Colors.darkHeader,
-        borderWidth: 1,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
         borderRadius: 10,
         marginBottom: 2,
     },
