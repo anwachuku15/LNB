@@ -145,7 +145,8 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
             bio: '',
             website: '',
             messages: {},
-            isAdmin: isAdmin
+            isAdmin: isAdmin,
+            lastReadAnnouncements: null
         })
         .catch(err => {
             console.log(err)
@@ -153,7 +154,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
-        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin))
+        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin, lastReadAnnouncements))
 
         //ONBOARDING
         // data.additionalUserInfo.isNewUser for onboarding
@@ -183,16 +184,16 @@ export const login = (email, password) => {
         dispatch(authenticate(idToken, userId))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = userDoc.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
             
-            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin))
+            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, lastReadAnnouncements))
         }
     }
 }
 
 
 // SET USER ACTIONS
-export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin) => {
+export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, lastReadAnnouncements) => {
     return async dispatch => {
         dispatch({
             type: SET_USER,
@@ -213,7 +214,8 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
             likes: [],
             notifications: [],
             connectNotifications: [],
-            messageNotifications: []
+            messageNotifications: [],
+            lastReadAnnouncements: lastReadAnnouncements
         })
 
         const unreadListener = db.collection('notifications')
@@ -223,11 +225,11 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                                 })
         unreadListener
 
-        const announcementListner = db.collection('announcements')
+        const announcementListener = db.collection('announcements')
                                       .onSnapshot(snapshot => {
                                           dispatch(setAnnouncements())
                                       })
-        announcementListner
+        announcementListener
                 
         let lastReadMessages = []
         await (await db.collection('chats').get()).docs
@@ -389,8 +391,40 @@ export const updateProfile = (headline, location, bio, link, uri) => {
             auth.connections,
             auth.pendingConnections,
             auth.messages,
-            auth.credentials.isAdmin
+            auth.credentials.isAdmin,
+            auth.lastReadAnnouncements
         ))
+    }
+}
+
+export const readAnnouncements = () => {
+    return async (dispatch, getState) => {
+        const justRead = new Date().toISOString()
+        const auth = getState().auth
+
+        try {
+            await db.doc(`/users/${auth.userId}`).update({
+                lastReadAnnouncements: justRead
+            })
+            console.log('updated')
+            dispatch(getAuthenticatedUser(
+                auth.userId,
+                auth.credentials.email,
+                auth.credentials.displayName,
+                auth.credentials.headline,
+                auth.credentials.imageUrl,
+                auth.credentials.location,
+                auth.credentials.bio,
+                auth.credentials.website,
+                auth.connections,
+                auth.pendingConnections,
+                auth.messages,
+                auth.credentials.isAdmin,
+                justRead
+            ))
+        } catch (err) {
+            console.log(err)
+        }
     }
 }
 
@@ -994,7 +1028,8 @@ export const disconnect = (authId, selectedUserId) => {
             likes: [],
             notifications: [],
             connectNotifications: [],
-            messageNotifications: []
+            messageNotifications: [],
+            lastReadAnnouncements: authData.lastReadAnnouncements
         })
         dispatch(setNotifications())
         dispatch(setLikes())

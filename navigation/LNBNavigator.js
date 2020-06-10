@@ -88,18 +88,22 @@ const AdminStack = createStackNavigator({
 
 const ThemedTopTabBar = props => {
     const scheme = useColorScheme()
-    let theme
+    let theme, indicator
     if (scheme === 'dark') {
         theme = 'black'
-    } else theme = 'white'
+        indicator = 'white'
+    } else {
+        theme = 'white'
+        indicator = 'black'
+    }
     return (
         <MaterialTopTabBar
             {...props}
             showLabel={true}
-            activeTintColor='white'
+            activeTintColor={indicator}
             inactiveTintColor={Colors.placeholder}
             style={{backgroundColor: theme}}
-            indicatorStyle={{backgroundColor:'white'}}
+            indicatorStyle={{backgroundColor:indicator}}
         />
     )
 }
@@ -542,12 +546,12 @@ const BottomTabStackContainer = createStackNavigator({
                 tabBarLabel: 'Announcements',
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <AntDesign 
-                            name='notification'
-                            size={23} 
-                            color={tabInfo.tintColor}
-                        />
-                        // <AnnouncementsIcon tabInfo={tabInfo} />
+                        // <AntDesign 
+                        //     name='notification'
+                        //     size={23} 
+                        //     color={tabInfo.tintColor}
+                        // />
+                        <AnnouncementsIcon tabInfo={tabInfo} />
                     )
                 },
                 tabBarColor: Colors.secondaryColor,
@@ -713,8 +717,8 @@ BottomTabStackContainer.navigationOptions = ({navigation}) => {
 
 // Disable swipe to Messages if the Drawer or Post Modal is open or if HomeStack is past home page
 DrawerNav.navigationOptions = ({navigation}) => {
-    console.log(navigation.state.routes[0].routes[0].routes[0].routes[0])
-    console.log('--------------')
+    // console.log(navigation.state.routes[0].routes[0].routes[0].routes[0])
+    // console.log('--------------')
     let swipeEnabled = true
     const HomeStack = navigation.state.routes[0].routes[0].routes[0].routes[0]
     const AnnouncementsStack = navigation.state.routes[0].routes[0].routes[1]

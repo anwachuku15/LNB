@@ -53,7 +53,7 @@ export const createAnnouncement = (admin, body, localUri) => {
                     imageUrl: remoteUri,
                     commentCount: 0,
                     likeCount: 0
-                }
+                },
             })
         } else {
             db.collection('announcements')
@@ -86,7 +86,7 @@ export const createAnnouncement = (admin, body, localUri) => {
                     imageUrl: null,
                     commentCount: 0,
                     likeCount: 0
-                }
+                },
             })
         }
     } 

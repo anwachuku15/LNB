@@ -33,6 +33,7 @@ const initialState = {
     notifications: [],
     messageNotifications: [],
     lastReadMessages: [],
+    lastReadAnnouncements: null
 }
 
 export default (state = initialState, action) => {
@@ -51,7 +52,8 @@ export default (state = initialState, action) => {
                 pendingConnections: action.pendingConnections,
                 likes: action.likes,
                 notifications: action.notifications,
-                messageNotifications: action.messageNotifications
+                messageNotifications: action.messageNotifications,
+                lastReadAnnouncements: action.lastReadAnnouncements
             }
         }
         case SET_SELECTED_USER: {

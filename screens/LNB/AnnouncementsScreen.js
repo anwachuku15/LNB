@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { 
     Dimensions,
     View, 
@@ -14,9 +14,12 @@ import {
     TouchableNativeFeedback,
     TouchableHighlight
 } from 'react-native'
+import { withNavigationFocus } from 'react-navigation'
 import Clipboard from '@react-native-community/clipboard'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
+import { readAnnouncements } from '../../redux/actions/authActions'
+
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
@@ -29,6 +32,9 @@ import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 import moment from 'moment'
 
+// import firebase from 'firebase'
+// const db = firebase.firestore()
+
 const WINDOW_WIDTH = Dimensions.get('window').width
 const WINDOW_HEIGHT = Dimensions.get('window').height
 const BASE_PADDING = 10
@@ -40,6 +46,7 @@ const AnnouncementsScreen = props => {
     
 
     const authUser = useSelector(state => state.auth.credentials)
+    const uid = useSelector(state => state.auth.userId)
     let announcements = useSelector(state => state.admin.announcements.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))
     const dispatch = useDispatch()
     
@@ -53,6 +60,24 @@ const AnnouncementsScreen = props => {
         text = 'black'
         background = 'white'
     }
+
+    const loadAnnouncements = useCallback(async () => {
+        try {
+            await dispatch(readAnnouncements())
+            console.log('blur')
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch]) 
+
+    useEffect(() => {
+        const didBlurSub = props.navigation.addListener('didBlur', loadAnnouncements)
+        return () => {
+            didBlurSub.remove()
+        }
+    }, [loadAnnouncements])
+
+    
 
     const selectUserHandler = (userId, name) => {
         props.navigation.navigate({
@@ -333,4 +358,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default AnnouncementsScreen
+export default withNavigationFocus(AnnouncementsScreen)

@@ -20,43 +20,43 @@ const AnnouncementsIcon = props => {
     } else {
         cardTheme = 'white'
     }
-    const dispatch = useDispatch()
-    const uid = useSelector(state => state.auth.userId)
-    const notifications = useSelector(state => state.auth.notifications)
-    // SET UNREAD NOTIFICATION COUNT WITH STATE
-    let unread = notifications.filter(notification => notification.read === false)
-    const BadgedIcon = withBadge(unread.length)(Icon)
+    const lastRead = useSelector(state => state.auth.lastReadAnnouncements)
+    const announcements = useSelector(state => state.admin.announcements.sort((a,b) => a.timestamp > b.timestamp ? -1 : 1))
 
 
-    // SET UNREAD NOTIFICATION COUNT WITH FIRESTORE LISTENER
-    const [unreadCount, setUnreadCount] = useState(0)
-
-    // const BadgedIcon = withBadge(unreadCount)(Icon)
-
-    return (
-        <View>
-            {/* {unreadCount > 0 ? (    */}
-            {unread && unread.length > 0 ? (
-                <View>
+    if (announcements.length > 0) {
+        return (
+            <View>
+                {lastRead < announcements[0].timestamp ? (
+                    <View>
+                        <AntDesign 
+                            name='notification'
+                            size={23} 
+                            color={props.tabInfo.tintColor}
+                        />
+                        <Badge
+                            containerStyle={{position: 'absolute', top: 0, right: -1}}
+                            badgeStyle={{backgroundColor:Colors.raspberry, borderColor:Colors.raspberry}}
+                        />
+                    </View>
+                ) : (
                     <AntDesign 
                         name='notification'
                         size={23} 
                         color={props.tabInfo.tintColor}
                     />
-                    <Badge
-                        containerStyle={{position: 'absolute', top: 0, right: -1}}
-                        badgeStyle={{backgroundColor:Colors.raspberry, borderColor:Colors.raspberry}}
-                    />
-                </View>
-            ) : (
-                <AntDesign 
-                    name='notification'
-                    size={23} 
-                    color={props.tabInfo.tintColor}
-                />
-            )}
-        </View>
-    )
+                )}
+            </View>
+        )
+    } else {
+        return (
+            <AntDesign 
+                name='notification'
+                size={23} 
+                color={props.tabInfo.tintColor}
+            />
+        )
+    }
 }
 
 const styles = StyleSheet.create({

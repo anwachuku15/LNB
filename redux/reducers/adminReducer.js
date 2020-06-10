@@ -36,7 +36,6 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 announcements: state.announcements.concat(newAnnouncement),
-                read: action.read
             }
         
         case CREATE_ANNOUNCEMENT_NOIMG: 
@@ -55,7 +54,6 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 announcements: state.announcements.concat(newAnnouncementNoImg),
-                read: action.read
             }
         
         default:
