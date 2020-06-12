@@ -302,7 +302,7 @@ const NotificationsScreen = props => {
         
         <SafeAreaView style={styles.screen}>
             
-            {notifications && notifications.length > 0 ? (
+            {notifications && (notifications.length > 0 || connectReqs.length > 0) ? (
                 <FlatList
                     keyExtractor={(item,index) => index.toString()}
                     data={notifications}
