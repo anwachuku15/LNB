@@ -114,6 +114,7 @@ const UserProfileScreen = props => {
         loadUser().then(() => {
             setIsLoading(false)
         })
+        // MOVE CONNECTIONS TO STATE
         const connectionsSnapshot = db.doc(`/users/${userId}`).onSnapshot(snapshot => {
             const currentConnections = snapshot.data().connections
             setConnections(currentConnections)
@@ -127,9 +128,9 @@ const UserProfileScreen = props => {
                 setAccept(false)
             }
         })
-        const requestedButton = db.doc(`/users/${userId}`).onSnapshot(snapshot => {
-            const selectedUserPendings = snapshot.data().pendingConnections
-            if(selectedUserPendings.indexOf(authUser.userId) > -1) {
+        const requestedButton = db.doc(`/users/${authUser.userId}`).onSnapshot(snapshot => {
+            const outgoingRequests = snapshot.data().outgoingRequests
+            if(outgoingRequests.indexOf(userId) > -1) {
                 // setConnectButton(false)
                 setRequested(true)
             } else {
