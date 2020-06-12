@@ -42,22 +42,6 @@ const SettingsScreen = props => {
     return (
         
         <SafeAreaView style={styles.screen}>
-            {/* <View style={styles.header}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {props.navigation.goBack()}}
-                    />
-                </HeaderButtons>
-                <Text style={styles.headerTitle}>Settings</Text>
-                <HeaderButtons HeaderButtonComponent={Placeholder}>
-                    <Item
-                        title='More'
-                        iconName='md-more'
-                    />
-                </HeaderButtons>
-            </View> */}
             <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
                 <Text style={{color:Colors.socialdark}}>Under Construction</Text>
                 <FontAwesome name='gears' size={40} style={{marginTop: 10}} color={Colors.primary} />
