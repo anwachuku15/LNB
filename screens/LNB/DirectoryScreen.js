@@ -10,13 +10,16 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
     TextInput,
-    FlatList
+    FlatList,
+    Alert
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
+import { connectReq, unrequest, confirmConnect, disconnect, declineConnect } from '../../redux/actions/authActions'
+
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
@@ -24,14 +27,18 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import { FontAwesome, Feather, MaterialIcons } from '@expo/vector-icons'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 
+import * as firebase from 'firebase'
 
 import algoliasearch from 'algoliasearch'
 import { appId, key, adminkey } from '../../secrets/algolia'
+import { set } from 'react-native-reanimated'
 
 // const client = algoliasearch(appId, key)
 const client = algoliasearch(appId, adminkey)
 const index = client.initIndex('LNBmembers')
 const connectionsIndex = client.initIndex('Connections')
+
+const db = firebase.firestore()
 
 let themeColor
 
@@ -49,10 +56,25 @@ const DirectoryScreen = props => {
         background = 'white'
         searchBar = Colors.lightSearch
     }
-    
+
+    const dispatch = useDispatch()
+
+    const authId = useSelector(state => state.auth.userId)
+    const authName = useSelector(state => state.auth.credentials.displayName)
+    const userConnections = useSelector(state => state.auth.userConnections)
+    const userConnectionIds = useSelector(state => state.auth.userConnectionIds)
+    const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
+    const incomingRequests = useSelector(state => state.auth.pendingConnections)
+
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
     const [isFocused, setIsFocused] = useState(false)
+
+    const [connect, setConnect] = useState(false)
+    const [accept, setAccept] = useState(false)
+    const [requested, setRequested] = useState(false)
+    const [connected, setConnected] = useState(false)
+
     const searchInput = useRef(null)
     
     let hits = []
@@ -86,6 +108,8 @@ const DirectoryScreen = props => {
                 setResults(searchResults)
             })
         }).catch(err => console.log(err))
+
+
     }, [])
     
     
@@ -140,6 +164,36 @@ const DirectoryScreen = props => {
         
     }
 
+    const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
+        Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + selectedUserName + '?', [
+            {
+                text: 'No',
+                style: 'cancel'
+            },
+            {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: () => {dispatch(disconnect(authId, selectedUserId))}
+            }
+        ])
+    }
+
+    const unrequestHandler = (authId, selectedUserId) => {
+        Alert.alert('Remove Request', 'Are you sure you want to remove your pending request?', [
+            {
+                text: 'Keep',
+                style: 'cancel'
+            },
+            {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => {dispatch(unrequest(authId, selectedUserId))}
+            }
+        ])
+    }
+
+    
+
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {navToUserProfile(item.uid, item.name)}}>
             <ListItem
@@ -175,14 +229,60 @@ const DirectoryScreen = props => {
                         {item.location.length > 0 && <Text style={{color:Colors.disabled, fontSize:12}}>{item.location}</Text>}
                     </View>
                 }
-                rightElement={
-                    <TouchableCmp
-                        onPress={() => {}}
-                        style={{...styles.connectButton, borderColor: Colors.primary}}
-                    >
-                        <Text style={{...styles.connectText, color:Colors.primary}}>Connected</Text>
-                    </TouchableCmp>
-                }
+                rightElement={item.uid !== authId ? (
+                    <View style={styles.buttonContainer}>
+                        {userConnectionIds && !userConnectionIds.includes(item.uid) && !outgoingRequests.includes(item.uid) && !incomingRequests.includes(item.uid) && (
+                            <TouchableCmp
+                                style={styles.connectButton}
+                                onPress={() => {
+                                    dispatch(connectReq(authId, authName, item.uid))
+                                }}
+                            >
+                                <Text style={styles.connectText}>Connect</Text>
+                            </TouchableCmp>
+                        )}
+                        {outgoingRequests.includes(item.uid) && (
+                            <TouchableCmp
+                                style={styles.requestedButton}
+                                onPress={() => {
+                                    unrequestHandler(authId, item.uid)
+                                }}
+                            >
+                                <Text style={styles.requestedText}>Requested</Text>
+                            </TouchableCmp>
+                        )}
+                        {incomingRequests.includes(item.uid) && (
+                            <View style={{flexDirection: 'column'}}>
+                                <TouchableCmp
+                                    style={styles.acceptButton}
+                                    onPress={() => {
+                                        dispatch(confirmConnect(authId, authName, item.uid, item.name))
+                                    }}
+                                >
+                                    <Text style={styles.acceptText}>Accept</Text>
+                                </TouchableCmp>
+                                <TouchableCmp
+                                    style={styles.declineButton}
+                                    onPress={() => {
+                                        dispatch(declineConnect(authId, authName, item.name))
+                                    }}
+                                >
+                                    <Text style={styles.declineText}>Decline</Text>
+                                </TouchableCmp>
+                            </View>
+                        )}
+                        {userConnectionIds.includes(item.uid) && (
+                            <TouchableCmp
+                                style={styles.connectedButton}
+                                onPress={() => {
+                                    disconnectHandler(authId, item.uid, item.name)
+                                }}
+                            >
+                                <Text style={styles.connectedText}>Connected</Text>
+                            </TouchableCmp>
+                        )}
+                    </View>
+                ) : (null)}
                 // bottomDivider
             />
         </TouchableCmp>
@@ -291,18 +391,82 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
     },
+    buttonContainer: {
+        justifyContent: 'center',
+        width: '25%'
+    },
     connectButton: {
         height: 24,
-        width: '25%',
         marginVertical: 5,
         justifyContent: 'center',
+        backgroundColor: Colors.primary,
+        borderColor: Colors.primary,
         borderWidth: 1,
         borderRadius: 50
     },
     connectText: {
         alignSelf:'center',
-        fontSize: 12, 
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold'
     },
+    connectedButton: {
+        height: 24,
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderColor: Colors.primary,
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    connectedText: {
+        alignSelf:'center',
+        color: Colors.primary,
+        fontSize: 12, 
+        fontWeight: 'bold'
+    },
+    acceptButton: {
+        height: 24,
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderColor: Colors.green,
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    acceptText: {
+        alignSelf:'center',
+        color: Colors.green,
+        fontSize: 12, 
+        fontWeight: 'bold'
+    },
+    declineButton: {
+        height: 24,
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderColor: Colors.raspberry,
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    declineText: {
+        alignSelf:'center',
+        color: Colors.raspberry,
+        fontSize: 12, 
+        fontWeight: 'bold'
+    },
+    requestedButton: {
+        height: 24,
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderColor: Colors.disabled,
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    requestedText: {
+        alignSelf:'center',
+        color: Colors.disabled,
+        fontSize: 12, 
+        fontWeight: 'bold'
+    },
+    
     header: {
         flexDirection:'row',
         justifyContent:'space-between',
