@@ -118,6 +118,9 @@ const HomeScreen = props => {
                 props.navigation.navigate('Notifications')
                 props.navigation.navigate('ConnectRequests')
 
+            } else if (type === 'new connection') {
+                props.navigation.navigate('Notifications')
+
             } else if (type === 'announcement') {
                 props.navigation.navigate('Announcements')
             }
