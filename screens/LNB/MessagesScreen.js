@@ -318,7 +318,7 @@ const MessagesScreen = props => {
                         </TouchableCmp>
                     )}
                 </View>
-                {!isFocused && search.length === 0 && chats && chats.length > 0 && (
+                {search.length === 0 && chats && chats.length > 0 && (
                     <DismissKeyboard>
                         <FlatList
                             keyExtractor={(item, index) => index.toString()}
@@ -341,7 +341,7 @@ const MessagesScreen = props => {
                         renderItem={renderResult}
                     />
                 )}
-                {isFocused && search.length === 0 && (
+                {isFocused && search.length === 0 && chats.length === 0 && (
                     <DismissKeyboard>
                         <View style={{flex:1, alignItems:'center', paddingTop:10}}>
                             <Text style={{color:Colors.placeholder}}>Search for someone you'd like to message</Text>
