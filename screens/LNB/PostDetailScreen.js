@@ -304,7 +304,7 @@ const PostDetailScreen = props => {
                     onRefresh={loadComments}
                     refreshing={isRefreshing}
                     ListHeaderComponent={() => (
-                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.blacksmoke : Colors.lightHeader}}}>
+                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightHeader}}}>
                             <TouchableCmp 
                                 onPress={() => selectUserHandler(need.uid, need.userName)}
                                 style={{alignSelf:'flex-start'}}
