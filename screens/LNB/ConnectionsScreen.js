@@ -167,14 +167,14 @@ const ConnectionsScreen = props => {
                         {item.location.length > 0 && <Text style={{color:Colors.disabled, fontSize:12}}>{item.location}</Text>}
                     </View>
                 }
-                rightElement={
-                    <TouchableCmp
-                        onPress={() => {}}
-                        style={{...styles.connectButton, borderColor: Colors.primary}}
-                    >
-                        <Text style={{...styles.connectText, color:Colors.primary}}>Connected</Text>
-                    </TouchableCmp>
-                }
+                // rightElement={
+                //     <TouchableCmp
+                //         onPress={() => {}}
+                //         style={{...styles.connectButton, borderColor: Colors.primary}}
+                //     >
+                //         <Text style={{...styles.connectText, color:Colors.primary}}>Connected</Text>
+                //     </TouchableCmp>
+                // }
                 // bottomDivider
             />
         </TouchableCmp>
