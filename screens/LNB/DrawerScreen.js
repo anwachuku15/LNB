@@ -142,7 +142,7 @@ const DrawerScreen = props => {
                     <View>
                     <MaterialCommunityIcons
                       style={styles.icon}
-                      name='account-card-details'
+                      name='account-card-details-outline'
                       size={23}
                       color={Colors.primary}
                     />
@@ -191,7 +191,7 @@ const DrawerScreen = props => {
                       <View>
                           <MaterialCommunityIcons
                               style={styles.icon}
-                              name="account-key-outline"
+                              name="account-badge-outline"
                               size={23}
                               color={Colors.redcrayola}
                             />
