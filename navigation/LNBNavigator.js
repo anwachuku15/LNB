@@ -22,7 +22,7 @@ import { Ionicons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign } fr
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import AnnouncementsScreen from '../screens/LNB/AnnouncementsScreen'
-import ConnectScreen from '../screens/LNB/ConnectScreen'
+import ShopScreen from '../screens/LNB/ShopScreen'
 import CreatePostScreen from '../screens/LNB/CreatePostScreen'
 import NotificationsScreen from '../screens/LNB/NotificationsScreen'
 import MessagesScreen from '../screens/LNB/MessagesScreen'
@@ -441,9 +441,9 @@ const NotificationsStack = createStackNavigator({
     defaultNavigationOptions: defaultNavOptions
 })
 
-const ConnectStack = createStackNavigator({
-    Connect: {
-        screen: ConnectScreen
+const ShopStack = createStackNavigator({
+    Shop: {
+        screen: ShopScreen
     },
     UserProfile: {
         screen: UserProfileScreen,
@@ -592,13 +592,13 @@ const BottomTabStackContainer = createStackNavigator({
                                 : 'Notifications'
             }
         },
-        Connect: {
-            screen: ConnectStack,
+        Shop: {
+            screen: ShopStack,
             navigationOptions: {
                 tabBarIcon: (tabInfo) => {
                     return (
-                        <FontAwesome 
-                            name='handshake-o' 
+                        <Feather 
+                            name='shopping-cart' 
                             size={23} 
                             color={tabInfo.tintColor}
                         />
@@ -606,8 +606,8 @@ const BottomTabStackContainer = createStackNavigator({
                 },
                 tabBarColor: Colors.primaryColor,
                 tabBarLabel: Platform.OS === 'android' 
-                                ? <Text style={{fontFamily: 'open-sans-bold'}}>Connect</Text>
-                                : 'Connect'
+                                ? <Text style={{fontFamily: 'open-sans-bold'}}>Shop</Text>
+                                : 'Shop'
             }
         }
     }, {
@@ -659,6 +659,40 @@ const MessagesStack = createStackNavigator({
                     horizontal: 300
                 }
             }
+        },
+        PostDetail: {
+            screen: PostDetailScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
+        Connections: {
+            screen: ConnectionsSwipeTab,
+            navigationOptions: {
+                headerTitleStyle: {
+                    fontFamily: 'open-sans-bold',
+                },
+                headerBackTitleStyle: {
+                    fontFamily: 'open-sans',
+                },
+                headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+                headerBackTitleVisible: false,
+            },
+        },
+        Directory: {
+            screen: DirectorySwipeTab,
+            navigationOptions: {
+                headerTitleStyle: {
+                    fontFamily: 'open-sans-bold',
+                },
+                headerBackTitleStyle: {
+                    fontFamily: 'open-sans',
+                },
+                headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+                headerBackTitleVisible: false,
+            },
         },
     }, {
         defaultNavigationOptions: defaultNavOptions
@@ -723,7 +757,7 @@ DrawerNav.navigationOptions = ({navigation}) => {
     const HomeStack = navigation.state.routes[0].routes[0].routes[0].routes[0]
     const AnnouncementsStack = navigation.state.routes[0].routes[0].routes[1]
     const NotificationsStack = navigation.state.routes[0].routes[0].routes[3]
-    const ConnectStack = navigation.state.routes[0].routes[0].routes[4]
+    const ShopStack = navigation.state.routes[0].routes[0].routes[4]
     
     if (
         navigation.state.isDrawerOpen || 
@@ -731,7 +765,7 @@ DrawerNav.navigationOptions = ({navigation}) => {
         HomeStack.index > 0 ||
         AnnouncementsStack.index > 0 ||
         NotificationsStack.index > 0 ||
-        ConnectStack.index > 0
+        ShopStack.index > 0
     ) {
         swipeEnabled = false
     } else {
