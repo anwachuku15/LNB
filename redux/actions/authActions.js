@@ -27,6 +27,8 @@ export const SET_ANNOUNCEMENT = 'SET_ANNOUNCEMENT'
 export const LIKE_ANNOUNCEMENT = 'LIKE_ANNOUNCEMENT'
 export const UNLIKE_ANNOUNCEMENT = 'UNLIKE_ANNOUNCEMENT'
 export const SET_CONNECTIONS = 'SET_CONNECTIONS'
+export const SET_INCOMING_REQUESTS = 'SET_INCOMING_REQUESTS'
+export const SET_OUTGOING_REQUESTS = 'SET_OUTGOING_REQUESTS'
 
 
 const db = firebase.firestore()
@@ -141,6 +143,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
             imageUrl: imageUrl,
             connections: 0,
             pendingConnections: [],
+            outgoingRequests: [],
             location: '',
             bio: '',
             website: '',
@@ -154,7 +157,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
-        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], {}, isAdmin, lastReadAnnouncements))
+        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, lastReadAnnouncements))
 
         //ONBOARDING
         // data.additionalUserInfo.isNewUser for onboarding
@@ -184,16 +187,18 @@ export const login = (email, password) => {
         dispatch(authenticate(idToken, userId))
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
             
-            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, lastReadAnnouncements))
+            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
         }
     }
 }
 
 
 // SET USER ACTIONS
-export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, lastReadAnnouncements) => {
+
+
+export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements) => {
     return async dispatch => {
         dispatch({
             type: SET_USER,
@@ -210,6 +215,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
             },
             connections: connections,
             pendingConnections: pendingConnections,
+            outgoingRequests: outgoingRequests,
             messages: messages,
             likes: [],
             notifications: [],
@@ -217,6 +223,26 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
             messageNotifications: [],
             lastReadAnnouncements: lastReadAnnouncements
         })
+
+        const requestsListener = db.doc(`/users/${userId}`)
+                                    .get()
+                                    .then(doc => {
+                                        const requestListener = doc.ref.onSnapshot(snapshot => {
+                                            dispatch(updateOutgoingRequests(snapshot.data().outgoingRequests))
+                                            dispatch(updateIncomingRequests(snapshot.data().pendingConnections))
+                                        })
+                                    }).catch(err => console.log(err))
+                                    
+
+
+        const newConnectionListener = db.collection('connections')
+                                        .where('requestedBy', '==', userId)
+                                        .onSnapshot(snapshot => {
+                                            dispatch(fetchConnections(userId))
+                                        })
+        newConnectionListener
+
+        
 
         const unreadListener = db.collection('notifications')
                                 .where('recipientId', '==', userId)
@@ -230,6 +256,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                                           dispatch(setAnnouncements())
                                       })
         announcementListener
+
                 
         let lastReadMessages = []
         await (await db.collection('chats').get()).docs
@@ -291,7 +318,8 @@ export const fetchConnections = (uid) => {
             })
             dispatch({
                 type: SET_CONNECTIONS,
-                userConnections: userConnections
+                userConnections: userConnections,
+                userConnectionIds: userConnectionIds
             })
         } catch (err) {
             throw err
@@ -390,6 +418,7 @@ export const updateProfile = (headline, location, bio, link, uri) => {
             website,
             auth.connections,
             auth.pendingConnections,
+            auth.outgoingRequests,
             auth.messages,
             auth.credentials.isAdmin,
             auth.lastReadAnnouncements
@@ -418,6 +447,7 @@ export const readAnnouncements = () => {
                 auth.credentials.website,
                 auth.connections,
                 auth.pendingConnections,
+                auth.outgoingRequests,
                 auth.messages,
                 auth.credentials.isAdmin,
                 justRead
@@ -457,13 +487,21 @@ export const connectReq = (authId, authName, selectedUserId) => {
     return async (dispatch, getState) => {
         const authImg = getState().auth.credentials.imageUrl
         const authHeadline = getState().auth.credentials.headline
+
         const userData = await db.doc(`/users/${selectedUserId}`).get()
         let userPendingReq = userData.data().pendingConnections
+
+        const authData = await db.doc(`/users/${authId}`).get()
+        let authOutgoingReq = authData.data().outgoingRequests
         
         if (userPendingReq.indexOf(authId) === -1) {
             userPendingReq.push(authId)
             const pending = {
                 pendingConnections: userPendingReq
+            }
+            authOutgoingReq.push(selectedUserId)
+            const outgoing = {
+                outgoingRequests: authOutgoingReq
             }
             db.doc(`/users/${selectedUserId}`)
                 .update(pending)
@@ -492,16 +530,16 @@ export const connectReq = (authId, authName, selectedUserId) => {
                                 }
                             })
 
-                            dispatch({
-                                type: SET_PENDING_CONNECTIONS,
-                                pendingConnections: {
-                                    recipientId: selectedUserId,
-                                    senderId: authId
-                                }
-                            })
+                            // dispatch({
+                            //     type: SET_PENDING_CONNECTIONS,
+                            //     pendingConnections: {
+                            //         recipientId: selectedUserId,
+                            //         senderId: authId
+                            //     }
+                            // })
+                            
                         })
                         .then(async () => {
-                            
                             const pushToken = (await db.doc(`/users/${selectedUserId}`).get()).data().pushToken
                             if (pushToken) {
                                 sendRequestNotification(authId, authName, authImg, authHeadline, selectedUserId, pushToken)
@@ -512,9 +550,40 @@ export const connectReq = (authId, authName, selectedUserId) => {
                 .catch(err => {
                     console.error(err)
                 })
+            db.doc(`/users/${authId}`)
+                .update(outgoing)
+                .then(() => {
+                    db.doc(`/users/${authId}`).get()
+                    .then(doc => {
+                        dispatch(updateOutgoingRequests(doc.data().outgoingRequests))
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
         }
     }
 }
+
+const updateOutgoingRequests = (outgoingRequests) => {
+    return async dispatch => {
+        dispatch({
+            type: SET_OUTGOING_REQUESTS,
+            outgoingRequests: outgoingRequests
+        })
+    }
+}
+
+const updateIncomingRequests = (incomingRequests) => {
+    return async dispatch => {
+        dispatch({
+            type: SET_INCOMING_REQUESTS,
+            incomingRequests: incomingRequests
+        })
+    }
+}
+
+
 const sendRequestNotification = (authId, authName, authImg, authHeadline, selectedUserId, pushToken) => {
     db.collection('notifications').add({
         timestamp: new Date().toISOString(),
@@ -558,9 +627,10 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                                          .get()).docs[0]
         notificationData.ref.delete()
 
-
         let authPendingState = getState().auth.pendingConnections
+
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
+        const selectedUserData = (await db.doc(`/users/${selectedUserId}`).get()).data()
 
         // Remove from pendingConnections
         const index = authData.pendingConnections.indexOf(selectedUserId)
@@ -574,9 +644,17 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             {connections: authData.connections + 1},
             {merge: true}
         )
+            
         
+        // Remove from outgoingRequests
+        const index2 = selectedUserData.outgoingRequests.indexOf(authId)
+        selectedUserData.outgoingRequests.splice(index2, 1)
+        db.doc(`/users/${selectedUserId}`).set(
+            {outgoingRequests: selectedUserData.outgoingRequests},
+            {merge: true}
+        )
+
         // Increment selected user connections by 1
-        const selectedUserData = (await db.doc(`/users/${selectedUserId}`).get()).data()
         db.doc(`/users/${selectedUserId}`).set(
             {connections: selectedUserData.connections + 1},
             {merge: true}
@@ -593,33 +671,9 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             requestedBy: selectedUserId,
             acceptedBy: authId,
             timestamp: new Date().toISOString()
+        }).then(() => {
+            dispatch(fetchConnections(authId))
         })
-
-        // db.doc(`/connections/${connectionId}`).set({
-        //     requestedBy: {
-        //         isAdmin: selectedUserData.isAdmin,
-        //         userId: selectedUserId,
-        //         email: selectedUserData.email,
-        //         displayName: selectedUserName,
-        //         headline: selectedUserData.headline,
-        //         imageUrl: selectedUserData.imageUrl,
-        //         location: selectedUserData.location,
-        //         bio: selectedUserData.bio,
-        //         website: selectedUserData.website
-        //     },
-        //     acceptedBy: {
-        //         isAdmin: authData.isAdmin,
-        //         userId: authId,
-        //         email: authData.email,
-        //         displayName: authName,
-        //         headline: authData.headline,
-        //         imageUrl: authData.imageUrl,
-        //         location: authData.location,
-        //         bio: authData.bio,
-        //         website: authData.website
-        //     },
-        //     timestamp: new Date().toISOString()
-        // })
 
         dispatch({
             type: SET_SELECTED_USER,
@@ -642,10 +696,10 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
             }
         })
         sendConnectionNotification(authId, authName, authImg, authHeadline, selectedUserId, selectedUserData.pushToken)
-            dispatch({
-                type: SET_PENDING_CONNECTIONS,
-                pendingConnections: authPendingState
-            })
+        // dispatch({
+        //     type: SET_PENDING_CONNECTIONS,
+        //     pendingConnections: authPendingState
+        // })
     }
 }
 
@@ -681,19 +735,25 @@ const sendConnectionNotification = (authId, authName, authImg, authHeadline, sel
 export const declineConnect = (authId, selectedUserId, selectedUserName) => {
     return async (dispatch, getState) => {
         const authImg = getState().auth.credentials.imageUrl
-        
-        // Delete request notification
+        // read then set to false
         const notificationData = (await db.collection('notifications')
                                          .where('type', '==', 'connection request')
                                          .where('recipientId', '==', authId)
                                          .where('senderId', '==', selectedUserId)
                                          .limit(1)
                                          .get()).docs[0]
-        notificationData.ref.delete()
-
-
+        const updatedFields = {
+            declined: true,
+            read: true
+        }
+        notificationData.ref.update(updatedFields).then(() => {
+            // Delete request notification
+            notificationData.ref.delete()
+        })
+        
         let authPendingState = getState().auth.pendingConnections
         const authData = await (await db.doc(`/users/${authId}`).get()).data()
+        const selectedUserData = await (await db.doc(`/users/${selectedUserId}`).get()).data()
         
         // Remove from pendingConnections
         const index = authData.pendingConnections.indexOf(selectedUserId)
@@ -703,11 +763,18 @@ export const declineConnect = (authId, selectedUserId, selectedUserName) => {
             {merge: true}
         )
 
+        // Remove from outgoingRequests
+        const index2 = selectedUserData.outgoingRequests.indexOf(authId)
+        selectedUserData.outgoingRequests.splice(index2, 1)
+        db.doc(`/users/${selectedUserId}`).set(
+            {outgoingRequests: selectedUserData.outgoingRequests},
+            {merge: true}
+        )
         
-        dispatch({
-            type: SET_PENDING_CONNECTIONS,
-            pendingConnections: authPendingState
-        })
+        // dispatch({
+        //     type: SET_PENDING_CONNECTIONS,
+        //     pendingConnections: authPendingState
+        // })
     }
 }
 
@@ -1025,6 +1092,7 @@ export const disconnect = (authId, selectedUserId) => {
             },
             connections: authData.connections,
             pendingConnections: authData.pendingConnections,
+            outgoingRequests: authData.outgoingRequests,
             likes: [],
             notifications: [],
             connectNotifications: [],
@@ -1069,10 +1137,18 @@ export const unrequest = (authId, selectedUserId) => {
         
         const userData = await db.doc(`/users/${selectedUserId}`).get()
         let userPendingReq = userData.data().pendingConnections
+
+        const authData = await db.doc(`/users/${authId}`).get()
+        let authOutgoingReq = authData.data().outgoingRequests
+
         if (userPendingReq.indexOf(authId) > -1) {
             userPendingReq.splice(userPendingReq.indexOf(authId), 1)
             const pending = {
                 pendingConnections: userPendingReq
+            }
+            authOutgoingReq.splice(authOutgoingReq.indexOf(selectedUserId), 1)
+            const outgoing = {
+                outgoingRequests: authOutgoingReq
             }
             db.doc(`/users/${selectedUserId}`)
                 .update(pending)
@@ -1103,9 +1179,20 @@ export const unrequest = (authId, selectedUserId) => {
                         })
                 })
                 .catch(err => console.log(err))
+            db.doc(`/users/${authId}`)
+                .update(outgoing)
+                .then(() => {
+                    db.doc(`/users/${authId}`).get()
+                    .then(doc => {
+                        dispatch(updateOutgoingRequests(doc.data().outgoingRequests))
+                    })
+                })
+                .catch(err => {console.log(err)})
         }
     }
 }
+
+
 
 
 

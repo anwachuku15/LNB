@@ -17,6 +17,8 @@ import {
     SET_ANNOUNCEMENTS,
     // SET_ANNOUNCEMENT,
     SET_CONNECTIONS,
+    SET_INCOMING_REQUESTS,
+    SET_OUTGOING_REQUESTS,
 } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
@@ -50,6 +52,7 @@ export default (state = initialState, action) => {
                 credentials: action.credentials,
                 connections: action.connections,
                 pendingConnections: action.pendingConnections,
+                outgoingRequests: action.outgoingRequests,
                 likes: action.likes,
                 notifications: action.notifications,
                 messageNotifications: action.messageNotifications,
@@ -62,10 +65,22 @@ export default (state = initialState, action) => {
                 selectedUser: action.selectedUser
             }
         }
-        case SET_PENDING_CONNECTIONS: {
+        // case SET_PENDING_CONNECTIONS: {
+        //     return {
+        //         ...state,
+        //         pendingConnections: action.pendingConnections
+        //     }
+        // }
+        case SET_INCOMING_REQUESTS: {
             return {
                 ...state,
-                pendingConnections: action.pendingConnections
+                pendingConnections: action.incomingRequests
+            }
+        }
+        case SET_OUTGOING_REQUESTS: {
+            return {
+                ...state,
+                outgoingRequests: action.outgoingRequests
             }
         }
         case SET_LIKES: {
@@ -119,7 +134,8 @@ export default (state = initialState, action) => {
         case SET_CONNECTIONS: {
             return {
                 ...state,
-                userConnections: action.userConnections
+                userConnections: action.userConnections,
+                userConnectionIds: action.userConnectionIds
             }
         }
         case LAST_READ_TIMESTAMP: {
