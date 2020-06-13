@@ -310,7 +310,13 @@ const PostDetailScreen = props => {
                                     linkDefault={true}
                                     linkStyle={{color:Colors.bluesea}}
                                 >
-                                    <Text style={{...styles.post, ...{color:text}}}>{need.body}</Text>
+                                    {/* <Text selectable style={{...styles.post, ...{color:text}}}>{need.body}</Text> */}
+                                    <TextInput 
+                                        multiline 
+                                        scrollEnabled={false} 
+                                        editable={false} 
+                                        style={{...styles.post, color:text}}
+                                    >{need.body}</TextInput>
                                 </Hyperlink>
                                 {need.imageUrl ? (
                                     <Image source={{uri: need.imageUrl}} style={styles.postImage} resizeMode='cover'/>
@@ -509,7 +515,8 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
     post: {
-        marginTop: 12,
+        // marginTop: 12,
+        marginTop: 5,
         fontSize: 14,
     },
     postImage: {
