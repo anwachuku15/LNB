@@ -327,7 +327,11 @@ const PostDetailScreen = props => {
                                                     onPress={() => navToLikes()}
                                                 >
                                                     <Text style={{color:text, fontWeight: 'bold', alignSelf:'center'}}>{likeCount}</Text>
-                                                    <Text style={{color:Colors.disabled, alignSelf:'center'}}> likes</Text>
+                                                    {likeCount === 1 ? ( 
+                                                        <Text style={{color:Colors.disabled, alignSelf:'center'}}> like</Text>
+                                                    ) : (
+                                                        <Text style={{color:Colors.disabled, alignSelf:'center'}}> likes</Text>
+                                                    )}
                                                 </TouchableCmp>
                                             )}
                                         </View>
