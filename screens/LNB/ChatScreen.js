@@ -15,7 +15,6 @@ import {
     FlatList,
     Platform
 } from 'react-native'
-import { Clipboard, useClipboard} from '@react-native-community/clipboard'
 // REDUX
 import { getUser, setLastReadMessage } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
@@ -235,7 +234,7 @@ const ChatScreen = props => {
                         linkDefault={true}
                         linkStyle={{color:Colors.blue}}
                     >
-                        <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                        <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
             </View>
@@ -249,7 +248,7 @@ const ChatScreen = props => {
                         linkDefault={true}
                         linkStyle={{color:Colors.blue}}
                     >
-                        <Text style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                        <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
             </View>
