@@ -237,6 +237,15 @@ const ChatScreen = props => {
                         <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
+                {/* <View style={{...styles.rightHeartLike, backgroundColor: Colors.primaryLight, borderColor: scheme === 'dark' ? 'black' : 'white'}}>
+                    <TouchableCmp>
+                        <Ionicons 
+                            name={Platform.OS==='android' ? 'md-heart' : 'ios-heart'} 
+                            size={15} 
+                            color={Colors.raspberry}
+                        />
+                    </TouchableCmp>
+                </View> */}
             </View>
         ) : (
             <View style={{...styles.leftMessageView, ...{backgroundColor:background}}} key={item._id}>
@@ -251,6 +260,15 @@ const ChatScreen = props => {
                         <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
+                {/* <View style={{...styles.rightHeartLike, backgroundColor: Colors.primaryLight, borderColor: scheme === 'dark' ? 'black' : 'white'}}>
+                    <TouchableCmp>
+                        <Ionicons 
+                            name={Platform.OS==='android' ? 'md-heart' : 'ios-heart'} 
+                            size={15} 
+                            color={Colors.raspberry}
+                        />
+                    </TouchableCmp>
+                </View> */}
             </View>
         )
     )
@@ -260,37 +278,6 @@ const ChatScreen = props => {
 
     return (
         <SafeAreaView style={styles.screen}>
-
-            {/* <View style={styles.header}>
-                <View style={{flexDirection:'row', alignItems:'center'}}>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                        <Item
-                            title='Direct'
-                            iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                            onPress={() => {props.navigation.goBack()}}
-                        />
-                    </HeaderButtons>
-                    <TouchableCmp
-                        onPress={() => {props.navigation.navigate({
-                            routeName: 'UserProfile',
-                            params: {
-                                userId: user.credentials.userId
-                            }
-                        })}}
-                        style={{flexDirection:'row'}}
-                    >
-                        <Image style={styles.headerAvatar} source={{uri: user.credentials.imageUrl}}/>
-                        <Text style={styles.headerTitle}>{user.credentials.displayName}</Text>
-                    </TouchableCmp>
-                </View>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                        onPress={() => {}}
-                    />
-                </HeaderButtons>
-            </View> */}
             
             <FlatList
                 contentContainerStyle={styles.messages}
@@ -376,6 +363,18 @@ ChatScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    rightHeartLike: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        position:'relative',
+        right: 15, 
+        bottom: -10,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        paddingTop: 2
     },
     messages: {
         justifyContent: 'flex-start'
