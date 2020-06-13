@@ -139,7 +139,7 @@ exports.onUserImageChange = functions
         .then((data) => {
           data.forEach(doc => {
             const like = db.doc(`/likes/${doc.id}`)
-            batch.update(like, { senderImage: change.after.data().imageUrl})
+            batch.update(like, { userImage: change.after.data().imageUrl})
           })
           return db
             .collection('notifications')
