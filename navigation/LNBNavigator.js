@@ -42,7 +42,7 @@ import UserProfilePictureScreen from '../screens/LNB/UserProfilePictureScreen'
 import CreateAnnouncementScreen from '../screens/LNB/CreateAnnouncementScreen'
 import DirectoryScreen from '../screens/LNB/DirectoryScreen'
 import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
-// import ConnectIcon from '../components/LNB/ConnectIcon'
+import PostLikesScreen from '../screens/LNB/PostLikesScreen'
 
 import { useColorScheme } from 'react-native-appearance'
 
@@ -222,6 +222,14 @@ const HomeStack = createStackNavigator({
                 }
             }
         },
+        PostLikes: {
+            screen: PostLikesScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
         EditProfile: {
             screen: EditProfileScreen,
             navigationOptions: {
@@ -348,6 +356,14 @@ const AnnouncementsStack = createStackNavigator({
             }
         }
     },
+    PostLikes: {
+        screen: PostLikesScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
     Settings: {
         screen: SettingsScreen,
         navigationOptions: {
@@ -407,6 +423,14 @@ const NotificationsStack = createStackNavigator({
     },
     PostDetail: {
         screen: PostDetailScreen,
+        navigationOptions: {
+            gestureResponseDistance: {
+                horizontal: 300
+            }
+        }
+    },
+    PostLikes: {
+        screen: PostLikesScreen,
         navigationOptions: {
             gestureResponseDistance: {
                 horizontal: 300
@@ -660,8 +684,8 @@ const MessagesStack = createStackNavigator({
                 }
             }
         },
-        PostDetail: {
-            screen: PostDetailScreen,
+        PostLikes: {
+            screen: PostLikesScreen,
             navigationOptions: {
                 gestureResponseDistance: {
                     horizontal: 300
