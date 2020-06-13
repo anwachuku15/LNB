@@ -136,8 +136,14 @@ const PostDetailScreen = props => {
                     setIsLiked(true)
                 }
             })
-
+        const needDataListener = db.doc(`/needs/${props.needId}`).onSnapshot(snapshot => {
+            if (snapshot.exists) {
+                setLikeCount(snapshot.data().likeCount)
+                setCommentCount(snapshot.data().commentCount)
+            }
+        })
         return () => {
+            needDataListener()
             setLikeIcon()
         }
     },[dispatch])
@@ -182,6 +188,12 @@ const PostDetailScreen = props => {
                 }
             )
         }
+    }
+
+    const navToLikes = () => {
+        props.navigation.push('PostLikes', {
+            needId: needId
+        })
     }
 
     const pickImage = async () => {
@@ -258,35 +270,6 @@ const PostDetailScreen = props => {
     
     return (
         <View style={styles.screen}>
-            {/* HEADER */}
-            {/* <View style={{...styles.header, ...{paddingBottom: senderName ? 1 : 16}}}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Back'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {props.navigation.goBack()}}
-                    />
-                </HeaderButtons>
-                {senderName ? (
-                    <View style={{alignItems:'center'}}>
-                        {type === 'likeNeed' && <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>Liked</Text>}
-                        {type === 'commentNeed' && <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>New Comment</Text>}
-                        {type === 'commentThread' && <Text style={{...styles.headerTitle, ...{textAlign:'center'}}}>New Comment</Text>}
-                        <Text style={{color:Colors.disabled, fontFamily: 'open-sans', fontSize:12}}>by {senderName}</Text>
-                    </View>
-                ) : (
-                    <Text style={styles.headerTitle}>Need Detail</Text>
-                )}
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                        onPress={() => {}}
-                    />
-                </HeaderButtons>
-            </View> */}
-            
-
             {/* Comments */}
             {isLoading && (
                 <View style={styles.spinner}>
@@ -337,8 +320,16 @@ const PostDetailScreen = props => {
                                 <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
                                     <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                                         <View style={{flexDirection:'row'}}>
-                                            <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.blue} style={{marginRight: 7}} />
-                                            {/* {likeCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center'}}>{likeCount}</Text>} */}
+                                            <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.pink} style={{marginRight: 7}} />
+                                            {likeCount > 0 && (
+                                                <TouchableCmp 
+                                                    style={{flexDirection:'row'}}
+                                                    onPress={() => navToLikes()}
+                                                >
+                                                    <Text style={{color:text, fontWeight: 'bold', alignSelf:'center'}}>{likeCount}</Text>
+                                                    <Text style={{color:Colors.disabled, alignSelf:'center'}}> likes</Text>
+                                                </TouchableCmp>
+                                            )}
                                         </View>
                                     </TouchableCmp>
                                     <TouchableCmp onPress={() => {}}>
@@ -441,6 +432,12 @@ const styles = StyleSheet.create({
     },
     screen: {
         flex: 1
+    },
+    likeInfo: {
+        paddingTop: 5,
+        marginTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: Colors.disabled
     },
     commentView: {
         padding: 10,
