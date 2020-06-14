@@ -65,17 +65,6 @@ const ChatScreen = props => {
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
     
-    // const [copiedText, setCopiedText] = useState('')
-    // const [data, setString] = useClipboard()
-    // const copyToClipboard = () => {
-    //     Clipboard.setString('hello world')
-    // }
-
-    // const fetchCopiedText = async () => {
-    //     const text = await Clipboard.getString()
-    //     setCopiedText(text)
-    // }
-    
     useEffect(() => {
         const createChat = async () => {
             if (!(await db.doc(`chats/${chatId}`).get()).exists) {
@@ -226,6 +215,18 @@ const ChatScreen = props => {
         })
     }
 
+    const heartLike = () => (
+        <View style={{...styles.rightHeartLike, backgroundColor: Colors.primaryLight, borderColor: scheme === 'dark' ? 'black' : 'white'}}>
+            <TouchableCmp>
+                <Ionicons 
+                    name={Platform.OS==='android' ? 'md-heart' : 'ios-heart'} 
+                    size={15} 
+                    color={Colors.raspberry}
+                />
+            </TouchableCmp>
+        </View>
+    )
+
     const renderMessage = ({item}) => (
         item.user._id === uid ? (
             <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
@@ -237,15 +238,6 @@ const ChatScreen = props => {
                         <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
-                {/* <View style={{...styles.rightHeartLike, backgroundColor: Colors.primaryLight, borderColor: scheme === 'dark' ? 'black' : 'white'}}>
-                    <TouchableCmp>
-                        <Ionicons 
-                            name={Platform.OS==='android' ? 'md-heart' : 'ios-heart'} 
-                            size={15} 
-                            color={Colors.raspberry}
-                        />
-                    </TouchableCmp>
-                </View> */}
             </View>
         ) : (
             <View style={{...styles.leftMessageView, ...{backgroundColor:background}}} key={item._id}>
@@ -260,15 +252,6 @@ const ChatScreen = props => {
                         <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
-                {/* <View style={{...styles.rightHeartLike, backgroundColor: Colors.primaryLight, borderColor: scheme === 'dark' ? 'black' : 'white'}}>
-                    <TouchableCmp>
-                        <Ionicons 
-                            name={Platform.OS==='android' ? 'md-heart' : 'ios-heart'} 
-                            size={15} 
-                            color={Colors.raspberry}
-                        />
-                    </TouchableCmp>
-                </View> */}
             </View>
         )
     )
