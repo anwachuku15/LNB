@@ -18,7 +18,7 @@ import { withNavigationFocus } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import { connectReq, unrequest, confirmConnect, disconnect, declineConnect } from '../../redux/actions/authActions'
+import { connectReq, unrequest, confirmConnect, disconnect, declineConnect, getUser } from '../../redux/actions/authActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -33,25 +33,21 @@ import algoliasearch from 'algoliasearch'
 import { appId, key, adminkey } from '../../secrets/algolia'
 import { set } from 'react-native-reanimated'
 
-// const client = algoliasearch(appId, key)
 const client = algoliasearch(appId, adminkey)
 const index = client.initIndex('LNBmembers')
 const connectionsIndex = client.initIndex('Connections')
 
 const db = firebase.firestore()
 
-let themeColor
 
 const DirectoryScreen = props => {
     const scheme = useColorScheme()
     let text, background, searchBar
     if (scheme === 'dark') {
-        themeColor = 'black'
         text = 'white'
         background = 'black'
         searchBar = Colors.darkSearch
     } else {
-        themeColor = 'white'
         text = 'black'
         background = 'white'
         searchBar = Colors.lightSearch
@@ -195,13 +191,15 @@ const DirectoryScreen = props => {
     
 
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={() => {navToUserProfile(item.uid, item.name)}}>
+        <TouchableCmp onPress={async () => {
+            // await dispatch(getUser(item.uid))
+            navToUserProfile(item.uid, item.name)
+        }}>
             <ListItem
                 containerStyle={{
                     backgroundColor:background,
                     paddingHorizontal: 14,
-                    paddingVertical: 5,
-
+                    paddingVertical: 10,
                 }}
                 leftAvatar={{
                     source: {uri: item.imageUrl},
@@ -281,6 +279,28 @@ const DirectoryScreen = props => {
                                 <Text style={styles.connectedText}>Connected</Text>
                             </TouchableCmp>
                         )}
+                        <TouchableCmp
+                            // style={userConnectionIds.includes(item.uid) ? styles.messageButton : styles.messageButtonOutline}
+                            style={styles.messageButton}
+                            onPress={async () => {
+                                await dispatch(getUser(item.uid))
+                                props.navigation.push(
+                                    'ChatScreen',
+                                    {
+                                        selectedUserId: item.uid,
+                                        userName: item.name,
+                                        userImage: item.imageUrl
+                                    }
+                                )
+                            }}
+                        >
+                            {/* <Text style={styles.messageText}>Message </Text> */}
+                            <MaterialIcons
+                                name='mail-outline'
+                                color='white'
+                                size={20}
+                            />
+                        </TouchableCmp>
                     </View>
                 ) : (null)}
                 // bottomDivider
@@ -371,13 +391,13 @@ const DirectoryScreen = props => {
                     )}
                 </View>
             </View>
-                <FlatList
-                    keyExtractor={(item, index) => index.toString()}
-                    data={results}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                />
+            <FlatList
+                keyExtractor={(item, index) => index.toString()}
+                data={results}
+                renderItem={renderItem}
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+            />
         </View>
     )
 }
@@ -392,17 +412,55 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     buttonContainer: {
+        // flex: 1,
+        // flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '30%',
+    },
+    messageButton: {
+        marginTop: 5,
+        paddingVertical: 5,
+        flexDirection: 'row',
+        alignItems:'center',
         justifyContent: 'center',
-        width: '25%'
+        backgroundColor: Colors.blue,
+        borderColor: Colors.blue,
+        borderWidth: 1,
+        borderRadius: 50,
+        width: '60%',
+        alignSelf: 'center'
+    },
+    messageButtonOutline: {
+        marginTop: 5,
+        paddingVertical: 5,
+        flexDirection: 'row',
+        alignItems:'center',
+        justifyContent: 'center',
+        borderColor: Colors.blue,
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    messageText: {
+        alignSelf:'center',
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold'
+    },
+    messageTextOutline: {
+        alignSelf:'center',
+        color: Colors.blue,
+        fontSize: 12,
+        fontWeight: 'bold'
     },
     connectButton: {
-        height: 24,
+        // height: 24,
+        paddingVertical: 8,
         marginVertical: 5,
         justifyContent: 'center',
         backgroundColor: Colors.primary,
         borderColor: Colors.primary,
         borderWidth: 1,
-        borderRadius: 50
+        borderRadius: 50,
     },
     connectText: {
         alignSelf:'center',
@@ -411,12 +469,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     connectedButton: {
-        height: 24,
+        // height: 24,
+        paddingVertical: 8,
         marginVertical: 5,
         justifyContent: 'center',
         borderColor: Colors.primary,
         borderWidth: 1,
-        borderRadius: 50
+        borderRadius: 50,
     },
     connectedText: {
         alignSelf:'center',
@@ -425,12 +484,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     acceptButton: {
-        height: 24,
+        // height: 24,
+        paddingVertical: 5,
         marginVertical: 5,
         justifyContent: 'center',
         borderColor: Colors.green,
         borderWidth: 1,
-        borderRadius: 50
+        borderRadius: 50,
     },
     acceptText: {
         alignSelf:'center',
@@ -439,12 +499,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     declineButton: {
-        height: 24,
+        // height: 24,
+        paddingVertical: 5,
         marginVertical: 5,
         justifyContent: 'center',
         borderColor: Colors.raspberry,
         borderWidth: 1,
-        borderRadius: 50
+        borderRadius: 50,
     },
     declineText: {
         alignSelf:'center',
@@ -453,12 +514,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     requestedButton: {
-        height: 24,
+        // height: 24,
+        paddingVertical: 5,
         marginVertical: 5,
         justifyContent: 'center',
         borderColor: Colors.disabled,
         borderWidth: 1,
-        borderRadius: 50
+        borderRadius: 50,
     },
     requestedText: {
         alignSelf:'center',
@@ -467,13 +529,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     
+    
     header: {
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems: 'center',
         paddingTop: 49,
         paddingBottom: 16,
-        backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
     },

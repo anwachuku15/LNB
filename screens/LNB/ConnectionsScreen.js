@@ -17,7 +17,7 @@ import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 // REDUX
-import { fetchConnections } from '../../redux/actions/authActions'
+import { fetchConnections, getUser } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -167,14 +167,30 @@ const ConnectionsScreen = props => {
                         {item.location.length > 0 && <Text style={{color:Colors.disabled, fontSize:12}}>{item.location}</Text>}
                     </View>
                 }
-                // rightElement={
-                //     <TouchableCmp
-                //         onPress={() => {}}
-                //         style={{...styles.connectButton, borderColor: Colors.primary}}
-                //     >
-                //         <Text style={{...styles.connectText, color:Colors.primary}}>Connected</Text>
-                //     </TouchableCmp>
-                // }
+                rightElement={
+                    <View style={styles.buttonContainer}>
+                        <TouchableCmp
+                            style={styles.messageButton}
+                            onPress={async () => {
+                                await dispatch(getUser(item.uid))
+                                props.navigation.push(
+                                    'ChatScreen',
+                                    {
+                                        selectedUserId: item.uid,
+                                        userName: item.name,
+                                        userImage: item.imageUrl
+                                    }
+                            )}}
+                        >
+                            <Text style={styles.messageText}>Message </Text>
+                            <MaterialIcons
+                                name='mail-outline'
+                                color='white'
+                                size={20}
+                            />
+                        </TouchableCmp>
+                    </View>
+                }
                 // bottomDivider
             />
         </TouchableCmp>
@@ -307,6 +323,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    buttonContainer: {
+        // flex: 1,
+        // flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '30%',
+    },
     connectButton: {
         height: 24,
         width: '25%',
@@ -318,6 +340,23 @@ const styles = StyleSheet.create({
     connectText: {
         alignSelf:'center',
         fontSize: 12, 
+    },
+    messageButton: {
+        marginTop: 5,
+        paddingVertical: 5,
+        flexDirection: 'row',
+        alignItems:'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.blue,
+        borderColor: Colors.blue,
+        borderWidth: 1,
+        borderRadius: 50
+    },
+    messageText: {
+        alignSelf:'center',
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold'
     },
     header: {
         flexDirection:'row',
