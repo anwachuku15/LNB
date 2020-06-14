@@ -43,6 +43,7 @@ import CreateAnnouncementScreen from '../screens/LNB/CreateAnnouncementScreen'
 import DirectoryScreen from '../screens/LNB/DirectoryScreen'
 import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
 import PostLikesScreen from '../screens/LNB/PostLikesScreen'
+import NewMessageScreen from '../screens/LNB/NewMessageScreen'
 
 import { useColorScheme } from 'react-native-appearance'
 
@@ -659,6 +660,14 @@ const MessagesStack = createStackNavigator({
     default: createStackNavigator({
         MessagesScreen: {
             screen: MessagesScreen,
+        },
+        NewMessageScreen: {
+            screen: NewMessageScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
         },
         ChatScreen: {
             screen: ChatScreen,
