@@ -282,8 +282,13 @@ const EditProfileScreen = props => {
 
 
 EditProfileScreen.navigationOptions = (navData) => {
+    const background = navData.screenProps.theme
     return {
-        headerTitle: 'EditProfile'
+        headerTitle: 'EditProfile',
+        headerStyle: {
+            backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
+        },
     }
 }
 
@@ -305,7 +310,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
-        borderBottomWidth: StyleSheet.hairlineWidth
+        // borderBottomWidth: StyleSheet.hairlineWidth
     },
     header2: {
         // borderBottomWidth: 0.5,
