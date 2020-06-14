@@ -931,7 +931,7 @@ export const markMessageNotificationsAsRead = () => {
             batch.update(notification, {read: true})
         })
         batch.commit().then(() => {
-            console.log('message notifications read')
+            // console.log('message notifications read')
         }).catch(err => {
             console.log(err)
         })                                                   
