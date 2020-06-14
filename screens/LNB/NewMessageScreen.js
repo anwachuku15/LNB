@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { 
     Platform,
     SafeAreaView,
@@ -11,19 +11,28 @@ import {
     FlatList,
     TextInput,
     Keyboard,
-    TouchableWithoutFeedback
+    KeyboardEvent,
+    TouchableWithoutFeedback,
+    Dimensions,
+    Modal
 } from 'react-native'
-import { CheckBox, ListItem } from 'react-native-elements'
+import CustomModal from 'react-native-modal'
+import Dialog from 'react-native-dialog'
+import { CheckBox, ListItem, Overlay } from 'react-native-elements'
 import firebase from 'firebase'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
+import { getUser } from '../../redux/actions/authActions'
+
+import { useKeyboard } from '../../hooks/useKeyboard'
+
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import { Feather, MaterialIcons } from '@expo/vector-icons'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
-
+import NameGroupChatModal from '../../components/LNB/NameGroupChatModal'
 import algoliasearch from 'algoliasearch'
 import { appId, key, adminkey } from '../../secrets/algolia'
 
@@ -32,7 +41,8 @@ const index = client.initIndex('LNBmembers')
 
 const db = firebase.firestore()
 
-
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_HEIGHT = Dimensions.get('window').height
 
 const NewMessageScreen = props => {
     const scheme = useColorScheme()
@@ -50,10 +60,14 @@ const NewMessageScreen = props => {
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
     const [isFocused, setIsFocused] = useState(false)
+    const [isVisible, setIsVisible] = useState(false)
+    const [groupName, setGroupName] = useState('')
 
     const [chatMembers, setChatMembers] = useState([])
     const [chatMembersIds, setChatMembersIds] = useState([])
     const [selected, setSelected] = useState(false)
+
+    const auth = useSelector(state => state.auth)
 
     const dispatch = useDispatch()
 
@@ -106,6 +120,7 @@ const NewMessageScreen = props => {
     }, [loadIndex])
 
 
+
     const updateSearch = (text) => {
         setSearch(text)
         const query = text
@@ -155,16 +170,6 @@ const NewMessageScreen = props => {
         setSelected(!selected)
     }
 
-
-    const cancelSearch = () => {
-        searchInput.current.blur()
-    }
-
-    const DismissKeyboard = ({ children }) => (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-            {children}
-        </TouchableWithoutFeedback>
-    )
 
     
     
@@ -241,8 +246,94 @@ const NewMessageScreen = props => {
         </TouchableCmp>
     )
 
+    const navToChatScreen = async (userId, userName, userImage) => {
+        await dispatch(getUser(userId))
+        props.navigation.navigate({
+            routeName: 'ChatScreen',
+            params: {
+                selectedUserId: userId,
+                userName: userName,
+                userImage: userImage
+            }
+        })
+    }
+
+
+    const navToGroupChatScreen = (groupChatMembers, groupName) => {
+        toggleModal()
+        props.navigation.navigate({
+            routeName: 'GroupChatScreen',
+            params: {
+                chatMembers: groupChatMembers,
+                groupName: groupName
+            }
+        })
+        setChatMembers([])
+        setChatMembersIds([])
+        setGroupName('')
+    }
+
+
+    
+    const toggleModal = () => {
+        setIsVisible(!isVisible)
+    }
+    const cancel = () => {
+        toggleModal()
+        setGroupName('')
+    }
+
+    
+
+   
+
+    
+
+    // let groupNameValue
+    const updateGroupName = (text) => {
+        // groupNameValue = text
+        setGroupName(text)
+    }
+
     return (
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
+
+            <View style={styles.header}>
+                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                    <Item
+                        title='Direct'
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {props.navigation.goBack()}}
+                    />
+                </HeaderButtons>
+                <Text style={styles.headerTitle}>New Message</Text>
+                {chatMembers.length > 0 ? (
+                    <TouchableCmp 
+                        style={styles.chatButton}
+                        onPress={
+                            chatMembers.length === 1
+                            ? () => navToChatScreen(chatMembers[0].userId, chatMembers[0].userName, chatMembers[0].userImage)
+                            : () => toggleModal()
+                        }
+                    >
+                        <Text style={styles.chatButtonText}>Chat</Text>
+                    </TouchableCmp>
+                ) : (
+                    <View style={styles.chatButton}>
+                        <Text style={styles.chatButtonTextDisabled}>Chat</Text>
+                    </View>
+                )}
+            </View>
+
+            <NameGroupChatModal
+                isVisible={isVisible}
+                chatMembers={chatMembers}
+                groupName={groupName}
+                updateGroupName={updateGroupName}
+                navToGroupChatScreen={navToGroupChatScreen}
+                cancel={cancel}
+            />
+
             <View style={{flexDirection:'column', paddingHorizontal: 10, marginTop: 10}}>
                 <View style={{flexDirection:'column'}}>
                     <Text style={{color:text, fontWeight:'bold', fontSize:16}}>To</Text>
@@ -261,7 +352,7 @@ const NewMessageScreen = props => {
                         extraData={selected}
                         renderItem={renderChatMember}
                         showsHorizontalScrollIndicator={false}
-
+                        // keyboardShouldPersistTaps='always'
                     />
                 </View>
                 <View style={{...styles.searchContainer, width: '100%', alignSelf: 'center'}}>
@@ -300,7 +391,7 @@ const NewMessageScreen = props => {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -320,6 +411,9 @@ NewMessageScreen.navigationOptions = (navData) => {
             </HeaderButtons>
         ),
         headerTitle: 'New Message',
+        headerRight: () => (
+            <Text style={{color: Colors.blue}}>Chat</Text>
+        ),
         headerTitleStyle: {
             fontFamily: 'open-sans-bold',
         },
@@ -338,6 +432,66 @@ NewMessageScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    modal: {
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: 'white', 
+        // borderTopLeftRadius: 8,
+        // borderTopRightRadius: 8,
+        borderRadius: 8,
+        paddingHorizontal: 22,
+        paddingTop: 20,
+        paddingBottom: 20
+    },
+    cancelButton: {
+        // flex: 1,
+        width: '40%',
+        backgroundColor: Colors.raspberry,
+        padding: 10,
+        borderRadius: 50,
+    },
+    cancelText: {
+        color: 'white',
+        fontWeight: 'bold',
+        alignSelf: 'center'
+    },
+    createButton: {
+        // flex: 1,
+        width: '40%',
+        padding: 10,
+        borderRadius: 50,
+    },
+    createText: {
+        color: 'white',
+        fontWeight: 'bold',
+        alignSelf: 'center'
+    },
+    header: {
+        flexDirection:'row',
+        justifyContent:'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    headerTitle: {
+        color: Colors.primary,
+        fontFamily: 'open-sans-bold',
+        fontSize: 17,
+        fontWeight: '500',
+    },
+    chatButton: {
+        marginRight: 10,
+    },
+    chatButtonText: {
+        color: Colors.blue, 
+        fontSize: 16, 
+        fontWeight: 'bold'
+    },
+    chatButtonTextDisabled: {
+        color: Colors.disabled, 
+        fontSize: 16, 
+        fontWeight: 'bold'
     },
     checkbox: {
         width: '10%'
@@ -381,20 +535,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    header: {
-        flexDirection:'row',
-        justifyContent:'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomColor: Colors.primary,
-        borderBottomWidth: StyleSheet.hairlineWidth
-    },
-    headerTitle: {
-        color: Colors.primary,
-        fontFamily: 'open-sans-bold',
-        fontSize: 17,
-        fontWeight: '500',
     },
     subtitleView: {
         flexDirection: 'row'
