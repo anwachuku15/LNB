@@ -27,6 +27,7 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import NewMessageButton from '../../components/UI/NewMessageButton'
 import { Feather, MaterialIcons } from '@expo/vector-icons'
 import firebase from 'firebase'
 import moment from 'moment'
@@ -59,19 +60,15 @@ const messagesTimeConfig = {
 moment.updateLocale('en', { relativeTime: messagesTimeConfig})
 // https://stackoverflow.com/questions/55234064/momentjs-with-two-separate-fromnow-formats
 
-let themeColor
 
 const MessagesScreen = props => {
     
     const scheme = useColorScheme()
-    let text
-    let background
+    let text, background
     if (scheme === 'dark') {
-        themeColor = 'black'
         text = 'white'
         background = 'black'
     } else {
-        themeColor = 'black'
         text = 'black'
         background = 'white'
     }
@@ -371,15 +368,17 @@ MessagesScreen.navigationOptions = (navData) => {
             </View>
         ),
         headerTitle: 'Messages',
-        // headerRight: () => (
-        //     <HeaderButtons HeaderButtonComponent={HeaderButton}>
-        //         <Item
-        //             title='Direct'
-        //             iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-        //             onPress={() => {setIsModalVisible(!isModalVisible)}}
-        //         />
-        //     </HeaderButtons>
-        // ),
+        headerRight: () => (
+            <HeaderButtons HeaderButtonComponent={NewMessageButton}>
+                <Item
+                    title='New Message'
+                    iconName='message-plus'
+                    onPress={() => {
+                        navData.navigation.navigate('NewMessageScreen')
+                    }}
+                />
+            </HeaderButtons>
+        ),
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
             borderBottomColor: Colors.primary
@@ -402,7 +401,6 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems: 'center',
         paddingVertical: 12,
-        backgroundColor: themeColor,
         borderBottomColor: Colors.primary,
         borderBottomWidth: StyleSheet.hairlineWidth
     },
