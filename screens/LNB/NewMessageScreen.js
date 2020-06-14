@@ -24,7 +24,6 @@ import firebase from 'firebase'
 import { useSelector, useDispatch } from 'react-redux'
 import { getUser } from '../../redux/actions/authActions'
 
-import { useKeyboard } from '../../hooks/useKeyboard'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
