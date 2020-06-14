@@ -44,6 +44,7 @@ import DirectoryScreen from '../screens/LNB/DirectoryScreen'
 import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
 import PostLikesScreen from '../screens/LNB/PostLikesScreen'
 import NewMessageScreen from '../screens/LNB/NewMessageScreen'
+import GroupChatScreen from '../screens/LNB/GroupChatScreen'
 
 import { useColorScheme } from 'react-native-appearance'
 
@@ -237,6 +238,7 @@ const HomeStack = createStackNavigator({
                 gestureResponseDistance: {
                     horizontal: 300
                 },
+                headerShown: false
             }
         },
         UserProfile: {
@@ -666,7 +668,17 @@ const MessagesStack = createStackNavigator({
             navigationOptions: {
                 gestureResponseDistance: {
                     horizontal: 300
-                }
+                },
+                headerShown: false
+            }
+        },
+        GroupChatScreen: {
+            screen: GroupChatScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                },
+                headerShown: false
             }
         },
         ChatScreen: {
