@@ -25,7 +25,7 @@ import { SharedElement } from 'react-navigation-shared-element'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
@@ -90,8 +90,8 @@ const UserProfileScreen = props => {
         setIsRefreshing(true)
         try {
             await dispatch(getUser(userId))
-            dispatch(fetchNeeds())
-            dispatch(setLikes())
+            await dispatch(fetchNeeds())
+            await dispatch(setLikes())
         } catch (err) {
             console.log(err)
             setError(err.message)
@@ -414,7 +414,7 @@ const UserProfileScreen = props => {
                                     {userId !== authUser.userId ? (
                                         <View>
                                             {websiteIcon}
-                                            <View>
+                                            <View style={{flexDirection:'row', justifyContent:'space-between', paddingHorizontal: 8}}>
                                                 {accept && (
                                                     <TouchableCmp 
                                                         onPress={() => {
@@ -450,18 +450,22 @@ const UserProfileScreen = props => {
                                                 <View>
                                                     <TouchableCmp
                                                         onPress={() => {
-                                                            props.navigation.navigate({
-                                                                routeName: 'ChatScreen',
-                                                                params: {
+                                                            props.navigation.push(
+                                                                'ChatScreen',
+                                                                {
                                                                     selectedUserId: userId,
                                                                     userName: user.credentials.displayName,
                                                                     userImage: user.credentials.imageUrl
                                                                 }
-                                                            }
                                                         )}}
-                                                        style={{...styles.connectButton, ...{borderColor: Colors.blue}}}
+                                                        style={{...styles.messageButton, ...{borderColor: Colors.blue}}}
                                                     >
-                                                        <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text>
+                                                        {/* <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text> */}
+                                                        <MaterialIcons 
+                                                            name='mail-outline'
+                                                            size={23}
+                                                            color={Colors.blue}
+                                                        />
                                                     </TouchableCmp>
                                                 </View>
                                             </View>
@@ -606,6 +610,14 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         justifyContent: 'center',
         borderWidth: 1,
+        borderRadius: 50
+    },
+    messageButton: {
+        height: 24,
+        // width: '75%',
+        marginVertical: 5,
+        justifyContent: 'center',
+        // borderWidth: 1,
         borderRadius: 50
     },
     infoContainer: {
