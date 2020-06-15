@@ -4,17 +4,13 @@ import {
     SafeAreaView,
     View, 
     Text, 
-    StyleSheet, 
-    Image, 
-    Button,  
-    ScrollView,
+    StyleSheet,
     FlatList,
     TextInput,
     Keyboard,
     KeyboardEvent,
     TouchableWithoutFeedback,
     Dimensions,
-    Modal
 } from 'react-native'
 import CustomModal from 'react-native-modal'
 import Dialog from 'react-native-dialog'
@@ -237,9 +233,21 @@ const NewMessageScreen = props => {
         </TouchableWithoutFeedback>
     )
 
-    const renderChatMember = ({item}) => (
+    const [memberColor, setMemberColor] = useState(Colors.blue)
+    const deleteMember = (item, index, userId, userName, userImage) => {
+        if (memberColor === Colors.blue) {
+            setMemberColor(Colors.raspberry)
+        } else {
+            removeMember()
+            setMemberColor(Colors.blue)
+        }
+    }
+    const renderChatMember = ({item, index}) => (
         <TouchableCmp
-            style={styles.memberCmp}
+            style={{...styles.memberCmp, backgroundColor: memberColor, borderColor: memberColor}}
+            onPress={() => {
+                // deleteMember(item, index, item.userId, item.userName, item.userImage)
+            }}
         >
             <Text style={styles.memberText}>{item.userName}</Text>
         </TouchableCmp>
@@ -255,6 +263,11 @@ const NewMessageScreen = props => {
                 userImage: userImage
             }
         })
+        setChatMembers([])
+        setChatMembersIds([])
+        setGroupName('')
+        setSearch('')
+        updateSearch('')
     }
 
 
@@ -270,6 +283,8 @@ const NewMessageScreen = props => {
         setChatMembers([])
         setChatMembersIds([])
         setGroupName('')
+        setSearch('')
+        updateSearch('')
     }
 
 
@@ -514,8 +529,21 @@ const styles = StyleSheet.create({
         margin: 5,
         padding: 5,
         flexDirection: 'row',
-        backgroundColor: Colors.blue,
-        borderColor: Colors.blue,
+        // backgroundColor: Colors.blue,
+        // borderColor: Colors.blue,
+        borderWidth: 1,
+        borderRadius: 50,
+    },
+    memberCmpDelete: {
+        alignItems:'center',
+        alignContent: 'center',
+        justifyContent: 'center',
+        alignSelf: 'center',
+        margin: 5,
+        padding: 5,
+        flexDirection: 'row',
+        backgroundColor: Colors.raspberry,
+        borderColor: Colors.raspberry,
         borderWidth: 1,
         borderRadius: 50,
     },
