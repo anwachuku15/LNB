@@ -61,12 +61,18 @@ const GroupChatScreen = props => {
     const [image, setImage] = useState()
     
     useEffect(() => {
+        // IF THE CHAT DOES NOT EXIST
         chatMembers.push({
-            userid: uid,
+            userId: uid,
             userName: authUser.credentials.displayName,
             userImage: authUser.credentials.imageUrl
         })
-        console.log(chatMembers)
+        let chat = ''
+        chatMembers.forEach(member => {
+            chat.concat(member.userId)
+        })
+        const chatId = groupName.replace(/\s+/g, '') + chat
+        console.log(chatId)
         // const createChat = async () => {
         //     // if (!(await groupchat doc where all users from param doesn't exist, createChat))
             
