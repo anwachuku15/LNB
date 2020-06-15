@@ -245,7 +245,11 @@ const MessagesScreen = props => {
                 }
                 subtitle={
                     <View style={styles.subtitleView}>
-                        <Text style={{color:Colors.disabled}}>{item.lastMessageSenderId === uid ? `You: ${item.lastMessageText}` : item.lastMessageText}</Text>
+                        <Text 
+                            numberOfLines={1} 
+                            ellipsizeMode='tail' 
+                            style={{color:Colors.disabled, marginRight: 5 }}
+                        >{item.lastMessageSenderId === uid ? `You: ${item.lastMessageText}` : item.lastMessageText}</Text>
                     </View>
                 }
                 leftAvatar={{source: {uri: item.chatWith.image}}}
@@ -273,6 +277,30 @@ const MessagesScreen = props => {
             </View>
         )
     }
+
+    const goToGroupChats = () => (
+        uid && (
+            <TouchableCmp
+                onPress={() => {}}
+            >
+                <View style={{...styles.groupChatContainer, borderColor: Colors.primary}}>
+                    <View style={{flexDirection:'row'}}>
+                        <Text style={{color:Colors.primary, fontWeight:'bold', alignSelf:'center'}}>
+                            Groups
+                        </Text>
+                        <View style={{...styles.groupChatCountContainer, backgroundColor: Colors.primary}}>
+                            <Text style={{...styles.groupChatCount, color: scheme==='dark' ? 'black' : 'white'}}>{chats.length}</Text>
+                        </View>
+                    </View>
+                    <MaterialIcons
+                        name='navigate-next'
+                        color={Colors.primary}
+                        size={24}
+                    />
+                </View>
+            </TouchableCmp>
+        )
+    )
 
     return (
         (isMounted && 
@@ -321,6 +349,7 @@ const MessagesScreen = props => {
                             keyExtractor={(item, index) => index.toString()}
                             data={chats}
                             renderItem={renderChat}
+                            ListHeaderComponent={goToGroupChats}
                         />
                     </DismissKeyboard>
                 )}
@@ -390,6 +419,30 @@ MessagesScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    groupChatContainer: {
+        height: 40,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        flexDirection:'row', 
+        paddingHorizontal:20, 
+        alignItems:'center', 
+        justifyContent:'space-between'
+    },
+    groupChatCountContainer: {
+        justifyContent:'center',
+        alignItems: 'center',
+        paddingHorizontal: 5,
+        marginLeft: 10,
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10
+    },
+    groupChatCount: {
+        fontSize: 14
+    },
+    requests: {
+        marginVertical: 3,
     },
     spinner: {
         flex: 1,
