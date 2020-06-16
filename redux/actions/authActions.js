@@ -29,6 +29,7 @@ export const UNLIKE_ANNOUNCEMENT = 'UNLIKE_ANNOUNCEMENT'
 export const SET_CONNECTIONS = 'SET_CONNECTIONS'
 export const SET_INCOMING_REQUESTS = 'SET_INCOMING_REQUESTS'
 export const SET_OUTGOING_REQUESTS = 'SET_OUTGOING_REQUESTS'
+export const SET_GROUP_CHATS = 'SET_GROUP_CHATS'
 
 
 const db = firebase.firestore()
@@ -157,7 +158,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
-        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, lastReadAnnouncements))
+        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, null))
 
         //ONBOARDING
         // data.additionalUserInfo.isNewUser for onboarding
@@ -233,8 +234,14 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                                         })
                                     }).catch(err => console.log(err))
                                     
-
-
+        // const groupChatListener = db.doc(`/users/${userId}`)
+        //                             .get()
+        //                             .then(doc => {
+        //                                 const groupChats = doc.ref.onSnapshot(snapshot => {
+        //                                     dispatch(updateGroupChats(snapshot.data().groupChats))
+        //                                 })
+        //                             }).catch(err => console.log(err))
+        
         const newConnectionListener = db.collection('connections')
                                         .where('requestedBy', '==', userId)
                                         .onSnapshot(snapshot => {
@@ -565,6 +572,15 @@ export const connectReq = (authId, authName, selectedUserId) => {
     }
 }
 
+const updateGroupChats = (groupChats) => {
+    return async dispatch => {
+        dispatch({
+            type: SET_GROUP_CHATS,
+            groupChats: groupChats
+        })
+    }
+}
+
 const updateOutgoingRequests = (outgoingRequests) => {
     return async dispatch => {
         dispatch({
@@ -885,6 +901,16 @@ export const setNotifications = () => {
                     read: doc.data().read,
                     timestamp: doc.data().timestamp,
                 })
+            } else if (doc.data().type == 'groupMessage') {
+                userMessageNotifications.push({
+                    id: doc.id,
+                    type: doc.data().type,
+                    senderId: doc.data().senderId,
+                    groupId: doc.data().groupId,
+                    groupName: doc.data().groupName,
+                    read: doc.data().read,
+                    timestamp: doc.data().timestamp
+                })
             }
         })
         dispatch({
@@ -1028,6 +1054,28 @@ export const setLastReadMessage = (chatId, selectedUserId, readTimestamp) => {
         }
     }
 }
+
+export const setLastReadGroupMessage = (groupChatId, readTimestamp) => {
+    return async (dispatch, getState) => {
+        const uid = getState().auth.userId
+        db.doc(`/chats/${groupChatId}`).get()
+            .then(doc => {
+                const members = doc.data().memberIds
+                const memberIndex = members.indexOf(uid).toString()
+                const key = 'user' + memberIndex
+                const lastRead = {}
+                lastRead[key] = {
+                    uid: uid,
+                    timestamp: readTimestamp
+                }
+                doc.ref.set({lastRead: lastRead}, {merge: true})
+            })
+            .catch(err => console.log(err))
+
+    }
+}
+
+
 
 export const removeNotification = (type, recipientId, senderId, timestamp, read) => {
     return (dispatch, getState) => {
