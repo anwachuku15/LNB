@@ -19,6 +19,7 @@ import {
     SET_CONNECTIONS,
     SET_INCOMING_REQUESTS,
     SET_OUTGOING_REQUESTS,
+    SET_GROUP_CHATS,
 } from '../actions/authActions'
 // import { LOGIN, SIGNUP } from '../actions/authActions'
 
@@ -35,7 +36,7 @@ const initialState = {
     notifications: [],
     messageNotifications: [],
     lastReadMessages: [],
-    lastReadAnnouncements: null
+    lastReadAnnouncements: null,
 }
 
 export default (state = initialState, action) => {
@@ -71,6 +72,12 @@ export default (state = initialState, action) => {
         //         pendingConnections: action.pendingConnections
         //     }
         // }
+        case SET_GROUP_CHATS: {
+            return {
+                ...state,
+                groupChats: action.groupChats
+            }
+        }
         case SET_INCOMING_REQUESTS: {
             return {
                 ...state,
