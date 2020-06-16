@@ -90,7 +90,7 @@ const HomeScreen = props => {
 
     const handleNotification = async notification => {
         const { origin, data, remote } = notification
-        const { type, needId, senderName, senderImage, selectedUserId } = data
+        const { type, needId, senderName, senderImage, selectedUserId, groupChatName, groupChatId } = data
         if (origin === 'selected') {
             if (type === 'likeNeed' || type === 'commentNeed' || type === 'commentThread') {
                 props.navigation.navigate('Notifications')
@@ -111,6 +111,16 @@ const HomeScreen = props => {
                         selectedUserId: selectedUserId,
                         userName: senderName,
                         userImage: senderImage,
+                    }
+                })
+
+            } else if (type === 'groupMessage') {
+                props.navigation.navigate('Messages')
+                props.navigation.navigate({
+                    routeName: 'GroupChatScreen',
+                    params: {
+                        groupChatName: groupChatName,
+                        groupChatId: groupChatId
                     }
                 })
 
