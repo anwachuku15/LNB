@@ -22,10 +22,11 @@ const NameGroupChatModal = props => {
         >
             <View style={{...styles.modal, height: 500}}>
                 <View style={styles.modalContent}>
-                    <Text style={{margin: 10, fontSize: 18, fontWeight:'bold', alignSelf:'center'}}>Group Chat Name</Text>
+                    <Text style={{margin: 10, fontSize: 18, fontWeight:'bold', color:'black', alignSelf:'center'}}>Group Chat Name</Text>
                     <TextInput
                         style={{color:'black', fontSize: 16, alignSelf:'center', marginVertical: 10}}
                         autoFocus
+                        autoCapitalize='words'
                         maxLength={36}
                         onChangeText={text => updateGroupName(text)}
                         value={groupName}
@@ -50,16 +51,17 @@ const NameGroupChatModal = props => {
 
 const styles = StyleSheet.create({
     modal: {
+        flex: 1,
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: 'white', 
+        backgroundColor: Colors.primaryLight, 
         // borderTopLeftRadius: 8,
         // borderTopRightRadius: 8,
         borderRadius: 8,
         paddingHorizontal: 22,
         paddingTop: 20,
-        paddingBottom: 20
+        paddingBottom: 400
     },
     cancelButton: {
         // flex: 1,
