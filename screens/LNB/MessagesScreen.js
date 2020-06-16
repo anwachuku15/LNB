@@ -253,7 +253,6 @@ const MessagesScreen = props => {
                     }
                 })
             } else {
-                console.log(item.lastRead)
                 props.navigation.navigate({
                     routeName: 'GroupChatScreen',
                     params: {
