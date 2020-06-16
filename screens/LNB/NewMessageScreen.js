@@ -134,8 +134,8 @@ const NewMessageScreen = props => {
 
     const addMember = (userId, userName, userImage) => {
         const newMember = {
-            userId: userId,
-            userName: userName,
+            uid: userId,
+            name: userName,
             userImage: userImage
         }
         members.push(newMember)
@@ -152,11 +152,11 @@ const NewMessageScreen = props => {
 
     const removeMember = (userId, userName, userImage) => {
         const member = {
-            userId: userId,
-            userName: userName,
+            uid: userId,
+            name: userName,
             userImage: userImage
         }
-        chatMembers.splice(chatMembers.indexOf(chatMembers.find(member => member.userId === userId)), 1)
+        chatMembers.splice(chatMembers.indexOf(chatMembers.find(member => member.uid === userId)), 1)
         setChatMembers(chatMembers)
 
         chatMembersIds.splice(chatMembersIds.indexOf(userId), 1)
@@ -249,7 +249,7 @@ const NewMessageScreen = props => {
                 // deleteMember(item, index, item.userId, item.userName, item.userImage)
             }}
         >
-            <Text style={styles.memberText}>{item.userName}</Text>
+            <Text style={styles.memberText}>{item.name}</Text>
         </TouchableCmp>
     )
 
@@ -270,22 +270,32 @@ const NewMessageScreen = props => {
         updateSearch('')
     }
 
+    const idGenerator = () => {return Math.random().toString(36).replace('.', '-') + Math.random().toString(36).replace('.', '-')}
 
     const navToGroupChatScreen = (groupChatMembers, groupName) => {
         toggleModal()
         props.navigation.navigate({
             routeName: 'GroupChatScreen',
             params: {
-                chatMembers: groupChatMembers,
-                groupName: groupName
+                groupChatMembers: groupChatMembers.concat({uid: auth.userId, name: auth.credentials.displayName, userImage: auth.credentials.imageUrl}),
+                groupChatName: groupName,
+                groupChatId: groupName.replace(/\s+/g, '') + idGenerator(),
+                createdBy: {
+                    uid: auth.userId,
+                    name: auth.credentials.displayName,
+                    userImage: auth.credentials.imageUrl
+                },
             }
         })
+
+        
         setChatMembers([])
         setChatMembersIds([])
         setGroupName('')
         setSearch('')
         updateSearch('')
     }
+
 
 
     
@@ -350,7 +360,10 @@ const NewMessageScreen = props => {
 
             <View style={{flexDirection:'column', paddingHorizontal: 10, marginTop: 10}}>
                 <View style={{flexDirection:'column'}}>
-                    <Text style={{color:text, fontWeight:'bold', fontSize:16}}>To</Text>
+                    <View style={{flexDirection: 'row'}}>
+                        <Text style={{color:text, fontWeight:'bold', fontSize:16}}>To: </Text>
+                        {chatMembers.length > 1 && (<Text style={{color:Colors.blue, fontWeight:'bold', fontSize:15}}>({chatMembers.length} people)</Text>)}
+                    </View>
                     {chatMembers.length === 0 && 
                         <View
                             style={{...styles.placeholderCmp, backgroundColor:background, borderColor:background}}
@@ -527,7 +540,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf: 'center',
         margin: 5,
-        padding: 5,
+        padding: 10,
         flexDirection: 'row',
         // backgroundColor: Colors.blue,
         // borderColor: Colors.blue,
@@ -540,7 +553,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf: 'center',
         margin: 5,
-        padding: 5,
+        padding: 10,
         flexDirection: 'row',
         backgroundColor: Colors.raspberry,
         borderColor: Colors.raspberry,
@@ -549,13 +562,13 @@ const styles = StyleSheet.create({
     },
     memberTextPlaceholder: {
         alignSelf:'center',
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 'bold'
     },
     memberText: {
         alignSelf:'center',
         color: 'white',
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 'bold'
     },
     spinner: {
@@ -570,9 +583,10 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         flexDirection: 'row',
         paddingHorizontal: 5,
+        marginTop: 5,
         marginBottom:10,
         borderWidth: 1,
-        borderColor: Colors.placeholder,
+        borderColor: Colors.disabled,
         borderRadius: 50
     },
 })
