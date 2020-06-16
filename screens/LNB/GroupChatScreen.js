@@ -16,7 +16,7 @@ import {
     Platform
 } from 'react-native'
 // REDUX
-import { getUser, setLastReadMessage } from '../../redux/actions/authActions'
+import { getUser, setLastReadGroupMessage } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -50,121 +50,170 @@ const GroupChatScreen = props => {
     }
 
     
-    const authUser = useSelector(state => state.auth)
-    const uid = authUser.userId
-    const chatMembers = props.navigation.getParam('chatMembers')
-    const groupName = props.navigation.getParam('groupName')
-    
+    const auth = useSelector(state => state.auth)
+    const groupChatMembers = props.navigation.getParam('groupChatMembers')
+    const memberIds = props.navigation.getParam('memberIds')
+    const groupChatName = props.navigation.getParam('groupChatName')
+    const groupChatId = props.navigation.getParam('groupChatId')
+    const createdBy = props.navigation.getParam('createdBy')
+
+    // DISPLAY ERRORS
+
     const dispatch = useDispatch()
     
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
     
     useEffect(() => {
-        // IF THE CHAT DOES NOT EXIST
-        chatMembers.push({
-            userId: uid,
-            userName: authUser.credentials.displayName,
-            userImage: authUser.credentials.imageUrl
-        })
-        let chat = ''
-        chatMembers.forEach(member => {
-            chat.concat(member.userId)
-        })
-        const chatId = groupName.replace(/\s+/g, '') + chat
-        console.log(chatId)
-        // const createChat = async () => {
-        //     // if (!(await groupchat doc where all users from param doesn't exist, createChat))
-            
-        // }
-        // createChat()
+        const createGroupChat = async () => {
+            if (!(await db.doc(`chats/${groupChatId}`).get()).exists) {
+                let users = {}
+                let lastRead = {}
+                let memberIds = []
+                groupChatMembers.forEach(member => {
+                    let num = groupChatMembers.indexOf(member)
+                    memberIds.push(member.uid)
+                    
+                    const key = 'user' + num.toString()
+                    const userMap = {
+                        name: member.name,
+                        uid: member.uid,
+                        userImage: member.userImage
+                    }
+                    const lastReadMap = {
+                        timestamp: null,
+                        uid: member.uid
+                    }
+                    users[key] = userMap
+                    lastRead[key] = lastReadMap
+                })
+
+                db.doc(`chats/${groupChatId}`).set({
+                    createdAt: new Date().toISOString(),
+                    createdBy: createdBy,
+                    id: groupChatId,
+                    groupChatName: groupChatName,
+                    memberIds: memberIds,
+                    users: users,
+                    messages: [],
+                    messageCount: 0,
+                    lastMessageTimestamp: null,
+                    lastRead: lastRead
+                }).then(() => {
+                    groupChatMembers.forEach(member => {
+                        db.doc(`/users/${member.uid}`).update({
+                            groupChats: firestore.FieldValue.arrayUnion(groupChatId)
+                        }).catch(err => console.log(err))
+                    })
+                }).catch(err => console.log(err))
+            }
+        }
+        createGroupChat()
     }, [])
 
 
-    // const [messages, setMessages] = useState([])
-    // useEffect(() => { // synchronous issue leads to TypeError (can't read snapshot fast enough)
-    //     const updateChat = db.doc(`/chats/${chatId}`).onSnapshot(snapshot => {
-    //         if (snapshot) {
-    //             const thread = snapshot.data().messages
-    //             setMessages(thread.reverse())
-    //         } else {
-    //             console.log('snapshot not accounted for yet')
-    //         }
-    //     })
-    //     return () => {
-    //         updateChat()
-    //     }
-    // }, [])
 
+    const [messages, setMessages] = useState([])
+    useEffect(() => {
+        const updateChat = db.doc(`/chats/${groupChatId}`).onSnapshot(snapshot => {
+            if (snapshot.exists) {
+                const thread = snapshot.data().messages
+                setMessages(thread.reverse())
+            }
+        })
+        return () => {
+            updateChat()
+        }
+    }, [])
+
+    let readTimestamp 
+    useEffect(() => {
+        return () => {
+            readTimestamp = new Date().toISOString()
+            dispatch(setLastReadGroupMessage(groupChatId, readTimestamp))
+        }
+    }, [readTimestamp])
     
 
-    // UNMOUNT!!!!!
-    // let readTimestamp 
-    // useEffect(() => {
-    //     return () => {
-    //         readTimestamp = new Date().toISOString()
-    //         dispatch(setLastReadMessage(chatId, selectedUserId, readTimestamp))
-    //     }
-    // }, [readTimestamp])
 
     
+    const messageIdGenerator = () => {return Math.random().toString(36)}
 
-    // const sendMessage = async (body) => {
-    //     const message = {
-    //         _id: messageIdGenerator(),
-    //         text: body,
-    //         timestamp: new Date().toISOString(),
-    //         user: {
-    //             _id: uid,
-    //             name: authUser.credentials.displayName,
-    //             userImage: authUser.credentials.imageUrl,
-    //         },
-    //     }
-    //     db.doc(`/chats/${chatId}`).update({
-    //         messages: firestore.FieldValue.arrayUnion(message),
-    //         lastMessageTimestamp: message.timestamp,
-    //         messageCount: firestore.FieldValue.increment(1)
-    //     }).catch(err => console.log(err))
+    const sendMessage = async (body) => {
+        const message = {
+            _id: messageIdGenerator(),
+            text: body,
+            timestamp: new Date().toISOString(),
+            user: {
+                _id: auth.userId,
+                name: auth.credentials.displayName,
+                userImage: auth.credentials.imageUrl,
+            },
+        }
+        db.doc(`/chats/${groupChatId}`).update({
+            messages: firestore.FieldValue.arrayUnion(message),
+            lastMessageTimestamp: message.timestamp,
+            messageCount: firestore.FieldValue.increment(1)
+        }).catch(err => console.log(err))
+        
+        if (groupChatMembers) {
+            groupChatMembers.forEach(async member => {
+                if (member.uid !== auth.userId) {
+                    const pushToken = (await db.doc(`/users/${member.uid}`).get()).data().pushToken
+                    if (pushToken) {
+                        const authName = auth.credentials.displayName
+                        const authImage = auth.credentials.imageUrl
+                        const selectedUserId = member.uid
+                        sendGroupMessageNotification(auth.userId, authName, authImage, groupChatName, message.text, selectedUserId, pushToken)
+                    }
+                }
+            })
+        } else {
+            memberIds.forEach(async uid => {
+                if (uid !== auth.userId) {
+                    const pushToken = (await db.doc(`/users/${uid}`).get()).data().pushToken
+                    if (pushToken) {
+                        const authName = auth.credentials.displayName
+                        const authImage = auth.credentials.imageUrl
+                        const selectedUserId = uid
+                        sendGroupMessageNotification(auth.userId, authName, authImage, groupChatName, message.text, selectedUserId, pushToken)
+                    }
+                }
+            })
+        }
+        
+        setBody('')
+    }
 
-    //     const pushToken = (await db.doc(`/users/${user.credentials.userId}`).get()).data().pushToken
-    //     if (pushToken) {
-    //         const authName = authUser.credentials.displayName
-    //         const authImage = authUser.credentials.imageUrl
-    //         const selectedUserId = user.credentials.userId
-    //         sendMessageNotification(uid, authName, authImage, message.text, selectedUserId, pushToken)
-    //     }
-    //     setBody('')
-    // }
-
-
-    // const sendMessageNotification = (authId, authName, authImage, message, selectedUserId, pushToken) => {
-    //     db.collection('notifications').add({
-    //         timestamp: new Date().toISOString(),
-    //         type: 'message',
-    //         recipientId: selectedUserId,
-    //         senderId: authId,
-    //         read: false
-    //     })
-    //     let res = fetch('https://exp.host/--/api/v2/push/send', {
-    //         method: 'POST',
-    //         headers: {
-    //             Accept: 'application/json',
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({
-    //             to: pushToken,
-    //             sound: 'default',
-    //             title: authName,
-    //             body: message,
-    //             data: {
-    //                 type: 'message',
-    //                 selectedUserId: authId,
-    //                 senderName: authName,
-    //                 senderImage: authImage
-    //             }
-    //         })
-    //     })
-    // }
+    const sendGroupMessageNotification = (senderId, senderName, senderImage, groupChatName, message, recipientId, pushToken) => {
+        db.collection('notifications').add({
+            timestamp: new Date().toISOString(),
+            type: 'groupMessage',
+            recipientId: recipientId,
+            senderId: senderId,
+            read: false,
+            groupChatId: groupChatId,
+            groupChatName: groupChatName
+        })
+        let res = fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                to: pushToken,
+                sound: 'default',
+                title: groupChatName,
+                body: senderName + ': ' + message,
+                data: {
+                    type: 'groupMessage',
+                    groupChatName: groupChatName,
+                    groupChatId: groupChatId,
+                }
+            })
+        })
+    }
 
     // const sendMessageWithImg = async () => {}
     // const pickImage = async () => {
@@ -179,20 +228,16 @@ const GroupChatScreen = props => {
     //     }
     // }
 
-    // const messageIdGenerator = () => {
-    //     return Math.random().toString(36)
-    // }
-    
-    // const navToUserProfile = (id) => {
-    //     props.navigation.navigate({
-    //         routeName: 'UserProfile',
-    //         params: {
-    //             userId: id,
-    //             name: user.credentials.displayName,
-    //             from: 'GroupChatScreen'
-    //         }
-    //     })
-    // }
+    const navToUserProfile = (id, name) => {
+        props.navigation.navigate({
+            routeName: 'UserProfile',
+            params: {
+                userId: id,
+                name: name,
+                from: 'GroupChatScreen'
+            }
+        })
+    }
 
     const heartLike = () => (
         <View style={{...styles.rightHeartLike, backgroundColor: Colors.primaryLight, borderColor: scheme === 'dark' ? 'black' : 'white'}}>
@@ -207,7 +252,7 @@ const GroupChatScreen = props => {
     )
 
     const renderMessage = ({item}) => (
-        item.user._id === uid ? (
+        item.user._id === auth.userId ? (
             <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
                 <View style={{alignSelf: 'flex-start', backgroundColor: scheme==='light' ? 'white' : 'black', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, borderColor: Colors.primary}}>
                     <Hyperlink
@@ -223,13 +268,16 @@ const GroupChatScreen = props => {
                 <TouchableCmp onPress={() => navToUserProfile(item.user._id)}>
                     <Image source={{uri: item.user.userImage}} style={styles.leftMessageAvatar}/>
                 </TouchableCmp>
-                <View style={{backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomRightRadius: 15}}>
-                    <Hyperlink
-                        linkDefault={true}
-                        linkStyle={{color:Colors.blue}}
-                    >
-                        <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
-                    </Hyperlink>
+                <View style={{flexDirection:'column'}}>
+                    <Text style={{color:Colors.disabled, fontSize: 12, marginBottom: 5, marginLeft: 5}}>{item.user.name}</Text>
+                    <View style={{backgroundColor: scheme === 'light' ? '#EEEEEE' : '#414141', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomRightRadius: 15}}>
+                        <Hyperlink
+                            linkDefault={true}
+                            linkStyle={{color:Colors.blue}}
+                        >
+                            <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                        </Hyperlink>
+                    </View>
                 </View>
             </View>
         )
@@ -241,23 +289,45 @@ const GroupChatScreen = props => {
     return (
         <SafeAreaView style={styles.screen}>
 
-            <View style={styles.header}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {props.navigation.goBack()}}
-                    />
-                </HeaderButtons>
-                <Text style={styles.headerTitle}>{groupName}</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Settings'
-                        iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
-                        onPress={() => {}} // nav to group chat settings
-                    />
-                </HeaderButtons>
-            </View>
+            <FlatList
+                contentContainerStyle={styles.messages}
+                keyExtractor={(item,index) => index.toString()}
+                data={messages}
+                renderItem={renderMessage}
+                keyboardDismissMode={Platform.OS==='ios' ? 'interactive' : 'on-drag'}
+                inverted
+            />
+
+            <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.select({ios: 85, android:500})}>
+                <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', paddingLeft: 20, paddingRight:20}}>
+                    <View style={styles.inputContainer}>
+                        {/* <TouchableCmp 
+                            onPress={pickImage}
+                            disabled
+                            style={{justifyContent:'center', alignItems:'center', backgroundColor:Colors.pink, padding:0, borderRadius:20, width:30, height:30}}
+                        >
+                            <Ionicons name='md-camera' size={20} color='white'/>
+                        </TouchableCmp> */}
+                        <TextInput
+                            autoFocus={false}
+                            multiline={true}
+                            numberOfLines={4} 
+                            style={{flex:1, color:text, marginHorizontal:10, alignSelf:'center', paddingTop:0, fontSize: 16}}
+                            placeholder={'Message...'}
+                            placeholderTextColor={'#838383'}
+                            onChangeText={text => {setBody(text)}}
+                            value={body}
+                        />
+                    </View>
+                    <TouchableCmp onPress={() => sendMessage(body)} disabled={!body.trim().length}>
+                        <Ionicons 
+                            name={Platform.OS === 'ios' ? 'ios-send' : 'md-send'} 
+                            size={26} 
+                            color={!body.trim().length ? Colors.disabled : Colors.blue}
+                        />
+                    </TouchableCmp>
+                </View>
+            </KeyboardAvoidingView>
             
         </SafeAreaView>
     )
@@ -266,8 +336,41 @@ const GroupChatScreen = props => {
 
 GroupChatScreen.navigationOptions = (navData) => {
     const background = navData.screenProps.theme
+    const groupChatName = navData.navigation.getParam('groupChatName')
     return {
-        headerShown: false,
+        headerLeft: () => (
+            <View style={{flexDirection:'row', alignItems:'center'}}>
+                <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                    <Item
+                        title='Direct'
+                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        onPress={() => {navData.navigation.goBack()}}
+                    />
+                </HeaderButtons>
+                <TouchableCmp
+                    onPress={() => {navData.navigation.navigate({
+                        routeName: 'UserProfile',
+                        params: {
+                            userId: selectedUserId,
+                            name: userName
+                        }
+                    })}}
+                    style={{flexDirection:'row'}}
+                >
+                    {/* <Image style={styles.headerAvatar} source={{uri: userImage}}/> */}
+                    <Text style={styles.headerTitle}>{groupChatName}</Text>
+                </TouchableCmp>
+            </View>
+        ),
+        headerRight: () => {
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                <Item
+                    title='Direct'
+                    iconName={Platform.OS==='android' ? 'md-more' : 'ios-more'}
+                    onPress={() => {}}
+                />
+            </HeaderButtons>
+        },
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
             borderBottomColor: Colors.primary
