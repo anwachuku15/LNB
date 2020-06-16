@@ -77,6 +77,8 @@ const MessagesScreen = props => {
     // const unreadThread = useSelector(state => state.auth.lastReadMessages.)
 
     const uid = useSelector(state => state.auth.userId)
+    const authImg = useSelector(state => state.auth.credentials.imageUrl)
+    const groupChats = useSelector(state => state.auth.groupChats)
     const [chats, setChats] = useState()
     const [isLoading, setIsLoading] = useState(false)
     const [isMounted, setIsMounted] = useState(true)
@@ -101,11 +103,12 @@ const MessagesScreen = props => {
         try {
             await dispatch(markMessageNotificationsAsRead())
             let userChats = []
+            const groupChats = (await db.doc(`/users/${uid}`).get()).data().groupChats
             const allChats = await (await db.collection('chats').orderBy('lastMessageTimestamp', 'desc').get())
                                                                 .docs
                                                                 .forEach(doc => {
+                                                                    const messages = doc.data().messages
                                                                     if (doc.id.includes(uid)) {
-                                                                        const messages = doc.data().messages
                                                                         const chatWithId = doc.id.replace(uid,'')
                                                                         const authUser = uid < chatWithId
                                                                                     ? 'user1'
@@ -129,9 +132,25 @@ const MessagesScreen = props => {
                                                                                 lastRead: authUser === 'user1' ? doc.data().lastRead.user1.timestamp : doc.data().lastRead.user2.timestamp
                                                                             })
                                                                         }
+                                                                    } else if (groupChats.includes(doc.id)) {
+                                                                        const ids = doc.data().memberIds
+                                                                        const index = ids.indexOf(uid).toString()
+                                                                        const user = 'user' + index
+                                                                        if (doc.data().messageCount > 0) {
+                                                                            userChats.push({
+                                                                                groupChatName: doc.data().groupChatName,
+                                                                                groupChatId: doc.id,
+                                                                                lastMessageText: messages[messages.length-1].text,
+                                                                                lastMessageSenderId: messages[messages.length-1].user._id,
+                                                                                lastMessageSenderName: messages[messages.length-1].user.name,
+                                                                                lastMessageTimestamp: doc.data().lastMessageTimestamp,
+                                                                                lastRead: doc.data().lastRead[user].timestamp,
+                                                                                memberIds: doc.data().memberIds
+                                                                            })
+                                                                            
+                                                                        }
                                                                     }
                                                                 })
-            // setIsLoading(false)
             setChats(userChats)
         } catch (err) {
             console.log(err)
@@ -152,7 +171,6 @@ const MessagesScreen = props => {
         setIsMounted(true)
         return (() => {
             setIsMounted(false)
-            // console.log('MessageScreen Unmounted')
         })
     }, [])
 
@@ -224,35 +242,59 @@ const MessagesScreen = props => {
 
     const renderChat = ({item}) => (
         <TouchableCmp onPress={async () => {
-            await dispatch(getUser(item.chatWith.uid));
-            props.navigation.navigate({
-                routeName: 'ChatScreen',
-                params: {
-                    selectedUserId: item.chatWith.uid,
-                    userName: item.chatWith.name,
-                    userImage: item.chatWith.image
-                }
-            })
+            if (item.chatWith) {
+                await dispatch(getUser(item.chatWith.uid));
+                props.navigation.navigate({
+                    routeName: 'ChatScreen',
+                    params: {
+                        selectedUserId: item.chatWith.uid,
+                        userName: item.chatWith.name,
+                        userImage: item.chatWith.image
+                    }
+                })
+            } else {
+                console.log(item.lastRead)
+                props.navigation.navigate({
+                    routeName: 'GroupChatScreen',
+                    params: {
+                        groupChatId: item.groupChatId,
+                        groupChatName: item.groupChatName,
+                        memberIds: item.memberIds
+                    }
+                })
+            }
         }}>
             <ListItem
-                // containerStyle={{backgroundColor:background}}
                 containerStyle={{backgroundColor: item.lastRead < item.lastMessageTimestamp ? 'rgba(251, 188, 4, 0.4)' : background}}
                 title={
                     <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                        <Text style={{color:text, fontSize: 16}}>{item.chatWith.name}</Text>
+                        {item.chatWith ? (
+                            <Text style={{color:text, fontSize: 16}}>{item.chatWith.name}</Text>
+                        ) : (
+                            <Text style={{color:text, fontSize: 16}}>{item.groupChatName}</Text>
+                        )}
                         <Text style={{color:Colors.disabled, fontSize: 14, }}>{moment.utc(new Date(item.lastMessageTimestamp)).fromNow()}</Text>
                     </View>
                 }
                 subtitle={
                     <View style={styles.subtitleView}>
-                        <Text 
-                            numberOfLines={1} 
-                            ellipsizeMode='tail' 
-                            style={{color:Colors.disabled, marginRight: 5 }}
-                        >{item.lastMessageSenderId === uid ? `You: ${item.lastMessageText}` : item.lastMessageText}</Text>
+                        {item.lastMessageSenderName ? (
+                            <Text 
+                                numberOfLines={1} 
+                                ellipsizeMode='tail' 
+                                style={{color:Colors.disabled, marginRight: 5 }}
+                            >{item.lastMessageSenderId === uid ? `You: ${item.lastMessageText}` : `${item.lastMessageSenderName}: ${item.lastMessageText}`}</Text>
+                            
+                        ) : (
+                            <Text 
+                                numberOfLines={1} 
+                                ellipsizeMode='tail' 
+                                style={{color:Colors.disabled, marginRight: 5 }}
+                            >{item.lastMessageSenderId === uid ? `You: ${item.lastMessageText}` : item.lastMessageText}</Text>
+                        )}
                     </View>
                 }
-                leftAvatar={{source: {uri: item.chatWith.image}}}
+                leftAvatar={{source: {uri: item.chatWith ? item.chatWith.image : authImg}}}
                 bottomDivider
             />
         </TouchableCmp>
@@ -278,29 +320,6 @@ const MessagesScreen = props => {
         )
     }
 
-    const goToGroupChats = () => (
-        uid && (
-            <TouchableCmp
-                onPress={() => {}}
-            >
-                <View style={{...styles.groupChatContainer, borderColor: Colors.primary}}>
-                    <View style={{flexDirection:'row'}}>
-                        <Text style={{color:Colors.primary, fontWeight:'bold', alignSelf:'center'}}>
-                            Groups
-                        </Text>
-                        <View style={{...styles.groupChatCountContainer, backgroundColor: Colors.primary}}>
-                            <Text style={{...styles.groupChatCount, color: scheme==='dark' ? 'black' : 'white'}}>{chats.length}</Text>
-                        </View>
-                    </View>
-                    <MaterialIcons
-                        name='navigate-next'
-                        color={Colors.primary}
-                        size={24}
-                    />
-                </View>
-            </TouchableCmp>
-        )
-    )
 
     return (
         (isMounted && 
@@ -349,7 +368,6 @@ const MessagesScreen = props => {
                             keyExtractor={(item, index) => index.toString()}
                             data={chats}
                             renderItem={renderChat}
-                            ListHeaderComponent={goToGroupChats}
                         />
                     </DismissKeyboard>
                 )}
