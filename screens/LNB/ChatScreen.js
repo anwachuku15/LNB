@@ -96,7 +96,7 @@ const ChatScreen = props => {
                     lastMessageTimestamp: null,
                     messageCount: 0,
                     messages: []
-                })
+                }).catch(err => console.log(err))
             }
         }
         createChat()
@@ -104,13 +104,11 @@ const ChatScreen = props => {
 
     // const [chatData, setChatData] = useState()
     const [messages, setMessages] = useState([])
-    useEffect(() => { // synchronous issue leads to TypeError (can't read snapshot fast enough)
+    useEffect(() => {
         const updateChat = db.doc(`/chats/${chatId}`).onSnapshot(snapshot => {
-            if (snapshot) {
+            if (snapshot.exists) {
                 const thread = snapshot.data().messages
                 setMessages(thread.reverse())
-            } else {
-                console.log('snapshot not accounted for yet')
             }
         })
         return () => {
