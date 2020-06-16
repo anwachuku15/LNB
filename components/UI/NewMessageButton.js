@@ -11,7 +11,7 @@ const CustomHeaderButton = props => {
             {...props} 
             IconComponent={MaterialCommunityIcons} 
             iconSize={23} 
-            color={Platform.OS==='android' ? 'white' : Colors.primary}
+            color={Platform.OS==='android' ? 'white' : Colors.blue}
         />
     )
 }
