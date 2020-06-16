@@ -313,7 +313,8 @@ const HomeStack = createStackNavigator({
             navigationOptions: {
                 gestureResponseDistance: {
                     horizontal: 300
-                }
+                },
+                headerShown: false
             }
         },
         
@@ -678,7 +679,6 @@ const MessagesStack = createStackNavigator({
                 gestureResponseDistance: {
                     horizontal: 300
                 },
-                headerShown: false
             }
         },
         ChatScreen: {

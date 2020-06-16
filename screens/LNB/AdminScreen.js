@@ -74,44 +74,6 @@ const AdminScreen = props => {
                 >
                     <Text style={{color:'white', fontWeight:'bold', fontSize: 18}}>Make Announcement</Text>
                 </TouchableCmp>
-
-                <View style={{flex:1, alignItems:'flex-start', padding:20}}>
-                    <View style={{flexDirection: 'row', marginVertical: 5, alignSelf: 'center'}}>
-                        <Text style={{color:Colors.redcrayola, fontWeight:'600', fontSize: 20}}>Notes</Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Refactor Notes: <CheckMark/>{"\n"}
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Firebase Functions{"\n"}</Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Guard Clauses to avoid If-Nesting 
-                                <Text style={{fontSize:3}}>https://youtu.be/g2nMKzhkvxw?t=429</Text> 
-                                {"\n"}
-                            </Text>
-                            <Text style={{color:text, fontWeight:'400'}}>    -    Make Models! OOP/MVC{"\n"}</Text>
-                        </Text>
-                    </View>
-                    <View style={{flexDirection: 'row', marginVertical: 5}}>
-                        <Text style={{color:text}}>-    </Text>
-                        <Text style={{color:Colors.orange, fontWeight: '600'}}>Misc Notes Notes:    <CheckMark/>{"\n"}
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Redesign User Profile{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Mass messaging from Admins{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    If post deleted, alert when commented on{"\n"}</Text>
-
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Start Events App{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Start planning how best to migrate shopping app into LNBapp (Stripe payments){"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Allow user to upload audio/video{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Twitter style profile layouts & responsive headers{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Build Admin Page (allow Admins to add new admins){"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Implement useMemo when necessary to cache images{"\n"}</Text>
-                        <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    ANIMATIONS: Like button, shared transitions (opening/navigating to need/picture/video, double-tap(?) etc){"\n"}</Text>
-                        <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    App Redesign: DrawerScreen, Profile Header, Feed (animated header, new card component, embedded media){"\n"}</Text>
-                        <Text style={{color:Colors.raspberry, fontWeight:'400'}}>    -    Improve image aspect ratio, show image when pressed (UserProfile){"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Research and implement best practices for SQLite database use cases</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    Detect when multiple devices are signed in to same account{"\n"}</Text>
-                        <Text style={{color:text, fontWeight:'400'}}>    -    TESTING, TESTING, TESTING{"\n"}</Text>
-                        </Text>
-                    </View>
-                </View>
             </ScrollView>
         </View>
 
@@ -123,27 +85,27 @@ const AdminScreen = props => {
 AdminScreen.navigationOptions = (navData) => {
     const background = navData.screenProps.theme
     return {
-        headerLeft: () => (
-            <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                <Item
-                    title='Back'
-                    iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                    onPress={() => {navData.navigation.pop()}}
-                />
-            </HeaderButtons>
-        ),
-        headerTitle: 'Admin',
-        headerTitleStyle: {
-            fontFamily: 'open-sans-bold',
-        },
-        headerBackTitleStyle: {
-            fontFamily: 'open-sans',
-        },
-        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
-        headerBackTitleVisible: false,
-        headerStyle: {
-            backgroundColor: background === 'dark' ? 'black' : 'white'
-        },
+        // headerLeft: () => (
+        //     <HeaderButtons HeaderButtonComponent={HeaderButton}>
+        //         <Item
+        //             title='Back'
+        //             iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+        //             onPress={() => {navData.navigation.pop()}}
+        //         />
+        //     </HeaderButtons>
+        // ),
+        // headerTitle: 'Admin',
+        // headerTitleStyle: {
+        //     fontFamily: 'open-sans-bold',
+        // },
+        // headerBackTitleStyle: {
+        //     fontFamily: 'open-sans',
+        // },
+        // headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+        // headerBackTitleVisible: false,
+        // headerStyle: {
+        //     backgroundColor: background === 'dark' ? 'black' : 'white'
+        // },
     }
 }
 
