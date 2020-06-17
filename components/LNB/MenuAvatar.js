@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback, useState} from 'react'
+import React, {useEffect, useCallback, useState, useMemo} from 'react'
 import { useSelector } from 'react-redux'
 import { View, StyleSheet, Image} from 'react-native'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
@@ -31,12 +31,18 @@ const MenuAvatar = props => {
         }
     }, [loadPic])
 
-
-    return (
-        <View>
+    const memoizedAvatar = useMemo(() => {
+        return (
             <TouchableCmp onPress={props.toggleDrawer}>
                 <Image source={{uri: avatar}} style={styles.menuAvatar} />
             </TouchableCmp>
+        )
+    }, [avatar, setAvatar])
+
+
+    return (
+        <View>
+            {memoizedAvatar}
         </View>
     )
 }
