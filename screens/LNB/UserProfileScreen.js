@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { 
     AppState,
     Platform,
@@ -168,7 +168,11 @@ const UserProfileScreen = props => {
         }
     }, [dispatch, loadUser])
     
-    
+    const memoizedProfileAvatar = useMemo(() => {
+        return (
+            user && <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
+        )
+    }, [user, selectedNeed, setSelectedNeed, isModalVisible, setIsModalVisible, selectUserHandler, deleteHandler, commentButtonHandler, showNeedActions, isDeletable, setIsDeletable])
 
     const disconnectHandler = (authId, selectedUserId) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + user.credentials.displayName + '?', [
@@ -309,6 +313,68 @@ const UserProfileScreen = props => {
         })
     }
 
+    // const pinHandler = (id) => {
+    //     Alert.alert('Pin Announcement', 'This will appear at the top of the announcement feed and replace any previously pinned announcement. Are you sure?', [
+    //         {
+    //             text: 'Cancel',
+    //             style: 'cancel',
+    //             onPress: () => {
+    //                 setIsVisible(!isVisible)
+    //                 setSelectedItem()
+    //             }
+    //         },
+    //         {
+    //             text: 'Pin',
+    //             style: 'default',
+    //             onPress: async () => {
+    //                 try {
+    //                     await dispatch(pinAnnouncement(id))
+    //                     setIsVisible(!isVisible)
+    //                     // setIsRefreshing(true)
+    //                     // loadData().then(() => {
+    //                     //     setIsRefreshing(false)
+    //                     // })
+    //                 } catch (err) {
+    //                     alert(err)
+    //                     console.log(err)
+    //                 }
+                    
+    //             }
+    //         }
+    //     ])
+    // }
+
+    // const unpinHandler = (id) => {
+    //     Alert.alert('Unpin Announcement', 'Are you sure?', [
+    //         {
+    //             text: 'Cancel',
+    //             style: 'cancel',
+    //             onPress: () => {
+    //                 setIsVisible(!isVisible)
+    //                 setSelectedItem()
+    //             }
+    //         },
+    //         {
+    //             text: 'Unpin',
+    //             style: 'destructive',
+    //             onPress: async () => {
+    //                 try {
+    //                     await dispatch(unpinAnnouncement(id))
+    //                     setIsVisible(!isVisible)
+    //                     // setIsRefreshing(true)
+    //                     // loadData().then(() => {
+    //                     //     setIsRefreshing(false)
+    //                     // })
+    //                 } catch (err) {
+    //                     alert(err)
+    //                     console.log(err)
+    //                 }
+                    
+    //             }
+    //         }
+    //     ])
+    // }
+
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {
             props.navigation.push(
@@ -334,6 +400,8 @@ const UserProfileScreen = props => {
             />
         </TouchableCmp>
     )
+
+    
 
     return (
         <SafeAreaView style={styles.screen}>
@@ -405,7 +473,7 @@ const UserProfileScreen = props => {
                                                     />
                                                 )}
                                             >
-                                                <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
+                                                {memoizedProfileAvatar}
                                             </Lightbox>
                                         </View>
                                     </TouchableWithoutFeedback>
