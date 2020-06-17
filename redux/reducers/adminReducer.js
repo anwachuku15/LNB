@@ -1,4 +1,4 @@
-import { CREATE_ANNOUNCEMENT, CREATE_ANNOUNCEMENT_NOIMG } from '../actions/adminActions'
+import { CREATE_ANNOUNCEMENT, CREATE_ANNOUNCEMENT_NOIMG, DELETE_ANNOUNCEMENT } from '../actions/adminActions'
 import { SET_ANNOUNCEMENTS, SET_ANNOUNCEMENT } from '../actions/authActions'
 import Announcement from '../../models/announcement-model'
 
@@ -56,6 +56,12 @@ export default (state = initialState, action) => {
                 announcements: state.announcements.concat(newAnnouncementNoImg),
             }
         
+        case DELETE_ANNOUNCEMENT:
+            let index = state.announcements.findIndex(announcement => announcement.id === action.announcementId)
+            state.announcements.splice(index, 1)
+            return {
+                ...state
+            }
         default:
             return state
     }

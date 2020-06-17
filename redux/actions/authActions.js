@@ -824,6 +824,7 @@ export const setAnnouncements = () => {
                     imageUrl: doc.data().imageUrl,
                     likeCount: doc.data().likeCount,
                     commentCount: doc.data().commentCount,
+                    isPinned: doc.data().isPinned
                 })
                 if (doc.data().imageUrl) {
                     announcements.concat({

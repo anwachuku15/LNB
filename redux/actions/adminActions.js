@@ -11,7 +11,7 @@ export const DELETE_ANNOUNCEMENT = 'DELETE_ANNOUNCEMENT'
 
 
 // Consider drafts (published: false vs published: true, pubTimestamp)
-export const createAnnouncement = (admin, body, localUri) => {
+export const createAnnouncement = (admin, subject, body, localUri) => {
     return async (dispatch, getState) => {
         const uid = getState().auth.userId
         const adminHeadline = getState().auth.credentials.headline
@@ -24,6 +24,7 @@ export const createAnnouncement = (admin, body, localUri) => {
             db.collection('announcements')
             .add({
                 admin,
+                subject,
                 body,
                 uid: uid,
                 adminImage,
@@ -38,7 +39,7 @@ export const createAnnouncement = (admin, body, localUri) => {
             })
             .catch(err => console.log(err))
 
-            sendAnnouncementNotification(announcementId)
+            sendAnnouncementNotification(announcementId, subject)
 
             dispatch({
                 type: CREATE_ANNOUNCEMENT,
@@ -49,6 +50,7 @@ export const createAnnouncement = (admin, body, localUri) => {
                     admin,
                     adminImage,
                     adminHeadline,
+                    subject: subject,
                     body: body,
                     imageUrl: remoteUri,
                     commentCount: 0,
@@ -59,6 +61,7 @@ export const createAnnouncement = (admin, body, localUri) => {
             db.collection('announcements')
             .add({
                 admin,
+                subject,
                 body,
                 uid,
                 adminImage,
@@ -82,6 +85,7 @@ export const createAnnouncement = (admin, body, localUri) => {
                     admin,
                     adminImage,
                     adminHeadline,
+                    subject: subject,
                     body: body,
                     imageUrl: null,
                     commentCount: 0,
@@ -92,7 +96,7 @@ export const createAnnouncement = (admin, body, localUri) => {
     } 
 }
 
-export const createAnnouncementNoImg = (admin, body) => {
+export const createAnnouncementNoImg = (admin, subject, body) => {
     return async (dispatch, getState) => {
         const uid = getState().auth.userId
         const adminHeadline = getState().auth.credentials.headline
@@ -102,6 +106,7 @@ export const createAnnouncementNoImg = (admin, body) => {
         db.collection('announcements')
         .add({
             admin,
+            subject,
             body,
             uid,
             adminImage,
@@ -116,7 +121,7 @@ export const createAnnouncementNoImg = (admin, body) => {
         })
         .catch(err => console.log(err))
 
-        sendAnnouncementNotification(announcementId)
+        sendAnnouncementNotification(announcementId, subject)
 
         dispatch({
             type: CREATE_ANNOUNCEMENT_NOIMG,
@@ -127,6 +132,7 @@ export const createAnnouncementNoImg = (admin, body) => {
                 admin,
                 adminImage,
                 adminHeadline,
+                subject: subject,
                 body: body,
                 commentCount: 0,
                 likeCount: 0
@@ -136,7 +142,7 @@ export const createAnnouncementNoImg = (admin, body) => {
     }
 }
 
-const sendAnnouncementNotification = (announcementId) => {
+const sendAnnouncementNotification = (announcementId, subject) => {
     db.collection('users')
     // .where('isAdmin', '==', true)
     .get()
@@ -153,7 +159,7 @@ const sendAnnouncementNotification = (announcementId) => {
                         to: doc.data().pushToken,
                         sound: 'default',
                         title: 'Announcement',
-                        body: 'New announcement from LNB',
+                        body: subject,
                         data: {
                             type: 'announcement',
                             announcementId: announcementId
@@ -169,6 +175,58 @@ const sendAnnouncementNotification = (announcementId) => {
 }
 
 export const deleteAnnouncement = (announcementId) => {
-    db.doc(`/announcements/${announcementId}`).delete()
-    .catch(err => console.log(err))
+    return async dispatch => {
+        try {
+            await db.doc(`/announcements/${announcementId}`).delete()
+            dispatch({
+                type: DELETE_ANNOUNCEMENT,
+                announcementId: announcementId
+            })
+        } catch (err) {
+            console.log(err)
+        }
+        
+    }
+}
+
+export const pinAnnouncement = (announcementId) => {
+    return async dispatch => {
+        db.collection('announcements')
+            .where('isPinned', '==', true)
+            .limit(1)
+            .get()
+            .then(doc => {
+                if (!doc.empty) {
+                    doc.docs[0].ref.set(
+                        {isPinned: false}, 
+                        {merge: true}
+                    )
+                }
+            })
+            .then(() => {
+                db.doc(`/announcements/${announcementId}`).set(
+                    {isPinned: true}, 
+                    {merge: true}
+                )
+            })
+            .catch(err => console.log(err))
+    }
+}
+
+export const unpinAnnouncement = (announcementId) => {
+    return async => {
+        db.collection('announcements')
+            .where('isPinned', '==', true)
+            .limit(1)
+            .get()
+            .then(doc => {
+                if (!doc.empty) {
+                    doc.docs[0].ref.set(
+                        {isPinned: false}, 
+                        {merge: true}
+                    )
+                }
+            })
+            .catch(err => console.log(err))
+    }
 }
