@@ -13,7 +13,7 @@ import {
     SafeAreaView
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, FontAwesome } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
@@ -66,7 +66,7 @@ const CreatePostScreen = props => {
         UserPermissions.getCameraPermission()
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
+            allowsEditing: false,
             aspect: [4,3]
         })
 
@@ -123,7 +123,7 @@ const CreatePostScreen = props => {
                     numberOfLines={4} 
                     style={{flex:1, color:text}}
                     placeholder={'What do you need?'}
-                    placeholderTextColor={'#838383'}
+                    placeholderTextColor={Colors.placeholder}
                     onChangeText={text => {
                         setBody(text)
                     }}
@@ -135,7 +135,7 @@ const CreatePostScreen = props => {
                 style={styles.photo}
                 onPress={pickImage}
             >
-                <Ionicons name='ios-camera' size={32} color={'#838383'}/>
+                <FontAwesome name='image' size={26} color={Colors.placeholder}/>
             </TouchableOpacity>
 
             <View style={{marginHorizontal: 32, marginTop: 10, height: 150}}>
