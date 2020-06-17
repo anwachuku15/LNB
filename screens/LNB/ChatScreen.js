@@ -228,12 +228,12 @@ const ChatScreen = props => {
     const renderMessage = ({item}) => (
         item.user._id === uid ? (
             <View style={{...styles.rightMessageView, ...{backgroundColor:background}}} key={item._id}>
-                <View style={{alignSelf: 'flex-start', backgroundColor: scheme==='light' ? 'white' : 'black', padding:10, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, borderColor: Colors.primary}}>
+                <View style={{alignSelf: 'flex-start', padding:10, backgroundColor: scheme==='dark' ? 'black' : 'white', borderColor: Colors.primary, borderTopRightRadius: 15, borderTopLeftRadius: 15, borderBottomLeftRadius: 15, borderWidth: 1, }}>
                     <Hyperlink
                         linkDefault={true}
                         linkStyle={{color:Colors.blue}}
                     >
-                        <Text selectable style={{fontSize: 16, color: scheme === 'light' ? 'black' : 'white'}}>{item.text}</Text>
+                        <Text selectable style={{fontSize: 16, color: scheme === 'dark' ? 'white' : 'black'}}>{item.text}</Text>
                     </Hyperlink>
                 </View>
             </View>
