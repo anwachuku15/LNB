@@ -1,9 +1,10 @@
 export default {
     primaryColor: '#ff4081',
     secondaryColor: '#06d4cd',
-    primary: '#fbbc04',
+    primary: '#FBBC04',
     primaryDark: '#8D6A02',
     primaryLight: '#FDD55E',
+    primaryChat: '#DE8602',
     gunmetal: '#2F4550',
     blacksmoke: '#08090A',
     olive: '#3F3F37',
@@ -34,5 +35,7 @@ export default {
     timestamp: '#C4C6CE',
     drawericon: 'rgb(136, 153, 166)',
     darkSearch: '#2B2B2B',
-    lightSearch: '#D5D5D5'
+    lightSearch: '#D5D5D5',
+    red: '#FF1D15',
+    bluebutton: '#2196F3',
 }
