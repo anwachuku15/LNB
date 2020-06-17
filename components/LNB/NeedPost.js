@@ -12,7 +12,7 @@ import { useSelector } from 'react-redux'
 import NeedActions from './NeedActions'
 import TouchableCmp from './TouchableCmp'
 import Colors from '../../constants/Colors'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, AntDesign } from '@expo/vector-icons'
 import { useColorScheme } from 'react-native-appearance'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
@@ -77,7 +77,7 @@ const NeedPost = props => {
                     }}>
                         <Ionicons name='ios-more' size={24} color='#73788B'/>
                     </TouchableCmp>
-                    <Modal
+                    {/* <Modal
                         animationType='slide'
                         transparent={true}
                         visible={isModalVisible}
@@ -102,6 +102,64 @@ const NeedPost = props => {
                                         <Text style={styles.modalButtonText}>Delete</Text>
                                     </TouchableHighlight>
                                 )}
+                            </View>
+                        </View>
+                    </Modal> */}
+                    <Modal
+                        animationType='slide'
+                        transparent={true}
+                        visible={isModalVisible}
+                        onDismiss={() => {}}
+                    >
+                        <View style={styles.modalView}>
+                            <View style={{...styles.modal, backgroundColor: scheme==='dark' ? Colors.darkHeader : 'white'}}>
+                                <TouchableCmp
+                                    style={{ ...styles.modalButton }}
+                                    // onPress={() => deleteHandler(selectedItem)}
+                                >
+                                    <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                        <Ionicons
+                                            name={Platform.OS==='android' ? 'md-trash' : 'ios-trash'}
+                                            color={Colors.redcrayola}
+                                            size={28}
+                                            style={{marginRight: 24}}
+                                        />
+                                        <Text style={{...styles.modalButtonText, color: Colors.redcrayola}}>Delete</Text>
+                                    </View>
+                                </TouchableCmp>
+                                <TouchableCmp
+                                    style={{ ...styles.modalButton, marginTop: 5, }}
+                                    // onPress={() => {
+                                    //     if (pinned) {
+                                    //         selectedItem !== pinned.id ? pinHandler(selectedItem) : unpinHandler(selectedItem)
+                                    //     } else pinHandler(selectedItem)
+                                    // }}
+                                >
+                                    <View style={{flexDirection:'row', alignItems: 'center'}}>
+                                        <AntDesign
+                                            name='pushpino'
+                                            color={Colors.placeholder}
+                                            size={24}
+                                            style={{marginRight: 20}}
+                                        />
+                                        {/* {!pinned || selectedItem !== pinned.id ? (
+                                            <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Pin Announcement</Text>
+                                        ) : (
+                                            <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Unpin Announcement</Text>
+                                        )} */}
+                                        <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Pin to Profile</Text>
+                                    </View>
+                                </TouchableCmp>
+
+                                <TouchableCmp
+                                    style={{marginTop: 5, backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, borderRadius: 20, padding: 12}}
+                                    onPress={() => {
+                                        setIsModalVisible(!isModalVisible)
+                                        setSelectedNeed()
+                                    }}
+                                >
+                                    <Text style={{...styles.modalButtonText, fontWeight:'bold', textAlign:'center', color: scheme==='dark' ? 'white' : 'black'}}>Cancel</Text>
+                                </TouchableCmp>
                             </View>
                         </View>
                     </Modal>
@@ -169,11 +227,11 @@ const styles = StyleSheet.create({
     },
     modal: {
         width: Dimensions.get('window').width,
-        margin: 20,
-        backgroundColor: "white",
         borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
+        paddingTop: 30,
+        paddingBottom: 50,
+        paddingHorizontal: 20,
+        // alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
           width: 0,
@@ -184,19 +242,18 @@ const styles = StyleSheet.create({
         elevation: 5
     },
     modalButton: {
-        backgroundColor: "#F194FF",
         borderRadius: 20,
         padding: 10,
         elevation: 2
     },
     modalButtonText: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center"
+        // fontWeight: "bold",
+        fontSize: 18,
+        // textAlign: "center",
     },
     modalText: {
         marginBottom: 15,
-        textAlign: "center"
+        textAlign: "center",
     },
     screen: {
         flex: 1
