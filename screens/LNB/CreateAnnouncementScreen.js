@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { 
     Platform,
     View, 
@@ -10,10 +10,11 @@ import {
     ScrollView,
     TouchableOpacity,
     TextInput,
-    SafeAreaView
+    SafeAreaView,
+    Dimensions,
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
@@ -27,6 +28,12 @@ import Fire from '../../Firebase/Firebase'
 import { createAnnouncement, createAnnouncementNoImg } from '../../redux/actions/adminActions'
 import UserPermissions from '../../util/UserPermissions'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
+import Lightbox from 'react-native-lightbox'
+import { sub } from 'react-native-reanimated'
+
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_HEIGHT = Dimensions.get('window').height
+const BASE_PADDING = 10
 
 const CreateAnnouncementScreen = props => {
     const scheme = useColorScheme()
@@ -42,29 +49,18 @@ const CreateAnnouncementScreen = props => {
         text = 'black'
     }
 
-    
+    const [subject, setSubject] = useState('')
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
 
-    // useEffect(() => {
-    //     getPhotoPermission()
-    // }, [getPhotoPermission])
+    const announcementInput = useRef()
 
-    // const getPhotoPermission = async () => {
-    //     if (Constants.platform.ios) {
-    //         const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-
-    //         if(status != 'granted') {
-    //             alert('We need permission to access your camera roll')
-    //         }
-    //     }
-    // }
 
     const pickImage = async () => {
         UserPermissions.getCameraPermission()
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
+            allowsEditing: false,
             aspect: [4,3]
         })
 
@@ -76,7 +72,8 @@ const CreateAnnouncementScreen = props => {
 
     const handlePost = async () => {
         try {
-            await dispatch(createAnnouncement(admin, body, image))
+            await dispatch(createAnnouncement(admin, subject, body, image))
+            setSubject('')
             setBody('')
             setImage(null)
             props.navigation.goBack()
@@ -89,7 +86,8 @@ const CreateAnnouncementScreen = props => {
 
     const handlePostNoImg = async () => {
         try {
-            await dispatch(createAnnouncementNoImg(admin, body, ''))
+            await dispatch(createAnnouncementNoImg(admin, subject, body, ''))
+            setSubject('')
             setBody('')
             setImage(null)
             props.navigation.goBack()
@@ -109,51 +107,91 @@ const CreateAnnouncementScreen = props => {
                 </TouchableOpacity>
                 <Text style={{color:text, fontFamily:'open-sans-bold'}}>Create an Announcement</Text>
                 <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost} disabled={!body.trim().length}>
-                    <Text style={{fontWeight:'500', color: (!body.trim().length) ? Colors.disabled : Colors.primary}}>Post</Text>
+                    <Text style={{fontWeight:'500', color: !body.trim().length || !subject.trim().length ? Colors.disabled : Colors.primary}}>Post</Text>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.inputContainer}>
-                <Image source={{uri: userImage}} style={styles.avatar}/>
-                <TextInput 
-                    autoFocus={true} 
-                    multiline={true} 
-                    numberOfLines={4} 
-                    style={{flex:1, color:text}}
-                    placeholder={'What\'s new?'}
-                    placeholderTextColor={'#838383'}
-                    onChangeText={text => {
-                        setBody(text)
-                    }}
-                    value={body}
-                />
-            </View>
-
-            <TouchableOpacity 
-                style={styles.photo}
-                onPress={pickImage}
-            >
-                <Ionicons name='ios-camera' size={32} color={'#838383'}/>
-            </TouchableOpacity>
-
-            <View style={{marginHorizontal: 32, marginTop: 10, height: 150}}>
-                {image ? (
-                    <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={{width: '100%', height: '100%', alignItems:'flex-end'}}>
-                        <TouchableCmp
-                            style={styles.removeImageButton}
-                            onPress={() => setImage()}
-                        >
-                            <Ionicons
-                                name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
-                                color='white'
-                                size={24}
+            <ScrollView>
+                <View style={styles.inputContainer}>
+                    <Image source={{uri: userImage}} style={styles.avatar}/>
+                    <View style={{flex: 1, flexDirection: 'column'}}>
+                        <TextInput
+                            autoFocus={true}
+                            numberOfLines={2}
+                            maxLength={50}
+                            placeholder={'Subject'}
+                            placeholderTextColor={Colors.placeholder}
+                            onSubmitEditing={() => announcementInput.current.focus()}
+                            style={{justifyContent:'center', borderWidth: 1, borderColor: Colors.primary, borderRadius: 50, width: '100%', padding: 10}}
+                            onChangeText={text => {setSubject(text)}}
+                            value={subject}
+                            returnKeyType='next'
+                            // returnKeyLabel='Next' - ANDROID
+                        />
+                        <View style={{flexDirection:'row'}}>
+                            <TextInput
+                                ref={announcementInput}
+                                multiline={true} 
+                                numberOfLines={4} 
+                                style={{flex: 7, marginTop: 5, padding: 10, color:text,}}
+                                placeholder={'Announcement'}
+                                placeholderTextColor={Colors.placeholder}
+                                onChangeText={text => {
+                                    setBody(text)
+                                }}
+                                value={body}
                             />
-                        </TouchableCmp>
-                    </ImageBackground>
-                ) : (
-                    null
-                )}
-            </View>
+                            <TouchableOpacity 
+                                style={{flex: 1, alignItems: 'flex-end', marginTop: 10}}
+                                onPress={pickImage}
+                            >
+                                <FontAwesome name='image' size={26} color={Colors.placeholder}/>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
+
+                <View style={{marginHorizontal: 32, marginTop: 10, height: '100%',}}>
+                    {image ? (
+                        <Lightbox
+                            backgroundColor='rgba(0, 0, 0, 0.8)'
+                            underlayColor={scheme==='dark' ? 'black' : 'white'}
+                            springConfig={{tension: 15, friction: 7}}
+                            renderHeader={(close) => (
+                                <TouchableCmp 
+                                    onPress={close}
+                                    style={styles.closeButton}
+                                >
+                                    <Ionicons 
+                                        name='ios-close'
+                                        size={36}
+                                        color='white'
+                                    />
+                                </TouchableCmp >
+                            )}
+                            renderContent={() => (
+                                <Image source={{uri: image}} style={styles.lightboxImage} resizeMode='contain' />
+                            )}
+                        >
+                            <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={{width: '100%', height: '100%', alignItems:'flex-end'}}>
+                                <TouchableCmp
+                                    style={styles.removeImageButton}
+                                    onPress={() => setImage()}
+                                >
+                                    <Ionicons
+                                        name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
+                                        color='white'
+                                        size={24}
+                                    />
+                                </TouchableCmp>
+                            </ImageBackground>
+                        </Lightbox>
+                    ) : (
+                        null
+                    )}
+                </View>
+            </ScrollView>
         </SafeAreaView>
 
             
@@ -170,6 +208,26 @@ CreateAnnouncementScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+        // justifyContent: 'center'
+    },
+    lightboxImage: {
+        width: SCREEN_WIDTH * 0.9,
+        height: SCREEN_HEIGHT * 0.9 - BASE_PADDING,
+        alignSelf: 'center',
+        borderRadius: 5,
+        marginVertical: 10,
+    },
+    closeButton: {
+        color: 'white',
+        backgroundColor: 'gray',
+        borderRadius: 20,
+        marginHorizontal: 18,
+        marginVertical: 32,
+        height: 40,
+        width: 40,
+        paddingTop: 2,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     removeImageButton: {
         alignItems: 'center',
@@ -190,7 +248,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth
     },
     inputContainer: {
-        margin: 32,
+        margin: 20,
         flexDirection: 'row',
     },
     avatar: {
@@ -199,10 +257,6 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         marginRight: 16
     },
-    photo: {
-        alignItems: 'flex-end',
-        marginHorizontal: 32
-    }
 })
 
 
