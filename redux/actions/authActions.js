@@ -10,6 +10,7 @@ export const AUTHENTICATE = 'AUTHENTICATE'
 // export const LOGIN = 'LOGIN'
 export const LOGOUT = 'LOGOUT'
 export const SET_USER = 'SET_USER'
+export const SET_ALL_USERS = 'SET_ALL_USERS'
 export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
 export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
@@ -300,8 +301,10 @@ export const fetchConnections = (uid) => {
         try {
             const userConnectionIds = []
             const userConnections = []
+            const allUsers = []
+
             const allConnections = await db.collection('connections').get()
-            const users = await db.collection('users').get()
+            const users = await db.collection('users').orderBy('displayName', 'asc').get()
             
             allConnections.forEach(doc => {
                 if (doc.id.includes(uid)) {
@@ -309,7 +312,20 @@ export const fetchConnections = (uid) => {
                 }
             })
             
+            
+
             users.forEach(doc => {
+                allUsers.push({
+                    uid: doc.data().userId,
+                    name: doc.data().displayName,
+                    headline: doc.data().headline,
+                    location: doc.data().location,
+                    bio: doc.data().bio,
+                    imageUrl: doc.data().imageUrl,
+                    website: doc.data().website,
+                    connections: doc.data().connections
+                })
+
                 if (userConnectionIds.includes(doc.id)) {
                     userConnections.push({
                         uid: doc.data().userId,
@@ -322,6 +338,10 @@ export const fetchConnections = (uid) => {
                         connections: doc.data().connections
                     })
                 }
+            })
+            dispatch({
+                type: SET_ALL_USERS,
+                allUsers: allUsers
             })
             dispatch({
                 type: SET_CONNECTIONS,
@@ -389,6 +409,40 @@ export const getUser = (userId) => {
         }
     }
 }
+
+export const pinNeed = (needId, uid) => {
+    console.log(needId)
+    console.log(uid)
+    db.collection('needs')
+        .where('uid', '==', uid)
+        .where('isPinned', '==', true)
+        .limit(1)
+        .get()
+        .then(doc => {
+            if (!doc.empty) {
+                doc.docs[0].ref.set(
+                    {isPinned: false}, 
+                    {merge: true}
+                )
+            }
+        })
+        .then(() => {
+            db.doc(`/needs/${needId}`).set(
+                {isPinned: true}, 
+                {merge: true}
+            )
+        })
+        .catch(err => console.log(err))
+    
+}
+
+export const unpinNeed = (needId) => {
+    db.doc(`needs/${needId}`).set(
+        {isPinned: false}, 
+        {merge: true}
+    ).catch(err => console.log(err))
+}
+
 
 export const updateProfile = (headline, location, bio, link, uri) => {
     return async (dispatch, getState) => {
