@@ -76,8 +76,8 @@ const PostDetailScreen = props => {
     const [comments, setComments] = useState()
 
     const userLikes = useSelector(state => state.auth.likes)
-    const [likeCount, setLikeCount] = useState(need.likeCount)
-    const [commentCount, setCommentCount] = useState(need.commentCount)
+    const [likeCount, setLikeCount] = useState()
+    const [commentCount, setCommentCount] = useState()
     const [isLiked, setIsLiked] = useState(false)
 
 
@@ -107,6 +107,8 @@ const PostDetailScreen = props => {
                                                                         }
                                                                       })
             setComments(postComments)
+            setLikeCount(need.likeCount)
+            setCommentCount(need.commentCount)
         } catch (err) {
             console.log(err)
             setError(err.message)
@@ -127,7 +129,7 @@ const PostDetailScreen = props => {
 
     useEffect(() => {
         const setLikeIcon = db.collection('likes')
-            .where('needId','==',needId)
+            .where('needId', '==', needId)
             .where('uid', '==', uid)
             .onSnapshot(snapshot => {
                 if (snapshot.empty) {
@@ -136,7 +138,7 @@ const PostDetailScreen = props => {
                     setIsLiked(true)
                 }
             })
-        const needDataListener = db.doc(`/needs/${props.needId}`).onSnapshot(snapshot => {
+        const needDataListener = db.doc(`/needs/${needId}`).onSnapshot(snapshot => {
             if (snapshot.exists) {
                 setLikeCount(snapshot.data().likeCount)
                 setCommentCount(snapshot.data().commentCount)
@@ -152,7 +154,7 @@ const PostDetailScreen = props => {
         return (
             <View style={styles.spinner}>
                 <Text>An error occured</Text>
-                <Button title='try again' onPress={loadData} color={Colors.primary}/>
+                <Button title='try again' onPress={loadComments} color={Colors.primary}/>
             </View>
         )
     }
@@ -262,6 +264,10 @@ const PostDetailScreen = props => {
         dispatch(unLikeNeed(needId))
     }
 
+    const MemoizedAvatar = useMemo(() => {
+        return <Image source={{uri: need.userImage}} style={styles.avatar} />
+    }, [])
+
     let TouchableCmp = TouchableOpacity
     if (Platform.OS === 'android' && Platform.Version >= 21) {
         TouchableCmp = TouchableNativeFeedback
@@ -292,7 +298,8 @@ const PostDetailScreen = props => {
                                 onPress={() => selectUserHandler(need.uid, need.userName)}
                                 style={{alignSelf:'flex-start'}}
                             >
-                                <Image source={{uri: need.userImage}} style={styles.avatar} />
+                                <Image source={{uri: need.userImage, cache: 'force-cache'}} style={styles.avatar} />
+                                {/* {MemoizedAvatar} */}
                             </TouchableCmp>
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
@@ -327,13 +334,13 @@ const PostDetailScreen = props => {
                                     <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                                         <View style={{flexDirection:'row'}}>
                                             <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.pink} style={{marginRight: 7}} />
-                                            {likeCount > 0 && (
+                                            {need && need.likeCount > 0 && (
                                                 <TouchableCmp 
                                                     style={{flexDirection:'row'}}
                                                     onPress={() => navToLikes()}
                                                 >
                                                     <Text style={{color:text, fontWeight: 'bold', alignSelf:'center'}}>{likeCount}</Text>
-                                                    {likeCount === 1 ? ( 
+                                                    {need && need.likeCount === 1 ? ( 
                                                         <Text style={{color:Colors.disabled, alignSelf:'center'}}> like</Text>
                                                     ) : (
                                                         <Text style={{color:Colors.disabled, alignSelf:'center'}}> likes</Text>
