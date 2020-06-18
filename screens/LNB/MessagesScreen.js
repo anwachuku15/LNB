@@ -78,6 +78,7 @@ const MessagesScreen = props => {
 
     const uid = useSelector(state => state.auth.userId)
     const authImg = useSelector(state => state.auth.credentials.imageUrl)
+    const allUsers = useSelector(state => state.auth.allUsers)
     const groupChats = useSelector(state => state.auth.groupChats)
     const [chats, setChats] = useState()
     const [isLoading, setIsLoading] = useState(false)
@@ -90,13 +91,7 @@ const MessagesScreen = props => {
 
     const searchInput = useRef(null)
 
-    // const loadMessageNotifications = useCallback(async () => {
-    //     try {
-    //         await dispatch(markMessageNotificationsAsRead())
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }, [dispatch])
+    
 
     const loadChats = useCallback(async () => {
         // setIsLoading(true)
@@ -175,23 +170,34 @@ const MessagesScreen = props => {
     }, [])
 
 
-    let searchResults = []
+    // let searchResults = []
+    // const updateSearch = (text) => {
+    //     setSearch(text)
+    //     const query = text
+    //     if (query.trim().length === 0) {setResults([])}
+
+    //     if (query.trim().length > 0) {
+    //         index.search(query, {
+    //             attributesToRetrieve: ['newData'],
+    //             hitsPerPage: 10
+    //         }).then(({ hits }) => {
+    //             hits.forEach(hit => {
+    //                 searchResults.push(hit.newData)
+    //             })
+    //             setResults(searchResults)
+    //         })
+    //     }
+    // }
+
     const updateSearch = (text) => {
         setSearch(text)
-        const query = text
-        if (query.trim().length === 0) {setResults([])}
+        const newResults = allUsers.filter(result => {
+            const resultData = `${result.name.toUpperCase()}`
+            const query = text.toUpperCase()
 
-        if (query.trim().length > 0) {
-            index.search(query, {
-                attributesToRetrieve: ['newData'],
-                hitsPerPage: 10
-            }).then(({ hits }) => {
-                hits.forEach(hit => {
-                    searchResults.push(hit.newData)
-                })
-                setResults(searchResults)
-            })
-        }
+            return resultData.includes(query)
+        })
+        setResults(newResults)
     }
 
     const cancelSearch = () => {
@@ -299,6 +305,10 @@ const MessagesScreen = props => {
         </TouchableCmp>
     )
 
+    const memoizedChat = useMemo(() => {
+        return renderChat
+    }, [])
+
 
     if (error) {
         return (
@@ -342,8 +352,8 @@ const MessagesScreen = props => {
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {updateSearch(text)}}
                         value={search}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
+                        // onFocus={() => setIsFocused(true)}
+                        // onBlur={() => setIsFocused(false)}
                     />
                     {search.length > 0 && (
                         <TouchableCmp
@@ -366,7 +376,7 @@ const MessagesScreen = props => {
                         <FlatList
                             keyExtractor={(item, index) => index.toString()}
                             data={chats}
-                            renderItem={renderChat}
+                            renderItem={memoizedChat}
                         />
                     </DismissKeyboard>
                 )}
