@@ -13,6 +13,7 @@ export default (state = initialState, action) => {
     switch (action.type) {
         case SET_NEEDS: {
             return {
+                ...state,
                 allNeeds: action.allNeeds,
                 userNeeds: action.userNeeds
             }
