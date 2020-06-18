@@ -16,6 +16,7 @@ import {
     TouchableNativeFeedback,
     TouchableHighlight
 } from 'react-native'
+import CustomModal from 'react-native-modal'
 import { withNavigationFocus } from 'react-navigation'
 import Clipboard from '@react-native-community/clipboard'
 // REDUX
@@ -234,11 +235,17 @@ const AnnouncementsScreen = props => {
                                     />
                                 </TouchableCmp>
 
-                                <Modal
-                                    animationType='slide'
-                                    transparent={true}
-                                    visible={isVisible}
-                                    onDismiss={() => {}}
+                                <CustomModal
+                                    swipeDirection='down'
+                                    onSwipeCancel={() => setIsVisible(!isVisible)}
+                                    animationIn='slideInUp'
+                                    animationOut='slideOutDown'
+                                    style={{marginBottom: 0}}
+                                    isVisible={isVisible}
+                                    // animationType='slide'
+                                    // transparent={true}
+                                    // visible={isVisible}
+                                    // onDismiss={() => {}}
                                 >
                                     <View style={styles.modalView}>
                                         <View style={{...styles.modal, backgroundColor: scheme==='dark' ? Colors.darkHeader : 'white'}}>
@@ -290,7 +297,7 @@ const AnnouncementsScreen = props => {
                                             </TouchableCmp>
                                         </View>
                                     </View>
-                                </Modal>
+                                </CustomModal>
                             </View>
                         )}
 
@@ -377,7 +384,21 @@ const AnnouncementsScreen = props => {
                     keyExtractor={(item,index) => index.toString()}
                     data={announcements}
                     renderItem={renderItem}
-                    ListHeaderComponent={pinned && memoPinnedImages}
+                    // ListHeaderComponent={pinned && memoPinnedImages}
+                    ListHeaderComponent={pinned && (
+                        <PinnedAnnouncement
+                            pinned={pinned}
+                            authUser={authUser}
+                            selectUserHandler={selectUserHandler}
+                            announcementOptions={announcementOptions}
+                            deleteHandler={deleteHandler}
+                            pinHandler={pinHandler} 
+                            isVisible={isVisible}
+                            setIsVisible={setIsVisible}
+                            selectedItem={selectedItem}
+                            setSelectedItem={setSelectedItem}
+                        />
+                    )}
                 />
             ) : (
                 <View style={styles.spinner}>
