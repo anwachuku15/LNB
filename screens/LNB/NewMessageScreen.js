@@ -63,6 +63,7 @@ const NewMessageScreen = props => {
     const [selected, setSelected] = useState(false)
 
     const auth = useSelector(state => state.auth)
+    const allUsers = useSelector(state => state.auth.allUsers)
 
     const dispatch = useDispatch()
 
@@ -74,62 +75,73 @@ const NewMessageScreen = props => {
         flatListRef.current.scrollToEnd()
     }
     
-    let hits = []
-    let searchResults = []
-    let members = []
+    // let hits = []
+    // let searchResults = []
+    // let members = []
     
-    const loadIndex = useCallback(async () => {
-        index.setSettings({
-            customRanking: [
-                'asc(newData.name)'
-            ],
-            ranking: [
-                'custom',
-                'typo',
-                'geo',
-                'words',
-                'filters',
-                'proximity',
-                'attribute',
-                'exact'
-            ]
-        }).then(() => {
-            index.browseObjects({
-                query: '',
-                batch: batch => {
-                    hits = hits.concat(batch)
-                }
-            }).then(() => {
-                hits.forEach(hit => {
-                    searchResults.push(hit.newData)
-                })
-                setResults(searchResults)
-            })
-        }).catch(err => console.log(err))
-    }, [])
+    // const loadIndex = useCallback(async () => {
+    //     index.setSettings({
+    //         customRanking: [
+    //             'asc(newData.name)'
+    //         ],
+    //         ranking: [
+    //             'custom',
+    //             'typo',
+    //             'geo',
+    //             'words',
+    //             'filters',
+    //             'proximity',
+    //             'attribute',
+    //             'exact'
+    //         ]
+    //     }).then(() => {
+    //         index.browseObjects({
+    //             query: '',
+    //             batch: batch => {
+    //                 hits = hits.concat(batch)
+    //             }
+    //         }).then(() => {
+    //             hits.forEach(hit => {
+    //                 searchResults.push(hit.newData)
+    //             })
+    //             setResults(searchResults)
+    //         })
+    //     }).catch(err => console.log(err))
+    // }, [])
 
-    useEffect(() => {
-        if (props.navigation.isFocused) {
-            loadIndex()
-        }
-    }, [loadIndex])
+    // useEffect(() => {
+    //     if (props.navigation.isFocused) {
+    //         loadIndex()
+    //     }
+    // }, [loadIndex])
 
 
+
+    // const updateSearch = (text) => {
+    //     setSearch(text)
+    //     const query = text
+    //     index.browseObjects({
+    //         query: query.length > 0 ? query : '',
+    //         batch: batch => {
+    //             hits = hits.concat(batch)
+    //         }
+    //     }).then(() => {
+    //         hits.forEach(hit => {
+    //             searchResults.push(hit.newData)
+    //         })
+    //         setResults(searchResults)
+    //     }).catch(err => console.log(err))
+    // }
 
     const updateSearch = (text) => {
         setSearch(text)
-        const query = text
-        index.browseObjects({
-            query: query.length > 0 ? query : '',
-            batch: batch => {
-                hits = hits.concat(batch)
-            }
-        }).then(() => {
-            hits.forEach(hit => {
-                searchResults.push(hit.newData)
-            })
-            setResults(searchResults)
-        }).catch(err => console.log(err))
+        const newResults = allUsers.filter(result => {
+            const resultData = `${result.name.toUpperCase()}`
+            const query = text.toUpperCase()
+
+            return resultData.includes(query)
+        })
+        setResults(newResults)
     }
 
     const addMember = (userId, userName, userImage) => {
@@ -413,7 +425,7 @@ const NewMessageScreen = props => {
             </View>
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
-                data={results}
+                data={search.length === 0 ? allUsers : results}
                 renderItem={renderItem}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
