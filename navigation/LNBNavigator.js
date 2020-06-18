@@ -283,6 +283,14 @@ const HomeStack = createStackNavigator({
                 headerBackTitleVisible: false,
             },
         },
+        ConnectRequests: {
+            screen: ConnectRequestsScreen,
+            navigationOptions: {
+                gestureResponseDistance: {
+                    horizontal: 300
+                }
+            }
+        },
         ChatScreen: {
             screen: ChatScreen,
             navigationOptions: {
