@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { 
     Platform,
     View, 
@@ -57,87 +57,61 @@ const DirectoryScreen = props => {
 
     const authId = useSelector(state => state.auth.userId)
     const authName = useSelector(state => state.auth.credentials.displayName)
-    const userConnections = useSelector(state => state.auth.userConnections)
+    const allUsers = useSelector(state => state.auth.allUsers)
     const userConnectionIds = useSelector(state => state.auth.userConnectionIds)
     const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
 
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
-    const [isFocused, setIsFocused] = useState(false)
-
-    const [connect, setConnect] = useState(false)
-    const [accept, setAccept] = useState(false)
-    const [requested, setRequested] = useState(false)
-    const [connected, setConnected] = useState(false)
 
     const searchInput = useRef(null)
     
-    let hits = []
-    let searchResults = []
+    // let hits = []
+    // let searchResults = []
 
-    const loadIndex = useCallback(async () => {
-        index.setSettings({
-            customRanking: [
-                'asc(newData.name)'
-            ],
-            ranking: [
-                'custom',
-                'typo',
-                'geo',
-                'words',
-                'filters',
-                'proximity',
-                'attribute',
-                'exact'
-            ]
-        }).then(() => {
-            index.browseObjects({
-                query: '',
-                batch: batch => {
-                    hits = hits.concat(batch)
-                }
-            }).then(() => {
-                hits.forEach(hit => {
-                    searchResults.push(hit.newData)
-                })
-                setResults(searchResults)
-            })
-        }).catch(err => console.log(err))
-
-
-    }, [])
+    // Algolia Search
+    // const loadIndex = useCallback(async () => {
+    //     index.setSettings({
+    //         customRanking: [
+    //             'asc(newData.name)'
+    //         ],
+    //         ranking: [
+    //             'custom',
+    //             'typo',
+    //             'geo',
+    //             'words',
+    //             'filters',
+    //             'proximity',
+    //             'attribute',
+    //             'exact'
+    //         ]
+    //     }).then(() => {
+    //         index.browseObjects({
+    //             query: '',
+    //             batch: batch => {
+    //                 hits = hits.concat(batch)
+    //             }
+    //         }).then(() => {
+    //             hits.forEach(hit => {
+    //                 searchResults.push(hit.newData)
+    //             })
+    //             setResults(searchResults)
+    //         })
+    //     }).catch(err => console.log(err))
+    // }, [])
     
-    
-    // useEffect(() => {
-    //     const willFocusSub = props.navigation.addListener('willFocus', loadIndex)
-    //     return () => {
-    //         willFocusSub.remove()
-    //     }
-    // }, [loadIndex])
-
-    useEffect(() => {
-        if (props.navigation.isFocused) {
-            loadIndex()
-        }
-    }, [loadIndex])
 
 
     const updateSearch = (text) => {
         setSearch(text)
-        const query = text
-        index.browseObjects({
-            query: query.length > 0 ? query : '',
-            batch: batch => {
-                hits = hits.concat(batch)
-            }
-        }).then(() => {
-            hits.forEach(hit => {
-                searchResults.push(hit.newData)
-                // console.log(hit.newData.name)
-            })
-            setResults(searchResults)
-        }).catch(err => console.log(err))
+        const newResults = allUsers.filter(result => {
+            const resultData = `${result.name.toUpperCase()}`
+            const query = text.toUpperCase()
+
+            return resultData.includes(query)
+        })
+        setResults(newResults)
     }
 
     const cancelSearch = () => {
@@ -157,11 +131,10 @@ const DirectoryScreen = props => {
                 name: userName
         })
         setSearch('')
-        
     }
 
     const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
-        Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + selectedUserName + '?', [
+        Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
             {
                 text: 'No',
                 style: 'cancel'
@@ -191,8 +164,7 @@ const DirectoryScreen = props => {
     
 
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={async () => {
-            // await dispatch(getUser(item.uid))
+        <TouchableCmp onPress={() => {
             navToUserProfile(item.uid, item.name)
         }}>
             <ListItem
@@ -250,22 +222,29 @@ const DirectoryScreen = props => {
                             </TouchableCmp>
                         )}
                         {incomingRequests.includes(item.uid) && (
-                            <View style={{flexDirection: 'column'}}>
-                                <TouchableCmp
-                                    style={styles.acceptButton}
-                                    onPress={() => {
-                                        dispatch(confirmConnect(authId, authName, item.uid, item.name))
-                                    }}
-                                >
-                                    <Text style={styles.acceptText}>Accept</Text>
-                                </TouchableCmp>
+                            <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10}}>
                                 <TouchableCmp
                                     style={styles.declineButton}
-                                    onPress={() => {
-                                        dispatch(declineConnect(authId, authName, item.name))
-                                    }}
+                                    onPress={() => props.navigation.navigate('ConnectRequests')}
                                 >
-                                    <Text style={styles.declineText}>Decline</Text>
+                                    {/* <Text style={styles.declineText}>Decline</Text> */}
+                                    <MaterialIcons
+                                        name='close'
+                                        size={18}
+                                        color={Colors.raspberry}
+                                    />
+                                </TouchableCmp>
+
+                                <TouchableCmp
+                                    style={styles.acceptButton}
+                                    onPress={() => props.navigation.navigate('ConnectRequests')}
+                                >
+                                    {/* <Text style={styles.acceptText}>Accept</Text> */}
+                                    <MaterialIcons
+                                        name='check'
+                                        size={18}
+                                        color={Colors.green}
+                                    />
                                 </TouchableCmp>
                             </View>
                         )}
@@ -285,8 +264,7 @@ const DirectoryScreen = props => {
                             onPress={async () => {
                                 await dispatch(getUser(item.uid))
                                 props.navigation.push(
-                                    'ChatScreen',
-                                    {
+                                    'ChatScreen', {
                                         selectedUserId: item.uid,
                                         userName: item.name,
                                         userImage: item.imageUrl
@@ -308,47 +286,11 @@ const DirectoryScreen = props => {
         </TouchableCmp>
     )
 
-    const renderSearchBar = () => (
-        <View style={{flexDirection:'row', paddingHorizontal: 10, marginTop: 10}}>
-            <View style={{...styles.searchContainer, backgroundColor: searchBar, width: '100%', alignSelf: 'center'}}>
-                <View style={{justifyContent:'center'}}>
-                    <Feather
-                        name='search'
-                        size={14}
-                        color={Colors.placeholder}
-                    />
-                </View>
-                <TextInput
-                    ref={searchInput}
-                    autoFocus={false}
-                    multiline={true}
-                    numberOfLines={4} 
-                    style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:5}}
-                    placeholder={'Search...'}
-                    placeholderTextColor={Colors.placeholder}
-                    onChangeText={text => {updateSearch(text)}}
-                    value={search}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                />
-                {search.length > 0 && (
-                    <TouchableCmp
-                        style={{justifyContent:'center'}}
-                        onPress={() => {
-                            setSearch('')
-                            updateSearch('')
-                        }}
-                    >
-                        <MaterialIcons
-                            name='cancel'
-                            size={16}
-                            color={Colors.disabled}
-                        />
-                    </TouchableCmp>
-                )}
-            </View>
-        </View>
-    )
+    const memoizedItem = useMemo(() => {
+        return renderItem
+    }, [])
+
+
 
     return (
         <View style={styles.screen}>
@@ -371,15 +313,13 @@ const DirectoryScreen = props => {
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {updateSearch(text)}}
                         value={search}
-                        // onFocus={() => setIsFocused(true)}
-                        // onBlur={() => setIsFocused(false)}
                     />
                     {search.length > 0 && (
                         <TouchableCmp
                             style={{justifyContent:'center'}}
                             onPress={() => {
                                 setSearch('')
-                                updateSearch('')
+                                // updateSearch('')
                             }}
                         >
                             <MaterialIcons
@@ -393,8 +333,9 @@ const DirectoryScreen = props => {
             </View>
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
-                data={results}
-                renderItem={renderItem}
+                data={search.length === 0 ? allUsers : results}
+                // renderItem={renderItem}
+                renderItem={memoizedItem}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
             />
@@ -485,7 +426,8 @@ const styles = StyleSheet.create({
     },
     acceptButton: {
         // height: 24,
-        paddingVertical: 5,
+        // paddingVertical: 5,
+        padding: 5,
         marginVertical: 5,
         justifyContent: 'center',
         borderColor: Colors.green,
@@ -500,7 +442,8 @@ const styles = StyleSheet.create({
     },
     declineButton: {
         // height: 24,
-        paddingVertical: 5,
+        // paddingVertical: 5,
+        padding: 5,
         marginVertical: 5,
         justifyContent: 'center',
         borderColor: Colors.raspberry,
@@ -554,4 +497,4 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
 })
-export default withNavigationFocus(DirectoryScreen)
+export default DirectoryScreen
