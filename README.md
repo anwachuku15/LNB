@@ -1,15 +1,14 @@
 
 # Mobile Social Networking App
-- **Optimized for iOS**
+- **Optimized for iOS** - full Android compatibility coming soon...
 - **Front-end built with React Native, using Redux & React-Redux for state management**
 - **Integrated Firebase for Authentication, Database, Storage, & Functions**
 
 ## Current Features
 **Build a network by connecting and collaborating with like-minded people**
 - Share opportunities, news, and knowledge on a live feed
-- Instant Messaging
+- Instant Messaging & Group Chat
 - Push Notifications
-- Search powered by Algolia
 
 
 ## Coming soon...
@@ -18,9 +17,7 @@
 - QR Code Scan
 - Machine Learning for improved user experience
 - AR Integration
-- Group Chat
 - Trending News
-- Full Android compatibility
 
 # Screenshots
 ## Feed
