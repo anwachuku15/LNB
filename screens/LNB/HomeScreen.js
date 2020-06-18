@@ -312,7 +312,7 @@ const HomeScreen = props => {
     )
    
     const deleteHandler = (needId) => {
-        Alert.alert('Delete', 'Are you sure?', [
+        Alert.alert('Delete Need', 'Are you sure?', [
             {
                 text: 'Cancel',
                 style: 'cancel',
@@ -358,7 +358,7 @@ const HomeScreen = props => {
     }
 
 
-
+    
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {
             props.navigation.navigate({
@@ -370,6 +370,7 @@ const HomeScreen = props => {
             })
         }} useForeground>
             <NeedPost 
+                navigation={props.navigation}
                 item={item} 
                 selectUserHandler={selectUserHandler}
                 isDeletable={isDeletable}
@@ -435,9 +436,10 @@ const TouchableHeader = () => {
 HomeScreen.navigationOptions = (navData) => {
     const background = navData.screenProps.theme
     const isFocused = navData.navigation.isFocused()
+    console.log(background)
     return {
         headerLeft: () => (
-            isFocused && <MenuAvatar toggleDrawer={() => navData.navigation.toggleDrawer()} />
+            <MenuAvatar toggleDrawer={() => navData.navigation.toggleDrawer()} />
         ),
         headerRight: () => (
             <HeaderButtons HeaderButtonComponent={HeaderButton}>
