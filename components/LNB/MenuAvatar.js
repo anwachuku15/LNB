@@ -7,42 +7,45 @@ import shorthash from 'shorthash'
 
 const MenuAvatar = props => {
     const authUserImage = useSelector(state => state.auth.credentials.imageUrl)
-    const [avatar, setAvatar] = useState()
+    // const [avatar, setAvatar] = useState()
 
-    const loadPic = useCallback(async () => {
-        const uri = authUserImage
-        const name = shorthash.unique(uri)
-        const path = `${FileSystem.cacheDirectory}${name}`
-        const image = await FileSystem.getInfoAsync(path)
-        if (image.exists) {
-            setAvatar(image.uri)
-            return
-        } else {
-            console.log('downloaded image to cache')
-            const newImage = await FileSystem.downloadAsync(uri, path)
-            setAvatar(newImage.uri)
-        }
-    })
+    // const loadPic = useCallback(async () => {
+    //     const uri = authUserImage
+    //     const name = shorthash.unique(uri)
+    //     const path = `${FileSystem.cacheDirectory}${name}`
+    //     const image = await FileSystem.getInfoAsync(path)
+    //     if (image.exists) {
+    //         setAvatar(image.uri)
+    //         return
+    //     } else {
+    //         console.log('downloaded image to cache')
+    //         const newImage = await FileSystem.downloadAsync(uri, path)
+    //         setAvatar(newImage.uri)
+    //     }
+    // })
 
-    useEffect(() => {
-        const willFocusSub = loadPic()
-        return () => {
-            willFocusSub
-        }
-    }, [loadPic])
+    // useEffect(() => {
+    //     const willFocusSub = loadPic()
+    //     return () => {
+    //         willFocusSub
+    //     }
+    // }, [loadPic])
 
-    const memoizedAvatar = useMemo(() => {
-        return (
-            <TouchableCmp onPress={props.toggleDrawer}>
-                <Image source={{uri: avatar}} style={styles.menuAvatar} />
-            </TouchableCmp>
-        )
-    }, [avatar, setAvatar])
+    // const memoizedAvatar = useMemo(() => {
+    //     return (
+    //         <TouchableCmp onPress={props.toggleDrawer}>
+    //             <Image source={{uri: avatar}} style={styles.menuAvatar} />
+    //         </TouchableCmp>
+    //     )
+    // }, [avatar, setAvatar])
 
 
     return (
         <View>
-            {memoizedAvatar}
+            {/* {memoizedAvatar} */}
+            <TouchableCmp onPress={props.toggleDrawer}>
+                <Image source={{uri: authUserImage}} style={styles.menuAvatar} />
+            </TouchableCmp>
         </View>
     )
 }
