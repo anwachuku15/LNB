@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useCallback, useState } from 'react'
 import { 
+    Alert,
     View, 
     StyleSheet,
     Image,
@@ -8,11 +9,16 @@ import {
     TouchableHighlight,
     Dimensions
 } from 'react-native'
-import { useSelector } from 'react-redux'
+
+import CustomModal from 'react-native-modal'
+import { useSelector, useDispatch } from 'react-redux'
+import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
+import { deleteNeed } from '../../redux/actions/postsActions'
+import { connectReq, unrequest, confirmConnect, declineConnect, disconnect } from '../../redux/actions/authActions'
 import NeedActions from './NeedActions'
 import TouchableCmp from './TouchableCmp'
 import Colors from '../../constants/Colors'
-import { Ionicons, AntDesign } from '@expo/vector-icons'
+import { Ionicons, AntDesign, FontAwesome, SimpleLineIcons, MaterialIcons } from '@expo/vector-icons'
 import { useColorScheme } from 'react-native-appearance'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
@@ -22,187 +28,379 @@ const WINDOW_WIDTH = Dimensions.get('window').width
 const WINDOW_HEIGHT = Dimensions.get('window').height
 const BASE_PADDING = 10
 
-let themeColor
+let themeColor, pinnedMargin
+// const { Swipeable } = GestureHandler 
 
 const NeedPost = props => {
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         themeColor = 'black'
         text = 'white'
+        pinnedMargin = Colors.darkHeader
     } 
     if (scheme === 'light') {
         themeColor = 'white'
         text = 'black'
+        pinnedMargin = Colors.lightHeader
     }
     const authUser = useSelector(state => state.auth.credentials)
     const authId = useSelector(state => state.auth.userId)
+    const userConnections = useSelector(state => state.auth.userConnections)
+    const userConnectionIds = useSelector(state => state.auth.userConnectionIds)
+    const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
+    const incomingRequests = useSelector(state => state.auth.pendingConnections)
+
+    const dispatch = useDispatch()
 
     const { 
-        item, 
+        item,
+        screen,
+        pinned, 
+        pinHandler,
+        unpinHandler,
         selectUserHandler,
-        isDeletable,
-        setIsDeletable,
         selectedNeed,
         setSelectedNeed,
         isModalVisible,
         setIsModalVisible,
         deleteHandler,
         commentButtonHandler,
+        navToPostDetail,
         showNeedActions,
-        // setShowNeedActions
     } = props
 
-    return (
-        <View style={{...styles.feedItem, ...{backgroundColor: themeColor}}} key={item.id}>
-            <TouchableCmp 
-                onPress={() => selectUserHandler(item.uid, item.userName)}
-                style={{alignSelf:'flex-start'}}
-            >
-                <Image source={{uri: item.userImage}} style={styles.avatar} />
-            </TouchableCmp>
-            <View style={{flex: 1}}>
-                <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
-                    <View>
-                        <TouchableCmp onPress={() => selectUserHandler(item.uid, item.userName)}>
-                            <Text style={{...styles.name, ...{color:text}}}>
-                                {item.userName}
-                                <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
-                            </Text>
-                        </TouchableCmp>
-                    </View>
-                    <TouchableCmp onPress={() => {
-                        item.uid === authId ? setIsDeletable(true) : setIsDeletable(false)
-                        setIsModalVisible(!isModalVisible)
-                        setSelectedNeed(item.id)
-                    }}>
-                        <Ionicons name='ios-more' size={24} color='#73788B'/>
-                    </TouchableCmp>
-                    {/* <Modal
-                        animationType='slide'
-                        transparent={true}
-                        visible={isModalVisible}
-                        onDismiss={() => {}}
-                    >
-                        <View style={styles.modalView}>
-                            <View style={styles.modal}>
-                                <Text style={styles.modalText}>Coming soon...</Text>
-                                <TouchableHighlight
-                                    style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
-                                    onPress={() => {
-                                        setIsModalVisible(!isModalVisible);
-                                    }}
-                                >
-                                    <Text style={styles.modalButtonText}>Hide Modal</Text>
-                                </TouchableHighlight>
-                                {isDeletable && (
-                                    <TouchableHighlight
-                                        style={{ ...styles.modalButton, marginTop: 5, backgroundColor: Colors.redcrayola }}
-                                        onPress={() => {deleteHandler(selectedNeed)}}
-                                    >
-                                        <Text style={styles.modalButtonText}>Delete</Text>
-                                    </TouchableHighlight>
-                                )}
-                            </View>
-                        </View>
-                    </Modal> */}
-                    <Modal
-                        animationType='slide'
-                        transparent={true}
-                        visible={isModalVisible}
-                        onDismiss={() => {}}
-                    >
-                        <View style={styles.modalView}>
-                            <View style={{...styles.modal, backgroundColor: scheme==='dark' ? Colors.darkHeader : 'white'}}>
-                                <TouchableCmp
-                                    style={{ ...styles.modalButton }}
-                                    // onPress={() => deleteHandler(selectedItem)}
-                                >
-                                    <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
-                                        <Ionicons
-                                            name={Platform.OS==='android' ? 'md-trash' : 'ios-trash'}
-                                            color={Colors.redcrayola}
-                                            size={28}
-                                            style={{marginRight: 24}}
-                                        />
-                                        <Text style={{...styles.modalButtonText, color: Colors.redcrayola}}>Delete</Text>
-                                    </View>
-                                </TouchableCmp>
-                                <TouchableCmp
-                                    style={{ ...styles.modalButton, marginTop: 5, }}
-                                    // onPress={() => {
-                                    //     if (pinned) {
-                                    //         selectedItem !== pinned.id ? pinHandler(selectedItem) : unpinHandler(selectedItem)
-                                    //     } else pinHandler(selectedItem)
-                                    // }}
-                                >
-                                    <View style={{flexDirection:'row', alignItems: 'center'}}>
-                                        <AntDesign
-                                            name='pushpino'
-                                            color={Colors.placeholder}
-                                            size={24}
-                                            style={{marginRight: 20}}
-                                        />
-                                        {/* {!pinned || selectedItem !== pinned.id ? (
-                                            <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Pin Announcement</Text>
-                                        ) : (
-                                            <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Unpin Announcement</Text>
-                                        )} */}
-                                        <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Pin to Profile</Text>
-                                    </View>
-                                </TouchableCmp>
+    
 
-                                <TouchableCmp
-                                    style={{marginTop: 5, backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, borderRadius: 20, padding: 12}}
-                                    onPress={() => {
-                                        setIsModalVisible(!isModalVisible)
-                                        setSelectedNeed()
-                                    }}
-                                >
-                                    <Text style={{...styles.modalButtonText, fontWeight:'bold', textAlign:'center', color: scheme==='dark' ? 'white' : 'black'}}>Cancel</Text>
-                                </TouchableCmp>
-                            </View>
-                        </View>
-                    </Modal>
-                </View>
-                <Hyperlink
-                    linkDefault={true}
-                    linkStyle={{color:Colors.bluesea}}
+    const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
+        Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
+            {
+                text: 'No',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                    setSelectedNeed()
+                }
+            },
+            {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: () => {
+                    dispatch(disconnect(authId, selectedUserId))
+                    setIsModalVisible(!isModalVisible)
+                }
+            }
+        ])
+    }
+
+    const [imageWidth, setImageWidth] = useState()
+    const [imageHeight, setImageHeight] = useState()
+    useEffect(() => {
+        if (item.imageUrl) {
+            Image.getSize(item.imageUrl, (width, height) => {
+                if (item.imageUrl) {
+                    // console.log(width, height)
+                    const fixedWidth = width > WINDOW_WIDTH ? width : width
+                    const fixedHeight = height > 550 ? 550 : height
+                    setImageWidth(width)
+                    setImageHeight(height)
+                }
+            }, (error) => {
+                console.log(error.message)
+            })
+        }
+    }, [])
+
+    return (
+        screen === 'UserProfile' && pinned && pinned.id === item.id ? (
+            null
+        ) : (
+            <View 
+                style={{
+                    ...styles.feedItem, 
+                    flexDirection: 'row',
+                    borderBottomWidth: StyleSheet.hairlineWidth, 
+                    borderBottomColor: Colors.placeholder,
+                    flexDirection:'column', 
+                    backgroundColor: themeColor
+                }} 
+                key={item.id}
+            >
+                <View style={{flexDirection: 'row'}}>
+
+                <TouchableCmp 
+                    onPress={() => selectUserHandler(item.uid, item.userName)}
+                    style={{alignSelf:'flex-start'}}
                 >
-                    <Text style={{...styles.post, ...{color:text}}}>{item.body}</Text>
-                </Hyperlink>
-                {item.imageUrl ? (
-                    <Lightbox
-                        backgroundColor='rgba(0, 0, 0, 0.8)'
-                        underlayColor={themeColor}
-                        springConfig={{tension: 15, friction: 7}}
-                        renderHeader={(close) => (
-                            <TouchableCmp 
-                                onPress={close}
-                                style={styles.closeButton}
-                            >
-                                <Ionicons 
-                                    name='ios-close'
-                                    size={36}
-                                    color='white'
-                                />
-                            </TouchableCmp >
-                        )}
-                        renderContent={() => (
-                            <Image source={{uri: item.imageUrl}} style={styles.lightboxImage} resizeMode='contain' />
-                        )}
+                    <Image source={{uri: item.userImage}} style={styles.avatar} />
+                </TouchableCmp>
+
+                <View style={{flex: 1}}>
+                    <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center'}}>
+                        <View>
+                            <TouchableCmp onPress={() => selectUserHandler(item.uid, item.userName)}>
+                                <Text style={{...styles.name, ...{color:text}}}>
+                                    {item.userName}
+                                    <Text style={styles.timestamp}>  ·  {moment(item.timestamp).fromNow()}</Text>
+                                </Text>
+                            </TouchableCmp>
+                        </View>
+                        <TouchableCmp 
+                            style={{marginRight: 5}}
+                            onPress={() => {
+                                setIsModalVisible(!isModalVisible)
+                                setSelectedNeed({needId: item.id, uid: item.uid, userName: item.userName})
+                            }}
+                        >
+                            <Ionicons name='ios-more' size={24} color='#73788B'/>
+                        </TouchableCmp>
+
+                        <CustomModal
+                            swipeDirection='down'
+                            onSwipeCancel={() => setIsModalVisible(!isModalVisible)}
+                            animationIn='slideInUp'
+                            animationOut='slideOutDown'
+                            style={{marginBottom: 0}}
+                            isVisible={isModalVisible}
+                            // animationType='slide' transparent={true} visible={isModalVisible}
+                        >
+                            <View style={styles.modalView}>
+                                <View style={{...styles.modal, backgroundColor: scheme==='dark' ? '#141414' : 'white'}}>
+                                    <View style={{
+                                        alignSelf: 'center',
+                                        marginTop: 7,
+                                        marginBottom: 10,
+                                        width: '10%', 
+                                        borderRadius: 50, 
+                                        height: 5,
+                                        backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, 
+                                    }}/>
+                                    {userConnectionIds && selectedNeed &&
+                                        selectedNeed.uid !== authId &&
+                                        !userConnectionIds.includes(selectedNeed.uid) && 
+                                        !outgoingRequests.includes(selectedNeed.uid) && 
+                                        !incomingRequests.includes(selectedNeed.uid) && (
+                                            <TouchableCmp
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    dispatch(connectReq(authId, authName, selectedNeed.uid))
+                                                }}
+                                            >
+                                                <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                                    <FontAwesome
+                                                        name='handshake-o'
+                                                        color={Colors.blue}
+                                                        size={26}
+                                                        style={{marginRight: 18}}
+                                                    />
+                                                    <Text style={{...styles.modalButtonText, color: Colors.blue}}>Connect with {selectedNeed.userName}</Text>
+                                                </View>
+                                            </TouchableCmp>
+                                        )
+                                    }
+                                    {userConnectionIds && selectedNeed && userConnectionIds.includes(selectedNeed.uid) && (
+                                        <TouchableCmp
+                                            style={styles.modalButton}
+                                            onPress={() => {
+                                                disconnectHandler(authId, selectedNeed.uid, selectedNeed.userName)
+                                            }}
+                                        >
+                                            <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                                <SimpleLineIcons
+                                                    name='user-unfollow'
+                                                    color={Colors.disabled}
+                                                    size={28}
+                                                    style={{marginRight: 24}}
+                                                />
+                                                <Text style={{...styles.modalButtonText, color: scheme==='dark' ? Colors.placeholder : Colors.darkSearch}}>Disconnect with {selectedNeed.userName}</Text>
+                                            </View>
+                                        </TouchableCmp>
+                                    )}
+                                    {selectedNeed && selectedNeed.uid === authId && (
+                                        <TouchableCmp
+                                            style={styles.modalButton}
+                                            onPress={() => {
+                                                deleteHandler(selectedNeed.needId)
+                                            }}
+                                        >
+                                            <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                                <Ionicons
+                                                    name={Platform.OS==='android' ? 'md-trash' : 'ios-trash'}
+                                                    color={Colors.redcrayola}
+                                                    size={28}
+                                                    style={{marginRight: 24}}
+                                                />
+                                                <Text style={{...styles.modalButtonText, color: Colors.redcrayola}}>Delete</Text>
+                                            </View>
+                                        </TouchableCmp>
+                                    )}
+
+                                    
+                                    
+                                    {selectedNeed && selectedNeed.uid === authId &&
+                                        <TouchableCmp
+                                            style={{ ...styles.modalButton}}
+                                            onPress={() => {
+                                                if (pinned) {
+                                                    selectedNeed.needId !== pinned.needId ? pinHandler(selectedNeed.needId, selectedNeed.uid) : unpinHandler(selectedNeed.needId)
+                                                } else {
+                                                    pinHandler(selectedNeed.needId, selectedNeed.uid)
+                                                }
+                                            }}
+                                        >
+                                            <View style={{flexDirection:'row', alignItems: 'center'}}>
+                                                <AntDesign
+                                                    name='pushpino'
+                                                    color={Colors.placeholder}
+                                                    size={24}
+                                                    style={{marginRight: 20}}
+                                                />
+                                                {!pinned || selectedNeed.needId !== pinned.id ? (
+                                                    <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Pin to profile</Text>
+                                                ) : (
+                                                    <Text style={{...styles.modalButtonText, color: scheme==='dark' ? 'white' : 'black'}}>Unpin from profile</Text>
+                                                )}
+                                            </View>
+                                        </TouchableCmp>
+                                    }
+
+                                    {selectedNeed && screen !== 'UserProfile' &&
+                                        <TouchableCmp
+                                            style={{ ...styles.modalButton, }}
+                                            onPress={() => {
+                                                selectUserHandler(selectedNeed.uid, selectedNeed.userName)
+                                                setIsModalVisible(!isModalVisible)
+                                                setSelectedNeed()
+                                            }}
+                                        >
+                                            {selectedNeed.uid !== authId ? (
+                                                <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 7}}>
+                                                    <FontAwesome
+                                                        name='user-o'
+                                                        size={26}
+                                                        color={Colors.blue}
+                                                        style={{marginRight: 28}}
+                                                    />
+                                                    <Text style={{...styles.modalButtonText, color: Colors.blue}}>View Profile</Text>
+                                                </View>
+                                            ) : (
+                                                <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                                    <FontAwesome
+                                                        name='user-o'
+                                                        size={24}
+                                                        color={Colors.blue}
+                                                        style={{marginRight: 18}}
+                                                    />
+                                                    <Text style={{...styles.modalButtonText, color: Colors.blue}}>View Profile</Text>
+                                                </View>
+                                            )}
+                                        </TouchableCmp>
+                                    }
+                                    {selectedNeed &&
+                                        <TouchableCmp
+                                            style={{ ...styles.modalButton, }}
+                                            onPress={() => {
+                                                props.navigation.navigate({
+                                                    routeName: 'PostDetail',
+                                                    params: {
+                                                        needId: selectedNeed.needId,
+                                                        from: 'HomeScreen'
+                                                    }
+                                                })
+                                                setIsModalVisible(!isModalVisible)
+                                                setSelectedNeed()
+                                            }}
+                                        >
+                                            {selectedNeed.uid !== authId ? (
+                                                <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                                    <MaterialIcons 
+                                                        name='comment' 
+                                                        color={Colors.green} 
+                                                        size={28} 
+                                                        style={{marginRight: 24}} 
+                                                    />
+                                                    <Text style={{...styles.modalButtonText, color: Colors.green}}>View Comments</Text>
+                                                </View>
+                                            ) : (
+                                                <View style={{flexDirection:'row', alignItems: 'center'}}>
+                                                    <MaterialIcons 
+                                                        name='comment' 
+                                                        color={Colors.green} 
+                                                        size={28} 
+                                                        style={{marginRight: 15}} 
+                                                    />
+                                                    <Text style={{...styles.modalButtonText, color: Colors.green}}>View Comments</Text>
+                                                </View>
+                                            )}
+                                        </TouchableCmp>
+                                    }
+
+                                    <TouchableCmp
+                                        style={{marginTop: 10, backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, borderRadius: 20, padding: 12}}
+                                        onPress={() => {
+                                            setIsModalVisible(!isModalVisible)
+                                            setSelectedNeed()
+                                        }}
+                                    >
+                                        <Text style={{
+                                            ...styles.modalButtonText, 
+                                            fontWeight:'bold', 
+                                            textAlign:'center', 
+                                            color: scheme==='dark' ? 'white' : 'black'
+                                        }}>
+                                            Cancel
+                                        </Text>
+                                    </TouchableCmp>
+                                </View>
+                            </View>
+                        </CustomModal>
+                    </View>
+                    
+                    <Hyperlink
+                        linkDefault={true}
+                        linkStyle={{color:Colors.bluesea}}
                     >
-                        <Image 
-                            source={{uri: item.imageUrl}} 
-                            style={{...styles.postImage, ...{borderColor:Colors.disabled}}} 
-                            resizeMethod='auto' 
-                        />
-                    </Lightbox>
-                ) : (
-                    null
-                )}
-                {showNeedActions && item.id && (<NeedActions needId={item.id} leaveComment={() => commentButtonHandler(item.id, item.userName)}/>)}
+                        <Text style={{...styles.post, ...{color:text}}}>{item.body}</Text>
+                    </Hyperlink>
+                    {item.imageUrl ? (
+                        <Lightbox
+                            backgroundColor='rgba(0, 0, 0, 0.8)'
+                            underlayColor={themeColor}
+                            springConfig={{tension: 15, friction: 7}}
+                            renderHeader={(close) => (
+                                <TouchableCmp 
+                                    onPress={close}
+                                    style={styles.closeButton}
+                                >
+                                    <Ionicons 
+                                        name='ios-close'
+                                        size={36}
+                                        color='white'
+                                    />
+                                </TouchableCmp >
+                            )}
+                            renderContent={() => (
+                                <Image source={{uri: item.imageUrl}} style={styles.lightboxImage} resizeMode='contain'/>
+                            )}
+                        >
+                            <Image
+                                source={{uri: item.imageUrl}} 
+                                // defaultSource
+                                style={{...styles.postImage, borderColor: Colors.disabled}} 
+                                resizeMethod='auto' 
+                                resizeMode='cover'
+                                height={300}
+                                width={320}
+                                borderRadius={20}
+                            />
+                        </Lightbox>
+                    ) : (
+                        null
+                    )}
+                    {showNeedActions && item.id && (<NeedActions needId={item.id} leaveComment={() => commentButtonHandler(item.id, item.userName)}/>)}
+                </View>
+                </View>
             </View>
-        </View>
+        )
     )
 }
 
@@ -223,15 +421,14 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
         marginTop: 22,
+        marginBottom: 0
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     modal: {
         width: Dimensions.get('window').width,
         borderRadius: 20,
-        paddingTop: 30,
         paddingBottom: 50,
         paddingHorizontal: 20,
-        // alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
           width: 0,
@@ -244,7 +441,8 @@ const styles = StyleSheet.create({
     modalButton: {
         borderRadius: 20,
         padding: 10,
-        elevation: 2
+        elevation: 2,
+        marginBottom: 5,
     },
     modalButtonText: {
         // fontWeight: "bold",
@@ -285,11 +483,8 @@ const styles = StyleSheet.create({
         // marginHorizontal: 16
     },
     feedItem: {
-        backgroundColor: '#FFF',
         padding: 8,
-        flexDirection: 'row',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: Colors.placeholder
+        
     },
     avatar: {
         width: 36,
@@ -312,27 +507,46 @@ const styles = StyleSheet.create({
         lineHeight: 18
     },
     postImage: {
-        width: undefined,
-        minHeight: 200,
-        maxHeight: 300,
-        borderRadius: 5,
         borderWidth: 0.1,
         marginTop: 10,
         marginRight: 20
     },
-    lightboxImage: {
+    lightboxImage1: {
         width: WINDOW_WIDTH,
         height: WINDOW_HEIGHT - BASE_PADDING,
+        alignSelf: 'center',
+        borderRadius: 5,
+        marginVertical: 10
+    },
+    // closeButton: {
+    //     color: 'white',
+    //     paddingHorizontal: 18,
+    //     paddingVertical: 32,
+    //     textAlign: 'center',
+    //     margin: 10,
+    //     alignSelf: 'flex-start',
+    // },
+    lightboxImage: {
+        width: WINDOW_WIDTH * 0.9,
+        height: WINDOW_HEIGHT * 0.9,
+        alignSelf: 'center',
         borderRadius: 5,
         marginVertical: 10
     },
     closeButton: {
         color: 'white',
-        paddingHorizontal: 18,
-        paddingVertical: 32,
+        backgroundColor: 'rgba(40, 40, 40, 0.7)',
+        borderRadius: 20,
+        marginHorizontal: 18,
+        marginVertical: 32,
         textAlign: 'center',
         margin: 10,
         alignSelf: 'flex-start',
+        height: 40,
+        width: 40,
+        paddingTop: 2,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
 })
 
