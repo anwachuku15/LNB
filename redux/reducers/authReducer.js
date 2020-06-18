@@ -3,6 +3,7 @@ import {
     AUTHENTICATE, 
     LOGOUT, 
     SET_USER, 
+    SET_ALL_USERS,
     SET_SELECTED_USER, 
     SET_PENDING_CONNECTIONS, 
     SET_NEW_CONNECTION, 
@@ -58,6 +59,12 @@ export default (state = initialState, action) => {
                 notifications: action.notifications,
                 messageNotifications: action.messageNotifications,
                 lastReadAnnouncements: action.lastReadAnnouncements
+            }
+        }
+        case SET_ALL_USERS: {
+            return {
+                ...state,
+                allUsers: action.allUsers
             }
         }
         case SET_SELECTED_USER: {
