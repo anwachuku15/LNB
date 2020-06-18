@@ -23,6 +23,10 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { SharedElement } from 'react-navigation-shared-element'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
+import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
+import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
+
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
@@ -31,12 +35,11 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 import * as firebase from 'firebase'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
 import moment from 'moment'
-import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import * as Linking from 'expo-linking'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
+import PinnedNeed from '../../components/LNB/PinnedNeed'
 
 import NeedPost from '../../components/LNB/NeedPost'
 
@@ -83,8 +86,11 @@ const UserProfileScreen = props => {
     const authId = useSelector(state => state.auth.userId)
     const authName = useSelector(state => state.auth.credentials.displayName)
     const userPosts = useSelector(state => state.posts.allNeeds.filter(need => need.uid === userId))
+    const pinned = userPosts.find(post => post.isPinned === true)
+    const screen = 'UserProfile'
+
     const pendingConnections = useSelector(state => state.auth.pendingConnections)
-    // console.log(pendingConnections)
+    
     const loadUser = useCallback(async () => {
         setError(null)
         setIsRefreshing(true)
@@ -174,6 +180,8 @@ const UserProfileScreen = props => {
         )
     }, [user, selectedNeed, setSelectedNeed, isModalVisible, setIsModalVisible, selectUserHandler, deleteHandler, commentButtonHandler, showNeedActions, isDeletable, setIsDeletable])
 
+
+    
     const disconnectHandler = (authId, selectedUserId) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + user.credentials.displayName + '?', [
             {
@@ -289,7 +297,7 @@ const UserProfileScreen = props => {
                         deleteNeed(needId)
                         setIsModalVisible(!isModalVisible)
                         setIsRefreshing(true)
-                        loadData().then(() => {
+                        loadUser().then(() => {
                             setIsRefreshing(false)
                         })
                     } catch (err) {
@@ -313,79 +321,87 @@ const UserProfileScreen = props => {
         })
     }
 
-    // const pinHandler = (id) => {
-    //     Alert.alert('Pin Announcement', 'This will appear at the top of the announcement feed and replace any previously pinned announcement. Are you sure?', [
-    //         {
-    //             text: 'Cancel',
-    //             style: 'cancel',
-    //             onPress: () => {
-    //                 setIsVisible(!isVisible)
-    //                 setSelectedItem()
-    //             }
-    //         },
-    //         {
-    //             text: 'Pin',
-    //             style: 'default',
-    //             onPress: async () => {
-    //                 try {
-    //                     await dispatch(pinAnnouncement(id))
-    //                     setIsVisible(!isVisible)
-    //                     // setIsRefreshing(true)
-    //                     // loadData().then(() => {
-    //                     //     setIsRefreshing(false)
-    //                     // })
-    //                 } catch (err) {
-    //                     alert(err)
-    //                     console.log(err)
-    //                 }
-                    
-    //             }
-    //         }
-    //     ])
-    // }
+    
 
-    // const unpinHandler = (id) => {
-    //     Alert.alert('Unpin Announcement', 'Are you sure?', [
-    //         {
-    //             text: 'Cancel',
-    //             style: 'cancel',
-    //             onPress: () => {
-    //                 setIsVisible(!isVisible)
-    //                 setSelectedItem()
-    //             }
-    //         },
-    //         {
-    //             text: 'Unpin',
-    //             style: 'destructive',
-    //             onPress: async () => {
-    //                 try {
-    //                     await dispatch(unpinAnnouncement(id))
-    //                     setIsVisible(!isVisible)
-    //                     // setIsRefreshing(true)
-    //                     // loadData().then(() => {
-    //                     //     setIsRefreshing(false)
-    //                     // })
-    //                 } catch (err) {
-    //                     alert(err)
-    //                     console.log(err)
-    //                 }
+    const pinHandler = (needId, uid) => {
+        Alert.alert('Pin Need', 'This will appear at the top of your profile and replace any previously pinned need. Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                    setSelectedNeed()
+                }
+            },
+            {
+                text: 'Pin',
+                style: 'default',
+                onPress: () => {
+                    pinNeed(needId, uid)
+                    setIsModalVisible(!isModalVisible)
+                    setIsRefreshing(true)
+                    loadUser().then(() => {
+                        setIsRefreshing(false)
+                    }).catch(err => console.log(err))
+                }
+            }
+        ])
+    }
+
+    const unpinHandler = (needId) => {
+        Alert.alert('Unpin Need', 'Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                    setSelectedNeed()
+                }
+            },
+            {
+                text: 'Unpin',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        unpinNeed(needId)
+                        setIsModalVisible(!isModalVisible)
+                        setIsRefreshing(true)
+                        loadUser().then(() => {
+                            setIsRefreshing(false)
+                        })
+                    } catch (err) {
+                        alert(err)
+                        console.log(err)
+                    }
                     
-    //             }
-    //         }
-    //     ])
-    // }
+                }
+            }
+        ])
+    }
+
+    
+
+    const navToPostDetail = (needId) => {
+        props.navigation.navigate({
+            routeName: 'PostDetail',
+            params: {
+                needId: needId,
+                from: 'UserProfile'
+            }
+        })
+    }
+    
 
     const renderItem = ({item}) => (
         <TouchableCmp onPress={() => {
-            props.navigation.push(
-                'PostDetail', {
-                    needId: item.id,
-                    from: 'UserProfileScreen'
-                }
-            )
+            navToPostDetail(item.id)
         }} useForeground>
             <NeedPost 
                 item={item} 
+                screen={screen}
+                pinned={pinned}
+                pinHandler={pinHandler}
+                unpinHandler={unpinHandler}
                 selectUserHandler={selectUserHandler}
                 isDeletable={isDeletable}
                 setIsDeletable={setIsDeletable}
@@ -396,12 +412,31 @@ const UserProfileScreen = props => {
                 deleteHandler={deleteHandler}
                 commentButtonHandler={commentButtonHandler}
                 showNeedActions={showNeedActions}
+                navToPostDetail={navToPostDetail}
                 setShowNeedActions={setShowNeedActions}
             />
         </TouchableCmp>
     )
 
     
+    // const memoizedPinnedNeed = useMemo(() => {
+    //     return (
+    //         <PinnedNeed
+    //             pinned={pinned}
+    //             pinHandler={pinHandler}
+    //             unpinHandler={unpinHandler}
+    //             selectUserHandler={selectUserHandler}
+    //             selectedNeed={selectedNeed}
+    //             setSelectedNeed={setSelectedNeed}
+    //             isModalVisible={isModalVisible}
+    //             setIsModalVisible={setIsModalVisible}
+    //             deleteHandler={deleteHandler}
+    //             commentButtonHandler={commentButtonHandler}
+    //             navToPostDetail={navToPostDetail}
+    //             showNeedActions={showNeedActions}
+    //         />
+    //     )
+    // }, [selectUserHandler, deleteHandler, pinHandler, isModalVisible, setIsModalVisible, selectedNeed, setSelectedNeed, navToPostDetail])
 
     return (
         <SafeAreaView style={styles.screen}>
@@ -422,8 +457,13 @@ const UserProfileScreen = props => {
                     )}
                     renderItem={renderItem}
                     ListHeaderComponent={() => (
-                        <View style={{borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingVertical:5}}>
-                            <View style={{paddingHorizontal:20, alignItems:'flex-start', flexDirection:'row'}}>
+                        <View style={!pinned && {
+                            borderBottomColor:'#C3C5CD', 
+                            borderBottomWidth:1, 
+                            paddingVertical:5
+                        }}
+                        >
+                            <View style={{paddingHorizontal:20, marginTop: 10, alignItems:'flex-start', flexDirection:'row'}}>
                                 
                                 <View style={{flexDirection:'column', width:'40%'}}>
                                     <TouchableWithoutFeedback onPress={() => {
@@ -582,7 +622,23 @@ const UserProfileScreen = props => {
                                     </View>
                                 </View>
                             </View>
-                            
+                            {/* {memoizedPinnedNeed} */}
+                            {pinned && 
+                                <PinnedNeed
+                                    pinned={pinned}
+                                    pinHandler={pinHandler}
+                                    unpinHandler={unpinHandler}
+                                    selectUserHandler={selectUserHandler}
+                                    selectedNeed={selectedNeed}
+                                    setSelectedNeed={setSelectedNeed}
+                                    isModalVisible={isModalVisible}
+                                    setIsModalVisible={setIsModalVisible}
+                                    deleteHandler={deleteHandler}
+                                    commentButtonHandler={commentButtonHandler}
+                                    navToPostDetail={navToPostDetail}
+                                    showNeedActions={showNeedActions}
+                                />
+                            }
                         </View>
                     )}
                 />
