@@ -30,7 +30,8 @@ export const fetchNeeds = () => {
                     body: doc.data().body,
                     imageUrl: doc.data().imageUrl ? doc.data().imageUrl : null,
                     likeCount: doc.data().likeCount,
-                    commentCount: doc.data().commentCount
+                    commentCount: doc.data().commentCount,
+                    isPinned: doc.data().isPinned
                 })
             })
             dispatch({
