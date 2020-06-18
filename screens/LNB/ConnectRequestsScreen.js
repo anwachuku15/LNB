@@ -146,6 +146,7 @@ const ConnectRequestsScreen = props => {
                                         style={styles.acceptButton} 
                                         onPress={() => {
                                             dispatch(confirmConnect(uid, auth.credentials.displayName, item.senderId, item.senderName))
+                                            props.navigation.goBack()
                                         }}
                                     >
                                         <Text style={styles.acceptButtonText}>Accept</Text>
@@ -154,6 +155,7 @@ const ConnectRequestsScreen = props => {
                                         style={styles.declineButton}
                                         onPress={() => {
                                             dispatch(declineConnect(uid, item.senderId, item.senderName))
+                                            props.navigation.goBack()
                                             // LayoutAnimation.configureNext(CustomLayout)
                                         }}
                                     >
