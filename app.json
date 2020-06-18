@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "LNB Members",
+    "name": "LNB",
     "description": "Members-Only networking platform for those who want to leave normal behind.",
     "slug": "leave-normal-behind",
     "privacy": "unlisted",
@@ -9,7 +9,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/LNB-iOSicon.png",
     "splash": {
@@ -18,20 +18,20 @@
       "backgroundColor": "#000000"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 5000
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "bundleIdentifier": "com.andrewnwachuku.lnbapp",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.1.1",
       "supportsTablet": true,
       "userInterfaceStyle": "automatic"
     },
     "android": {
       "package": "com.andrewnwachuku.lnbapp",
-      "versionCode": 1
+      "versionCode": 3
     }
   }
 }
