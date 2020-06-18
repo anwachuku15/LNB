@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { 
+    Alert,
     Platform,
     View, 
     Text, 
@@ -10,10 +11,12 @@ import {
     ScrollView,
     TouchableOpacity,
     TextInput,
-    SafeAreaView
+    SafeAreaView,
+    Dimensions,
+    KeyboardAvoidingView,
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
-import { Ionicons, FontAwesome } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, SimpleLineIcons } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
@@ -27,6 +30,12 @@ import Fire from '../../Firebase/Firebase'
 import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
 import UserPermissions from '../../util/UserPermissions'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
+import Lightbox from 'react-native-lightbox'
+
+
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_HEIGHT = Dimensions.get('window').height
+const BASE_PADDING = 10
 
 const CreatePostScreen = props => {
     const scheme = useColorScheme()
@@ -37,11 +46,15 @@ const CreatePostScreen = props => {
     const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
     const dispatch = useDispatch()
 
-    let text
+    let text, postOptionsBorderTopColor, postOptionsBackground
     if (scheme === 'dark') {
         text = 'white'
+        postOptionsBackground = 'black'
+        postOptionsBorderTopColor = Colors.darkSearch
     } else {
         text = 'black'
+        postOptionsBackground = 'white'
+        postOptionsBorderTopColor = Colors.lightSearch
     }
 
     
@@ -103,60 +116,117 @@ const CreatePostScreen = props => {
 
 
     return (
-        
-        <SafeAreaView style={styles.screen}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={()=>props.navigation.goBack()}>
-                    <Ionicons name='md-close' size={24} color={Colors.primary}/>
-                </TouchableOpacity>
-                <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
-                <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost} disabled={!body.trim().length && !image}>
-                    <Text style={{fontWeight:'500', color: (!body.trim().length && !image) ? Colors.disabled : Colors.primary}}>Post</Text>
-                </TouchableOpacity>
-            </View>
+        <View style={styles.screen}>
+            <SafeAreaView>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={()=>props.navigation.goBack()}>
+                        <Ionicons name='md-close' size={24} color={Colors.primary}/>
+                    </TouchableOpacity>
+                    <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
+                    <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost} disabled={!body.trim().length && !image}>
+                        <Text style={{fontWeight:'500', color: (!body.trim().length && !image) ? Colors.disabled : Colors.primary}}>Post</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+            
+            <ScrollView contentContainerStyle={{flex: 1}}>
+                <View style={styles.inputContainer}>
+                    <Image source={{uri: userImage}} style={styles.avatar}/>
+                    <TextInput 
+                        autoFocus={true} 
+                        multiline={true} 
+                        numberOfLines={4} 
+                        style={{flex:1, color:text}}
+                        placeholder={'What do you need?'}
+                        placeholderTextColor={Colors.placeholder}
+                        onChangeText={text => {
+                            setBody(text)
+                        }}
+                        value={body}
+                    />
+                </View>
 
-            <View style={styles.inputContainer}>
-                <Image source={{uri: userImage}} style={styles.avatar}/>
-                <TextInput 
-                    autoFocus={true} 
-                    multiline={true} 
-                    numberOfLines={4} 
-                    style={{flex:1, color:text}}
-                    placeholder={'What do you need?'}
-                    placeholderTextColor={Colors.placeholder}
-                    onChangeText={text => {
-                        setBody(text)
-                    }}
-                    value={body}
-                />
-            </View>
-
-            <TouchableOpacity 
-                style={styles.photo}
-                onPress={pickImage}
-            >
-                <FontAwesome name='image' size={26} color={Colors.placeholder}/>
-            </TouchableOpacity>
-
-            <View style={{marginHorizontal: 32, marginTop: 10, height: 150}}>
-                {image ? (
-                    <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={{width: '100%', height: '100%', alignItems:'flex-end'}}>
-                        <TouchableCmp
-                            style={styles.removeImageButton}
-                            onPress={() => setImage()}
+                <View style={{marginHorizontal: 32, marginTop: 10, height: '80%', width: '80%', alignSelf:'center',}}>
+                    {image ? (
+                        <Lightbox
+                            backgroundColor='rgba(0, 0, 0, 0.8)'
+                            underlayColor={scheme==='dark' ? 'black' : 'white'}
+                            springConfig={{tension: 15, friction: 7}}
+                            renderHeader={(close) => (
+                                <TouchableCmp 
+                                    onPress={close}
+                                    style={styles.closeButton}
+                                >
+                                    <Ionicons 
+                                        name='ios-close'
+                                        size={36}
+                                        color='white'
+                                    />
+                                </TouchableCmp >
+                            )}
+                            renderContent={() => (
+                                <Image source={{uri: image}} style={styles.lightboxImage} />
+                            )}
                         >
-                            <Ionicons
-                                name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
-                                color='white'
-                                size={24}
+                        <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={styles.image}>
+                            <TouchableCmp
+                                style={styles.removeImageButton}
+                                onPress={() => setImage()}
+                            >
+                                <Ionicons
+                                    name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
+                                    color='white'
+                                    size={24}
+                                />
+                            </TouchableCmp>
+                        </ImageBackground>
+                    </Lightbox>
+                    ) : (
+                        null
+                    )}
+                </View>
+            </ScrollView>
+
+            {/* <SafeAreaView style={{height: '10%'}}> */}
+                <KeyboardAvoidingView behavior='padding'>
+                    <View style={{...styles.postOptions, backgroundColor: postOptionsBackground, borderTopColor: postOptionsBorderTopColor}}>
+                        <TouchableOpacity 
+                            style={styles.photo}
+                            onPress={() => {
+                                Alert.alert('Camera coming soon', "You'll be able to take pictures soon. For now, just upload something from your camera roll.", [
+                                    {
+                                        text: 'Cancel',
+                                        style: 'cancel'
+                                    },
+                                    {
+                                        text: 'Open Camera Roll',
+                                        style: 'default',
+                                        onPress: pickImage
+                                    }
+                                ])
+                            }}
+                        >
+                            <SimpleLineIcons 
+                                name='camera' 
+                                size={26} 
+                                color={Colors.primary}
                             />
-                        </TouchableCmp>
-                    </ImageBackground>
-                ) : (
-                    null
-                )}
-            </View>
-        </SafeAreaView>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.photo}
+                            onPress={pickImage}
+                        >
+                            <FontAwesome 
+                                name='image' 
+                                size={26} 
+                                color={Colors.primary}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
+            {/* </SafeAreaView> */}
+        </View>
+        
 
             
     )
@@ -172,6 +242,25 @@ CreatePostScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    lightboxImage: {
+        width: SCREEN_WIDTH * 0.9,
+        height: SCREEN_HEIGHT * 0.9,
+        alignSelf: 'center',
+        borderRadius: 10,
+        marginVertical: 10,
+    },
+    closeButton: {
+        color: 'white',
+        backgroundColor: 'rgba(40, 40, 40, 0.7)',
+        borderRadius: 20,
+        marginHorizontal: 18,
+        marginVertical: 32,
+        height: 40,
+        width: 40,
+        paddingTop: 2,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     removeImageButton: {
         alignItems: 'center',
@@ -192,7 +281,9 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth
     },
     inputContainer: {
-        margin: 32,
+        marginHorizontal: 32,
+        marginTop: 20,
+        marginBottom: 5,
         flexDirection: 'row',
     },
     avatar: {
@@ -203,7 +294,22 @@ const styles = StyleSheet.create({
     },
     photo: {
         alignItems: 'flex-end',
-        marginHorizontal: 32
+        marginHorizontal: 15
+    },
+    image: { 
+        // height: '100%', 
+        // width: '100%',
+        width: SCREEN_WIDTH * 0.8,
+        height: SCREEN_HEIGHT * 0.8,
+        alignItems: 'flex-end',
+        // alignSelf: 'center'
+    },
+    postOptions: {
+        borderTopWidth: 0.5,
+        paddingTop: 9,
+        flexDirection:'row', 
+        alignItems:'center', 
+        paddingBottom: 30,
     }
 })
 
