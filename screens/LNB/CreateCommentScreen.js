@@ -110,12 +110,6 @@ const CreateCommentScreen = props => {
                 />
             </View>
 
-            <TouchableCmp 
-                style={styles.photo}
-                onPress={pickImage}
-            >
-                <Ionicons name='ios-camera' size={32} color={'#838383'}/>
-            </TouchableCmp>
 
             <View style={{marginHorizontal: 32, marginTop: 32, height: 150}}>
                 {image ? (
