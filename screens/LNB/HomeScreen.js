@@ -38,7 +38,7 @@ import { useColorScheme } from 'react-native-appearance'
 // import '@firebase/firestore'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import NeedPost from '../../components/LNB/NeedPost'
-import { setLikes, getUser } from '../../redux/actions/authActions';
+import { setLikes, getUser, pinNeed, unpinNeed } from '../../redux/actions/authActions';
 import { deleteNeed } from '../../redux/actions/postsActions'
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
@@ -192,6 +192,8 @@ const HomeScreen = props => {
     const authUser = useSelector(state => state.auth.credentials)
     const userId = useSelector(state => state.auth.userId)
     const needs = useSelector(state => state.posts.allNeeds)
+    const authPosts = useSelector(state => state.posts.allNeeds.filter(need => need.uid === userId))
+    const pinned = authPosts.find(post => post.isPinned === true)
     
     const dispatch = useDispatch()
     const loadData = useCallback(async () => {
@@ -357,6 +359,55 @@ const HomeScreen = props => {
         })
     }
 
+    const pinHandler = (needId, uid) => {
+        Alert.alert('Pin Need', 'This will appear at the top of your profile and replace any previously pinned need. Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                    setSelectedNeed()
+                }
+            },
+            {
+                text: 'Pin',
+                style: 'default',
+                onPress: async () => {
+                    
+                    setIsModalVisible(!isModalVisible)
+                    pinNeed(needId, uid)
+                }
+            }
+        ])
+    }
+
+    const unpinHandler = (needId) => {
+        Alert.alert('Unpin Need', 'Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                    setSelectedNeed()
+                }
+            },
+            {
+                text: 'Unpin',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        unpinNeed(needId)
+                        setIsModalVisible(!isModalVisible)
+                    } catch (err) {
+                        alert(err)
+                        console.log(err)
+                    }
+                    
+                }
+            }
+        ])
+    }
+
 
     
     const renderItem = ({item}) => (
@@ -372,6 +423,9 @@ const HomeScreen = props => {
             <NeedPost 
                 navigation={props.navigation}
                 item={item} 
+                pinned={pinned}
+                pinHandler={pinHandler}
+                unpinHandler={unpinHandler}
                 selectUserHandler={selectUserHandler}
                 isDeletable={isDeletable}
                 setIsDeletable={setIsDeletable}
@@ -436,7 +490,7 @@ const TouchableHeader = () => {
 HomeScreen.navigationOptions = (navData) => {
     const background = navData.screenProps.theme
     const isFocused = navData.navigation.isFocused()
-    console.log(background)
+    // console.log(background)
     return {
         headerLeft: () => (
             <MenuAvatar toggleDrawer={() => navData.navigation.toggleDrawer()} />
