@@ -143,7 +143,8 @@ const ConnectionsScreen = props => {
                                         userName: item.name,
                                         userImage: item.imageUrl
                                     }
-                            )}}
+                                )
+                            }}
                         >
                             <Text style={styles.messageText}>Message </Text>
                             <MaterialIcons
