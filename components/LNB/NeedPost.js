@@ -18,7 +18,7 @@ import { connectReq, unrequest, confirmConnect, declineConnect, disconnect } fro
 import NeedActions from './NeedActions'
 import TouchableCmp from './TouchableCmp'
 import Colors from '../../constants/Colors'
-import { Ionicons, AntDesign, FontAwesome, SimpleLineIcons, MaterialIcons } from '@expo/vector-icons'
+import { Ionicons, AntDesign, FontAwesome, SimpleLineIcons, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useColorScheme } from 'react-native-appearance'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
@@ -94,21 +94,22 @@ const NeedPost = props => {
 
     const [imageWidth, setImageWidth] = useState()
     const [imageHeight, setImageHeight] = useState()
-    useEffect(() => {
-        if (item.imageUrl) {
-            Image.getSize(item.imageUrl, (width, height) => {
-                if (item.imageUrl) {
-                    // console.log(width, height)
-                    const fixedWidth = width > WINDOW_WIDTH ? width : width
-                    const fixedHeight = height > 550 ? 550 : height
-                    setImageWidth(width)
-                    setImageHeight(height)
-                }
-            }, (error) => {
-                console.log(error.message)
-            })
-        }
-    }, [])
+    // useEffect(() => {
+    
+    //     if (item.imageUrl) {
+    //         Image.getSize(item.imageUrl, (width, height) => {
+    //             if (item.imageUrl) {
+    //                 // console.log(width, height)
+    //                 const fixedWidth = width > WINDOW_WIDTH ? width : width
+    //                 const fixedHeight = height > 550 ? 550 : height
+    //                 setImageWidth(width)
+    //                 setImageHeight(height)
+    //             }
+    //         }, (error) => {
+    //             console.log(error.message)
+    //         })
+    //     }
+    // }, [])
 
     return (
         screen === 'UserProfile' && pinned && pinned.id === item.id ? (
@@ -148,7 +149,8 @@ const NeedPost = props => {
                             style={{marginRight: 5}}
                             onPress={() => {
                                 setIsModalVisible(!isModalVisible)
-                                setSelectedNeed({needId: item.id, uid: item.uid, userName: item.userName})
+                                setSelectedNeed({needId: item.id, uid: item.uid, userName: item.userName, likeCount: item.likeCount, commentCount: item.commentCount})
+                                
                             }}
                         >
                             <Ionicons name='ios-more' size={24} color='#73788B'/>
@@ -186,11 +188,11 @@ const NeedPost = props => {
                                                 }}
                                             >
                                                 <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
-                                                    <FontAwesome
-                                                        name='handshake-o'
+                                                    <Ionicons
+                                                        name='md-person-add' 
                                                         color={Colors.blue}
-                                                        size={26}
-                                                        style={{marginRight: 18}}
+                                                        size={28} 
+                                                        style={{marginRight: 26}}
                                                     />
                                                     <Text style={{...styles.modalButtonText, color: Colors.blue}}>Connect with {selectedNeed.userName}</Text>
                                                 </View>
@@ -241,7 +243,9 @@ const NeedPost = props => {
                                             style={{ ...styles.modalButton}}
                                             onPress={() => {
                                                 if (pinned) {
-                                                    selectedNeed.needId !== pinned.needId ? pinHandler(selectedNeed.needId, selectedNeed.uid) : unpinHandler(selectedNeed.needId)
+                                                    selectedNeed.needId !== pinned.id ? 
+                                                    pinHandler(selectedNeed.needId, selectedNeed.uid) : 
+                                                    unpinHandler(selectedNeed.needId)
                                                 } else {
                                                     pinHandler(selectedNeed.needId, selectedNeed.uid)
                                                 }
@@ -277,61 +281,78 @@ const NeedPost = props => {
                                                     <FontAwesome
                                                         name='user-o'
                                                         size={26}
-                                                        color={Colors.blue}
+                                                        color={Colors.primary}
                                                         style={{marginRight: 28}}
                                                     />
-                                                    <Text style={{...styles.modalButtonText, color: Colors.blue}}>View Profile</Text>
+                                                    <Text style={{...styles.modalButtonText, color: Colors.primary}}>View Profile</Text>
                                                 </View>
                                             ) : (
                                                 <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
                                                     <FontAwesome
                                                         name='user-o'
                                                         size={24}
-                                                        color={Colors.blue}
+                                                        color={Colors.primary}
                                                         style={{marginRight: 18}}
                                                     />
-                                                    <Text style={{...styles.modalButtonText, color: Colors.blue}}>View Profile</Text>
+                                                    <Text style={{...styles.modalButtonText, color: Colors.primary}}>View Profile</Text>
                                                 </View>
                                             )}
                                         </TouchableCmp>
                                     }
-                                    {selectedNeed &&
-                                        <TouchableCmp
-                                            style={{ ...styles.modalButton, }}
-                                            onPress={() => {
-                                                props.navigation.navigate({
-                                                    routeName: 'PostDetail',
-                                                    params: {
-                                                        needId: selectedNeed.needId,
-                                                        from: 'HomeScreen'
-                                                    }
-                                                })
-                                                setIsModalVisible(!isModalVisible)
-                                                setSelectedNeed()
-                                            }}
-                                        >
-                                            {selectedNeed.uid !== authId ? (
-                                                <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
-                                                    <MaterialIcons 
-                                                        name='comment' 
-                                                        color={Colors.green} 
-                                                        size={28} 
-                                                        style={{marginRight: 24}} 
-                                                    />
-                                                    <Text style={{...styles.modalButtonText, color: Colors.green}}>View Comments</Text>
-                                                </View>
-                                            ) : (
-                                                <View style={{flexDirection:'row', alignItems: 'center'}}>
-                                                    <MaterialIcons 
-                                                        name='comment' 
-                                                        color={Colors.green} 
-                                                        size={28} 
-                                                        style={{marginRight: 15}} 
-                                                    />
-                                                    <Text style={{...styles.modalButtonText, color: Colors.green}}>View Comments</Text>
-                                                </View>
+
+                                    {selectedNeed && selectedNeed.uid !== authId && (selectedNeed.likeCount > 0 || selectedNeed.commentCount > 0) &&
+                                        <View>
+                                            {selectedNeed.commentCount > 0 && (
+                                                <TouchableCmp
+                                                    style={{ ...styles.modalButton, }}
+                                                    onPress={() => {
+                                                        props.navigation.navigate({
+                                                            routeName: 'PostDetail',
+                                                            params: {
+                                                                needId: selectedNeed.needId,
+                                                                from: 'HomeScreen'
+                                                            }
+                                                        })
+                                                        setIsModalVisible(!isModalVisible)
+                                                        setSelectedNeed()
+                                                    }}
+                                                >
+
+                                                    <View style={{flexDirection:'row', alignItems: 'center', marginLeft: selectedNeed.uid !== authId ? 5 : 1, marginTop: selectedNeed.uid !== authId ? 0 : 2}}>
+                                                        <MaterialIcons 
+                                                            name='comment'
+                                                            color={Colors.green} 
+                                                            size={selectedNeed.uid !== authId ? 28 : 24} 
+                                                            style={{marginRight: selectedNeed.uid !== authId ? 24 : 18}} 
+                                                        />
+                                                        <Text style={{...styles.modalButtonText, color: Colors.green}}>View Comments</Text>
+                                                    </View>
+                                                    
+                                                </TouchableCmp>
                                             )}
-                                        </TouchableCmp>
+                                            {selectedNeed.likeCount > 0 && (
+                                                <TouchableCmp
+                                                    style={{ ...styles.modalButton, }}
+                                                    onPress={() => {
+                                                        props.navigation.push('PostLikes', {
+                                                            needId: selectedNeed.needId
+                                                        })
+                                                        setIsModalVisible(!isModalVisible)
+                                                        setSelectedNeed()
+                                                    }}
+                                                >
+                                                    <View style={{flexDirection:'row', alignItems: 'center', marginLeft: selectedNeed.uid !== authId ? 5 : 1, marginTop: selectedNeed.uid !== authId ? 0 : 2}}>
+                                                        <MaterialCommunityIcons 
+                                                            name='thumb-up'
+                                                            color={Colors.pink} 
+                                                            size={selectedNeed.uid !== authId ? 28 : 24} 
+                                                            style={{marginRight: selectedNeed.uid !== authId ? 24 : 18}} 
+                                                        />
+                                                        <Text style={{...styles.modalButtonText, color: Colors.pink}}>View Likes</Text>
+                                                    </View>
+                                                </TouchableCmp>
+                                            )}
+                                        </View>
                                     }
 
                                     <TouchableCmp
