@@ -8,7 +8,6 @@ import {
     Text, 
     StyleSheet, 
     Image, 
-    ImageBackground,
     Button, 
     ScrollView,
     FlatList,
@@ -16,8 +15,7 @@ import {
     Alert,
     TouchableWithoutFeedback,
     Animated,
-    Dimensions,
-    MaskedViewIOS
+    Dimensions
 } from 'react-native'
 import CustomModal from 'react-native-modal'
 import Clipboard from '@react-native-community/clipboard'
@@ -32,7 +30,7 @@ import { fetchNeeds, getNeed, deleteNeed } from '../../redux/actions/postsAction
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { Ionicons, MaterialIcons, AntDesign, FontAwesome, SimpleLineIcons, MaterialCommunityIcons, Entypo, } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons, AntDesign, FontAwesome, SimpleLineIcons, MaterialCommunityIcons, } from '@expo/vector-icons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
@@ -72,7 +70,6 @@ const UserProfileScreen = props => {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
 
-    const [isMounted, setIsMounted] = useState(true)
     
     const [connect, setConnect] = useState(false)
     const [accept, setAccept] = useState(false)
@@ -127,15 +124,6 @@ const UserProfileScreen = props => {
             willFocusSub
         }
     }, [dispatch, loadUser])
-
-
-    // useEffect(() => {
-    //     setIsMounted(true)
-    //     return (() => {
-    //         setIsMounted(false)
-    //         console.log('unmounted')
-    //     })
-    // }, [])
 
     // const memoizedHeader = useMemo(() => {
     //     return (
@@ -292,10 +280,43 @@ const UserProfileScreen = props => {
     }
 
 
+    let websiteIcon
+    if (user) {    
+        websiteIcon =   <View>
+                            {user.credentials.website.includes('linkedin.com') && (
+                                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{}}>
+                                    <MaterialCommunityIcons 
+                                        name='linkedin-box' 
+                                        size={24}
+                                        color='#2867B2'
+                                    />
+                                </TouchableCmp>
+                            )}
+                            {user.credentials.website.includes('instagram.com') && (
+                                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{}}>
+                                    <MaterialCommunityIcons 
+                                        name='instagram' 
+                                        size={24}
+                                        color='#C13584'
+                                    />
+                                </TouchableCmp>
+                            )}
+                        </View>
+    }
+
+
+    const EditProfileButton = () => (
+        <TouchableCmp onPress={() => {props.navigation.navigate('EditProfile')}} style={{...styles.editProfileButton, ...{borderColor: Colors.green}}}>
+            <View key={userId}>
+                <Text style={{color:Colors.green, fontSize:12, alignSelf:'center'}}>Edit Profile</Text>
+            </View>
+        </TouchableCmp>
+    )
 
     const selectUserHandler = (userId, userName) => {
         if (userId !== user.credentials.userId) {
-            props.navigation.push('UserProfile', {
+            props.navigation.push(
+                'UserProfile', {
                     userId: userId,
                     name: userName,
                     from: 'UserProfileScreen'
@@ -411,25 +432,22 @@ const UserProfileScreen = props => {
     
 
     const navToPostDetail = (needId) => {
-        props.navigation.push(
-            'PostDetail',
-            {
+        props.navigation.navigate({
+            routeName: 'PostDetail',
+            params: {
                 needId: needId,
                 from: 'UserProfile'
             }
-        )
+        })
     }
     
 
     const renderItem = ({item}) => (
-        <TouchableCmp 
-            onPress={() => {
-                navToPostDetail(item.id)
-            }}
-        >
+        <TouchableCmp onPress={() => {
+            navToPostDetail(item.id)
+        }} useForeground>
             <NeedPost 
                 item={item} 
-                navigation={props.navigation}
                 screen={screen}
                 pinned={pinned}
                 pinHandler={pinHandler}
@@ -450,214 +468,114 @@ const UserProfileScreen = props => {
         </TouchableCmp>
     )
 
-
-    const WebsiteIcon = () => (
-        <View>
-            {user.credentials.website.includes('linkedin.com') && (
-                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{justifyContent: 'center'}}>
-                    <MaterialCommunityIcons 
-                        name='linkedin-box' 
-                        size={24}
-                        color='#2867B2'
-                    />
-                </TouchableCmp>
-            )}
-            {user.credentials.website.includes('instagram.com') && (
-                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{justifyContent: 'center'}}>
-                    <MaterialCommunityIcons 
-                        name='instagram' 
-                        size={24}
-                        color='#C13584'
-                    />
-                </TouchableCmp>
-            )}
-            {!user.credentials.website.includes('linkedin.com') && !user.credentials.website.includes('instagram.com') && (
-                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{justifyContent: 'center'}}>
-                    <Ionicons 
-                        name='md-link' 
-                        size={24}
-                        color={Colors.blue}
-                    />
-                </TouchableCmp>
-            )}
-        </View>
-    )
-    
-
-
-    const EditProfileButton = () => (
-        <TouchableCmp onPress={() => {props.navigation.navigate('EditProfile')}} style={{...styles.editProfileButton}}>
-            <View key={userId}>
-                <Text style={{color:Colors.green, fontSize:12, alignSelf:'center'}}>Edit Profile</Text>
-            </View>
-        </TouchableCmp>
-    )
     
     
 
     return (
-        // isMounted &&
         <SafeAreaView style={styles.screen}>
             {user && (
-                <View style={styles.screen}>
-                    
-                    
-                        <ImageBackground
-                            source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
-                            style={[
-                                StyleSheet.absoluteFill, {
-                                    width: SCREEN_WIDTH,
-                                    height: SCREEN_HEIGHT * 0.4,
-                                    opacity: 0.4,
-                                },
-                            ]}
-                            blurRadius={10}
-                        >
-                            <LinearGradient colors={[themeColor, 'transparent', themeColor,]} style={{position: 'absolute', left: 0, right: 0, top: 0, height: SCREEN_HEIGHT * 0.4}}/>
-                        </ImageBackground>
-
-                    <FlatList
-                        keyExtractor={(item, index) => index.toString()}
-                        data={userPosts}
-                        onRefresh={loadUser}
-                        refreshing={isRefreshing}
-                        style={{}}
-                        showsVerticalScrollIndicator={false}
-                        showsHorizontalScrollIndicator={false}
-                        ListEmptyComponent={() => (
-                            <View style={{flex:1, justifyContent:'center', alignItems:'center', paddingTop: 10}}>
-                                <Text style={{color:Colors.placeholder}}>{user.credentials.displayName} hasn't posted any needs.</Text>
-                            </View>
-                        )}
-                        renderItem={renderItem}
-                        ListHeaderComponent={() => (
-                            <View>
+            <View style={styles.screen}>
+                <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={userPosts}
+                    onRefresh={loadUser}
+                    refreshing={isRefreshing}
+                    style={styles.feed}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    ListEmptyComponent={() => (
+                        <View style={{flex:1, justifyContent:'center', alignItems:'center', paddingTop: 10}}>
+                            <Text style={{color:Colors.placeholder}}>{user.credentials.displayName} hasn't posted any needs.</Text>
+                        </View>
+                    )}
+                    renderItem={renderItem}
+                    ListHeaderComponent={() => (
+                        <View style={!pinned && {borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingVertical:5}}>
+                            <View style={{paddingHorizontal:20, marginTop: 10, alignItems:'flex-start', flexDirection:'row'}}>
                                 
-                                <View style={!pinned && {borderBottomColor:'#C3C5CD', borderBottomWidth:0.5, paddingVertical:5}}>
-                                
-                                    <View style={{paddingHorizontal:20, paddingTop: 10, paddingBottom: 0, justifyContent:'center'}}>
-
-                                        {/* AVATAR, HEADER, LOCATION */}
-                                        <View style={{alignItems: 'center', marginBottom: 10}}>
-                                            <View style={styles.avatarContainer}>
-                                                <Lightbox
-                                                    backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
-                                                    underlayColor='rgba(255, 255, 255, 0.1)'
-                                                    springConfig={{tension: 15, friction: 7}}
-                                                    renderHeader={(close) => (
-                                                        <TouchableCmp 
-                                                            onPress={close}
-                                                            style={styles.closeButton}
-                                                        >
-                                                            <Ionicons 
-                                                                name='ios-close'
-                                                                size={36}
-                                                                color={Colors.placeholder}
-                                                            />
-                                                        </TouchableCmp >
-                                                    )}
-                                                    renderContent={() => (
-                                                        <Image 
-                                                            source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
-                                                            style={{
-                                                                alignSelf: 'center',
-                                                                width: SCREEN_WIDTH - 20, 
-                                                                height: SCREEN_WIDTH - 20,
-                                                                borderRadius: (SCREEN_WIDTH - 20) /2,
-                                                            }}
+                                <View style={{flexDirection:'column', width:'40%'}}>
+                                    <TouchableWithoutFeedback onPress={() => {
+                                        props.navigation.navigate({
+                                            routeName: 'UserProfilePicture',
+                                            params: {
+                                                profilePic: user.credentials.imageUrl,
+                                                userId: userId
+                                            } 
+                                        })
+                                    }}>
+                                        <View style={styles.avatarContainer}>
+                                            <Lightbox
+                                                backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
+                                                underlayColor='rgba(255, 255, 255, 0.1)'
+                                                springConfig={{tension: 15, friction: 7}}
+                                                renderHeader={(close) => (
+                                                    <TouchableCmp 
+                                                        onPress={close}
+                                                        style={styles.closeButton}
+                                                    >
+                                                        <Ionicons 
+                                                            name='ios-close'
+                                                            size={36}
+                                                            color={Colors.placeholder}
                                                         />
-                                                    )}
-                                                >
-                                                    {memoizedProfileAvatar}
-                                                    {/* <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/> */}
-                                                </Lightbox>
-                                            </View>
-                                            <View style={{flexDirection: 'row', marginTop: 5}}>
-                                                <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
-                                                {user.credentials.website.length > 3 && (
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={{alignSelf:'center', color: Colors.placeholder}}> | </Text>
-                                                        <WebsiteIcon />
-                                                    </View>
+                                                    </TouchableCmp >
                                                 )}
-                                            </View>
-                                            {/* {authUser.userId === userId && <EditProfileButton key={userId}/>} */}
-                                            <Text style={{...styles.infoTitle, marginTop: 5, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.credentials.headline}</Text>
-                                            <View style={{flexDirection: 'row', justifyContent:'center', alignItems: 'center', marginTop: 5}}>
-                                                <Entypo
-                                                    name='location-pin'
-                                                    size={12}
-                                                    color={Colors.redcrayola}
-                                                    style={{marginRight: 3, }}
-                                                />
-                                                <Text style={{...styles.infoTitle, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.credentials.location}</Text>
-                                            </View>
+                                                renderContent={() => (
+                                                    <Image 
+                                                        source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
+                                                        style={{
+                                                            alignSelf: 'center',
+                                                            width: SCREEN_WIDTH - 20, 
+                                                            height: SCREEN_WIDTH - 20,
+                                                            borderRadius: (SCREEN_WIDTH - 20) /2,
+                                                        }}
+                                                    />
+                                                )}
+                                            >
+                                                {memoizedProfileAvatar}
+                                                {/* <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/> */}
+                                            </Lightbox>
                                         </View>
-
-
-
-                                        {/* STATS */}
-                                        <View style={{flex:1, flexDirection:'row', justifyContent:'space-around', marginBottom: 15 }}>
-                                            <View style={{alignItems:'center'}}>
-                                                <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.primary : '#E7AD04'}}>{userPosts.length}</Text>
-                                                <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{userPosts.length === 1 ? 'Post' : 'Posts'}</Text>
-                                            </View>
-                                            <View style={{alignItems:'center'}}>
-                                                <TouchableCmp
-                                                    style={{alignItems:'center'}} 
-                                                    onPress={() => {
-                                                        props.navigation.push(
-                                                            'Connections', {
-                                                                userId: userId,
-                                                                userName: user.credentials.displayName
-                                                            }
-                                                        )
-                                                    }}
-                                                >
-                                                    <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.primary : '#E7AD04'}}>{connections}</Text>
-                                                    <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{connections === 1 ? 'Connection' : 'Connections'}</Text>
-                                                </TouchableCmp>
-                                            </View>
-                                        </View>
-
-
-                                        {/* BUTTONS */}
-                                        {userId !== authUser.userId && (
-                                            <View>
-                                                <View style={{flexDirection:'row', justifyContent:'space-between', paddingHorizontal: 8}}>
-                                                    {accept && (
-                                                        <TouchableCmp 
-                                                            onPress={() => {
-                                                                dispatch(confirmConnect(authUser.userId, authName, userId, user.credentials.displayName))
-                                                                setAccept(false)
-                                                            }} 
-                                                            style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
-                                                            <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
-                                                        </TouchableCmp>
-                                                    )}
-                                                    {requested && (
-                                                        <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
-                                                            <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
-                                                        </TouchableCmp>
-                                                    )}
-                                                    {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}
-                                                    {!connected && !requested && !accept && ( 
-                                                        <TouchableCmp 
-                                                            style={{...styles.connectButton,  backgroundColor: Colors.primary, borderColor: Colors.primary}}
-                                                            onPress={() => {
-                                                                dispatch(connectReq(authUser.userId, authName, userId))
-                                                                setRequested(true)
-                                                            }} 
-                                                        >
-                                                            <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connect</Text>
-                                                        </TouchableCmp>
-                                                    )}
-                                                    {connected && (
-                                                        <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.primary}}>
-                                                            <Text style={{color:Colors.primary, fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connected</Text>
-                                                        </TouchableCmp>
-                                                    )}
-
+                                    </TouchableWithoutFeedback>
+                                    <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
+                                    <Text style={styles.infoTitle}>{user.credentials.headline}</Text>
+                                    {userId !== authUser.userId ? (
+                                        <View>
+                                            {websiteIcon}
+                                            <View style={{flexDirection:'row', justifyContent:'space-between', paddingHorizontal: 8}}>
+                                                {accept && (
+                                                    <TouchableCmp 
+                                                        onPress={() => {
+                                                            dispatch(confirmConnect(authUser.userId, authName, userId, user.credentials.displayName))
+                                                            setAccept(false)
+                                                        }} 
+                                                        style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
+                                                        <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
+                                                    </TouchableCmp>
+                                                )}
+                                                {requested && (
+                                                    <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
+                                                        <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
+                                                    </TouchableCmp>
+                                                )}
+                                                {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}
+                                                {!connected && !requested && !accept && ( 
+                                                    <TouchableCmp 
+                                                        style={{...styles.connectButton, ...{borderColor: Colors.bluesea}}}
+                                                        onPress={() => {
+                                                            dispatch(connectReq(authUser.userId, authName, userId))
+                                                            setRequested(true)
+                                                        }} 
+                                                    >
+                                                        <Text style={{color:Colors.bluesea, fontSize:14, alignSelf:'center'}}>Connect</Text>
+                                                    </TouchableCmp>
+                                                )}
+                                                {connected && (
+                                                    <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.primary}}}>
+                                                        <Text style={{color:Colors.primary, fontSize:14, alignSelf:'center'}}>Connected</Text>
+                                                    </TouchableCmp>
+                                                )}
+                                                <View>
                                                     <TouchableCmp
                                                         onPress={() => {
                                                             props.navigation.push(
@@ -668,52 +586,86 @@ const UserProfileScreen = props => {
                                                                     userImage: user.credentials.imageUrl
                                                                 }
                                                         )}}
-                                                        style={{...styles.messageButton, backgroundColor: Colors.blue, borderColor: Colors.blue}}
+                                                        style={{...styles.messageButton, ...{borderColor: Colors.blue}}}
                                                     >
-                                                        <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Message</Text>
+                                                        {/* <Text style={{color:Colors.blue, fontSize:14, alignSelf:'center'}}>Message</Text> */}
+                                                        <MaterialIcons 
+                                                            name='mail-outline'
+                                                            size={23}
+                                                            color={Colors.blue}
+                                                        />
                                                     </TouchableCmp>
-                                                    
                                                 </View>
                                             </View>
-                                        )}
-                                        
-                                        {/* EDIT PROFILE, BIO, NEEDCOUNT, CONNECTIONS, LOCATION */}
-                                        {/* <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
-                                            
-                                            <View style={{flex: 3}}>
-                                                <Text style={styles.infoTitle}>Bio</Text>
-                                                <Hyperlink
-                                                    linkDefault={true}
-                                                    linkStyle={{color: scheme==='dark' ? Colors.bluesea : Colors.blue}}
-                                                >
-                                                    <Text style={{color:text}}>{user.credentials.bio}</Text>
-                                                </Hyperlink>
-                                            </View>
-                                            
-                                        </View> */}
-
-                                    </View>
-                                {/* PINNED NEED */}
-                                    {pinned && (
-                                        <View style={{}}>
-                                            <TouchableCmp onPress={() => {
-                                                navToPostDetail(pinned.id)
-                                            }} useForeground>
-                                                {memoizedPinnedNeed}
-                                            </TouchableCmp>
-                                            <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
-                                            <View style={{
-                                                borderBottomWidth: pinned ? 15 : StyleSheet.hairlineWidth, 
-                                                borderBottomColor: pinned ? pinnedMargin : Colors.placeholder,
-                                            }}></View>
-                                            <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
                                         </View>
+                                    ) : (
+                                        websiteIcon
                                     )}
                                 </View>
+
+                                {/* EDIT PROFILE, BIO, NEEDCOUNT, CONNECTIONS, LOCATION */}
+                                <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
+                                    {authUser.userId === userId && <EditProfileButton key={userId}/>}
+                                    <View style={{flex: 3}}>
+                                        <Text style={styles.infoTitle}>Bio</Text>
+                                        <Hyperlink
+                                            linkDefault={true}
+                                            linkStyle={{color: scheme==='dark' ? Colors.bluesea : Colors.blue}}
+                                        >
+                                            <Text style={{color:text}}>{user.credentials.bio}</Text>
+                                        </Hyperlink>
+                                    </View>
+                                    <View style={{flex:1, flexDirection:'row', justifyContent:'space-between', }}>
+                                        <View style={{alignItems:'center'}}>
+                                            <Text style={styles.infoValue}>{userPosts.length}</Text>
+                                            <Text style={styles.infoTitle}>{userPosts.length === 1 ? 'Need' : 'Needs'}</Text>
+                                        </View>
+                                        <View style={{alignItems:'center'}}>
+                                            <TouchableCmp
+                                                style={{alignItems:'center'}} 
+                                                onPress={() => {
+                                                    props.navigation.push(
+                                                        'Connections', {
+                                                            userId: userId,
+                                                            userName: user.credentials.displayName
+                                                        }
+                                                    )
+                                                }}
+                                            >
+                                                <Text style={styles.infoValue}>{connections}</Text>
+                                                <Text style={styles.infoTitle}>{connections === 1 ? 'Connection' : 'Connections'}</Text>
+                                            </TouchableCmp>
+                                        </View>
+                                        <View style={{alignItems:'center'}}>
+                                            <Text style={styles.infoValue}>{user.credentials.location}</Text>
+                                            <Text style={styles.infoTitle}>Location</Text>
+                                        </View>
+                                    </View>
+                                </View>
+
                             </View>
-                        )}
-                    />
-                
+
+
+                            {/* PINNED NEED */}
+                            {pinned && (
+                                <View>
+                                    <TouchableCmp onPress={() => {
+                                        navToPostDetail(pinned.id)
+                                    }} useForeground>
+                                        {memoizedPinnedNeed}
+                                    </TouchableCmp>
+                                    <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
+                                    <View style={{
+                                        borderBottomWidth: pinned ? 15 : StyleSheet.hairlineWidth, 
+                                        borderBottomColor: pinned ? pinnedMargin : Colors.placeholder,
+                                    }}></View>
+                                    <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
+                                </View>
+                            )}
+                        </View>
+                    )}
+                />
+
                 </View>
             )}
         </SafeAreaView>
@@ -746,6 +698,7 @@ UserProfileScreen.navigationOptions = (navData) => {
         ),
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
+            borderBottomColor: Colors.primary
         },
     }
 }
@@ -814,8 +767,10 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     editProfileButton: {
-        // justifyContent: 'center',
-        // marginTop: 2
+        justifyContent: 'center',
+        padding: 4,
+        borderWidth: 1,
+        borderRadius: 50
     },
     avatarContainer: {
         shadowColor: '#151734',
@@ -824,30 +779,31 @@ const styles = StyleSheet.create({
         elevation: 10
     },
     avatar: {
-        width: 200,
-        height: 200,
-        borderRadius: 100
+        width: 100,
+        height: 100,
+        borderRadius: 68
     },
     name: {
+        marginTop: 6,
         fontSize: 16,
         fontWeight: '600',
         fontFamily: 'open-sans-bold'
     },
     connectButton: {
-        paddingVertical: 10,
-        width: '40%',
+        height: 24,
+        width: '75%',
         marginVertical: 5,
         justifyContent: 'center',
         borderWidth: 1,
-        borderRadius: 10
+        borderRadius: 50
     },
     messageButton: {
-        paddingVertical: 10,
-        width: '40%',
+        height: 24,
+        // width: '75%',
         marginVertical: 5,
         justifyContent: 'center',
-        borderWidth: 1,
-        borderRadius: 10
+        // borderWidth: 1,
+        borderRadius: 50
     },
     infoContainer: {
         flexDirection: 'row',
@@ -860,17 +816,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     infoValue: {
-        fontSize: 18,
-        fontWeight: 'bold'
+        color: Colors.primary,
+        fontSize: 12,
+        fontWeight: '500'
     },
     infoTitle: {
+        color: '#C3C5CD',
         fontSize: 11,
         fontWeight: '500',
-        // marginTop: 4
+        marginTop: 4
     },
     feed: {
         // flexGrow: 1
-        // backgroundColor: 'white'
     },
     feedItem: {
         backgroundColor: '#FFF',
