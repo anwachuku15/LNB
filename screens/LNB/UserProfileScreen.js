@@ -17,6 +17,7 @@ import {
     Animated,
     Dimensions
 } from 'react-native'
+import CustomModal from 'react-native-modal'
 import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -25,12 +26,11 @@ import { SharedElement } from 'react-navigation-shared-element'
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
 import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
-import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
+import { fetchNeeds, getNeed, deleteNeed } from '../../redux/actions/postsActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { Ionicons, MaterialIcons, AntDesign, FontAwesome, SimpleLineIcons, MaterialCommunityIcons, } from '@expo/vector-icons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
@@ -50,16 +50,20 @@ let SCREEN_HEIGHT = Dimensions.get('window').height
 const BASE_PADDING = 10
 
 let themeColor
-let text
+let text, pinnedMargin
+
+
 const UserProfileScreen = props => {
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         themeColor = 'black'
         text = 'white'
+        pinnedMargin = '#1B1B1B'
     } 
     if (scheme === 'light') {
         themeColor = 'white'
         text = 'black'
+        pinnedMargin = Colors.lightHeader
     }
 
     const [isLoading, setIsLoading] = useState(false)
@@ -87,6 +91,13 @@ const UserProfileScreen = props => {
     const authName = useSelector(state => state.auth.credentials.displayName)
     const userPosts = useSelector(state => state.posts.allNeeds.filter(need => need.uid === userId))
     const pinned = userPosts.find(post => post.isPinned === true)
+
+    const userConnections = useSelector(state => state.auth.userConnections)
+    const userConnectionIds = useSelector(state => state.auth.userConnectionIds)
+    const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
+    const incomingRequests = useSelector(state => state.auth.pendingConnections)
+
+    const [pinnedNeed, setPinnedNeed] = useState(pinned)
     const screen = 'UserProfile'
 
     const pendingConnections = useSelector(state => state.auth.pendingConnections)
@@ -97,7 +108,7 @@ const UserProfileScreen = props => {
         try {
             await dispatch(getUser(userId))
             await dispatch(fetchNeeds())
-            await dispatch(setLikes())
+            // await dispatch(setLikes())
         } catch (err) {
             console.log(err)
             setError(err.message)
@@ -114,8 +125,22 @@ const UserProfileScreen = props => {
         }
     }, [dispatch, loadUser])
 
+    // const memoizedHeader = useMemo(() => {
+    //     return (
+    //         <Image 
+    //             source={{uri: user && user.credentials.imageUrl, cache: 'force-cache'}}
+    //             style={{
+    //                 alignSelf: 'center',
+    //                 width: SCREEN_WIDTH - 20, 
+    //                 height: SCREEN_WIDTH - 20,
+    //                 borderRadius: (SCREEN_WIDTH - 20) /2,
+    //             }}
+    //         />
+    //     )
+    // }, [user.credentials.imageUrl])
     
     useEffect(() => {
+        console.log('loading')
         setIsLoading(true)
         loadUser().then(() => {
             setIsLoading(false)
@@ -175,12 +200,32 @@ const UserProfileScreen = props => {
     }, [dispatch, loadUser])
     
     const memoizedProfileAvatar = useMemo(() => {
+        if (user) {
+
+            return (
+                <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+            )
+        }
+    }, [user])
+
+    const memoizedPinnedNeed = useMemo(() => {
         return (
-            user && <Image style={styles.avatar} source={{uri: user.credentials.imageUrl}}/>
+            <PinnedNeed
+                pinned={pinned}
+                pinHandler={pinHandler}
+                unpinHandler={unpinHandler}
+                selectUserHandler={selectUserHandler}
+                selectedNeed={selectedNeed}
+                setSelectedNeed={setSelectedNeed}
+                isModalVisible={isModalVisible}
+                setIsModalVisible={setIsModalVisible}
+                deleteHandler={deleteHandler}
+                commentButtonHandler={commentButtonHandler}
+                navToPostDetail={navToPostDetail}
+                showNeedActions={showNeedActions}
+            />
         )
-    }, [user, selectedNeed, setSelectedNeed, isModalVisible, setIsModalVisible, selectUserHandler, deleteHandler, commentButtonHandler, showNeedActions, isDeletable, setIsDeletable])
-
-
+    }, [pinned, isRefreshing])
     
     const disconnectHandler = (authId, selectedUserId) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + user.credentials.displayName + '?', [
@@ -296,10 +341,11 @@ const UserProfileScreen = props => {
                     try {
                         deleteNeed(needId)
                         setIsModalVisible(!isModalVisible)
-                        setIsRefreshing(true)
-                        loadUser().then(() => {
-                            setIsRefreshing(false)
-                        })
+                        dispatch(fetchNeeds())
+                        // setIsLoading(true)
+                        // loadUser().then(() => {
+                        //     setIsLoading(false)
+                        // })
                     } catch (err) {
                         alert(err)
                         console.log(err)
@@ -336,13 +382,17 @@ const UserProfileScreen = props => {
             {
                 text: 'Pin',
                 style: 'default',
-                onPress: () => {
-                    pinNeed(needId, uid)
+                onPress: async () => {
+                    
                     setIsModalVisible(!isModalVisible)
-                    setIsRefreshing(true)
-                    loadUser().then(() => {
-                        setIsRefreshing(false)
-                    }).catch(err => console.log(err))
+                    pinNeed(needId, uid)
+                    setPinnedNeed(pinned)
+                    
+                    
+                    loadUser().catch(err => console.log(err))
+                        
+                    
+
                 }
             }
         ])
@@ -419,24 +469,7 @@ const UserProfileScreen = props => {
     )
 
     
-    // const memoizedPinnedNeed = useMemo(() => {
-    //     return (
-    //         <PinnedNeed
-    //             pinned={pinned}
-    //             pinHandler={pinHandler}
-    //             unpinHandler={unpinHandler}
-    //             selectUserHandler={selectUserHandler}
-    //             selectedNeed={selectedNeed}
-    //             setSelectedNeed={setSelectedNeed}
-    //             isModalVisible={isModalVisible}
-    //             setIsModalVisible={setIsModalVisible}
-    //             deleteHandler={deleteHandler}
-    //             commentButtonHandler={commentButtonHandler}
-    //             navToPostDetail={navToPostDetail}
-    //             showNeedActions={showNeedActions}
-    //         />
-    //     )
-    // }, [selectUserHandler, deleteHandler, pinHandler, isModalVisible, setIsModalVisible, selectedNeed, setSelectedNeed, navToPostDetail])
+    
 
     return (
         <SafeAreaView style={styles.screen}>
@@ -457,12 +490,7 @@ const UserProfileScreen = props => {
                     )}
                     renderItem={renderItem}
                     ListHeaderComponent={() => (
-                        <View style={!pinned && {
-                            borderBottomColor:'#C3C5CD', 
-                            borderBottomWidth:1, 
-                            paddingVertical:5
-                        }}
-                        >
+                        <View style={!pinned && {borderBottomColor:'#C3C5CD', borderBottomWidth:1, paddingVertical:5}}>
                             <View style={{paddingHorizontal:20, marginTop: 10, alignItems:'flex-start', flexDirection:'row'}}>
                                 
                                 <View style={{flexDirection:'column', width:'40%'}}>
@@ -477,18 +505,9 @@ const UserProfileScreen = props => {
                                     }}>
                                         <View style={styles.avatarContainer}>
                                             <Lightbox
-                                                // backgroundColor='rgba(0, 0, 0, 0.8)'
                                                 backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
                                                 underlayColor='rgba(255, 255, 255, 0.1)'
                                                 springConfig={{tension: 15, friction: 7}}
-                                                // activeProps={{
-                                                //     style: {
-                                                //         width: Dimensions.get('window').width, 
-                                                //         height: Dimensions.get('window').height,
-                                                //         borderRadius: 20
-                                                //     },
-                                                //     resizeMode: 'contain'
-                                                // }}
                                                 renderHeader={(close) => (
                                                     <TouchableCmp 
                                                         onPress={close}
@@ -503,7 +522,7 @@ const UserProfileScreen = props => {
                                                 )}
                                                 renderContent={() => (
                                                     <Image 
-                                                        source={{uri: user.credentials.imageUrl}}
+                                                        source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
                                                         style={{
                                                             alignSelf: 'center',
                                                             width: SCREEN_WIDTH - 20, 
@@ -514,6 +533,7 @@ const UserProfileScreen = props => {
                                                 )}
                                             >
                                                 {memoizedProfileAvatar}
+                                                {/* <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/> */}
                                             </Lightbox>
                                         </View>
                                     </TouchableWithoutFeedback>
@@ -622,8 +642,24 @@ const UserProfileScreen = props => {
                                     </View>
                                 </View>
                             </View>
-                            {/* {memoizedPinnedNeed} */}
-                            {pinned && 
+
+
+                            {pinned && (
+                                <View>
+                                    <TouchableCmp onPress={() => {
+                                        navToPostDetail(pinned.id)
+                                    }} useForeground>
+                                        {memoizedPinnedNeed}
+                                    </TouchableCmp>
+                                    <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
+                                    <View style={{
+                                        borderBottomWidth: pinned ? 15 : StyleSheet.hairlineWidth, 
+                                        borderBottomColor: pinned ? pinnedMargin : Colors.placeholder,
+                                    }}></View>
+                                    <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
+                                </View>
+                            )}
+                            {/* {pinned && 
                                 <PinnedNeed
                                     pinned={pinned}
                                     pinHandler={pinHandler}
@@ -638,11 +674,12 @@ const UserProfileScreen = props => {
                                     navToPostDetail={navToPostDetail}
                                     showNeedActions={showNeedActions}
                                 />
-                            }
+                            } */}
                         </View>
                     )}
                 />
-            </View>
+
+                </View>
             )}
         </SafeAreaView>
     )
@@ -689,6 +726,43 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    modalView: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: 22,
+        marginBottom: 0
+        // backgroundColor: 'rgba(0,0,0,0.8)'
+    },
+    modal: {
+        width: Dimensions.get('window').width,
+        borderRadius: 20,
+        paddingBottom: 50,
+        paddingHorizontal: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    modalButton: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        marginBottom: 5,
+    },
+    modalButtonText: {
+        // fontWeight: "bold",
+        fontSize: 18,
+        // textAlign: "center",
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center",
     },
     header: {
         flexDirection:'row',
