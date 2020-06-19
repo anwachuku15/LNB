@@ -72,7 +72,7 @@ const PinnedAnnouncement = props => {
                     onPress={() => selectUserHandler(pinned.uid, pinned.admin)}
                     style={{alignSelf:'flex-start'}}
                 >
-                    <Image source={{uri: pinned.adminImage}} style={styles.avatar} />
+                    <Image source={{uri: pinned.adminImage, cache: 'force-cache'}} style={styles.avatar} />
                 </TouchableCmp>
 
                 <View style={{flex: 1}}>
