@@ -292,6 +292,11 @@ const PostDetailScreen = props => {
                     renderItem={renderComment}
                     onRefresh={loadComments}
                     refreshing={isRefreshing}
+                    ListEmptyComponent={() => (
+                        <View style={{flex:1, justifyContent:'center', alignItems:'center', paddingTop: 10}}>
+                            <Text style={{color:Colors.placeholder}}>Be the first to comment on {need.userName}'s need!</Text>
+                        </View>
+                    )}
                     ListHeaderComponent={() => (
                         <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightHeader}}}>
                             <TouchableCmp 
