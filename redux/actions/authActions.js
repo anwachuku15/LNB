@@ -411,8 +411,6 @@ export const getUser = (userId) => {
 }
 
 export const pinNeed = (needId, uid) => {
-    console.log(needId)
-    console.log(uid)
     db.collection('needs')
         .where('uid', '==', uid)
         .where('isPinned', '==', true)
