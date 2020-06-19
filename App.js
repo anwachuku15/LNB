@@ -1,7 +1,7 @@
 // import Fire from './Firebase/Fire'
 import React, { useEffect, useState } from 'react';
 import { AppearanceProvider, useColorScheme } from 'react-native-appearance'
-import { StatusBar, } from 'react-native'
+import { StatusBar } from 'react-native'
 import { Provider } from 'react-redux'
 import store from './redux/store';
 import { useFonts } from '@use-expo/font'
