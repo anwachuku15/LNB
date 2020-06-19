@@ -296,6 +296,8 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
     }
 }
 
+
+
 export const fetchConnections = (uid) => {
     return async (dispatch, getState) => {
         try {
@@ -325,6 +327,7 @@ export const fetchConnections = (uid) => {
                     website: doc.data().website,
                     connections: doc.data().connections
                 })
+                
 
                 if (userConnectionIds.includes(doc.id)) {
                     userConnections.push({
