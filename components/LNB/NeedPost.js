@@ -24,8 +24,8 @@ import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 import moment from 'moment'
 
-const WINDOW_WIDTH = Dimensions.get('window').width
-const WINDOW_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_HEIGHT = Dimensions.get('window').height
 const BASE_PADDING = 10
 
 let themeColor, pinnedMargin
@@ -100,7 +100,7 @@ const NeedPost = props => {
     //         Image.getSize(item.imageUrl, (width, height) => {
     //             if (item.imageUrl) {
     //                 // console.log(width, height)
-    //                 const fixedWidth = width > WINDOW_WIDTH ? width : width
+    //                 const fixedWidth = width > SCREEN_WIDTH ? width : width
     //                 const fixedHeight = height > 550 ? 550 : height
     //                 setImageWidth(width)
     //                 setImageHeight(height)
@@ -126,6 +126,7 @@ const NeedPost = props => {
                 }} 
                 key={item.id}
             >
+                
                 <View style={{flexDirection: 'row'}}>
 
                 <TouchableCmp 
@@ -410,7 +411,7 @@ const NeedPost = props => {
                                 resizeMethod='auto' 
                                 resizeMode='cover'
                                 height={300}
-                                width={320}
+                                width={SCREEN_WIDTH * 0.75}
                                 borderRadius={20}
                             />
                         </Lightbox>
@@ -495,9 +496,9 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     menuAvatar: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         marginLeft: 16
     },
     feed: {
@@ -508,9 +509,9 @@ const styles = StyleSheet.create({
         
     },
     avatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         marginRight: 16
     },
     name: {
@@ -524,6 +525,7 @@ const styles = StyleSheet.create({
     },
     post: {
         marginTop: 5,
+        marginRight: 14,
         fontSize: 14,
         lineHeight: 18
     },
@@ -533,8 +535,8 @@ const styles = StyleSheet.create({
         marginRight: 20
     },
     lightboxImage1: {
-        width: WINDOW_WIDTH,
-        height: WINDOW_HEIGHT - BASE_PADDING,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT - BASE_PADDING,
         alignSelf: 'center',
         borderRadius: 5,
         marginVertical: 10
@@ -548,8 +550,8 @@ const styles = StyleSheet.create({
     //     alignSelf: 'flex-start',
     // },
     lightboxImage: {
-        width: WINDOW_WIDTH * 0.9,
-        height: WINDOW_HEIGHT * 0.9,
+        width: SCREEN_WIDTH * 0.9,
+        height: SCREEN_HEIGHT * 0.9,
         alignSelf: 'center',
         borderRadius: 5,
         marginVertical: 10
