@@ -64,7 +64,8 @@ export default (state = initialState, action) => {
         case SET_ALL_USERS: {
             return {
                 ...state,
-                allUsers: action.allUsers
+                allUsers: action.allUsers,
+                isOnline: action.isOnline
             }
         }
         case SET_SELECTED_USER: {

@@ -298,13 +298,14 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
 
 
 
+
 export const fetchConnections = (uid) => {
     return async (dispatch, getState) => {
         try {
             const userConnectionIds = []
             const userConnections = []
             const allUsers = []
-
+            const isOnline = []
             const allConnections = await db.collection('connections').get()
             const users = await db.collection('users').orderBy('displayName', 'asc').get()
             
@@ -313,8 +314,6 @@ export const fetchConnections = (uid) => {
                     userConnectionIds.push(doc.id.replace(uid,''))
                 }
             })
-            
-            
 
             users.forEach(doc => {
                 allUsers.push({
@@ -325,9 +324,12 @@ export const fetchConnections = (uid) => {
                     bio: doc.data().bio,
                     imageUrl: doc.data().imageUrl,
                     website: doc.data().website,
-                    connections: doc.data().connections
+                    connections: doc.data().connections,
+                    isOnline: doc.data().isOnline,
                 })
-                
+                if (doc.data().isOnline === true) {
+                    isOnline.push(doc.data().userId)
+                }
 
                 if (userConnectionIds.includes(doc.id)) {
                     userConnections.push({
@@ -338,13 +340,16 @@ export const fetchConnections = (uid) => {
                         bio: doc.data().bio,
                         imageUrl: doc.data().imageUrl,
                         website: doc.data().website,
-                        connections: doc.data().connections
+                        connections: doc.data().connections,
+                        isOnline: doc.data().isOnline,
                     })
                 }
             })
+            console.log(isOnline)
             dispatch({
                 type: SET_ALL_USERS,
-                allUsers: allUsers
+                allUsers: allUsers,
+                isOnline: isOnline
             })
             dispatch({
                 type: SET_CONNECTIONS,
@@ -387,7 +392,7 @@ export const getUser = (userId) => {
         }
 
         if (userData.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = userData.data()
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, isOnline } = userData.data()
             // console.log(isConnected)
             dispatch({
                 type: SET_SELECTED_USER,
@@ -403,6 +408,7 @@ export const getUser = (userId) => {
                         bio: bio,
                         website: website
                     },
+                    isOnline: isOnline,
                     connections: connections,
                     pendingConnections: pendingConnections,
                     messages: messages,
@@ -570,7 +576,7 @@ export const connectReq = (authId, authName, selectedUserId) => {
                 .then(() => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = doc.data()
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, isOnline } = doc.data()
                             dispatch({
                                 type: SET_SELECTED_USER,
                                 selectedUser: {
@@ -585,6 +591,7 @@ export const connectReq = (authId, authName, selectedUserId) => {
                                         bio: bio,
                                         website: website
                                     },
+                                    isOnline: isOnline,
                                     connections: connections,
                                     pendingConnections: pendingConnections,
                                     messages: messages,
@@ -760,13 +767,14 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                     bio: selectedUserData.bio,
                     website: selectedUserData.website
                 },
+                isOnline: selectedUserData.isOnline,
                 connections: selectedUserData.connections + 1,
                 pendingConnections: selectedUserData.pendingConnections,
                 messages: selectedUserData.messages,
                 // likes: selectedUserData.likes
             }
         })
-        sendConnectionNotification(authId, authName, authImg, authHeadline, selectedUserId, selectedUserData.pushToken)
+        sendConnectionNotification(authId, authName, authImg, authHeadline, selectedUserId, selectedUserName, selectedUserData.imageUrl, selectedUserData.headline, selectedUserData.pushToken)
         // dispatch({
         //     type: SET_PENDING_CONNECTIONS,
         //     pendingConnections: authPendingState
@@ -774,7 +782,7 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
     }
 }
 
-const sendConnectionNotification = (authId, authName, authImg, authHeadline, selectedUserId, pushToken) => {
+const sendConnectionNotification = (authId, authName, authImg, authHeadline, selectedUserId, selectedName, selectedImg, selectedHeadline, pushToken) => {
     db.collection('notifications').add({
         timestamp: new Date().toISOString(),
         type: 'new connection',
@@ -784,6 +792,16 @@ const sendConnectionNotification = (authId, authName, authImg, authHeadline, sel
         senderHeadline: authHeadline,
         senderImage: authImg,
         read: false
+    })
+    db.collection('notifications').add({
+        timestamp: new Date().toISOString(),
+        type: 'new connection',
+        recipientId: authId,
+        senderId: selectedUserId,
+        senderName: selectedName,
+        senderHeadline: selectedHeadline,
+        senderImage: selectedImg,
+        read: true
     })
     let res = fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
@@ -875,6 +893,7 @@ export const setAnnouncements = () => {
                     admin: doc.data().admin,
                     adminHeadline: doc.data().adminHeadline,
                     adminImage: doc.data().adminImage,
+                    subject: doc.data().subject,
                     body: doc.data().body,
                     imageUrl: doc.data().imageUrl,
                     likeCount: doc.data().likeCount,
@@ -1219,6 +1238,7 @@ export const disconnect = (authId, selectedUserId) => {
                     bio: selectedUserData.bio,
                     website: selectedUserData.website
                 },
+                isOnline: selectedUserData.isOnline,
                 connections: selectedUserData.connections,
                 pendingConnections: selectedUserData.pendingConnections,
                 messages: selectedUserData.messages,
@@ -1259,7 +1279,7 @@ export const unrequest = (authId, selectedUserId) => {
                 .then(() => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
-                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin } = doc.data()
+                            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, isOnline } = doc.data()
                             dispatch({
                                 type: SET_SELECTED_USER,
                                 selectedUser: {
@@ -1274,6 +1294,7 @@ export const unrequest = (authId, selectedUserId) => {
                                         bio: bio,
                                         website: website
                                     },
+                                    isOnline: isOnline,
                                     connections: connections,
                                     pendingConnections: pendingConnections,
                                     messages: messages,
