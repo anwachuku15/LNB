@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     subject: {
         fontSize: 18,
         fontWeight: '500',
-        fontStyle: 'italic',
+        fontFamily: 'poppinsBold',
         color: 'black',
         marginTop: 10
     },
