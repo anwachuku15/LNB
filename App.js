@@ -12,11 +12,15 @@ import Colors from './constants/Colors'
 
 import NavContainer from './navigation/NavContainer'
 
+
 enableScreens()
 
 
 export default function App() {
   
+  
+
+
 
   const colorScheme = useColorScheme()
   if(colorScheme === 'dark') {
@@ -28,7 +32,10 @@ export default function App() {
   
   let [fontsLoaded] = useFonts({
     'open-sans': require('./assets/fonts/OpenSans-Regular.ttf'),
-    'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf')
+    'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf'),
+    'poppins': require('./assets/fonts/Poppins/Poppins-Regular.ttf'),
+    'poppinsItalic': require('./assets/fonts/Poppins/Poppins-Italic.ttf'),
+    'poppinsBold': require('./assets/fonts/Poppins/Poppins-Bold.ttf'),
   })
 
   const [isMounted, setIsMounted] = useState(true)
