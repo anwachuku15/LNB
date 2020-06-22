@@ -55,6 +55,11 @@ let themeColor
 let text
 let flatListRef
 const HomeScreen = props => {
+    // let uid = firebase.auth().currentUser.uid
+
+    
+
+
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         themeColor = 'black'
@@ -72,12 +77,27 @@ const HomeScreen = props => {
             AppState.removeEventListener('change', _handleAppStateChange)
         }
     },[])
+
+
+
     const _handleAppStateChange = nextAppState => {
         if ((appState === 'inactive' || 'background') && nextAppState === 'active') {
             console.log('App has come to the foreground')
+            db.doc(`users/${authUser.userId}`).set(
+                {isOnline: true},
+                {merge: true}
+            ).catch(err => console.log(err))
+        }
+        if ((appState === 'active' || 'foreground') && nextAppState === 'inactive') {
+            console.log('App is in the background')
+            db.doc(`users/${authUser.userId}`).set(
+                {isOnline: false},
+                {merge: true}
+            ).catch(err => console.log(err))
         }
         setAppState(nextAppState)
     }
+
     // PUSH NOTIFICATIONS
     useEffect(() => {
         registerForPushNotificationsAsync()
@@ -408,37 +428,40 @@ const HomeScreen = props => {
         ])
     }
 
+    const navToPostDetail = (needId) => {
+        props.navigation.push(
+            'PostDetail',
+            {
+                needId: needId,
+                from: 'HomeScreen'
+            }
+        )
+    }
 
+    const from = 'HomeScreen'
+    
     
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={() => {
-            props.navigation.navigate({
-                routeName: 'PostDetail',
-                params: {
-                    needId: item.id,
-                    from: 'HomeScreen'
-                }
-            })
-        }} useForeground>
-            <NeedPost 
-                navigation={props.navigation}
-                item={item} 
-                pinned={pinned}
-                pinHandler={pinHandler}
-                unpinHandler={unpinHandler}
-                selectUserHandler={selectUserHandler}
-                isDeletable={isDeletable}
-                setIsDeletable={setIsDeletable}
-                selectedNeed={selectedNeed}
-                setSelectedNeed={setSelectedNeed}
-                isModalVisible={isModalVisible}
-                setIsModalVisible={setIsModalVisible}
-                deleteHandler={deleteHandler}
-                commentButtonHandler={commentButtonHandler}
-                showNeedActions={showNeedActions}
-                setShowNeedActions={setShowNeedActions}
-            />
-        </TouchableCmp>
+        <NeedPost 
+            navigation={props.navigation}
+            navToPostDetail={navToPostDetail}
+            from={from}
+            item={item} 
+            pinned={pinned}
+            pinHandler={pinHandler}
+            unpinHandler={unpinHandler}
+            selectUserHandler={selectUserHandler}
+            isDeletable={isDeletable}
+            setIsDeletable={setIsDeletable}
+            selectedNeed={selectedNeed}
+            setSelectedNeed={setSelectedNeed}
+            isModalVisible={isModalVisible}
+            setIsModalVisible={setIsModalVisible}
+            deleteHandler={deleteHandler}
+            commentButtonHandler={commentButtonHandler}
+            showNeedActions={showNeedActions}
+            setShowNeedActions={setShowNeedActions}
+        />
     )
     
     
