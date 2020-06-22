@@ -26,8 +26,10 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
+import { Video } from 'expo-av'
+
 import Fire from '../../Firebase/Firebase'
-import { createNeed, createNeedNoImg } from '../../redux/actions/postsActions'
+import { createNeed } from '../../redux/actions/postsActions'
 import UserPermissions from '../../util/UserPermissions'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 import Lightbox from 'react-native-lightbox'
@@ -60,6 +62,7 @@ const CreatePostScreen = props => {
     
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
+    const [video, setVideo] = useState()
 
     // useEffect(() => {
     //     getPhotoPermission()
@@ -78,9 +81,10 @@ const CreatePostScreen = props => {
     const pickImage = async () => {
         UserPermissions.getCameraPermission()
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ImagePicker.MediaTypeOptions.All, // ImagePicker.MediaTypeOptions.Images & ImagePicker.MediaTypeOptions.Videos for Android
             allowsEditing: false,
-            aspect: [4,3]
+            aspect: [4,3],
+            videoExportPreset: 0
         })
 
         if(!result.cancelled) {
@@ -89,9 +93,13 @@ const CreatePostScreen = props => {
     }
     
 
-    const handlePost = async () => {
+    const handlePost = async (userName, body, image) => {
         try {
-            await dispatch(createNeed(userName, body, image))
+            if (image) {
+                await dispatch(createNeed(userName, body, image))
+            } else {
+                await dispatch(createNeed(userName, body, ''))
+            }
             setBody('')
             setImage(null)
             props.navigation.goBack()
@@ -101,18 +109,6 @@ const CreatePostScreen = props => {
         }
     }
 
-
-    const handlePostNoImg = async () => {
-        try {
-            await dispatch(createNeedNoImg(userName, body, ''))
-            setBody('')
-            setImage(null)
-            props.navigation.goBack()
-        } catch (err) {
-            alert(err)
-            console.log(err)
-        }
-    }
 
 
     return (
@@ -123,7 +119,7 @@ const CreatePostScreen = props => {
                         <Ionicons name='md-close' size={24} color={Colors.primary}/>
                     </TouchableOpacity>
                     <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
-                    <TouchableOpacity onPress={!image ? handlePostNoImg : handlePost} disabled={!body.trim().length && !image}>
+                    <TouchableOpacity onPress={() => handlePost(userName, body, image)} disabled={!body.trim().length && !image}>
                         <Text style={{fontWeight:'500', color: (!body.trim().length && !image) ? Colors.disabled : Colors.primary}}>Post</Text>
                     </TouchableOpacity>
                 </View>

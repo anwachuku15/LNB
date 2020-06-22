@@ -93,7 +93,6 @@ export const createNeed = (userName, body, localUri) => {
                 uid,
                 userImage,
                 timestamp: timestamp,
-                imageUrl: null,
                 commentCount: 0,
                 likeCount: 0
             })
@@ -110,7 +109,6 @@ export const createNeed = (userName, body, localUri) => {
                     userName: userName,
                     userImage: userImage,
                     body: body,
-                    imageUrl: null,
                     commentCount: 0,
                     likeCount: 0
                 }
@@ -119,42 +117,6 @@ export const createNeed = (userName, body, localUri) => {
     } 
 }
 
-export const createNeedNoImg = (userName, body) => {
-    return async (dispatch, getState) => {
-        const uid = getState().auth.userId
-        const userImage = getState().auth.credentials.imageUrl
-        const timestamp = moment(Date.now()).toISOString()
-        let postId
-        db.collection('needs')
-        .add({
-            userName,
-            body,
-            uid,
-            userImage,
-            timestamp: timestamp,
-            commentCount: 0,
-            likeCount: 0
-        })
-        .then(doc => {
-            postId = doc.id
-        })
-        .catch(err => console.log(err))
-        
-        dispatch({
-            type: CREATE_NEED_NOIMG,
-            postData: {
-                id: postId,
-                uid: uid,
-                timestamp: timestamp,
-                userName: userName,
-                userImage: userImage,
-                body: body,
-                commentCount: 0,
-                likeCount: 0
-            }
-        })
-    }
-}
 
 export const deleteNeed = (needId) => {
     db.doc(`/needs/${needId}`).delete()
