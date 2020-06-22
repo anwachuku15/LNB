@@ -11,11 +11,12 @@ import {
     ScrollView,
     TouchableOpacity,
     TouchableNativeFeedback,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    Switch
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import Input from '../../components/UI/Input'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 // REDUX
 import { updateProfile } from '../../redux/actions/authActions'
 import { useSelector, useDispatch } from 'react-redux'
@@ -26,6 +27,7 @@ import HeaderButton from '../../components/UI/HeaderButton'
 
 import UserPermissions from '../../util/UserPermissions'
 import * as ImagePicker from 'expo-image-picker'
+import { Alert } from 'react-native'
 
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
 // FORM VALIDATION REDUCER
@@ -67,11 +69,20 @@ let text
 const EditProfileScreen = props => {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState()
+    const auth = useSelector(state => state.auth)
+    const authWebsite = useSelector(state => state.auth.credentials.website)
     
-    
+    const [isInstagram, setIsInstagram] = useState(authWebsite.includes('instagram.com') ? true : false)
+    const [isTwitter, setIsTwitter] = useState(authWebsite.includes('twitter.com') ? true : false)
+    const [isLinkedIn, setIsLinkedIn] = useState(authWebsite.includes('linkedin.com') ? true : false)
+    const [isWebsite, setIsWebsite] = useState(
+        !authWebsite.includes('instagram.com') && 
+        !authWebsite.includes('linkedin.com') && 
+        !authWebsite.includes('twitter.com') && 
+        authWebsite !== '' ? true : false)
+    const [linkLabel, setLinkLabel] = useState('Link')
     
     const dispatch = useDispatch()
-    const auth = useSelector(state => state.auth)
     
     const [profilePic, setProfilePic] = useState(auth.credentials.imageUrl)
 
@@ -126,8 +137,37 @@ const EditProfileScreen = props => {
         } 
     }
 
+    const toggleInstagram = () => {
+        setIsInstagram(!isInstagram)
+        if (!isInstagram) {
+            setIsLinkedIn(false)
+            setIsWebsite(false)
+        } else setLinkLabel('Link')
+    }
+    const toggleLinkedIn = () => {
+        setIsLinkedIn(!isLinkedIn)
+        if (!isLinkedIn) {
+            setIsInstagram(false)
+            setIsWebsite(false)
+        } else setLinkLabel('Link')
+        
+    }
+    const toggleWebsite = () => {
+        setIsWebsite(!isWebsite)
+        if (!isWebsite) {
+            setIsInstagram(false)
+            setIsLinkedIn(false)
+        } else setLinkLabel('Link')
+    }
+
+
     const submitHandler = useCallback(async () => {
-        console.log('save!')
+        if ((isInstagram || isLinkedIn) && formState.inputValues.website.includes('.com/')) {
+            Alert.alert("You're doing too much!", 'All you need to provide is your username for this link. Try again.', [
+                { text: 'Okay'}
+            ])
+            return
+        }
         if (!formState.formIsValid) {
             Alert.alert('Invalid Information', 'Please check for errors', [
                 { text: 'Okay' }
@@ -137,11 +177,21 @@ const EditProfileScreen = props => {
         setError(null)
         setIsLoading(true)
         try {
+            let linkInput
+            if (isWebsite) {
+                linkInput = formState.inputValues.website
+            } else if (isInstagram) {
+                linkInput = 'instagram.com/' + formState.inputValues.website.replace(' ','')
+            } else if (isLinkedIn) {
+                linkInput = 'linkedin.com/in/' + formState.inputValues.website.replace(' ','')
+            } else if (!isInstagram && !isLinkedIn && !isWebsite) {
+                linkInput = ''
+            }
             await dispatch(updateProfile(
                 formState.inputValues.headline,
                 formState.inputValues.location,
                 formState.inputValues.bio,
-                formState.inputValues.website,
+                linkInput,
                 profilePic
             ))
             props.navigation.goBack()
@@ -246,27 +296,145 @@ const EditProfileScreen = props => {
                                     required
                                 />
 
-                                <Input
-                                    id='website'
-                                    website
-                                    label='LinkedIn'
-                                    errorText='Please enter a valid website'
-                                    keyboardType='default'
-                                    autoCapitalize='none'
-                                    autoCorrect
-                                    returnKeyType='next'
-                                    onInputChange={inputChangeHandler}
-                                    initialValue={auth.credentials.website}
-                                    initiallyValid={!!auth.credentials}
-                                    required
-                                />
+                                <View style={{flexDirection:'column'}}>
+                                    <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                                        <View style={{flexDirection:'column'}}>
+                                            <Text style={styles.label}>Instagram</Text>
+                                            <Switch
+                                                style={{marginTop: 10}}
+                                                value={isInstagram}
+                                                onValueChange={toggleInstagram}
+                                                trackColor={{false: Colors.darkSearch, true: Colors.primary}}
+                                                thumbColor={Colors.lightHeader}
+                                            />
+                                        </View>
+                                        <View style={{flexDirection:'column'}}>
+                                            <Text style={styles.label}>LinkedIn</Text>
+                                            <Switch
+                                                style={{marginTop: 10}}
+                                                value={isLinkedIn}
+                                                onValueChange={toggleLinkedIn}
+                                                trackColor={{false: Colors.darkSearch, true: Colors.primary}}
+                                                thumbColor={Colors.lightHeader}
+                                            />
+                                        </View>
+                                        <View style={{flexDirection:'column'}}>
+                                            <Text style={styles.label}>Website</Text>
+                                            <Switch
+                                                style={{marginTop: 10}}
+                                                value={isWebsite}
+                                                onValueChange={toggleWebsite}
+                                                trackColor={{false: Colors.darkSearch, true: Colors.primary}}
+                                                thumbColor={Colors.lightHeader}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {isLinkedIn && (
+                                    <Text style={styles.labelLinkedIn}>LINK (enter only your LinkedIn username)</Text>
+                                )}
+                                {isInstagram && (
+                                    <Text style={styles.labelLinkedIn}>LINK (enter only your Instagram username)</Text>
+                                )}
+                                {isWebsite && (
+                                    <Text style={styles.label}>LINK</Text>
+                                )}
+
+                                {/* {!isLinkedIn && !isInstagram && !isWebsite && (
+                                    <Text style={{...styles.label, color:'red'}}>Please selected one link to share</Text>
+                                )} */}
+                                {isInstagram && <View style={{flexDirection:'row'}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'flex-start', alignSelf:'center'}}>
+                                        <MaterialCommunityIcons 
+                                            name='instagram' 
+                                            size={24}
+                                            color='#C13584'
+                                            style={{marginRight:3}}
+                                        />
+                                        <Text style={{color:Colors.disabled, alignSelf:'center', fontWeight: 'bold', fontSize: 16, marginRight: 5}}>@</Text>
+                                    </View>
+                                    <View style={{flex:1}}>
+                                        <Input
+                                            id='website'
+                                            website
+                                            errorText='Please enter a valid website'
+                                            keyboardType='default'
+                                            autoCapitalize='none'
+                                            autoCorrect
+                                            returnKeyType='done'
+                                            onInputChange={inputChangeHandler}
+                                            initialValue={auth.credentials.website}
+                                            initiallyValid={!!auth.credentials}
+                                            required
+                                        />
+                                    </View>
+                                </View>}
+                                {isLinkedIn && <View style={{flexDirection:'row'}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'flex-start', alignSelf:'center'}}>
+                                        <MaterialCommunityIcons 
+                                            name='linkedin-box' 
+                                            size={24}
+                                            color='#2867B2'
+                                            // style={{marginRight:3}}
+                                        />
+                                        <Text style={{color:Colors.disabled, alignSelf:'center', fontWeight: 'bold', fontSize: 16, marginRight: 5}}>/</Text>
+                                    </View>
+                                    <View style={{flex:1}}>
+                                        <Input
+                                            id='website'
+                                            website
+                                            errorText='Please enter a valid website'
+                                            keyboardType='default'
+                                            autoCapitalize='none'
+                                            autoCorrect
+                                            returnKeyType='done'
+                                            onInputChange={inputChangeHandler}
+                                            initialValue={auth.credentials.website}
+                                            initiallyValid={!!auth.credentials}
+                                            required
+                                        />
+                                    </View>
+                                </View>}
+                                {isWebsite && <View style={{flexDirection:'row'}}>
+                                    <Ionicons 
+                                        name='md-link' 
+                                        size={24}
+                                        color={Colors.blue}
+                                        style={{marginRight: 5, alignSelf: 'center'}}
+                                    />
+                                    <View style={{flex:1}}>
+                                        <Input
+                                            id='website'
+                                            website
+                                            errorText='Please enter a valid website'
+                                            keyboardType='default'
+                                            autoCapitalize='none'
+                                            autoCorrect
+                                            returnKeyType='done'
+                                            onInputChange={inputChangeHandler}
+                                            initialValue={auth.credentials.website}
+                                            initiallyValid={!!auth.credentials}
+                                            required
+                                        />
+                                    </View>
+                                </View>}
+
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity 
+                                        style={{...styles.button, marginTop: 20, backgroundColor: Colors.disabled}} 
+                                        onPress={() => props.navigation.goBack()}
+                                    >
+                                        <Text style={{color:'white', fontWeight:'500'}}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
 
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity 
                                         style={{...styles.button, ...{marginTop: 20}}} 
                                         onPress={submitHandler}
                                     >
-                                        <Text style={{color:text, fontWeight:'500'}}>Save Changes</Text>
+                                        <Text style={{color:'black', fontWeight:'500'}}>Save Changes</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -320,6 +488,17 @@ const styles = StyleSheet.create({
         // shadowOpacity: 0.26,
         // zIndex: 10
     },
+    label: {
+        color: '#8A8F9E',
+        marginTop: 15,
+        fontSize: 12,
+        textTransform: 'uppercase'
+    },
+    labelLinkedIn: {
+        color: '#8A8F9E',
+        marginTop: 15,
+        fontSize: 12,
+    },
     headerTitle: {
         color: Colors.primary,
         fontFamily: 'open-sans-bold',
@@ -345,7 +524,7 @@ const styles = StyleSheet.create({
     },
     form: {
         marginBottom: 48,
-        marginHorizontal: 30
+        marginHorizontal: 30,
     },
     buttonContainer: {
         marginHorizontal: 10
