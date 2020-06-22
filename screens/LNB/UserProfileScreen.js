@@ -19,6 +19,7 @@ import {
     Dimensions,
     MaskedViewIOS
 } from 'react-native'
+import { Badge } from 'react-native-elements'
 import CustomModal from 'react-native-modal'
 import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
@@ -27,7 +28,7 @@ import { SharedElement } from 'react-navigation-shared-element'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, declineConnect, setLikes } from '../../redux/actions/authActions'
 import { fetchNeeds, getNeed, deleteNeed } from '../../redux/actions/postsActions'
 
 import Colors from '../../constants/Colors'
@@ -215,14 +216,33 @@ const UserProfileScreen = props => {
         if (user) {
 
             return (
-                <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                <View>
+                    <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                    {/* {user.isOnline && <Badge
+                        containerStyle={{position: 'absolute', bottom: 10, right: 30,}}
+                        Component={() => <View style={{borderRadius: 10, padding:10, backgroundColor:Colors.green}}/>}
+                    />} */}
+                </View>
             )
         }
     }, [user])
 
+    const navToPostDetail = (needId) => {
+        props.navigation.push(
+            'PostDetail',
+            {
+                needId: needId,
+                from: 'UserProfile'
+            }
+        )
+    }
+
+    const from = 'UserProfile'
+
     const memoizedPinnedNeed = useMemo(() => {
         return (
             <PinnedNeed
+                navToPostDetail={navToPostDetail}
                 pinned={pinned}
                 pinHandler={pinHandler}
                 unpinHandler={unpinHandler}
@@ -233,7 +253,6 @@ const UserProfileScreen = props => {
                 setIsModalVisible={setIsModalVisible}
                 deleteHandler={deleteHandler}
                 commentButtonHandler={commentButtonHandler}
-                navToPostDetail={navToPostDetail}
                 showNeedActions={showNeedActions}
             />
         )
@@ -410,26 +429,15 @@ const UserProfileScreen = props => {
 
     
 
-    const navToPostDetail = (needId) => {
-        props.navigation.push(
-            'PostDetail',
-            {
-                needId: needId,
-                from: 'UserProfile'
-            }
-        )
-    }
+    
     
 
     const renderItem = ({item}) => (
-        <TouchableCmp 
-            onPress={() => {
-                navToPostDetail(item.id)
-            }}
-        >
             <NeedPost 
                 item={item} 
+                navToPostDetail={navToPostDetail}
                 navigation={props.navigation}
+                from={from}
                 screen={screen}
                 pinned={pinned}
                 pinHandler={pinHandler}
@@ -444,10 +452,8 @@ const UserProfileScreen = props => {
                 deleteHandler={deleteHandler}
                 commentButtonHandler={commentButtonHandler}
                 showNeedActions={showNeedActions}
-                navToPostDetail={navToPostDetail}
                 setShowNeedActions={setShowNeedActions}
             />
-        </TouchableCmp>
     )
 
 
@@ -486,9 +492,12 @@ const UserProfileScreen = props => {
 
 
     const EditProfileButton = () => (
-        <TouchableCmp onPress={() => {props.navigation.navigate('EditProfile')}} style={{...styles.editProfileButton}}>
+        <TouchableCmp 
+            onPress={() => {props.navigation.navigate('EditProfile')}} 
+            style={{...styles.editProfileButton, backgroundColor: themeColor, borderWidth: 0.5, borderColor: scheme==='dark' ? Colors.placeholder : Colors.disabled}}
+        >
             <View key={userId}>
-                <Text style={{color:Colors.green, fontSize:12, alignSelf:'center'}}>Edit Profile</Text>
+                <Text style={{color:text, fontSize:12, fontWeight: 'bold', alignSelf:'center'}}>Edit Profile</Text>
             </View>
         </TouchableCmp>
     )
@@ -501,19 +510,21 @@ const UserProfileScreen = props => {
             {user && (
                 <View style={styles.screen}>
                     
-                    
                         <ImageBackground
                             source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
                             style={[
                                 StyleSheet.absoluteFill, {
                                     width: SCREEN_WIDTH,
-                                    height: SCREEN_HEIGHT * 0.4,
+                                    height: SCREEN_HEIGHT * 0.5,
                                     opacity: 0.4,
                                 },
                             ]}
                             blurRadius={10}
                         >
-                            <LinearGradient colors={[themeColor, 'transparent', themeColor,]} style={{position: 'absolute', left: 0, right: 0, top: 0, height: SCREEN_HEIGHT * 0.4}}/>
+                            <LinearGradient 
+                                colors={[themeColor, 'transparent', themeColor,]} 
+                                style={{position: 'absolute', left: 0, right: 0, top: 0, height: SCREEN_HEIGHT * 0.5}}
+                            />
                         </ImageBackground>
 
                     <FlatList
@@ -532,8 +543,8 @@ const UserProfileScreen = props => {
                         renderItem={renderItem}
                         ListHeaderComponent={() => (
                             <View>
-                                
-                                <View style={!pinned && {borderBottomColor:'#C3C5CD', borderBottomWidth:0.5, paddingVertical:5}}>
+                                {/* #C3C5CD */}
+                                <View style={!pinned && {borderBottomColor:Colors.placeholder, borderBottomWidth:StyleSheet.hairlineWidth, paddingVertical:5}}>
                                 
                                     <View style={{paddingHorizontal:20, paddingTop: 10, paddingBottom: 0, justifyContent:'center'}}>
 
@@ -576,7 +587,7 @@ const UserProfileScreen = props => {
                                                 <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
                                                 {user.credentials.website.length > 3 && (
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={{alignSelf:'center', color: Colors.placeholder}}> | </Text>
+                                                        <Text style={{alignSelf:'center', marginHorizontal: 5, color: Colors.placeholder}}>|</Text>
                                                         <WebsiteIcon />
                                                     </View>
                                                 )}
@@ -599,7 +610,7 @@ const UserProfileScreen = props => {
                                         {/* STATS */}
                                         <View style={{flex:1, flexDirection:'row', justifyContent:'space-around', marginBottom: 15 }}>
                                             <View style={{alignItems:'center'}}>
-                                                <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.primary : '#E7AD04'}}>{userPosts.length}</Text>
+                                                <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{userPosts.length}</Text>
                                                 <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{userPosts.length === 1 ? 'Post' : 'Posts'}</Text>
                                             </View>
                                             <View style={{alignItems:'center'}}>
@@ -614,7 +625,7 @@ const UserProfileScreen = props => {
                                                         )
                                                     }}
                                                 >
-                                                    <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.primary : '#E7AD04'}}>{connections}</Text>
+                                                    <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{connections}</Text>
                                                     <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{connections === 1 ? 'Connection' : 'Connections'}</Text>
                                                 </TouchableCmp>
                                             </View>
@@ -624,16 +635,28 @@ const UserProfileScreen = props => {
                                         {/* BUTTONS */}
                                         {userId !== authUser.userId && (
                                             <View>
-                                                <View style={{flexDirection:'row', justifyContent:'space-between', paddingHorizontal: 8}}>
+                                                <View style={{flexDirection:'row', justifyContent:'space-between', paddingTop: 8, paddingBottom: accept ? 0 : 15}}>
                                                     {accept && (
-                                                        <TouchableCmp 
-                                                            onPress={() => {
-                                                                dispatch(confirmConnect(authUser.userId, authName, userId, user.credentials.displayName))
-                                                                setAccept(false)
-                                                            }} 
-                                                            style={{...styles.connectButton, ...{borderColor: Colors.green}}}>
-                                                            <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
-                                                        </TouchableCmp>
+                                                        <View style={{flexDirection:'row', justifyContent:'space-between', width: '40%'}}>
+                                                            <TouchableCmp 
+                                                                onPress={() => {
+                                                                    dispatch(declineConnect(authUser.userId, userId, user.credentials.displayName))
+                                                                    setAccept(false)
+                                                                    setConnect(true)
+                                                                }} 
+                                                                style={{...styles.respondButton, borderColor: Colors.redcrayola}}>
+                                                                <Text style={{color:Colors.redcrayola, fontSize:14, alignSelf:'center'}}>Decline</Text>
+                                                            </TouchableCmp>
+                                                            <TouchableCmp 
+                                                                onPress={() => {
+                                                                    dispatch(confirmConnect(authUser.userId, authName, userId, user.credentials.displayName))
+                                                                    setAccept(false)
+                                                                    setConnected(true)
+                                                                }} 
+                                                                style={{...styles.respondButton, borderColor: Colors.green}}>
+                                                                <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
+                                                            </TouchableCmp>
+                                                        </View>
                                                     )}
                                                     {requested && (
                                                         <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
@@ -653,7 +676,7 @@ const UserProfileScreen = props => {
                                                         </TouchableCmp>
                                                     )}
                                                     {connected && (
-                                                        <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.primary}}>
+                                                        <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.primary, backgroundColor: 'white'}}>
                                                             <Text style={{color:Colors.primary, fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connected</Text>
                                                         </TouchableCmp>
                                                     )}
@@ -672,9 +695,16 @@ const UserProfileScreen = props => {
                                                     >
                                                         <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Message</Text>
                                                     </TouchableCmp>
-                                                    
                                                 </View>
+                                                {accept && (
+                                                    <Text style={{width: '40%', paddingBottom: 15, fontSize: 12, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>
+                                                        {user.credentials.displayName} has requested to connect with you.
+                                                    </Text>
+                                                )}
                                             </View>
+                                        )}
+                                        {userId === authUser.userId && (
+                                            <EditProfileButton />
                                         )}
                                         
                                         {/* EDIT PROFILE, BIO, NEEDCOUNT, CONNECTIONS, LOCATION */}
@@ -696,11 +726,7 @@ const UserProfileScreen = props => {
                                 {/* PINNED NEED */}
                                     {pinned && (
                                         <View style={{}}>
-                                            <TouchableCmp onPress={() => {
-                                                navToPostDetail(pinned.id)
-                                            }} useForeground>
-                                                {memoizedPinnedNeed}
-                                            </TouchableCmp>
+                                            {memoizedPinnedNeed}
                                             <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
                                             <View style={{
                                                 borderBottomWidth: pinned ? 15 : StyleSheet.hairlineWidth, 
@@ -833,9 +859,27 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontFamily: 'open-sans-bold'
     },
+    editProfileButton: {
+        paddingVertical: 10,
+        marginBottom: 15,
+        width: '40%',
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 10, 
+        alignSelf: 'center'
+    },
     connectButton: {
         paddingVertical: 10,
         width: '40%',
+        marginVertical: 5,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 10
+    },
+    respondButton: {
+        paddingVertical: 10,
+        width: '43%',
         marginVertical: 5,
         justifyContent: 'center',
         borderWidth: 1,
