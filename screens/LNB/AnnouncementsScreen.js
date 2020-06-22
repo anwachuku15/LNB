@@ -305,7 +305,7 @@ const AnnouncementsScreen = props => {
                     </View>
 
                     {item.subject && (
-                        <Text style={styles.subject}>{item.subject}</Text>
+                        <Text style={{...styles.subject, color:text}}>{item.subject}</Text>
                     )}
 
                     <Hyperlink
@@ -532,10 +532,9 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
     subject: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '500',
-        fontStyle: 'italic',
-        color: 'black',
+        fontFamily: 'poppinsBold',
         marginTop: 10
     },
     post: {
