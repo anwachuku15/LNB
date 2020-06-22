@@ -18,7 +18,7 @@ import {
     ActivityIndicator
 } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
-import { ListItem } from 'react-native-elements'
+import { ListItem, Badge } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { getUser, markMessageNotificationsAsRead } from '../../redux/actions/authActions'
@@ -79,6 +79,7 @@ const MessagesScreen = props => {
     const uid = useSelector(state => state.auth.userId)
     const authImg = useSelector(state => state.auth.credentials.imageUrl)
     const allUsers = useSelector(state => state.auth.allUsers)
+    const isOnline = useSelector(state => state.auth.isOnline)
     const groupChats = useSelector(state => state.auth.groupChats)
     const [chats, setChats] = useState()
     const [isLoading, setIsLoading] = useState(false)
@@ -94,7 +95,6 @@ const MessagesScreen = props => {
     
 
     const loadChats = useCallback(async () => {
-        // setIsLoading(true)
         try {
             await dispatch(markMessageNotificationsAsRead())
             let userChats = []
@@ -119,7 +119,7 @@ const MessagesScreen = props => {
                                                                                 chatWith: {
                                                                                     uid: chatWithId,
                                                                                     name: name,
-                                                                                    image: userImage
+                                                                                    image: userImage,
                                                                                 },
                                                                                 lastMessageText: messages[messages.length-1].text,
                                                                                 lastMessageSenderId: messages[messages.length-1].user._id,
@@ -227,7 +227,14 @@ const MessagesScreen = props => {
         >
             <ListItem
                 containerStyle={{backgroundColor:background}}
-                leftAvatar={{source: {uri: item.imageUrl}}}
+                leftAvatar={{
+                    source: {uri: item.imageUrl, cache: 'force-cache'},
+                    containerStyle: {
+                        height: 64,
+                        width: 64,
+                        borderRadius: 32
+                    },
+                }}
                 title={
                     <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
                 }
@@ -270,6 +277,16 @@ const MessagesScreen = props => {
             }
         }}>
             <ListItem
+                leftAvatar={{
+                    source: {uri: item.chatWith ? item.chatWith.image : authImg},
+                    // containerStyle: {
+                    //     height: 46,
+                    //     width: 46,
+                    //     borderRadius: 23,
+                    //     borderWidth: item.chatWith.isOnline ? 1 : 0,
+                    //     borderColor: item.chatWith.isOnline && Colors.green
+                    // },
+                }}
                 containerStyle={{backgroundColor: item.lastRead < item.lastMessageTimestamp ? 'rgba(251, 188, 4, 0.4)' : background}}
                 title={
                     <View style={{flexDirection:'row', justifyContent:'space-between'}}>
@@ -299,7 +316,6 @@ const MessagesScreen = props => {
                         )}
                     </View>
                 }
-                leftAvatar={{source: {uri: item.chatWith ? item.chatWith.image : authImg}}}
                 bottomDivider
             />
         </TouchableCmp>
