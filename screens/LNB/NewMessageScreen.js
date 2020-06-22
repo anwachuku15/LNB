@@ -150,7 +150,6 @@ const NewMessageScreen = props => {
             name: userName,
             userImage: userImage
         }
-        members.push(newMember)
         chatMembers.push(newMember)
         setChatMembers(chatMembers)
 
@@ -348,7 +347,7 @@ const NewMessageScreen = props => {
                         style={styles.chatButton}
                         onPress={
                             chatMembers.length === 1
-                            ? () => navToChatScreen(chatMembers[0].userId, chatMembers[0].userName, chatMembers[0].userImage)
+                            ? () => navToChatScreen(chatMembers[0].uid, chatMembers[0].name, chatMembers[0].userImage)
                             : () => toggleModal()
                         }
                     >
