@@ -1,5 +1,7 @@
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
+import * as MediaLibrary from 'expo-media-library'
+
 
 class UserPermissions {
     getCameraPermission = async () => {
@@ -11,6 +13,12 @@ class UserPermissions {
             }
         }
     }
+    
+  
+
+
+    // MEDIA LIBRARY METHODS FOR THE FUTURE...
+    // saveToLibaryAsync(localUri)
 }
 
 export default new UserPermissions()
