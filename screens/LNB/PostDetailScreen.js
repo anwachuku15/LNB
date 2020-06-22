@@ -336,6 +336,12 @@ const PostDetailScreen = props => {
                                     null
                                 )}
                                 <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                                    <TouchableCmp onPress={() => {}}>
+                                        <View style={{flexDirection:'row'}}>
+                                            <MaterialIcons name='comment' size={24} color={Colors.green} style={{}} />
+                                            {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}
+                                        </View>
+                                    </TouchableCmp>
                                     <TouchableCmp onPress={isLiked ? unlikeHandler : likeHandler}>
                                         <View style={{flexDirection:'row'}}>
                                             <MaterialCommunityIcons name={isLiked ? 'thumb-up' : 'thumb-up-outline'} size={24} color={Colors.pink} style={{marginRight: 7}} />
@@ -354,12 +360,7 @@ const PostDetailScreen = props => {
                                             )}
                                         </View>
                                     </TouchableCmp>
-                                    <TouchableCmp onPress={() => {}}>
-                                        <View style={{flexDirection:'row'}}>
-                                            <MaterialIcons name='comment' size={24} color={Colors.green} style={{}} />
-                                            {/* {commentCount > 0 && <Text style={{color:Colors.disabled, alignSelf:'center', marginLeft: 7}}>{commentCount}</Text>} */}
-                                        </View>
-                                    </TouchableCmp>
+                                    
                                 </View>
                             </View>
                         </View>
