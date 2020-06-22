@@ -126,7 +126,7 @@ const NeedPost = props => {
                 }} 
                 key={item.id}
             >
-                
+                <TouchableCmp onPress={() => navToPostDetail(item.id)}>
                 <View style={{flexDirection: 'row'}}>
 
                 <TouchableCmp 
@@ -421,6 +421,7 @@ const NeedPost = props => {
                     {showNeedActions && item.id && (<NeedActions needId={item.id} leaveComment={() => commentButtonHandler(item.id, item.userName)}/>)}
                 </View>
                 </View>
+                </TouchableCmp>
             </View>
         )
     )

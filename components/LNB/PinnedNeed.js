@@ -57,6 +57,7 @@ const PinnedNeed = props => {
     const { 
         item,
         screen,
+        navToPostDetail,
         pinned, 
         pinHandler,
         unpinHandler,
@@ -67,7 +68,6 @@ const PinnedNeed = props => {
         setIsModalVisible,
         deleteHandler,
         commentButtonHandler,
-        navToPostDetail,
         showNeedActions,
         // setShowNeedActions
     } = props
@@ -104,15 +104,17 @@ const PinnedNeed = props => {
             style={{
                 borderBottomWidth: StyleSheet.hairlineWidth, 
                 borderBottomColor: pinned ? pinnedMargin : Colors.placeholder,
+                backgroundColor: themeColor
             }}
         >
+            <TouchableCmp style={{backgroundColor: themeColor}} onPress={() => navToPostDetail(pinned.id)}>
             <View 
                 style={{
                     ...styles.feedItem, 
                     flexDirection:'column', 
                     
                     backgroundColor: themeColor,
-                    borderTopColor:Colors.placeholder, borderTopWidth:0.5, marginTop: 5
+                    borderTopColor:Colors.placeholder, borderTopWidth:0.5
                 }} 
                 key={pinned.id}>
                 {pinned &&
@@ -360,7 +362,7 @@ const PinnedNeed = props => {
                 </View>
                 
             </View>
-        
+            </TouchableCmp>
         
         </View>
     )
