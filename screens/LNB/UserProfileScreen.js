@@ -659,8 +659,8 @@ const UserProfileScreen = props => {
                                                         </View>
                                                     )}
                                                     {requested && (
-                                                        <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, ...{borderColor: Colors.disabled}}}>
-                                                            <Text style={{color:Colors.disabled, fontSize:14, alignSelf:'center'}}>Requested</Text>
+                                                        <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.placeholder, }}>
+                                                            <Text style={{color:Colors.placeholder, fontSize:14, fontWeight:'bold', alignSelf:'center'}}>Requested</Text>
                                                         </TouchableCmp>
                                                     )}
                                                     {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}

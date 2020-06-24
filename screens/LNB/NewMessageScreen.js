@@ -74,65 +74,7 @@ const NewMessageScreen = props => {
         // onEndReached - https://reactnative.dev/docs/flatlist#onendreached
         flatListRef.current.scrollToEnd()
     }
-    
-    // let hits = []
-    // let searchResults = []
-    // let members = []
-    
-    // const loadIndex = useCallback(async () => {
-    //     index.setSettings({
-    //         customRanking: [
-    //             'asc(newData.name)'
-    //         ],
-    //         ranking: [
-    //             'custom',
-    //             'typo',
-    //             'geo',
-    //             'words',
-    //             'filters',
-    //             'proximity',
-    //             'attribute',
-    //             'exact'
-    //         ]
-    //     }).then(() => {
-    //         index.browseObjects({
-    //             query: '',
-    //             batch: batch => {
-    //                 hits = hits.concat(batch)
-    //             }
-    //         }).then(() => {
-    //             hits.forEach(hit => {
-    //                 searchResults.push(hit.newData)
-    //             })
-    //             setResults(searchResults)
-    //         })
-    //     }).catch(err => console.log(err))
-    // }, [])
-
-    // useEffect(() => {
-    //     if (props.navigation.isFocused) {
-    //         loadIndex()
-    //     }
-    // }, [loadIndex])
-
-
-
-    // const updateSearch = (text) => {
-    //     setSearch(text)
-    //     const query = text
-    //     index.browseObjects({
-    //         query: query.length > 0 ? query : '',
-    //         batch: batch => {
-    //             hits = hits.concat(batch)
-    //         }
-    //     }).then(() => {
-    //         hits.forEach(hit => {
-    //             searchResults.push(hit.newData)
-    //         })
-    //         setResults(searchResults)
-    //     }).catch(err => console.log(err))
-    // }
-
+   
     const updateSearch = (text) => {
         setSearch(text)
         const newResults = allUsers.filter(result => {
