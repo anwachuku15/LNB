@@ -571,6 +571,18 @@ export const connectReq = (authId, authName, selectedUserId) => {
             const outgoing = {
                 outgoingRequests: authOutgoingReq
             }
+            db.doc(`/users/${authId}`)
+                .update(outgoing)
+                .then(() => {
+                    db.doc(`/users/${authId}`).get()
+                    .then(doc => {
+                        dispatch(updateOutgoingRequests(doc.data().outgoingRequests))
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+                
             db.doc(`/users/${selectedUserId}`)
                 .update(pending)
                 .then(() => {
@@ -619,17 +631,7 @@ export const connectReq = (authId, authName, selectedUserId) => {
                 .catch(err => {
                     console.error(err)
                 })
-            db.doc(`/users/${authId}`)
-                .update(outgoing)
-                .then(() => {
-                    db.doc(`/users/${authId}`).get()
-                    .then(doc => {
-                        dispatch(updateOutgoingRequests(doc.data().outgoingRequests))
-                    })
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+            
         }
     }
 }
