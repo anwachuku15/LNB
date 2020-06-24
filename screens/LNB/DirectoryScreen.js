@@ -13,12 +13,13 @@ import {
     FlatList,
     Alert
 } from 'react-native'
+import CustomModal from 'react-native-modal'
 import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
-import { connectReq, unrequest, confirmConnect, disconnect, declineConnect, getUser } from '../../redux/actions/authActions'
+import { connectReq, unrequest, fetchConnections, confirmConnect, disconnect, declineConnect, getUser } from '../../redux/actions/authActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
@@ -61,45 +62,36 @@ const DirectoryScreen = props => {
     const userConnectionIds = useSelector(state => state.auth.userConnectionIds)
     const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
+    
+    const [requestedUsers, setRequestedUsers] = useState(outgoingRequests)
+    const [connectedUsers, setConnectedUsers] = useState(userConnectionIds)
+    const [mounted, setMounted] = useState(true)
 
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
 
     const searchInput = useRef(null)
-    
-    // let hits = []
-    // let searchResults = []
 
-    // Algolia Search
-    // const loadIndex = useCallback(async () => {
-    //     index.setSettings({
-    //         customRanking: [
-    //             'asc(newData.name)'
-    //         ],
-    //         ranking: [
-    //             'custom',
-    //             'typo',
-    //             'geo',
-    //             'words',
-    //             'filters',
-    //             'proximity',
-    //             'attribute',
-    //             'exact'
-    //         ]
-    //     }).then(() => {
-    //         index.browseObjects({
-    //             query: '',
-    //             batch: batch => {
-    //                 hits = hits.concat(batch)
-    //             }
-    //         }).then(() => {
-    //             hits.forEach(hit => {
-    //                 searchResults.push(hit.newData)
-    //             })
-    //             setResults(searchResults)
-    //         })
-    //     }).catch(err => console.log(err))
-    // }, [])
+    const loadAllUsers = useCallback(async () => {
+        try {
+            await dispatch(fetchConnections(authId))
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch])
+
+
+    const connectReqHandler = useCallback(async (item) => {
+        try {
+            await dispatch(connectReq(authId, authName, item.uid))
+            requestedUsers.push(item.uid)
+            setRequestedUsers(requestedUsers)
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch, setRequestedUsers, ])
+
+
     
 
 
@@ -142,7 +134,11 @@ const DirectoryScreen = props => {
             {
                 text: 'Yes',
                 style: 'destructive',
-                onPress: () => {dispatch(disconnect(authId, selectedUserId))}
+                onPress: () => {
+                    dispatch(disconnect(authId, selectedUserId))
+                    connectedUsers.splice(connectedUsers.indexOf(selectedUserId), 1)
+                    setConnectedUsers(connectedUsers)
+                }
             }
         ])
     }
@@ -156,7 +152,11 @@ const DirectoryScreen = props => {
             {
                 text: 'Remove',
                 style: 'destructive',
-                onPress: () => {dispatch(unrequest(authId, selectedUserId))}
+                onPress: () => {
+                    dispatch(unrequest(authId, selectedUserId))
+                    requestedUsers.splice(requestedUsers.indexOf(selectedUserId), 1)
+                    setRequestedUsers(requestedUsers)
+                }
             }
         ])
     }
@@ -201,17 +201,20 @@ const DirectoryScreen = props => {
                 }
                 rightElement={item.uid !== authId ? (
                     <View style={styles.buttonContainer}>
-                        {userConnectionIds && !userConnectionIds.includes(item.uid) && !outgoingRequests.includes(item.uid) && !incomingRequests.includes(item.uid) && (
+                        {userConnectionIds && outgoingRequests && incomingRequests &&
+                        !userConnectionIds.includes(item.uid) && 
+                        !incomingRequests.includes(item.uid) && 
+                        !requestedUsers.includes(item.uid) && (
                             <TouchableCmp
                                 style={styles.connectButton}
                                 onPress={() => {
-                                    dispatch(connectReq(authId, authName, item.uid))
+                                    connectReqHandler(item)
                                 }}
                             >
                                 <Text style={styles.connectText}>Connect</Text>
                             </TouchableCmp>
                         )}
-                        {outgoingRequests.includes(item.uid) && (
+                        {(outgoingRequests.includes(item.uid) || requestedUsers.includes(item.uid)) && (
                             <TouchableCmp
                                 style={styles.requestedButton}
                                 onPress={() => {
@@ -248,7 +251,7 @@ const DirectoryScreen = props => {
                                 </TouchableCmp>
                             </View>
                         )}
-                        {userConnectionIds.includes(item.uid) && (
+                        {(userConnectionIds.includes(item.uid) || connectedUsers.includes(item.uid)) && (
                             <TouchableCmp
                                 style={styles.connectedButton}
                                 onPress={() => {
@@ -259,7 +262,6 @@ const DirectoryScreen = props => {
                             </TouchableCmp>
                         )}
                         <TouchableCmp
-                            // style={userConnectionIds.includes(item.uid) ? styles.messageButton : styles.messageButtonOutline}
                             style={styles.messageButton}
                             onPress={async () => {
                                 await dispatch(getUser(item.uid))
@@ -272,12 +274,8 @@ const DirectoryScreen = props => {
                                 )
                             }}
                         >
-                            {/* <Text style={styles.messageText}>Message </Text> */}
-                            <MaterialIcons
-                                name='mail-outline'
-                                color='white'
-                                size={20}
-                            />
+                            <Text style={styles.messageText}>Message</Text>
+                            
                         </TouchableCmp>
                     </View>
                 ) : (null)}
@@ -339,6 +337,92 @@ const DirectoryScreen = props => {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
             />
+            {/* <CustomModal
+                swipeDirection='down'
+                onSwipeCancel={() => setIsModalVisible(!isModalVisible)}
+                animationIn='slideInUp'
+                animationOut='slideOutDown'
+                style={{marginBottom: 0}}
+                isVisible={isModalVisible}
+                // animationType='slide' transparent={true} visible={isModalVisible}
+            >
+                <View style={styles.modalView}>
+                    <View style={{...styles.modal, backgroundColor: scheme==='dark' ? '#141414' : 'white'}}>
+                        <View style={{
+                            alignSelf: 'center',
+                            marginTop: 7,
+                            marginBottom: 10,
+                            width: '10%', 
+                            borderRadius: 50, 
+                            height: 5,
+                            backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, 
+                        }}/>
+
+                        {userConnectionIds && selectedNeed &&
+                            selectedNeed.uid !== authId &&
+                            !userConnectionIds.includes(selectedNeed.uid) && 
+                            !outgoingRequests.includes(selectedNeed.uid) && 
+                            !incomingRequests.includes(selectedNeed.uid) && (
+                                <TouchableCmp
+                                    style={styles.modalButton}
+                                    onPress={() => {
+                                        dispatch(connectReq(authId, authName, selectedNeed.uid))
+                                    }}
+                                >
+                                    <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                        <Ionicons
+                                            name='md-person-add' 
+                                            color={Colors.blue}
+                                            size={28} 
+                                            style={{marginRight: 26}}
+                                        />
+                                        <Text style={{...styles.modalButtonText, color: Colors.blue}}>Connect with {selectedNeed.userName}</Text>
+                                    </View>
+                                </TouchableCmp>
+                            )
+                        }
+                        {userConnectionIds && selectedNeed && userConnectionIds.includes(selectedNeed.uid) && (
+                            <TouchableCmp
+                                style={styles.modalButton}
+                                onPress={() => {
+                                    disconnectHandler(authId, selectedNeed.uid, selectedNeed.userName)
+                                }}
+                            >
+                                <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
+                                    <SimpleLineIcons
+                                        name='user-unfollow'
+                                        color={Colors.disabled}
+                                        size={28}
+                                        style={{marginRight: 24}}
+                                    />
+                                    <Text style={{...styles.modalButtonText, color: scheme==='dark' ? Colors.placeholder : Colors.darkSearch}}>Disconnect with {selectedNeed.userName}</Text>
+                                </View>
+                            </TouchableCmp>
+                        )}
+                        
+
+
+                        
+
+                        <TouchableCmp
+                            style={{marginTop: 10, backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, borderRadius: 20, padding: 12}}
+                            onPress={() => {
+                                setIsModalVisible(!isModalVisible)
+                                setSelectedNeed()
+                            }}
+                        >
+                            <Text style={{
+                                ...styles.modalButtonText, 
+                                fontWeight:'bold', 
+                                textAlign:'center', 
+                                color: scheme==='dark' ? 'white' : 'black'
+                            }}>
+                                Cancel
+                            </Text>
+                        </TouchableCmp>
+                    </View>
+                </View>
+            </CustomModal> */}
         </View>
     )
 }
@@ -360,15 +444,15 @@ const styles = StyleSheet.create({
     },
     messageButton: {
         marginTop: 5,
-        paddingVertical: 5,
+        paddingVertical: 8,
         flexDirection: 'row',
         alignItems:'center',
         justifyContent: 'center',
         backgroundColor: Colors.blue,
         borderColor: Colors.blue,
         borderWidth: 1,
-        borderRadius: 50,
-        width: '60%',
+        borderRadius: 10,
+        width: '100%',
         alignSelf: 'center'
     },
     messageButtonOutline: {
@@ -401,7 +485,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary,
         borderColor: Colors.primary,
         borderWidth: 1,
-        borderRadius: 50,
+        borderRadius: 10,
     },
     connectText: {
         alignSelf:'center',
@@ -416,7 +500,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderColor: Colors.primary,
         borderWidth: 1,
-        borderRadius: 50,
+        borderRadius: 10,
     },
     connectedText: {
         alignSelf:'center',
@@ -458,16 +542,16 @@ const styles = StyleSheet.create({
     },
     requestedButton: {
         // height: 24,
-        paddingVertical: 5,
+        paddingVertical: 8,
         marginVertical: 5,
         justifyContent: 'center',
-        borderColor: Colors.disabled,
+        borderColor: Colors.placeholder,
         borderWidth: 1,
-        borderRadius: 50,
+        borderRadius: 10,
     },
     requestedText: {
         alignSelf:'center',
-        color: Colors.disabled,
+        color: Colors.placeholder,
         fontSize: 12, 
         fontWeight: 'bold'
     },

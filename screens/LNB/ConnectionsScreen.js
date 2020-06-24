@@ -65,6 +65,23 @@ const ConnectionsScreen = props => {
 
     const searchInput = useRef(null)
     
+    const loadConnections = useCallback(async () => {
+        try {
+            await dispatch(fetchConnections(userId))
+        } catch (err) {
+            console.log(err)
+        }
+    }, [dispatch])
+
+    useEffect(() => {
+        const willFocusSub = props.navigation.addListener(
+            'willFocus', loadConnections
+        )
+        return () => {
+            willFocusSub
+        }
+    }, [dispatch, loadConnections])
+
 
     const updateSearch = (text) => {
         setSearch(text)
