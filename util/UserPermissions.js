@@ -16,7 +16,14 @@ class UserPermissions {
     
   
 
-
+    getMediaLibraryPermission = async () => {
+        if (Constants.platform.ios) {
+            const { status } = await MediaLibrary.getPermissionsAsync()
+            if (status != 'granted') {
+                alert('We cannot save this to your library without your permission')
+            }
+        }
+    }
     // MEDIA LIBRARY METHODS FOR THE FUTURE...
     // saveToLibaryAsync(localUri)
 }
