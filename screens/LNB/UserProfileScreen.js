@@ -357,7 +357,7 @@ const UserProfileScreen = props => {
     const commentButtonHandler = (needId, userName) => {
         dispatch(getNeed(needId))
         props.navigation.navigate({
-            routeName: 'Comment',
+            routeName: 'commentModal',
             params: {
                 needId: needId,
                 userName: userName
