@@ -45,6 +45,7 @@ import AnnouncementsIcon from '../components/LNB/AnnouncementsIcon'
 import PostLikesScreen from '../screens/LNB/PostLikesScreen'
 import NewMessageScreen from '../screens/LNB/NewMessageScreen'
 import GroupChatScreen from '../screens/LNB/GroupChatScreen'
+import CameraScreen from '../screens/LNB/CameraScreen'
 
 import { useColorScheme } from 'react-native-appearance'
 
@@ -549,6 +550,18 @@ const ThemedBottomBar = props => {
     )
 }
 
+// const PostStack = createStackNavigator({
+//     Post: {
+//         screen: CreatePostScreen,
+//     },
+//     Camera: {
+//         screen: CameraScreen
+//     }
+// }, {
+//     headerMode: 'none',
+//     mode: 'modal'
+// })
+
 
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
@@ -659,8 +672,14 @@ const BottomTabStackContainer = createStackNavigator({
         tabBarComponent: ThemedBottomBar
     }),
     postModal: {
-        screen: CreatePostScreen
+        screen: CreatePostScreen,
     },
+    cameraModal: {
+        screen: CameraScreen
+    },
+    commentModal: {
+        screen: CreateCommentScreen
+    }
 }, {
     mode: 'modal',
     headerMode: 'none',
