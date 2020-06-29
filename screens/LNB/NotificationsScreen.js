@@ -178,7 +178,7 @@ const NotificationsScreen = props => {
                                             />
                                         </TouchableCmp>
                                         <Text style={{color:text, marginTop: 3}}>
-                                            You are now connected with <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName}.</Text>
+                                            You connected with <Text style={{fontWeight:'500', color:Colors.primary}}>{item.senderName}.</Text>
                                         </Text>
                                     </View>
                                 </View>
