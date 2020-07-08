@@ -27,7 +27,12 @@ const CreateCommentScreen = props => {
 
     const userName = useSelector(state => state.auth.credentials.displayName)
     const userImage = useSelector(state => state.auth.credentials.imageUrl)
+
+
+
     const dispatch = useDispatch()
+
+    
 
     let text
     if (scheme === 'dark') {
@@ -79,6 +84,7 @@ const CreateCommentScreen = props => {
         }
     }
 
+    
 
 
     return (

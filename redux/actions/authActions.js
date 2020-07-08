@@ -161,10 +161,11 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         dispatch(authenticate(idToken, userId))
         dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, null))
 
-        //ONBOARDING
+        //ONBOARDING - SEND NOTIFICATION TO ANDREW & ROB
         // data.additionalUserInfo.isNewUser for onboarding
         // data.user.metadata.creationTime
         // data.user.metadata.lastSignInTime
+
     }
 }
 export const login = (email, password) => {
@@ -345,7 +346,7 @@ export const fetchConnections = (uid) => {
                     })
                 }
             })
-            console.log(isOnline)
+            // console.log(isOnline)
             dispatch({
                 type: SET_ALL_USERS,
                 allUsers: allUsers,
