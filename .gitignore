@@ -19,3 +19,5 @@ redux/actions/originalconnect
 secrets
 yarn-error.log
 UPDATES
+components/LNB/CameraModal.js
+screens/LNB/CameraImageView.js
