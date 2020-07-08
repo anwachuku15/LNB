@@ -7,9 +7,9 @@ import {
     Text,
     Modal,
     TouchableHighlight,
-    Dimensions
+    Dimensions,
 } from 'react-native'
-
+import * as Linking from 'expo-linking'
 import CustomModal from 'react-native-modal'
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
@@ -17,12 +17,15 @@ import { deleteNeed } from '../../redux/actions/postsActions'
 import { connectReq, unrequest, confirmConnect, declineConnect, disconnect } from '../../redux/actions/authActions'
 import NeedActions from './NeedActions'
 import TouchableCmp from './TouchableCmp'
+import TaggedUserText from './TaggedUserText'
 import Colors from '../../constants/Colors'
 import { Ionicons, AntDesign, FontAwesome, SimpleLineIcons, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useColorScheme } from 'react-native-appearance'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
+import ParsedText from 'react-native-parsed-text'
 import moment from 'moment'
+import { color } from 'react-native-reanimated'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height
@@ -50,10 +53,15 @@ const NeedPost = props => {
     const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
 
+    const [tagged, setTagged] = useState([])
+    const [taggedNames, setTaggedNames] = useState([])
+    const [taggedUser, setTaggedUser] = useState()
+
     const dispatch = useDispatch()
 
     const { 
         item,
+        navigation,
         screen,
         pinned, 
         pinHandler,
@@ -69,7 +77,34 @@ const NeedPost = props => {
         showNeedActions,
     } = props
 
-    
+    useEffect(() => {
+        if (item.taggedUsers) {
+            console.log(item.taggedUsers)
+            const { taggedUsers } = item
+            let i = 0
+            taggedUsers.forEach(user => {
+                tagged.push(user)
+                setTagged(tagged)
+                taggedNames.push(user.name)
+                setTaggedNames(taggedNames)
+            })
+            const regex = new RegExp('#' + taggedNames[0] + '#', 'g')
+            setTaggedUser(taggedNames[0])
+        }
+    }, [setTagged, setTaggedNames])
+
+    const navToUserProfile = (uid, name) => {
+        props.navigation.push('UserProfile', {
+            userId: uid,
+            name: name
+        }
+    )
+    }
+
+
+    const handleOpenLink = (url, matchIndex) => {
+        Linking.openURL(url)
+    }
 
     const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
@@ -377,12 +412,18 @@ const NeedPost = props => {
                         </CustomModal>
                     </View>
                     
+                    
                     <Hyperlink
                         linkDefault={true}
                         linkStyle={{color:Colors.bluesea}}
                     >
-                        <Text style={{...styles.post, ...{color:text}}}>{item.body}</Text>
+                        {item.userName === 'Andrew Nwachuku1' ? (
+                            <TaggedUserText item={item}>{item.body}</TaggedUserText>
+                        ) : (
+                            <Text style={{color:text}}>{item.body}</Text>
+                        )}
                     </Hyperlink>
+
                     {item.imageUrl ? (
                         <Lightbox
                             backgroundColor='rgba(0, 0, 0, 0.8)'
@@ -433,6 +474,13 @@ const styles = StyleSheet.create({
     touchable: {
         overflow: 'hidden',
         borderRadius: 10,
+    },
+    taggedUser: {
+        color: Colors.primary,
+        fontWeight: 'bold'
+    },
+    link: {
+        color: Colors.bluesea,
     },
     spinner: {
         flex: 1,

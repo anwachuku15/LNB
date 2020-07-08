@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { 
     Alert,
     Platform,
@@ -14,8 +14,12 @@ import {
     SafeAreaView,
     Dimensions,
     KeyboardAvoidingView,
+    Modal,
+    FlatList,
+    SectionList
 } from 'react-native'
-import Clipboard from '@react-native-community/clipboard'
+import { ListItem } from 'react-native-elements'
+
 import { Ionicons, FontAwesome, SimpleLineIcons } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -26,12 +30,14 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
+import { Camera } from 'expo-camera'
 import { Video } from 'expo-av'
 
 import Fire from '../../Firebase/Firebase'
 import { createNeed } from '../../redux/actions/postsActions'
 import UserPermissions from '../../util/UserPermissions'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
+import CameraModal from '../../components/LNB/CameraModal'
 import Lightbox from 'react-native-lightbox'
 
 
@@ -44,17 +50,21 @@ const CreatePostScreen = props => {
 
     const userName = useSelector(state => state.auth.credentials.displayName)
     const userImage = useSelector(state => state.auth.credentials.imageUrl)
-    const productId = props.navigation.getParam('productId')
-    const selectedProduct = useSelector(state => state.products.availableProducts.find(prod => prod.id === productId))
+    const authId = useSelector(state => state.auth.userId)
+
+    const allUsers = useSelector(state => state.auth.allUsers)
+    
     const dispatch = useDispatch()
 
-    let text, postOptionsBorderTopColor, postOptionsBackground
+    let text, postOptionsBorderTopColor, postOptionsBackground, background
     if (scheme === 'dark') {
         text = 'white'
+        backgroun ='black'
         postOptionsBackground = 'black'
         postOptionsBorderTopColor = Colors.darkSearch
     } else {
         text = 'black'
+        background = 'white'
         postOptionsBackground = 'white'
         postOptionsBorderTopColor = Colors.lightSearch
     }
@@ -63,20 +73,44 @@ const CreatePostScreen = props => {
     const [body, setBody] = useState('')
     const [image, setImage] = useState()
     const [video, setVideo] = useState()
+    const [isCameraVisible, setIsCameraVisible] = useState(false)
+    const [cameraView, setCameraView] = useState(Camera.Constants.Type.back)
+    const [cameraFlashMode, setCameraFlashMode] = useState(Camera.Constants.FlashMode.off)
 
-    // useEffect(() => {
-    //     getPhotoPermission()
-    // }, [getPhotoPermission])
+    const [isMentioning, setIsMentioning] = useState(false)
+    const [search, setSearch] = useState('')
+    const [results, setResults] = useState([])
+    const [taggedUsers, setTaggedUsers] = useState([])
 
-    // const getPhotoPermission = async () => {
-    //     if (Constants.platform.ios) {
-    //         const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+    const searchInput = useRef(null)
+    const textInput = useRef(null)
 
-    //         if(status != 'granted') {
-    //             alert('We need permission to access your camera roll')
-    //         }
-    //     }
-    // }
+    useEffect(() => {
+        getPhotoPermission()
+    }, [getPhotoPermission])
+
+    const getPhotoPermission = async () => {
+        if (Constants.platform.ios) {
+            const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+
+            if(status != 'granted') {
+                alert('We need permission to access your camera roll')
+            }
+        }
+    }
+
+
+
+    const toggleCamera = async () => {
+        if (Constants.platform.ios) {
+            const { status } = await Camera.requestPermissionsAsync()
+            if (status != 'granted') {
+                alert('We need permission to access your camera')
+            } else {
+                setIsCameraVisible(!isCameraVisible)
+            }
+        }
+    }
 
     const pickImage = async () => {
         UserPermissions.getCameraPermission()
@@ -84,7 +118,7 @@ const CreatePostScreen = props => {
             mediaTypes: ImagePicker.MediaTypeOptions.All, // ImagePicker.MediaTypeOptions.Images & ImagePicker.MediaTypeOptions.Videos for Android
             allowsEditing: false,
             aspect: [4,3],
-            videoExportPreset: 0
+            // videoExportPreset: 0
         })
 
         if(!result.cancelled) {
@@ -94,11 +128,20 @@ const CreatePostScreen = props => {
     
 
     const handlePost = async (userName, body, image) => {
+        console.log(taggedUsers)
+        taggedUsers.forEach(user => {
+            if (!body.includes(user.name)) {
+                taggedUsers.splice(taggedUsers.indexOf(taggedUsers.find(tagged => tagged.uid === user.uid)), 1)
+                setTaggedUsers(taggedUsers)
+            }
+        })
+        console.log(taggedUsers)
+        
         try {
             if (image) {
-                await dispatch(createNeed(userName, body, image))
+                await dispatch(createNeed(userName, body.trimEnd(), image, taggedUsers))
             } else {
-                await dispatch(createNeed(userName, body, ''))
+                await dispatch(createNeed(userName, body.trimEnd(), '', taggedUsers))
             }
             setBody('')
             setImage(null)
@@ -109,6 +152,65 @@ const CreatePostScreen = props => {
         }
     }
 
+
+    const updateSearch = (text) => {
+        setSearch(text)
+        if (text.includes('  ') || text.includes('.')) {
+            setIsMentioning(false)
+        } else {
+            const newResults = allUsers.filter(result => {
+                const resultData = `${result.name.toUpperCase()}`
+                const query = text.toUpperCase()
+    
+                return resultData.includes(query)
+            })
+            setResults(newResults)
+        }
+    }
+
+    const cancelSearch = () => {
+        searchInput.current.blur()
+    }
+
+    const tagUser = (uid, name) => {
+        const text = textInput.current._getText()
+        const index = text.lastIndexOf('@')
+        const endIndex = text.trim().length
+        const newText = text.slice(0, index)
+        setBody(newText + name)
+        taggedUsers.push({
+            uid,
+            name
+        })
+        setTaggedUsers(taggedUsers)
+        setIsMentioning(false)
+    }
+
+
+    const renderItem = ({item}) => (
+        <TouchableCmp onPress={() => {
+            tagUser(item.uid, item.name)
+        }}>
+            <ListItem
+                containerStyle={{
+                    backgroundColor:background,
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                }}
+                leftAvatar={{
+                    source: {uri: item.imageUrl},
+                    rounded: true
+                }}
+                title={
+                    <Text style={{color:text, fontSize: 14}}>{item.name}</Text>
+                }
+            />
+        </TouchableCmp>
+    )
+
+    const memoizedItem = useMemo(() => {
+        return renderItem
+    }, [])
 
 
     return (
@@ -129,6 +231,7 @@ const CreatePostScreen = props => {
                 <View style={styles.inputContainer}>
                     <Image source={{uri: userImage}} style={styles.avatar}/>
                     <TextInput 
+                        ref={textInput}
                         autoFocus={true} 
                         multiline={true} 
                         numberOfLines={4} 
@@ -136,6 +239,17 @@ const CreatePostScreen = props => {
                         placeholder={'What do you need?'}
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {
+                            const index = text.lastIndexOf('@')
+                            const end = text.length
+                            if (!text.includes('@') || (text.charAt(index-1) !== ' ' && index !== 0)) {
+                                setIsMentioning(false)
+                            }
+                            if (text.length > 0 && index === text.length-1) {
+                                setIsMentioning(true)
+                            }
+                            if (isMentioning) {
+                                updateSearch(text.slice(index+1, end))
+                            }
                             setBody(text)
                         }}
                         value={body}
@@ -182,45 +296,53 @@ const CreatePostScreen = props => {
                     )}
                 </View>
             </ScrollView>
+            
+            {isMentioning && <View style={{flex: 2, borderWidth: 1, borderColor: Colors.placeholder}}>
+                <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={search.length === 0 ? allUsers : results}
+                    // renderItem={renderItem}
+                    renderItem={memoizedItem}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    keyboardShouldPersistTaps='always'
+                />
+            </View>}
 
-            {/* <SafeAreaView style={{height: '10%'}}> */}
-                <KeyboardAvoidingView behavior='padding'>
-                    <View style={{...styles.postOptions, backgroundColor: postOptionsBackground, borderTopColor: postOptionsBorderTopColor}}>
-                        <TouchableOpacity 
-                            style={styles.photo}
-                            onPress={() => {
-                                Alert.alert('Camera coming soon', "You'll be able to take pictures soon. For now, just upload something from your camera roll.", [
-                                    {
-                                        text: 'Cancel',
-                                        style: 'cancel'
-                                    },
-                                    {
-                                        text: 'Open Camera Roll',
-                                        style: 'default',
-                                        onPress: pickImage
-                                    }
-                                ])
-                            }}
-                        >
-                            <SimpleLineIcons 
-                                name='camera' 
-                                size={26} 
-                                color={Colors.primary}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={styles.photo}
-                            onPress={pickImage}
-                        >
-                            <FontAwesome 
-                                name='image' 
-                                size={26} 
-                                color={Colors.primary}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </KeyboardAvoidingView>
-            {/* </SafeAreaView> */}
+            <KeyboardAvoidingView behavior='padding'>
+                <View style={{...styles.postOptions, backgroundColor: postOptionsBackground, borderTopColor: postOptionsBorderTopColor}}>
+                    <TouchableOpacity 
+                        style={styles.photo}
+                        // onPress={() => toggleCamera()}
+                        onPress={() => props.navigation.navigate('cameraModal')}
+                    >
+                        <SimpleLineIcons 
+                            name='camera' 
+                            size={26} 
+                            color={Colors.primary}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.photo}
+                        onPress={pickImage}
+                    >
+                        <FontAwesome 
+                            name='image' 
+                            size={26} 
+                            color={Colors.primary}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
+
+            {/* <CameraModal 
+                isCameraVisible={isCameraVisible}
+                toggleCamera={toggleCamera}
+                cameraView={cameraView}
+                setCameraView={setCameraView}
+                cameraFlashMode={cameraFlashMode}
+                setCameraFlashMode={setCameraFlashMode}
+            /> */}
         </View>
         
 
@@ -238,6 +360,32 @@ CreatePostScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    modalView: {
+        // flex: 1,
+        // justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: 500,
+        marginBottom: 0
+    },
+    cameraControls: {
+        flex: 1,
+        marginTop: SCREEN_HEIGHT * 0.08,
+        flexDirection: 'row',
+        justifyContent:'space-between',
+        backgroundColor: 'transparent',
+        // justifyContent: 'flex-end',
+        // marginTop: 100,
+    },
+    cameraControlButton: {
+        color: 'white',
+        backgroundColor: 'rgba(40, 40, 40, 0.7)',
+        borderRadius: 20,
+        marginHorizontal: 18,
+        height: 40,
+        width: 40,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     lightboxImage: {
         width: SCREEN_WIDTH * 0.9,

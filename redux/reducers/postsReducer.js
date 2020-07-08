@@ -34,7 +34,8 @@ export default (state = initialState, action) => {
                 action.postData.body,
                 action.postData.imageUrl,
                 action.postData.likeCount,
-                action.postData.commentCount
+                action.postData.commentCount,
+                action.postData.taggedUsers
             )
             return {
                 ...state,

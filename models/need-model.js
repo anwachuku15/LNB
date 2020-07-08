@@ -1,5 +1,5 @@
 class Need {
-    constructor(id, timestamp, uid, userName, userImage, body, imageUrl, likeCount, commentCount) {
+    constructor(id, timestamp, uid, userName, userImage, body, imageUrl, likeCount, commentCount, taggedUsers) {
         this.id = id,
         this.timestamp, timestamp,
         this.uid = uid,
@@ -8,7 +8,8 @@ class Need {
         this.body = body,
         this.imageUrl = imageUrl,
         this.likeCount = likeCount,
-        this.commentCount = commentCount
+        this.commentCount = commentCount,
+        this.taggedUsers = taggedUsers
     }
 }
 

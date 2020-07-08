@@ -31,7 +31,8 @@ export const fetchNeeds = () => {
                     imageUrl: doc.data().imageUrl ? doc.data().imageUrl : null,
                     likeCount: doc.data().likeCount,
                     commentCount: doc.data().commentCount,
-                    isPinned: doc.data().isPinned
+                    isPinned: doc.data().isPinned,
+                    taggedUsers: doc.data().taggedUsers
                 })
             })
             dispatch({
@@ -46,7 +47,7 @@ export const fetchNeeds = () => {
 }
 
 // Consider drafts (published: false vs published: true, pubTimestamp)
-export const createNeed = (userName, body, localUri) => {
+export const createNeed = (userName, body, localUri, taggedUsers) => {
     return async (dispatch, getState) => {
         const uid = getState().auth.userId
         const userImage = getState().auth.credentials.imageUrl
@@ -64,7 +65,8 @@ export const createNeed = (userName, body, localUri) => {
                 timestamp: timestamp,
                 imageUrl: remoteUri,
                 commentCount: 0,
-                likeCount: 0
+                likeCount: 0,
+                taggedUsers: taggedUsers
             })
             .then(doc => {
                 postId = doc.id
@@ -82,7 +84,8 @@ export const createNeed = (userName, body, localUri) => {
                     body: body,
                     imageUrl: remoteUri,
                     commentCount: 0,
-                    likeCount: 0
+                    likeCount: 0,
+                    taggedUsers: taggedUsers
                 }
             })
         } else {
@@ -94,7 +97,8 @@ export const createNeed = (userName, body, localUri) => {
                 userImage,
                 timestamp: timestamp,
                 commentCount: 0,
-                likeCount: 0
+                likeCount: 0,
+                taggedUsers: taggedUsers
             })
             .then(doc => {
                 postId = doc.id
@@ -110,7 +114,8 @@ export const createNeed = (userName, body, localUri) => {
                     userImage: userImage,
                     body: body,
                     commentCount: 0,
-                    likeCount: 0
+                    likeCount: 0,
+                    taggedUsers: taggedUsers
                 }
             })
         }
