@@ -109,9 +109,9 @@ const AuthScreen = props => {
             action = signup(
                 formState.inputValues.email, 
                 formState.inputValues.password, 
-                formState.inputValues.fname, 
-                formState.inputValues.lname,
-                formState.inputValues.headline,
+                formState.inputValues.fname.trimEnd(), 
+                formState.inputValues.lname.trimEnd(),
+                formState.inputValues.headline.trimEnd(),
                 profilePic
             )
         } else {
