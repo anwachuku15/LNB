@@ -6251,7 +6251,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@15.7.2, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.7.x:
+prop-types@15.7.2, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -6490,7 +6490,7 @@ react-native-image-pan-zoom@^2.1.12:
   resolved "https://registry.yarnpkg.com/react-native-image-pan-zoom/-/react-native-image-pan-zoom-2.1.12.tgz#eb98bf56fb5610379bdbfdb63219cc1baca98fd2"
   integrity sha512-BF66XeP6dzuANsPmmFsJshM2Jyh/Mo1t8FsGc1L9Q9/sVP8MJULDabB1hms+eAoqgtyhMr5BuXV3E1hJ5U5H6Q==
 
-react-native-iphone-x-helper@^1.2.0:
+react-native-iphone-x-helper@^1.2.0, react-native-iphone-x-helper@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.2.1.tgz#645e2ffbbb49e80844bb4cbbe34a126fda1e6772"
   integrity sha512-/VbpIEp8tSNNHIvstuA3Swx610whci1Zpc9mqNkqn14DkMbw+ORviln2u0XyHG1kPvvwTNGZY6QpeFwxYaSdbQ==
@@ -6527,14 +6527,7 @@ react-native-paper@^3.8.0:
     color "^3.1.2"
     react-native-safe-area-view "^0.14.6"
 
-react-native-parsed-text@^0.0.22:
-  version "0.0.22"
-  resolved "https://registry.yarnpkg.com/react-native-parsed-text/-/react-native-parsed-text-0.0.22.tgz#a23c756eaa5d6724296814755085127f9072e5f5"
-  integrity sha512-hfD83RDXZf9Fvth3DowR7j65fMnlqM9PpxZBGWkzVcUTFtqe6/yPcIoIAgrJbKn6YmtzkivmhWE2MCE4JKBXrQ==
-  dependencies:
-    prop-types "^15.7.x"
-
-"react-native-parsed-text@https://github.com/EvanBacon/react-native-parsed-text.git":
+react-native-parsed-text@^0.0.22, "react-native-parsed-text@https://github.com/EvanBacon/react-native-parsed-text.git":
   version "0.0.22"
   resolved "https://github.com/EvanBacon/react-native-parsed-text.git#c909f64ee437796fd1b047edd73146fc89edb796"
   dependencies:
@@ -6697,12 +6690,13 @@ react-navigation-shared-element@^2.3.0:
   dependencies:
     hoist-non-react-statics "^3.3.2"
 
-react-navigation-stack@^1.10.3:
-  version "1.10.3"
-  resolved "https://registry.yarnpkg.com/react-navigation-stack/-/react-navigation-stack-1.10.3.tgz#e714e442b20427f0d2d3c18fce1f9e8cfe69be0b"
-  integrity sha512-1gksFi/g/Lg9sBhgLlD0OiEB5xnatHb4C0eNMA5tli9cTVlhq375XNPIqOiTyftibBmjdApAsZFj5srUCoOu/w==
+react-navigation-stack@2:
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/react-navigation-stack/-/react-navigation-stack-2.8.2.tgz#e982bbf14a28b23c323b2d4a6fce4e9754b066e6"
+  integrity sha512-e1VtlF6NDdzgKmnqE3ucgizrgUWUakdT+r7htQU24iG8AJUFQEw+tH4Lfyj0St6i8/RLckXm+o9VgYJT+pNiRw==
   dependencies:
-    prop-types "^15.7.2"
+    color "^3.1.2"
+    react-native-iphone-x-helper "^1.2.1"
 
 react-navigation-tabs@^2.8.11:
   version "2.8.11"
@@ -6713,6 +6707,11 @@ react-navigation-tabs@^2.8.11:
     react-lifecycles-compat "^3.0.4"
     react-native-safe-area-view "^0.14.8"
     react-native-tab-view "^2.11.0"
+
+react-navigation-transitions@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/react-navigation-transitions/-/react-navigation-transitions-1.0.12.tgz#7307668bc7d5fdbdc1954224e7891f7fe6cb5f74"
+  integrity sha512-Hp0wX9KoXwsFch6Fgiz9HpGjQZDhnyucLbCai0LcaOC3VpmgYmvkbeAg/mQ5Z5exuY6PPrh/+FXU00yMPDHkcw==
 
 react-navigation@^4.3.7:
   version "4.3.7"
