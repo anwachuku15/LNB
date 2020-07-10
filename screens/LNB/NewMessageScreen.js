@@ -276,13 +276,16 @@ const NewMessageScreen = props => {
         <View style={{...styles.screen, backgroundColor: background}}>
             <SafeAreaView>
                 <View style={styles.header}>
-                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                    {/* <HeaderButtons HeaderButtonComponent={HeaderButton}>
                         <Item
                             title='Direct'
                             iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
                             onPress={() => {props.navigation.goBack()}}
                         />
-                    </HeaderButtons>
+                    </HeaderButtons> */}
+                    <TouchableCmp style={styles.cancelButton} onPress={() => {props.navigation.goBack()}}>
+                        <Text style={styles.cancelText}>Cancel</Text>
+                    </TouchableCmp>
                     <Text style={styles.headerTitle}>New Message</Text>
                     {chatMembers.length > 0 ? (
                         <TouchableCmp 
@@ -427,18 +430,6 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         paddingBottom: 20
     },
-    cancelButton: {
-        // flex: 1,
-        width: '40%',
-        backgroundColor: Colors.raspberry,
-        padding: 10,
-        borderRadius: 50,
-    },
-    cancelText: {
-        color: 'white',
-        fontWeight: 'bold',
-        alignSelf: 'center'
-    },
     createButton: {
         // flex: 1,
         width: '40%',
@@ -461,6 +452,15 @@ const styles = StyleSheet.create({
         fontFamily: 'open-sans-bold',
         fontSize: 17,
         fontWeight: '500',
+    },
+    cancelButton: {
+        marginLeft: 10,
+    },
+    cancelText: {
+        color: Colors.raspberry,
+        fontSize: 16,
+        fontWeight: '500',
+        alignSelf: 'center'
     },
     chatButton: {
         marginRight: 10,
