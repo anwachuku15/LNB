@@ -2,11 +2,15 @@ import React, {useEffect, useCallback, useState, useMemo} from 'react'
 import { useSelector } from 'react-redux'
 import { View, StyleSheet, Image} from 'react-native'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
+import { Badge, } from 'react-native-elements'
+import { FontAwesome, FontAwesome5, AntDesign, } from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system'
 import shorthash from 'shorthash'
+import Colors from '../../constants/Colors'
 
 const MenuAvatar = props => {
     const authUserImage = useSelector(state => state.auth.credentials.imageUrl)
+    const authUser = useSelector(state => state.auth.credentials)
     // const [avatar, setAvatar] = useState()
 
     // const loadPic = useCallback(async () => {
@@ -46,6 +50,18 @@ const MenuAvatar = props => {
             <TouchableCmp onPress={props.toggleDrawer}>
                 <Image source={{uri: authUserImage}} style={styles.menuAvatar} />
             </TouchableCmp>
+            {((authUser.headline === '') || (authUser.location === '') || (authUser.website === '')) && 
+                <Badge 
+                    Component={() => (
+                        <FontAwesome5
+                            name='exclamation-circle'
+                            size={14}
+                            color={Colors.red}
+                        />
+                    )}
+                    containerStyle={{position: 'absolute', right: -5, top: -5}}
+                />
+            }
         </View>
     )
 }
