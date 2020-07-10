@@ -1,10 +1,10 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
-import { Platform, View, Button, SafeAreaView, Text, } from 'react-native'
+import { Platform, StyleSheet, View, Button, SafeAreaView, Text, Animated, TouchableWithoutFeedback } from 'react-native'
 import TouchableCmp from '../components/LNB/TouchableCmp'
-import { createAppContainer, createSwitchNavigator, StackActions, SwitchActions } from 'react-navigation'
+import { createAppContainer, createSwitchNavigator, StackActions, SwitchActions, NavigationActions, getActiveChildNavigationOptions } from 'react-navigation'
 import { createStackNavigator, Header, HeaderBackButton, TransitionPresets, TransitionSpecs, HeaderStyleInterpolators } from 'react-navigation-stack'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
@@ -18,7 +18,7 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 import Colors from '../constants/Colors'
 
 import HomeScreen from '../screens/LNB/HomeScreen'
-import { Ionicons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign, FontAwesome5 } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import AnnouncementsScreen from '../screens/LNB/AnnouncementsScreen'
@@ -47,9 +47,11 @@ import NewMessageScreen from '../screens/LNB/NewMessageScreen'
 import GroupChatScreen from '../screens/LNB/GroupChatScreen'
 import CameraScreen from '../screens/LNB/CameraScreen'
 import PostButtonTab from '../components/UI/PostTabButton'
-
+import MenuAvatar from '../components/LNB/MenuAvatar'
+import MessageIcon from '../components/LNB/MessageIcon'
 import { useColorScheme } from 'react-native-appearance'
-import Animated, { Easing } from 'react-native-reanimated'
+import { Alert } from 'react-native'
+// import Animated, { Easing } from 'react-native-reanimated'
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -170,14 +172,12 @@ const DirectorySwipeTab = createMaterialTopTabNavigator({
     swipeEnabled: true,
     tabBarPosition: 'top',
     tabBarComponent: ThemedTopTabBar
-    
 })
+
+
 
 DirectorySwipeTab.navigationOptions = ({navigation, screenProps}) => {
     const index = navigation.state.index
-    const screens = navigation.state.routes
-    const connections = navigation.state.routes[0].routeName
-    const directory = navigation.state.routes[1].routeName
     const userName = navigation.state.routes[0].params.userName
     const background = screenProps.theme
 
@@ -213,13 +213,15 @@ DirectorySwipeTab.navigationOptions = ({navigation, screenProps}) => {
     }
 }
 
-const transitionConfig = {
-    animation: 'timing',
-    config: {
-        duration: 500,
-        easing: Easing.inOut(Easing.ease)
-    }
-}
+
+
+// const transitionConfig = {
+//     animation: 'timing',
+//     config: {
+//         duration: 500,
+//         easing: Easing.inOut(Easing.ease)
+//     }
+// }
 
 
 const screens = {
@@ -456,20 +458,115 @@ const ThemedBottomBar = props => {
     )
 }
 
-// const PostStack = createStackNavigator({
-//     Post: {
-//         screen: CreatePostScreen,
-//     },
-//     Camera: {
-//         screen: CameraScreen
-//     }
-// }, {
-//     headerMode: 'none',
-//     mode: 'modal'
-// })
+
+const styles = StyleSheet.create({
+    button: {
+        // position: 'absolute',
+        alignItems: 'center',
+        bottom: 20,
+        left: 190
+    },
+    createButton: {
+        backgroundColor: Colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        position: 'absolute',
+        top: -60,
+        // top: -100,
+        // left: 130,
+        // shadowColor: Colors.primary,
+        // shadowRadius: 5,
+        // shadowOffset: {height: 10},
+        // shadowOpacity: 0.3,
+        // borderWidth: 3,
+        borderColor: 'white'
+    },
+    secondaryButton: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        bottom: 20,
+        left: 190
+    }
+})
 
 
+const createButtonSize = new Animated.Value(1)
+const animation = new Animated.Value(0)
+const toggleCreateMenu = () => {
+    Animated.parallel([
+        Animated.sequence([
+            Animated.timing(createButtonSize, {
+                toValue: 0.97,
+                duration: 50
+            }),
+            Animated.timing(createButtonSize, {
+                toValue: 1
+            }),
+        ]),
+        Animated.spring(animation, {
+            toValue: animation._value === 0 ? 1 : 0,
 
+        })
+    ]).start()
+}
+const createButtonStyle = {
+    transform: [{
+        scale: createButtonSize
+    }]
+}
+const rotation = {
+    transform: [
+        {
+            rotate: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0deg', '45deg']
+            })
+        }
+    ]
+}
+const announcementX = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-24, -120]
+})
+const announcementY = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-50, -50]
+})
+
+const messageX = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-24, -100]
+})
+const messageY = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-50, -124]
+})
+
+const needX = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-24, -24]
+})
+const needY = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-50, -150],
+})
+
+const DirectoryTabButton = createMaterialTopTabNavigator({
+    Directory: DirectoryScreen,
+    Connections: ConnectionsScreen
+}, {
+    swipeEnabled: true,
+    tabBarPosition: 'top',
+    tabBarComponent: ThemedTopTabBar
+})
+    
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
         Home: {
@@ -516,26 +613,118 @@ const BottomTabStackContainer = createStackNavigator({
                                 : 'Announcements'
             }
         },
+        CreateAnnouncement: {
+            screen: CreateAnnouncementScreen,
+            navigationOptions: {
+                tabBarButtonComponent: () => {
+                    return (
+                        <TouchableWithoutFeedback onPress={navToEventsModal} >
+                            <Animated.View style={{position: 'relative', left: announcementX, top: announcementY}}>
+                                <View style={{...styles.secondaryButton, backgroundColor: 'rgba(0,0,0,0.4)'}}>
+                                    <MaterialCommunityIcons name='calendar-edit' size={24} color='white' />
+                                </View>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    )
+                }
+            }
+        },
+        CreateNeed: {
+            screen: CreatePostScreen,
+            navigationOptions: {
+                tabBarButtonComponent: () => {
+                    return (
+                        <TouchableWithoutFeedback onPress={navToPostModal}>
+                            <Animated.View style={{position: 'relative', left: needX, top: needY}}>
+                                <View style={{...styles.secondaryButton, backgroundColor: Colors.primary}}>
+                                    <MaterialIcons name='create' size={24} color='white' />
+                                </View>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    )
+                },
+                tabBarOnPress: () => {
+                    console.log('NEED')
+                }
+            }
+        },
+        CreateMessage: {
+            screen: NewMessageScreen,
+            navigationOptions: {
+                tabBarButtonComponent: () => {
+                    return (
+                        <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
+                            <Animated.View style={{position: 'relative', left: messageX, top: messageY}}>
+                                <View style={{...styles.secondaryButton, backgroundColor: Colors.blue}}>
+                                    <MaterialCommunityIcons name='message-plus' size={24} color='white' />
+                                </View>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    )
+                }
+            }
+        },
         Post: {
             screen: CreatePostScreen,
             navigationOptions: {
-                tabBarIcon: (tabInfo, navigation) => {
-                    return (
-                        // <Ionicons 
-                        //     name={Platform.OS==='android' ? 'md-add-circle-outline' : 'ios-add-circle-outline'} 
-                        //     size={25} 
-                        //     color={tabInfo.tintColor}
-                        // />
-                        <PostButtonTab tintColor={tabInfo.tintColor} navigation={navigation}/>
+                // tabBarIcon: (tabInfo, navigation) => {
+                //     return (
+                //         // <Ionicons 
+                //         //     name={Platform.OS==='android' ? 'md-add-circle-outline' : 'ios-add-circle-outline'} 
+                //         //     size={25} 
+                //         //     color={tabInfo.tintColor}
+                //         // />
+                //         // <PostButtonTab tintColor={tabInfo.tintColor} navigation={navigation}/>
+                //     )
+                // },
+                tabBarButtonComponent: ({style}) => {
+                    return ( 
+                        // <PostTabButton tintColor={'gray'} props={props.children} />
+                        <TouchableWithoutFeedback onPress={toggleCreateMenu}>
+                            <View style={styles.button}>
+                                <Animated.View style={[{...styles.createButton, backgroundColor: Colors.darkHeader, borderColor: Colors.primary, borderWidth: 2}, createButtonStyle]}>
+                                        <Animated.View style={[rotation]}>
+                                            <FontAwesome
+                                                name='plus'
+                                                size={24}
+                                                color={Colors.primary}
+                                            />
+                                        </Animated.View>
+                                </Animated.View>
+                            </View>
+                        </TouchableWithoutFeedback>
                     )
                 },
-                // tabBarButtonComponent: () => ( <PostButtonTab tintColor={'gray'} />),
+                
                 tabBarColor: Colors.primaryColor,
                 tabBarLabel: Platform.OS === 'android' 
                                 ? <Text style={{fontFamily: 'open-sans-bold'}}>Post</Text>
                                 : 'Post'
-            }
+            },
         },
+        
+        Directory: {
+            screen: createStackNavigator({
+                DirectoryTab: {
+                    screen: DirectoryTabButton,
+                },
+                ...screens
+            }, {
+                defaultNavigationOptions: defaultNavOptions,
+            }),
+            navigationOptions: {
+                tabBarIcon: (tabInfo) => {
+                    return (
+                        <FontAwesome5
+                            name='users'
+                            size={23}
+                            color={tabInfo.tintColor}
+                        />
+                    )
+                },
+            },
+        },
+        
         Notifications: {
             screen: NotificationsStack,
             navigationOptions: {
@@ -567,25 +756,55 @@ const BottomTabStackContainer = createStackNavigator({
                                 ? <Text style={{fontFamily: 'open-sans-bold'}}>Shop</Text>
                                 : 'Shop'
             }
-        }
+        },
     }, {
         defaultNavigationOptions: {
             tabBarOnPress: ({navigation, defaultHandler}) => {
                 if (navigation.state.key === 'Post') {
                     navigation.navigate('postModal')
+                    console.log('post')
                 } else {
                     defaultHandler()
                 }
             },
             
         },
-        tabBarComponent: ThemedBottomBar
+        navigationOptions: ({navigation, theme, screenProps}) => {
+            navToPostModal = () => {
+                toggleCreateMenu()
+                navigation.navigate('postModal')
+            }
+            navToEventsModal = () => {
+                
+                // navigation.navigate('announcementModal')
+                Alert.alert('Coming Soon', 'Event planning coming soon...', [
+                    {
+                        text: 'Okay',
+                        style: 'cancel',
+                        onPress: () => toggleCreateMenu()
+                    }
+                ])
+            }
+            navToNewMessageScreen = () => {
+                toggleCreateMenu()
+                // navigation.navigate('CreateMessage')
+                navigation.navigate('newMessageModal')
+            }
+            background = screenProps.theme === 'dark' ? 'black' : 'black'
+        },
+        tabBarComponent: ThemedBottomBar,
     }),
     postModal: {
         screen: CreatePostScreen,
     },
+    newMessageModal: {
+        screen: NewMessageScreen,
+    },
+    announcementModal: {
+        screen: CreateAnnouncementScreen,
+    },
     cameraModal: {
-        screen: CameraScreen
+        screen: CameraScreen,
     },
     commentModal: {
         screen: CreateCommentScreen
@@ -597,6 +816,46 @@ const BottomTabStackContainer = createStackNavigator({
     mode: 'modal',
     headerMode: 'none',
 })
+let navToPostModal, navToEventsModal, navToNewMessageScreen, navToMessages, background
+
+
+
+DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
+    const index = navigation.state.index
+    const userName = screenProps.authUser.displayName
+    const background = screenProps.theme
+    
+    let headerTitle, headerStyle
+    const headerLeft = () => (
+        <MenuAvatar toggleDrawer={() => navigation.toggleDrawer()} />
+    )
+    const headerRight = () => (
+        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            <Item
+                ButtonElement={<MessageIcon/>}
+                title='Messages'
+                onPress={() => {
+                    navigation.navigate('Messages')
+                }}
+            />
+        </HeaderButtons>
+    )
+    headerStyle = {
+        backgroundColor: background === 'dark' ? 'black' : 'white',
+        borderBottomWidth: 0
+    }
+    if (index === 0) {
+        headerTitle = 'LNB Directory'
+    } else if (index === 1) {
+        headerTitle = userName
+    }
+    return {
+        headerStyle,
+        headerLeft,
+        headerRight,
+        headerTitle,
+    }
+}
 
 
 const MessagesStack = createStackNavigator({
@@ -719,9 +978,6 @@ const DrawerNav = createDrawerNavigator({
 })
 
 HomeStack.navigationOptions = ({navigation}) => {
-    // console.log('BEGIN')
-    // console.log(navigation)
-    // console.log('END\n')
     let tabBarVisible = true
     let headerMode = 'float'
     const routes = navigation.state.routes[0].routes
@@ -735,14 +991,16 @@ HomeStack.navigationOptions = ({navigation}) => {
         headerMode
     }
 }
-
 // If current page is stacked on top of root tab screens or postModal is open
 BottomTabStackContainer.navigationOptions = ({navigation}) => {
     let drawerLockMode = 'unlocked'
     let tabBarVisible = false
     const allRoutes = navigation.state.routes[0].routes[0].routes[0].routes
-
-    if (allRoutes.filter(route => route.routeName === 'UserProfilePicture') > 0) {
+    const messageRoute = navigation.state.routes[0]
+    // console.log('-----\n')
+    // console.log(messageRoute)
+    // console.log('-----\n')
+    if (allRoutes.filter(route => route.routeName === ('UserProfilePicture')) > 0) {
         tabBarVisible = false
     }
     
