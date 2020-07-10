@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
         left: 190
     },
     createButton: {
-        backgroundColor: Colors.primary,
+        // backgroundColor: Colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
         width: 64,
@@ -498,7 +498,9 @@ const styles = StyleSheet.create({
 
 
 const createButtonSize = new Animated.Value(1)
-const animation = new Animated.Value(0)
+const buttonMenuAnimation = new Animated.Value(0)
+const buttonColorAnimation = new Animated.Value(0)
+
 const toggleCreateMenu = () => {
     Animated.parallel([
         Animated.sequence([
@@ -510,50 +512,62 @@ const toggleCreateMenu = () => {
                 toValue: 1
             }),
         ]),
-        Animated.spring(animation, {
-            toValue: animation._value === 0 ? 1 : 0,
-
+        Animated.spring(buttonMenuAnimation, {
+            toValue: buttonMenuAnimation._value === 0 ? 1 : 0,
+        }),
+        Animated.timing(buttonColorAnimation, {
+            toValue: buttonColorAnimation._value === 0 ? 1 : 0,
+            duration: 50
         })
     ]).start()
 }
+const interpolatePostButtonColor = buttonColorAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Colors.primary, Colors.placeholder]
+})
+
 const createButtonStyle = {
     transform: [{
-        scale: createButtonSize
-    }]
+        scale: createButtonSize,
+    }],
+    backgroundColor: interpolatePostButtonColor
 }
+
+
+
 const rotation = {
     transform: [
         {
-            rotate: animation.interpolate({
+            rotate: buttonMenuAnimation.interpolate({
                 inputRange: [0, 1],
                 outputRange: ['0deg', '45deg']
             })
         }
     ]
 }
-const announcementX = animation.interpolate({
+const announcementX = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-24, -120]
 })
-const announcementY = animation.interpolate({
+const announcementY = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, -50]
 })
 
-const messageX = animation.interpolate({
+const messageX = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-24, -100]
 })
-const messageY = animation.interpolate({
+const messageY = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, -124]
 })
 
-const needX = animation.interpolate({
+const needX = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-24, -24]
 })
-const needY = animation.interpolate({
+const needY = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, -150],
 })
@@ -620,7 +634,7 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <TouchableWithoutFeedback onPress={navToEventsModal} >
                             <Animated.View style={{position: 'relative', left: announcementX, top: announcementY}}>
-                                <View style={{...styles.secondaryButton, backgroundColor: 'rgba(0,0,0,0.4)'}}>
+                                <View style={{...styles.secondaryButton, backgroundColor: 'rgba(237, 37, 78, 0.4)'}}>
                                     <MaterialCommunityIcons name='calendar-edit' size={24} color='white' />
                                 </View>
                             </Animated.View>
@@ -682,12 +696,12 @@ const BottomTabStackContainer = createStackNavigator({
                         // <PostTabButton tintColor={'gray'} props={props.children} />
                         <TouchableWithoutFeedback onPress={toggleCreateMenu}>
                             <View style={styles.button}>
-                                <Animated.View style={[{...styles.createButton, backgroundColor: Colors.darkHeader, borderColor: Colors.primary, borderWidth: 2}, createButtonStyle]}>
+                                <Animated.View style={[ createButtonStyle, {...styles.createButton, borderColor: Colors.primary, borderWidth: 2}]}>
                                         <Animated.View style={[rotation]}>
                                             <FontAwesome
                                                 name='plus'
                                                 size={24}
-                                                color={Colors.primary}
+                                                color={'white'}
                                             />
                                         </Animated.View>
                                 </Animated.View>
