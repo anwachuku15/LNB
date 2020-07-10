@@ -323,7 +323,7 @@ const NotificationsScreen = props => {
 
 
 NotificationsScreen.navigationOptions = (navData) => {
-    const background = navData.screenProps.theme
+    const background = navData.screenProps.theme === 'dark' ? 'black' : 'white'
     const isFocused = navData.navigation.isFocused()
     return {
         headerLeft: () => (
@@ -342,7 +342,7 @@ NotificationsScreen.navigationOptions = (navData) => {
         ),
         headerTitle: 'Notifications',
         headerStyle: {
-            backgroundColor: background === 'dark' ? 'black' : 'white',
+            backgroundColor: background,
             borderBottomColor: Colors.primary
         },
     }
