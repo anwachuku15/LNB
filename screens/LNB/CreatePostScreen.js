@@ -59,7 +59,7 @@ const CreatePostScreen = props => {
     let text, postOptionsBorderTopColor, postOptionsBackground, background
     if (scheme === 'dark') {
         text = 'white'
-        backgroun ='black'
+        background ='black'
         postOptionsBackground = 'black'
         postOptionsBorderTopColor = Colors.darkSearch
     } else {
@@ -214,7 +214,7 @@ const CreatePostScreen = props => {
 
 
     return (
-        <View style={styles.screen}>
+        <View style={{...styles.screen, backgroundColor: background}}>
             <SafeAreaView>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={()=>props.navigation.goBack()}>
