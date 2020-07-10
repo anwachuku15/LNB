@@ -24,6 +24,7 @@ const NavContainer = props => {
     const posts = useSelector(state => state.posts.allNeeds)
     const userPosts = useSelector(state => state.posts.userNeeds)
     const need = useSelector(state => state.posts.need)
+    const authUser = useSelector(state => state.auth.credentials)
     const [mounted, setMounted] = useState(true)
 
     // access Navigation properties outside of navigator with useRef
@@ -42,7 +43,7 @@ const NavContainer = props => {
     }, [isAuth, mounted])
     
     return (
-        <LNBNavigator theme={props.theme} ref={navRef} screenProps={{theme: props.theme}}/>
+        <LNBNavigator theme={props.theme} ref={navRef} screenProps={{theme: props.theme, authUser: authUser}}/>
     )
 }
 
