@@ -344,6 +344,12 @@ const DirectoryScreen = props => {
 
 DirectoryScreen.navigationOptions = (navData) => {
     // console.log('DirectoryScreen ' + navData.navigation.isFocused())
+    const background = navData.screenProps.theme === 'dark' ? 'black' : 'white'
+    return {
+        headerStyle: {
+            backgroundColor: background
+        }
+    }
 }
 
 const styles = StyleSheet.create({
