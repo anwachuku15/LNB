@@ -7,14 +7,12 @@ import {
   TouchableOpacity,
   ScrollView
 } from 'react-native'
+import { Badge, } from 'react-native-elements'
 import Clipboard from '@react-native-community/clipboard'
 import {NavigationActions, DrawerActions} from 'react-navigation'
 import { useColorScheme } from 'react-native-appearance'
 
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { MaterialCommunityIcons, Ionicons, FontAwesome, AntDesign } from '@expo/vector-icons'
 import Colors from '../../constants/Colors'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotifications } from '../../redux/actions/authActions'
@@ -88,9 +86,26 @@ const DrawerScreen = props => {
                     >
                       <Text style={{...styles.viewProfile, ...{color:Colors.blue}}}>View Profile</Text>
                     </TouchableOpacity>
-                    {/* <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
-                      <Text style={{...styles.editProfile, ...{color:Colors.primary}}}>Edit Profile</Text>
-                    </TouchableOpacity> */}
+                    <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
+                      <Text style={{...styles.editProfile, ...{color:Colors.redcrayola}}}>
+                        {/* {(user.credentials.headline !== '') || (user.credentials.bio !== '') || (user.credentials.location !== '') ? 
+                          'Complete Profile' : 'Edit Profile'
+                        } */}
+                        Update Profile
+                      </Text>
+                    </TouchableOpacity>
+                    {((user.credentials.headline === '') || (user.credentials.location === '') || (user.credentials.website === '')) && 
+                      <Badge 
+                          Component={() => (
+                              <FontAwesome
+                                  name='exclamation-triangle'
+                                  size={14}
+                                  color={Colors.red}
+                              />
+                          )}
+                          containerStyle={{position: 'absolute', right: 20}}
+                      />
+                    }
                 </View>
             </View>
 
