@@ -19,12 +19,13 @@ import {
     Dimensions,
     MaskedViewIOS
 } from 'react-native'
-import { Badge } from 'react-native-elements'
+// import { SharedElement, SharedElementTransition, nodeFromRef } from 'react-native-shared-element'
+import { SharedElement } from 'react-navigation-shared-element';
+import { Badge, } from 'react-native-elements'
 import CustomModal from 'react-native-modal'
 import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
 import { LinearGradient } from 'expo-linear-gradient'
-import { SharedElement } from 'react-navigation-shared-element'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
@@ -129,31 +130,9 @@ const UserProfileScreen = props => {
         }
     }, [dispatch, loadUser])
 
-
-    // useEffect(() => {
-    //     setIsMounted(true)
-    //     return (() => {
-    //         setIsMounted(false)
-    //         console.log('unmounted')
-    //     })
-    // }, [])
-
-    // const memoizedHeader = useMemo(() => {
-    //     return (
-    //         <Image 
-    //             source={{uri: user && user.credentials.imageUrl, cache: 'force-cache'}}
-    //             style={{
-    //                 alignSelf: 'center',
-    //                 width: SCREEN_WIDTH - 20, 
-    //                 height: SCREEN_WIDTH - 20,
-    //                 borderRadius: (SCREEN_WIDTH - 20) /2,
-    //             }}
-    //         />
-    //     )
-    // }, [user.credentials.imageUrl])
+  
     
     useEffect(() => {
-        console.log('loading')
         setIsLoading(true)
         loadUser().then(() => {
             setIsLoading(false)
@@ -491,17 +470,43 @@ const UserProfileScreen = props => {
     
 
 
+
+
     const EditProfileButton = () => (
-        <TouchableCmp 
-            onPress={() => {props.navigation.navigate('EditProfile')}} 
-            style={{...styles.editProfileButton, backgroundColor: themeColor, borderWidth: 0.5, borderColor: scheme==='dark' ? Colors.placeholder : Colors.disabled}}
-        >
-            <View key={userId}>
-                <Text style={{color:text, fontSize:12, fontWeight: 'bold', alignSelf:'center'}}>Edit Profile</Text>
-            </View>
-        </TouchableCmp>
+        <View style={{alignSelf:'center'}}>
+            <TouchableCmp 
+                onPress={() => {props.navigation.navigate('EditProfile')}} 
+                style={{
+                    ...styles.editProfileButton, 
+                    marginBottom: 15, 
+                    backgroundColor: themeColor, 
+                    borderWidth: 0.5, 
+                    borderColor: scheme==='dark' ? Colors.placeholder : Colors.disabled}}
+            >
+                <View key={userId}>
+                    <Text style={{color:text, fontSize:12, fontWeight: 'bold', alignSelf:'center'}}>Edit Profile</Text>
+                </View>
+            </TouchableCmp>
+            {((user.credentials.headline === '') || (user.credentials.location === '') || (user.credentials.website === '')) && 
+                <Badge 
+                    Component={() => (
+                        <FontAwesome
+                            name='exclamation-circle'
+                            size={16}
+                            color={Colors.redcrayola}
+                        />
+                    )}
+                    containerStyle={{position: 'absolute', right: 0}}
+                />
+            }
+            {/* {((user.credentials.headline === '') || (user.credentials.location === '') || (user.credentials.website === '')) && 
+                <Text style={{color:Colors.redcrayola, alignSelf:'center', fontSize: 12, marginBottom: 15}}>Your profile is incomplete!</Text>
+            } */}
+        </View>
     )
     
+    // let startAncestor, startNode, endAncestor, endNode
+    // const position = new Animated.Value(0)
     
 
     return (
@@ -551,7 +556,12 @@ const UserProfileScreen = props => {
                                         {/* AVATAR, HEADER, LOCATION */}
                                         <View style={{alignItems: 'center', marginBottom: 10}}>
                                             <View style={styles.avatarContainer}>
-                                                <Lightbox
+                                                <TouchableCmp onPress={() => props.navigation.push('UserProfilePicture', {uri: user.credentials.imageUrl})}>
+                                                    <SharedElement id={user.credentials.imageUrl}>
+                                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                                                    </SharedElement>
+                                                </TouchableCmp>
+                                                {/* <Lightbox
                                                     backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
                                                     underlayColor='rgba(255, 255, 255, 0.1)'
                                                     springConfig={{tension: 15, friction: 7}}
@@ -580,8 +590,37 @@ const UserProfileScreen = props => {
                                                     )}
                                                 >
                                                     {memoizedProfileAvatar}
-                                                    {/* <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/> */}
-                                                </Lightbox>
+                                                </Lightbox> */}
+
+                                                {/* <View ref={ref => startAncestor = nodeFromRef(ref)}>
+                                                    <SharedElement onNode={node => startNode = node}>
+                                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                                                    </SharedElement>
+                                                </View>
+
+                                                <View ref={ref => endAncestor = nodeFromRef(ref)}>
+                                                    <SharedElement onNode={node => endNode = node}>
+                                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                                                    </SharedElement>
+                                                </View>
+
+                                                <View style={StyleSheet.absoluteFill}>
+                                                    <SharedElementTransition
+                                                        start={{
+                                                        node: startNode,
+                                                        ancestor: startAncestor
+                                                        }}
+                                                        end={{
+                                                        node: endNode,
+                                                        ancestor: endAncestor
+                                                        }}
+                                                        position={position}
+                                                        animation='move'
+                                                        resize='auto'
+                                                        align='auto'
+                                                    />
+                                                </View> */}
+
                                             </View>
                                             <View style={{flexDirection: 'row', marginTop: 5}}>
                                                 <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
@@ -594,7 +633,7 @@ const UserProfileScreen = props => {
                                             </View>
                                             {/* {authUser.userId === userId && <EditProfileButton key={userId}/>} */}
                                             <Text style={{...styles.infoTitle, marginTop: 5, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.credentials.headline}</Text>
-                                            <View style={{flexDirection: 'row', justifyContent:'center', alignItems: 'center', marginTop: 5}}>
+                                            {user.credentials.location !== '' && <View style={{flexDirection: 'row', justifyContent:'center', alignItems: 'center', marginTop: 5}}>
                                                 <Entypo
                                                     name='location-pin'
                                                     size={12}
@@ -602,7 +641,7 @@ const UserProfileScreen = props => {
                                                     style={{marginRight: 3, }}
                                                 />
                                                 <Text style={{...styles.infoTitle, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.credentials.location}</Text>
-                                            </View>
+                                            </View>}
                                         </View>
 
 
@@ -773,6 +812,7 @@ UserProfileScreen.navigationOptions = (navData) => {
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
         },
+        headerMode: 'screen'
     }
 }
 
@@ -839,10 +879,6 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '500'
     },
-    editProfileButton: {
-        // justifyContent: 'center',
-        // marginTop: 2
-    },
     avatarContainer: {
         shadowColor: '#151734',
         shadowRadius: 30,
@@ -861,7 +897,7 @@ const styles = StyleSheet.create({
     },
     editProfileButton: {
         paddingVertical: 10,
-        marginBottom: 15,
+        paddingHorizontal: 40,
         width: '40%',
         marginVertical: 5,
         justifyContent: 'center',
