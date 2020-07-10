@@ -348,7 +348,7 @@ const MessagesScreen = props => {
 
     return (
         (isMounted && 
-            <SafeAreaView style={styles.screen}>
+            <SafeAreaView style={{backgroundColor: background, ...styles.screen}}>
 
                 <View style={{...styles.searchContainer, ...{marginHorizontal: 15, marginTop:10, alignSelf: 'center'}}}>
                     <View style={{justifyContent:'center'}}>

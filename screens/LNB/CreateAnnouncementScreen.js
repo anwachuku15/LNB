@@ -42,11 +42,13 @@ const CreateAnnouncementScreen = props => {
     const userImage = useSelector(state => state.auth.credentials.imageUrl)
     const dispatch = useDispatch()
 
-    let text
+    let text, background
     if (scheme === 'dark') {
         text = 'white'
+        background = 'black'
     } else {
         text = 'black'
+        background = 'white'
     }
 
     const [subject, setSubject] = useState('')
@@ -100,7 +102,7 @@ const CreateAnnouncementScreen = props => {
 
     return (
         
-        <SafeAreaView style={styles.screen}>
+        <SafeAreaView style={{backgroundColor: background, ...styles.screen}}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={()=>props.navigation.goBack()}>
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>

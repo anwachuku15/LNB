@@ -287,7 +287,7 @@ const GroupChatScreen = props => {
     
 
     return (
-        <SafeAreaView style={styles.screen}>
+        <SafeAreaView style={{backgroundColor: background, ...styles.screen}}>
 
             <FlatList
                 contentContainerStyle={styles.messages}
@@ -362,6 +362,9 @@ GroupChatScreen.navigationOptions = (navData) => {
                 </TouchableCmp>
             </View>
         ),
+        headerTitle: () => {
+            <View></View>
+        },
         headerRight: () => {
             <HeaderButtons HeaderButtonComponent={HeaderButton}>
                 <Item

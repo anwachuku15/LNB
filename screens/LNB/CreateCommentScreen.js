@@ -34,11 +34,13 @@ const CreateCommentScreen = props => {
 
     
 
-    let text
+    let text, background
     if (scheme === 'dark') {
         text = 'white'
+        background = 'black'
     } else {
         text = 'black'
+        background = 'white'
     }
 
     
@@ -89,7 +91,7 @@ const CreateCommentScreen = props => {
 
     return (
         
-        <SafeAreaView style={styles.screen}>
+        <SafeAreaView style={{...styles.screen, backgroundColor: background}}>
             <View style={styles.header}>
                 <TouchableCmp onPress={()=>props.navigation.goBack()}>
                     <Ionicons name='md-close' size={24} color={Colors.primary}/>

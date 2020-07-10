@@ -258,7 +258,7 @@ const ChatScreen = props => {
     
 
     return (
-        <SafeAreaView style={styles.screen}>
+        <SafeAreaView style={{backgroundColor: background, ...styles.screen}}>
             
             <FlatList
                 contentContainerStyle={styles.messages}
@@ -334,6 +334,11 @@ ChatScreen.navigationOptions = (navData) => {
 
             </View>
         ),
+        headerTitle: () => {
+            <View>
+
+            </View>
+        },
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
             borderBottomColor: Colors.primary
