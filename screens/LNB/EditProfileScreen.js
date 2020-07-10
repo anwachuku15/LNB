@@ -24,6 +24,7 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
+import HeaderButtonDisabled from '../../components/UI/HeaderButtonDisabled'
 
 import UserPermissions from '../../util/UserPermissions'
 import * as ImagePicker from 'expo-image-picker'
@@ -92,7 +93,8 @@ const EditProfileScreen = props => {
             headline: auth.credentials.headline,
             location: auth.credentials.location,
             bio: auth.credentials.bio,
-            website: auth.credentials.website
+            website: authWebsite.includes('instagram') ? authWebsite.substring(22) : 
+                    (authWebsite.includes('linkedin') ? authWebsite.substring(24) : authWebsite)
         }, 
         inputValidities: {
             headline: true,
@@ -115,6 +117,7 @@ const EditProfileScreen = props => {
     }, [dispatchFormState])
 
     useEffect(() => {
+        console.log(formState.inputValues.website)
         if (error) {
             Alert.alert(
                 'Error', 
@@ -187,6 +190,9 @@ const EditProfileScreen = props => {
             } else if (!isInstagram && !isLinkedIn && !isWebsite) {
                 linkInput = ''
             }
+            console.log(isInstagram)
+            console.log(isLinkedIn)
+            console.log(isWebsite)
             await dispatch(updateProfile(
                 formState.inputValues.headline,
                 formState.inputValues.location,
@@ -226,13 +232,23 @@ const EditProfileScreen = props => {
                     />
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Edit Profile</Text>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Save'
-                        iconName={Platform.OS==='android' ? 'md-checkmark' : 'ios-checkmark-circle-outline'}
-                        onPress={submitHandler}
-                    />
-                </HeaderButtons>
+                {(formState.inputValues.headline === '') || (formState.inputValues.bio === '') || (formState.inputValues.location === '') ? (
+                    <HeaderButtons HeaderButtonComponent={HeaderButtonDisabled}>
+                        <Item
+                            title='Save'
+                            iconName={Platform.OS==='android' ? 'md-checkmark' : 'ios-checkmark-circle-outline'}
+                            // onPress={submitHandler}
+                        />
+                    </HeaderButtons>
+                ) : (
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        <Item
+                            title='Save'
+                            iconName={Platform.OS==='android' ? 'md-checkmark' : 'ios-checkmark-circle-outline'}
+                            onPress={submitHandler}
+                        />
+                    </HeaderButtons>
+                )}
             </View>
             
             <KeyboardAvoidingView behavior='padding' style={{flex: 1}}>
@@ -364,7 +380,7 @@ const EditProfileScreen = props => {
                                             autoCorrect
                                             returnKeyType='done'
                                             onInputChange={inputChangeHandler}
-                                            initialValue={auth.credentials.website}
+                                            initialValue={authWebsite.includes('instagram') ? authWebsite.substring(22) : ''}
                                             initiallyValid={!!auth.credentials}
                                             required
                                         />
@@ -390,7 +406,7 @@ const EditProfileScreen = props => {
                                             autoCorrect
                                             returnKeyType='done'
                                             onInputChange={inputChangeHandler}
-                                            initialValue={auth.credentials.website}
+                                            initialValue={authWebsite.includes('linkedin') ? authWebsite.substring(24) : ''}
                                             initiallyValid={!!auth.credentials}
                                             required
                                         />
@@ -413,7 +429,7 @@ const EditProfileScreen = props => {
                                             autoCorrect
                                             returnKeyType='done'
                                             onInputChange={inputChangeHandler}
-                                            initialValue={auth.credentials.website}
+                                            initialValue={(!authWebsite.includes('instagram') && !authWebsite.includes('linkedin')) ? authWebsite : ''}
                                             initiallyValid={!!auth.credentials}
                                             required
                                         />
@@ -422,7 +438,7 @@ const EditProfileScreen = props => {
 
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity 
-                                        style={{...styles.button, marginTop: 20, backgroundColor: Colors.disabled}} 
+                                        style={{...styles.button, marginTop: 20, backgroundColor: Colors.placeholder}} 
                                         onPress={() => props.navigation.goBack()}
                                     >
                                         <Text style={{color:'white', fontWeight:'500'}}>Cancel</Text>
@@ -431,10 +447,17 @@ const EditProfileScreen = props => {
 
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity 
-                                        style={{...styles.button, ...{marginTop: 20}}} 
+                                        style={
+                                            (formState.inputValues.headline === '') || (formState.inputValues.bio === '') || (formState.inputValues.location === '') ?
+                                            {...styles.disabledButton, marginTop: 20} : {...styles.button, marginTop: 20}
+                                        } 
                                         onPress={submitHandler}
+                                        disabled={(formState.inputValues.headline === '') || (formState.inputValues.bio === '') || (formState.inputValues.location === '')}
                                     >
-                                        <Text style={{color:'black', fontWeight:'500'}}>Save Changes</Text>
+                                        <Text style={{
+                                            color: (formState.inputValues.headline === '') || (formState.inputValues.bio === '') || (formState.inputValues.location === '') ?
+                                                    'gray' : 'black',
+                                            fontWeight:'500'}}>Save Changes</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -532,6 +555,14 @@ const styles = StyleSheet.create({
     button: {
         marginHorizontal: 30,
         backgroundColor: Colors.primary,
+        borderRadius: 4,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    disabledButton: {
+        marginHorizontal: 30,
+        backgroundColor: 'rgba(251, 188, 4, 0.3)',
         borderRadius: 4,
         height: 40,
         alignItems: 'center',
