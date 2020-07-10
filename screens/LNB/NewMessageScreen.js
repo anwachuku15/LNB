@@ -273,97 +273,98 @@ const NewMessageScreen = props => {
     }
 
     return (
-        <SafeAreaView style={styles.screen}>
-
-            <View style={styles.header}>
-                <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                    <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
-                        onPress={() => {props.navigation.goBack()}}
-                    />
-                </HeaderButtons>
-                <Text style={styles.headerTitle}>New Message</Text>
-                {chatMembers.length > 0 ? (
-                    <TouchableCmp 
-                        style={styles.chatButton}
-                        onPress={
-                            chatMembers.length === 1
-                            ? () => navToChatScreen(chatMembers[0].uid, chatMembers[0].name, chatMembers[0].userImage)
-                            : () => toggleModal()
-                        }
-                    >
-                        <Text style={styles.chatButtonText}>Chat</Text>
-                    </TouchableCmp>
-                ) : (
-                    <View style={styles.chatButton}>
-                        <Text style={styles.chatButtonTextDisabled}>Chat</Text>
-                    </View>
-                )}
-            </View>
-
-            <NameGroupChatModal
-                isVisible={isVisible}
-                chatMembers={chatMembers}
-                groupName={groupName}
-                updateGroupName={updateGroupName}
-                navToGroupChatScreen={navToGroupChatScreen}
-                cancel={cancel}
-            />
-
-            <View style={{flexDirection:'column', paddingHorizontal: 10, marginTop: 10}}>
-                <View style={{flexDirection:'column'}}>
-                    <View style={{flexDirection: 'row'}}>
-                        <Text style={{color:text, fontWeight:'bold', fontSize:16}}>To: </Text>
-                        {chatMembers.length > 1 && (<Text style={{color:Colors.blue, fontWeight:'bold', fontSize:15}}>({chatMembers.length} people)</Text>)}
-                    </View>
-                    {chatMembers.length === 0 && 
-                        <View
-                            style={{...styles.placeholderCmp, backgroundColor:background, borderColor:background}}
+        <View style={{...styles.screen, backgroundColor: background}}>
+            <SafeAreaView>
+                <View style={styles.header}>
+                    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+                        <Item
+                            title='Direct'
+                            iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                            onPress={() => {props.navigation.goBack()}}
+                        />
+                    </HeaderButtons>
+                    <Text style={styles.headerTitle}>New Message</Text>
+                    {chatMembers.length > 0 ? (
+                        <TouchableCmp 
+                            style={styles.chatButton}
+                            onPress={
+                                chatMembers.length === 1
+                                ? () => navToChatScreen(chatMembers[0].uid, chatMembers[0].name, chatMembers[0].userImage)
+                                : () => toggleModal()
+                            }
                         >
-                            <Text style={{...styles.memberTextPlaceholder, color:background}}>Placeholder</Text>
-                        </View>
-                    }
-                    <FlatList
-                        ref={flatListRef}
-                        horizontal
-                        keyExtractor={(item, index) => index.toString()}
-                        data={chatMembers}
-                        extraData={selected}
-                        renderItem={renderChatMember}
-                        showsHorizontalScrollIndicator={false}
-                        // keyboardShouldPersistTaps='always'
-                    />
-                </View>
-                <View style={{...styles.searchContainer, width: '100%', alignSelf: 'center'}}>
-                    <TextInput
-                        ref={searchInput}
-                        autoFocus={false}
-                        multiline={true}
-                        numberOfLines={4} 
-                        style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:5}}
-                        placeholder={'Search...'}
-                        placeholderTextColor={Colors.placeholder}
-                        onChangeText={text => {updateSearch(text)}}
-                        value={search}
-                    />
-                    {search.length > 0 && (
-                        <TouchableCmp
-                            style={{justifyContent:'center'}}
-                            onPress={() => {
-                                setSearch('')
-                                updateSearch('')
-                            }}
-                        >
-                            <MaterialIcons
-                                name='cancel'
-                                size={20}
-                                color={Colors.disabled}
-                            />
+                            <Text style={styles.chatButtonText}>Chat</Text>
                         </TouchableCmp>
+                    ) : (
+                        <View style={styles.chatButton}>
+                            <Text style={styles.chatButtonTextDisabled}>Chat</Text>
+                        </View>
                     )}
                 </View>
-            </View>
+        
+                <NameGroupChatModal
+                    isVisible={isVisible}
+                    chatMembers={chatMembers}
+                    groupName={groupName}
+                    updateGroupName={updateGroupName}
+                    navToGroupChatScreen={navToGroupChatScreen}
+                    cancel={cancel}
+                />
+
+                <View style={{flexDirection:'column', paddingHorizontal: 10, marginTop: 10}}>
+                    <View style={{flexDirection:'column'}}>
+                        <View style={{flexDirection: 'row'}}>
+                            <Text style={{color:text, fontWeight:'bold', fontSize:16}}>To: </Text>
+                            {chatMembers.length > 1 && (<Text style={{color:Colors.blue, fontWeight:'bold', fontSize:15}}>({chatMembers.length} people)</Text>)}
+                        </View>
+                        {chatMembers.length === 0 && 
+                            <View
+                                style={{...styles.placeholderCmp, backgroundColor:background, borderColor:background}}
+                            >
+                                <Text style={{...styles.memberTextPlaceholder, color:background}}>Placeholder</Text>
+                            </View>
+                        }
+                        <FlatList
+                            ref={flatListRef}
+                            horizontal
+                            keyExtractor={(item, index) => index.toString()}
+                            data={chatMembers}
+                            extraData={selected}
+                            renderItem={renderChatMember}
+                            showsHorizontalScrollIndicator={false}
+                            // keyboardShouldPersistTaps='always'
+                        />
+                    </View>
+                    <View style={{...styles.searchContainer, width: '100%', alignSelf: 'center'}}>
+                        <TextInput
+                            ref={searchInput}
+                            autoFocus={false}
+                            multiline={true}
+                            numberOfLines={4} 
+                            style={{flex:1, fontSize:16, color:text, marginLeft:7, marginRight:10, alignSelf:'center', paddingVertical:5}}
+                            placeholder={'Search...'}
+                            placeholderTextColor={Colors.placeholder}
+                            onChangeText={text => {updateSearch(text)}}
+                            value={search}
+                        />
+                        {search.length > 0 && (
+                            <TouchableCmp
+                                style={{justifyContent:'center'}}
+                                onPress={() => {
+                                    setSearch('')
+                                    updateSearch('')
+                                }}
+                            >
+                                <MaterialIcons
+                                    name='cancel'
+                                    size={20}
+                                    color={Colors.disabled}
+                                />
+                            </TouchableCmp>
+                        )}
+                    </View>
+                </View>
+            </SafeAreaView>
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
                 data={search.length === 0 ? allUsers : results}
@@ -371,7 +372,8 @@ const NewMessageScreen = props => {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
             />
-        </SafeAreaView>
+        </View>
+        
     )
 }
 
