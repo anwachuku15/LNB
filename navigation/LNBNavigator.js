@@ -498,6 +498,7 @@ const styles = StyleSheet.create({
 
 
 const createButtonSize = new Animated.Value(1)
+const secondaryButtonSize = new Animated.Value(1)
 const buttonMenuAnimation = new Animated.Value(0)
 const buttonColorAnimation = new Animated.Value(0)
 
@@ -521,6 +522,37 @@ const toggleCreateMenu = () => {
         })
     ]).start()
 }
+
+const selectOption = () => {
+    Animated.sequence([
+        Animated.timing(secondaryButtonSize, {
+            toValue: 0.80,
+            duration: 50
+        }),
+        Animated.parallel([
+            Animated.sequence([
+                Animated.timing(createButtonSize, {
+                    toValue: 0.97,
+                    duration: 50
+                }),
+                Animated.timing(createButtonSize, {
+                    toValue: 1
+                })
+            ]),
+            Animated.timing(secondaryButtonSize, {
+                toValue: 1
+            }),
+            Animated.spring(buttonMenuAnimation, {
+                toValue: buttonMenuAnimation._value === 0 ? 1 : 0,
+            }),
+            Animated.timing(buttonColorAnimation, {
+                toValue: buttonColorAnimation._value === 0 ? 1 : 0,
+                duration: 50
+            })
+        ])
+    ]).start()
+}
+
 const interpolatePostButtonColor = buttonColorAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [Colors.primary, Colors.placeholder]
@@ -531,6 +563,11 @@ const createButtonStyle = {
         scale: createButtonSize,
     }],
     backgroundColor: interpolatePostButtonColor
+}
+const secondaryButtonStyle = {
+    transform: [{
+        scale: secondaryButtonSize
+    }]
 }
 
 
@@ -650,9 +687,9 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <TouchableWithoutFeedback onPress={navToPostModal}>
                             <Animated.View style={{position: 'relative', left: needX, top: needY}}>
-                                <View style={{...styles.secondaryButton, backgroundColor: Colors.primary}}>
+                                <Animated.View style={[secondaryButtonStyle, {...styles.secondaryButton, backgroundColor: Colors.primary}]}>
                                     <MaterialIcons name='create' size={24} color='white' />
-                                </View>
+                                </Animated.View>
                             </Animated.View>
                         </TouchableWithoutFeedback>
                     )
@@ -669,9 +706,9 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
                             <Animated.View style={{position: 'relative', left: messageX, top: messageY}}>
-                                <View style={{...styles.secondaryButton, backgroundColor: Colors.blue}}>
+                                <Animated.View style={[secondaryButtonStyle, {...styles.secondaryButton, backgroundColor: Colors.blue}]}>
                                     <MaterialCommunityIcons name='message-plus' size={24} color='white' />
-                                </View>
+                                </Animated.View>
                             </Animated.View>
                         </TouchableWithoutFeedback>
                     )
@@ -697,13 +734,13 @@ const BottomTabStackContainer = createStackNavigator({
                         <TouchableWithoutFeedback onPress={toggleCreateMenu}>
                             <View style={styles.button}>
                                 <Animated.View style={[ createButtonStyle, {...styles.createButton, borderColor: Colors.primary, borderWidth: 2}]}>
-                                        <Animated.View style={[rotation]}>
-                                            <FontAwesome
-                                                name='plus'
-                                                size={24}
-                                                color={'white'}
-                                            />
-                                        </Animated.View>
+                                    <Animated.View style={[rotation]}>
+                                        <FontAwesome
+                                            name='plus'
+                                            size={24}
+                                            color={'white'}
+                                        />
+                                    </Animated.View>
                                 </Animated.View>
                             </View>
                         </TouchableWithoutFeedback>
@@ -785,7 +822,7 @@ const BottomTabStackContainer = createStackNavigator({
         },
         navigationOptions: ({navigation, theme, screenProps}) => {
             navToPostModal = () => {
-                toggleCreateMenu()
+                selectOption()
                 navigation.navigate('postModal')
             }
             navToEventsModal = () => {
@@ -800,8 +837,7 @@ const BottomTabStackContainer = createStackNavigator({
                 ])
             }
             navToNewMessageScreen = () => {
-                toggleCreateMenu()
-                // navigation.navigate('CreateMessage')
+                selectOption()
                 navigation.navigate('newMessageModal')
             }
             background = screenProps.theme === 'dark' ? 'black' : 'black'
