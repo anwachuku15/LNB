@@ -17,7 +17,6 @@ import { createMaterialTopTabNavigator, MaterialTopTabBar, createBottomTabNaviga
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
 import Colors from '../constants/Colors'
-import PostTab from '../constants/PostTab'
 import HomeScreen from '../screens/LNB/HomeScreen'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign, FontAwesome5 } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
