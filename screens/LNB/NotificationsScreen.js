@@ -149,7 +149,7 @@ const NotificationsScreen = props => {
     const renderItem = ({item}) => (
         // <Animated.View>
             <TouchableCmp onPress={() => {
-                item.type === 'new connection' && (navToUserProfile(item.senderId))
+                item.type === 'new connection' && (navToUserProfile(item.senderId, item.senderName))
                 item.type === 'likeNeed' && (navToNeed(item.needId, item.senderName, item.type))
                 item.type === 'commentNeed' && (navToNeed(item.needId, item.senderName, item.type))
                 item.type === 'commentThread' && (navToNeed(item.needId, item.senderName, item.type))
