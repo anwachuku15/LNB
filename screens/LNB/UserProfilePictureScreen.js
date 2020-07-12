@@ -25,7 +25,7 @@ import MenuAvatar from '../../components/LNB/MenuAvatar'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
-
+const SCREEN_HEIGHT = Dimensions.get('window').height
 
 
 let themeColor
@@ -51,7 +51,16 @@ const UserProfilePictureScreen = props => {
     
     return (
         <SafeAreaView style={styles.screen}>
-            <View style={{flex:1, justifyContent:'center'}}>
+            {/* <View style={styles.header}>
+                <TouchableCmp onPress={() => props.navigation.goBack()}>
+                    <EvilIcons
+                        name='close-o'
+                        size={36}
+                        color={Colors.disabled}
+                    />
+                </TouchableCmp>
+            </View> */}
+            <View style={{flex:1, marginTop: SCREEN_HEIGHT/6}}>
                 <SharedElement id={uri}>
                     <Image style={styles.avatar} source={{uri: uri}}/>
                 </SharedElement>
