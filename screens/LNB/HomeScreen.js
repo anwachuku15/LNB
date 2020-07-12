@@ -542,7 +542,7 @@ HomeScreen.navigationOptions = (navData) => {
         headerBackTitleVisible: false,
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
-            borderBottomColor: Colors.primary
+            
         },
     }
 }

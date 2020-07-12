@@ -51,15 +51,6 @@ const UserProfilePictureScreen = props => {
     
     return (
         <SafeAreaView style={styles.screen}>
-            <View style={styles.header}>
-                <TouchableCmp onPress={() => props.navigation.goBack()}>
-                    <EvilIcons 
-                        name='close-o'
-                        size={36}
-                        color={Colors.disabled}
-                    />
-                </TouchableCmp>
-            </View>
             <View style={{flex:1, justifyContent:'center'}}>
                 <SharedElement id={uri}>
                     <Image style={styles.avatar} source={{uri: uri}}/>
@@ -93,10 +84,6 @@ UserProfilePictureScreen.navigationOptions = (navData) => {
             </HeaderButtons>
         ),
         headerTitle: '',
-        headerStyle: {
-            backgroundColor: 'transparent',
-        },
-        headerMode: 'screen'
     }
 }
 
