@@ -2,7 +2,8 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
-import { Platform, StyleSheet, View, Button, SafeAreaView, Text, Animated, TouchableWithoutFeedback } from 'react-native'
+import { Platform, Dimensions, Vibration, StyleSheet, View, Button, SafeAreaView, Text, Animated, TouchableWithoutFeedback } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import TouchableCmp from '../components/LNB/TouchableCmp'
 import { createAppContainer, createSwitchNavigator, StackActions, SwitchActions, NavigationActions, getActiveChildNavigationOptions } from 'react-navigation'
 import { createStackNavigator, Header, HeaderBackButton, TransitionPresets, TransitionSpecs, HeaderStyleInterpolators } from 'react-navigation-stack'
@@ -16,7 +17,7 @@ import { createMaterialTopTabNavigator, MaterialTopTabBar, createBottomTabNaviga
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
 import Colors from '../constants/Colors'
-
+import PostTab from '../constants/PostTab'
 import HomeScreen from '../screens/LNB/HomeScreen'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign, FontAwesome5 } from '@expo/vector-icons'
 import AuthScreen from '../screens/user/AuthScreen'
@@ -52,6 +53,8 @@ import MessageIcon from '../components/LNB/MessageIcon'
 import { useColorScheme } from 'react-native-appearance'
 import { Alert } from 'react-native'
 // import Animated, { Easing } from 'react-native-reanimated'
+
+const SCREEN_WIDTH = Dimensions.get('window').width
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -175,7 +178,6 @@ const DirectorySwipeTab = createMaterialTopTabNavigator({
 })
 
 
-
 DirectorySwipeTab.navigationOptions = ({navigation, screenProps}) => {
     const index = navigation.state.index
     const userName = navigation.state.routes[0].params.userName
@@ -214,14 +216,6 @@ DirectorySwipeTab.navigationOptions = ({navigation, screenProps}) => {
 }
 
 
-
-// const transitionConfig = {
-//     animation: 'timing',
-//     config: {
-//         duration: 500,
-//         easing: Easing.inOut(Easing.ease)
-//     }
-// }
 
 
 const screens = {
@@ -355,9 +349,7 @@ const UserProfileStack = createSharedElementStackNavigator({
     headerMode: 'screen'
 })
 
-// HomeStack.navigationOptions = ({navigation}) => {
-//     console.log(navigation)
-// }
+
 
 const MainStack = createSharedElementStackNavigator({
     Home: HomeScreen,
@@ -392,13 +384,9 @@ const HomeStack = createStackNavigator({
 })
 
 MainStack.navigationOptions = ({navigation}) => {
-    // console.log('START')
-    // console.log(navigation.state.routes)
-    // console.log('END')
     let headerMode = 'float'
     if (navigation.state.routes.filter(route => route.routeName === 'UserProfile') > 0) {
         headerMode = 'screen'
-        // console.log('HELLO')
     }
 
     return {
@@ -442,7 +430,6 @@ const ShopStack = createStackNavigator({
 
 const ThemedBottomBar = props => {
     const scheme = useColorScheme()
-    // console.log(props)
     let theme
     if (scheme === 'dark') {
         theme = Colors.darkHeader
@@ -461,10 +448,9 @@ const ThemedBottomBar = props => {
 
 const styles = StyleSheet.create({
     button: {
-        // position: 'absolute',
         alignItems: 'center',
         bottom: 20,
-        left: 190
+        left: SCREEN_WIDTH*0.48
     },
     createButton: {
         // backgroundColor: Colors.primary,
@@ -492,7 +478,7 @@ const styles = StyleSheet.create({
         height: 48,
         borderRadius: 24,
         bottom: 20,
-        left: 190
+        left: SCREEN_WIDTH*0.48
     }
 })
 
@@ -506,7 +492,7 @@ const toggleCreateMenu = () => {
     Animated.parallel([
         Animated.sequence([
             Animated.timing(createButtonSize, {
-                toValue: 0.97,
+                toValue: 0.95,
                 duration: 50
             }),
             Animated.timing(createButtonSize, {
@@ -521,6 +507,21 @@ const toggleCreateMenu = () => {
             duration: 50
         })
     ]).start()
+    if (buttonMenuAnimation._value === 0) {
+        Vibration.vibrate()
+    }
+}
+
+const pressPost = () => {
+    Animated.sequence([
+        Animated.timing(createButtonSize, {
+            toValue: 0.95,
+            duration: 50
+        }),
+        Animated.timing(createButtonSize, {
+            toValue: 1
+        }),
+    ]).start()
 }
 
 const selectOption = () => {
@@ -532,7 +533,7 @@ const selectOption = () => {
         Animated.parallel([
             Animated.sequence([
                 Animated.timing(createButtonSize, {
-                    toValue: 0.97,
+                    toValue: 0.95,
                     duration: 50
                 }),
                 Animated.timing(createButtonSize, {
@@ -617,6 +618,15 @@ const DirectoryTabButton = createMaterialTopTabNavigator({
     tabBarPosition: 'top',
     tabBarComponent: ThemedTopTabBar
 })
+
+const DirectoryStack = createStackNavigator({
+    DirectoryTab: {
+        screen: DirectoryTabButton,
+    },
+    ...screens
+}, {
+    defaultNavigationOptions: defaultNavOptions,
+})
     
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
@@ -669,13 +679,15 @@ const BottomTabStackContainer = createStackNavigator({
             navigationOptions: {
                 tabBarButtonComponent: () => {
                     return (
-                        <TouchableWithoutFeedback onPress={navToEventsModal} >
-                            <Animated.View style={{position: 'relative', left: announcementX, top: announcementY}}>
-                                <View style={{...styles.secondaryButton, backgroundColor: 'rgba(237, 37, 78, 0.4)'}}>
-                                    <MaterialCommunityIcons name='calendar-edit' size={24} color='white' />
-                                </View>
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
+                        <View>
+                            <TouchableWithoutFeedback onPress={navToEventsModal}>
+                                <Animated.View style={{position: 'relative', left: announcementX, top: announcementY}}>
+                                    <View style={{...secondaryPostButtonStyle, backgroundColor: 'rgba(237, 37, 78, 0.4)'}}>
+                                        <MaterialCommunityIcons name='calendar-edit' size={24} color='white' />
+                                    </View>
+                                </Animated.View>
+                            </TouchableWithoutFeedback>
+                        </View>
                     )
                 }
             }
@@ -685,18 +697,17 @@ const BottomTabStackContainer = createStackNavigator({
             navigationOptions: {
                 tabBarButtonComponent: () => {
                     return (
-                        <TouchableWithoutFeedback onPress={navToPostModal}>
-                            <Animated.View style={{position: 'relative', left: needX, top: needY}}>
-                                <Animated.View style={[secondaryButtonStyle, {...styles.secondaryButton, backgroundColor: Colors.primary}]}>
-                                    <MaterialIcons name='create' size={24} color='white' />
+                        <View>
+                            <TouchableWithoutFeedback onPress={navToPostOption}>
+                                <Animated.View style={{position: 'relative', left: needX, top: needY}}>
+                                    <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: Colors.primary}]}>
+                                        <MaterialIcons name='create' size={24} color='white' />
+                                    </Animated.View>
                                 </Animated.View>
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
+                            </TouchableWithoutFeedback>
+                        </View>
                     )
                 },
-                tabBarOnPress: () => {
-                    console.log('NEED')
-                }
             }
         },
         CreateMessage: {
@@ -704,35 +715,26 @@ const BottomTabStackContainer = createStackNavigator({
             navigationOptions: {
                 tabBarButtonComponent: () => {
                     return (
-                        <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
-                            <Animated.View style={{position: 'relative', left: messageX, top: messageY}}>
-                                <Animated.View style={[secondaryButtonStyle, {...styles.secondaryButton, backgroundColor: Colors.blue}]}>
-                                    <MaterialCommunityIcons name='message-plus' size={24} color='white' />
+                        <View>
+                            <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
+                                <Animated.View style={{position: 'relative', left: messageX, top: messageY}}>
+                                    <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: Colors.blue}]}>
+                                        <MaterialCommunityIcons name='message-plus' size={24} color='white' />
+                                    </Animated.View>
                                 </Animated.View>
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
+                            </TouchableWithoutFeedback>
+                        </View>
                     )
                 }
             }
         },
-        Post: {
+        CreatePost: {
             screen: CreatePostScreen,
             navigationOptions: {
-                // tabBarIcon: (tabInfo, navigation) => {
-                //     return (
-                //         // <Ionicons 
-                //         //     name={Platform.OS==='android' ? 'md-add-circle-outline' : 'ios-add-circle-outline'} 
-                //         //     size={25} 
-                //         //     color={tabInfo.tintColor}
-                //         // />
-                //         // <PostButtonTab tintColor={tabInfo.tintColor} navigation={navigation}/>
-                //     )
-                // },
                 tabBarButtonComponent: ({style}) => {
-                    return ( 
-                        // <PostTabButton tintColor={'gray'} props={props.children} />
-                        <TouchableWithoutFeedback onPress={toggleCreateMenu}>
-                            <View style={styles.button}>
+                    return (
+                        <View style={postButtonStyle}>
+                            <TouchableWithoutFeedback onPress={navToPostModal} onLongPress={toggleCreateMenu}>
                                 <Animated.View style={[ createButtonStyle, {...styles.createButton, borderColor: Colors.primary, borderWidth: 2}]}>
                                     <Animated.View style={[rotation]}>
                                         <FontAwesome
@@ -742,11 +744,10 @@ const BottomTabStackContainer = createStackNavigator({
                                         />
                                     </Animated.View>
                                 </Animated.View>
-                            </View>
-                        </TouchableWithoutFeedback>
+                            </TouchableWithoutFeedback>
+                        </View>
                     )
                 },
-                
                 tabBarColor: Colors.primaryColor,
                 tabBarLabel: Platform.OS === 'android' 
                                 ? <Text style={{fontFamily: 'open-sans-bold'}}>Post</Text>
@@ -759,9 +760,29 @@ const BottomTabStackContainer = createStackNavigator({
                 DirectoryTab: {
                     screen: DirectoryTabButton,
                 },
-                ...screens
+                ...screens,
             }, {
                 defaultNavigationOptions: defaultNavOptions,
+                navigationOptions: ({navigation}) => {
+                    if (
+                        navigation.isFocused() && (
+                            navigation.state.index === 0 ||
+                            navigation.state.routes[navigation.state.routes.length - 1].routeName === 'PostDetail'
+                        )
+                    ) {
+                        postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
+                        secondaryPostButtonStyle = {
+                            position: 'absolute', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            width: 48, 
+                            height: 48, 
+                            borderRadius: 24, 
+                            bottom: -500, 
+                            left: SCREEN_WIDTH*0.48
+                        }
+                    }
+                }
             }),
             navigationOptions: {
                 tabBarIcon: (tabInfo) => {
@@ -813,7 +834,6 @@ const BottomTabStackContainer = createStackNavigator({
             tabBarOnPress: ({navigation, defaultHandler}) => {
                 if (navigation.state.key === 'Post') {
                     navigation.navigate('postModal')
-                    console.log('post')
                 } else {
                     defaultHandler()
                 }
@@ -821,12 +841,21 @@ const BottomTabStackContainer = createStackNavigator({
             
         },
         navigationOptions: ({navigation, theme, screenProps}) => {
-            navToPostModal = () => {
+            navToPostOption = () => {
                 selectOption()
                 navigation.navigate('postModal')
             }
+            navToPostModal = () => {
+                pressPost()
+                if (buttonMenuAnimation._value === 0) {
+                    setTimeout(() => {
+                        navigation.navigate('postModal')
+                    }, 250)
+                } else {
+                    toggleCreateMenu()
+                }
+            }
             navToEventsModal = () => {
-                
                 // navigation.navigate('announcementModal')
                 Alert.alert('Coming Soon', 'Event planning coming soon...', [
                     {
@@ -866,7 +895,23 @@ const BottomTabStackContainer = createStackNavigator({
     mode: 'modal',
     headerMode: 'none',
 })
-let navToPostModal, navToEventsModal, navToNewMessageScreen, navToMessages, background
+let navToPostModal, navToPostOption, navToEventsModal, navToNewMessageScreen, navToMessages, background, navScreen
+let postButtonStyle = {
+        alignItems: 'center', 
+        bottom: 20, 
+        left: SCREEN_WIDTH * 0.48
+    }
+let secondaryPostButtonStyle = {
+    position: 'absolute', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    width: 48, 
+    height: 48, 
+    borderRadius: 24, 
+    bottom: 0, 
+    left: SCREEN_WIDTH*0.48
+}
+
 
 
 
@@ -1027,37 +1072,116 @@ const DrawerNav = createDrawerNavigator({
     }
 })
 
+
 HomeStack.navigationOptions = ({navigation}) => {
     let tabBarVisible = true
     let headerMode = 'float'
     const routes = navigation.state.routes[0].routes
-    if (routes[routes.length-1].routeName === 'UserProfilePicture') {
+    const currentRouteName = routes[routes.length-1].routeName
+    if (currentRouteName === 'UserProfilePicture') {
         tabBarVisible = false
     }
-
+    if (navigation.isFocused() && currentRouteName === 'PostDetail') {
+        postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
+        secondaryPostButtonStyle = {
+            position: 'absolute', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: 48, 
+            height: 48, 
+            borderRadius: 24, 
+            bottom: -500, 
+            left: SCREEN_WIDTH*0.48
+        }
+    } else {
+        postButtonStyle = {alignItems: 'center', bottom: 20, left: SCREEN_WIDTH*0.48}
+        secondaryPostButtonStyle = {
+            position: 'absolute', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: 48, 
+            height: 48, 
+            borderRadius: 24, 
+            bottom: -30, 
+            left: SCREEN_WIDTH*0.48
+        }
+    }
 
     return {
         tabBarVisible,
         headerMode
     }
 }
+
+AnnouncementsStack.navigationOptions = ({navigation}) => {
+    const routes = navigation.state.routes
+    const currentRouteName = routes[routes.length-1].routeName
+    if (navigation.isFocused() && currentRouteName === 'PostDetail') {
+        postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
+        secondaryPostButtonStyle = {
+            position: 'absolute', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: 48, 
+            height: 48, 
+            borderRadius: 24, 
+            bottom: -500, 
+            left: SCREEN_WIDTH*0.48
+        }
+    }
+}
+
+NotificationsStack.navigationOptions = ({navigation}) => {
+    const routes = navigation.state.routes
+    const currentRouteName = routes[routes.length-1].routeName
+    if (navigation.isFocused() && currentRouteName === 'PostDetail') {
+        postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
+        secondaryPostButtonStyle = {
+            position: 'absolute', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: 48, 
+            height: 48, 
+            borderRadius: 24, 
+            bottom: -500, 
+            left: SCREEN_WIDTH*0.48
+        }
+    }
+}
+
+// DirectoryStack.navigationOptions = ({navigation}) => {
+//     console.log(navigation)
+// }
+
+
+
+
+
+
 // If current page is stacked on top of root tab screens or postModal is open
-BottomTabStackContainer.navigationOptions = ({navigation}) => {
+
+BottomTabStackContainer.navigationOptions = ({ navigation }) => {
     let drawerLockMode = 'unlocked'
     let tabBarVisible = false
-    const allRoutes = navigation.state.routes[0].routes[0].routes[0].routes
-    const messageRoute = navigation.state.routes[0]
-    // console.log('-----\n')
-    // console.log(messageRoute)
-    // console.log('-----\n')
-    if (allRoutes.filter(route => route.routeName === ('UserProfilePicture')) > 0) {
-        tabBarVisible = false
-    }
+    const tabStacks = navigation.state.routes[0].routes
+    tabStacks.forEach(tab => {
+        if (tab.routeName[0] !== 'C') {
+            // console.log(tab)
+        }
+    })
+    // console.log('---------\n')
     
+    
+    // console.log(navigation.state.routes[0].routes[6])
+
+
+    // console.log('Directory Tab open')
+
     if (
         navigation.state.routes[0].routes[0]['index'] > 0 || 
         navigation.state.routes.length > 1 ||
-        navigation.state.routes[0].routes[0].routes[0].routes.length > 1
+        navigation.state.routes[0].routes[0].routes[0].routes.length > 1 ||
+        (navigation.state.routes[0].routes[6].index === 0 && navigation.state.routes[0].routes[6].routes[0].index === 1)
     ) {
         drawerLockMode = 'locked-closed'
     }
@@ -1067,15 +1191,22 @@ BottomTabStackContainer.navigationOptions = ({navigation}) => {
     }
 }
 
+
+
+
+
 // Disable swipe to Messages if the Drawer or Post Modal is open or if HomeStack is past home page
 DrawerNav.navigationOptions = ({navigation}) => {
-    // console.log(navigation.state.routes[0].routes[0].routes[0].routes[0])
-    // console.log('--------------')
+    
     let swipeEnabled = true
     const HomeStack = navigation.state.routes[0].routes[0].routes[0].routes[0]
     const AnnouncementsStack = navigation.state.routes[0].routes[0].routes[1]
-    const NotificationsStack = navigation.state.routes[0].routes[0].routes[3]
-    const ShopStack = navigation.state.routes[0].routes[0].routes[4]
+    const DirectoryStack = navigation.state.routes[0].routes[0].routes[6]
+    const NotificationsStack = navigation.state.routes[0].routes[0].routes[7]
+    const ShopStack = navigation.state.routes[0].routes[0].routes[8]
+    
+    // console.log('Directory Stack Index: ' + DirectoryStack.index)
+    // console.log('Directory or Connections: ' + DirectoryStack.routes[0].index)
     
     if (
         navigation.state.isDrawerOpen || 
@@ -1083,7 +1214,8 @@ DrawerNav.navigationOptions = ({navigation}) => {
         HomeStack.index > 0 ||
         AnnouncementsStack.index > 0 ||
         NotificationsStack.index > 0 ||
-        ShopStack.index > 0
+        ShopStack.index > 0 ||
+        DirectoryStack.index > 0
     ) {
         swipeEnabled = false
     } else {
@@ -1110,6 +1242,7 @@ const SwipeTabNavigator = createMaterialTopTabNavigator({
     }
 })
 
+
 MessagesStack.navigationOptions = ({navigation}) => {
     let swipeEnabled = true
     if (navigation.state.index > 0) {
@@ -1133,6 +1266,7 @@ const AppNavigator = createSwitchNavigator({
     Auth: AuthNavigator,
     App: SwipeTabNavigator
 })
+
 
 
 
