@@ -504,7 +504,6 @@ export const readAnnouncements = () => {
             await db.doc(`/users/${auth.userId}`).update({
                 lastReadAnnouncements: justRead
             })
-            console.log('updated')
             dispatch(getAuthenticatedUser(
                 auth.userId,
                 auth.credentials.email,

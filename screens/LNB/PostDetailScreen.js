@@ -21,11 +21,13 @@ import {
     Dimensions,
     KeyboardAvoidingView 
 } from 'react-native'
+import { withNavigationFocus } from 'react-navigation'
 import Clipboard from '@react-native-community/clipboard'
 import { SharedElement } from 'react-navigation-shared-element'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import Colors from '../../constants/Colors'
+import PostTab from '../../constants/PostTab'
 import { useColorScheme } from 'react-native-appearance'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { getNeed, likeNeed, unLikeNeed } from '../../redux/actions/postsActions'
@@ -116,6 +118,8 @@ const PostDetailScreen = props => {
         setIsRefreshing(false)
     }, [setComments, setIsRefreshing, setError])
 
+    
+
     useEffect(() => {
         let mounted = true
         setIsLoading(true)
@@ -124,7 +128,9 @@ const PostDetailScreen = props => {
                 setIsLoading(false)
             })
         }
-        return () => mounted = false
+        return () => {
+            mounted = false 
+        }
     }, [loadComments])
 
     useEffect(() => {

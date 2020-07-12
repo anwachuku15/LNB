@@ -55,8 +55,8 @@ const ConnectionsScreen = props => {
     const dispatch = useDispatch()
     
     const auth = useSelector(state => state.auth)
-    const userId = props.navigation.getParam('userId')
-    const userName = props.navigation.getParam('userName')
+    const userId = props.navigation.getParam('userId') ? props.navigation.getParam('userId') : auth.userId
+    const userName = props.navigation.getParam('userName') ? props.navigation.getParam('userName') : auth.credentials.displayName
     const userConnections = useSelector(state => state.auth.userConnections)
 
     

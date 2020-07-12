@@ -133,35 +133,13 @@ const DrawerScreen = props => {
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>{
-                  props.navigation.navigate({
-                    routeName: 'Events'
-                  })
+                  // props.navigation.navigate({
+                  //   routeName: 'Events'
+                  // })
                 }} style={styles.list}>
                     <View>
-                        <Ionicons style={styles.icon} name='ios-calendar' size={20} color={Colors.primary} />
-                        <Text style={{...styles.text, ...{color:text}}}> Events </Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.list} 
-                  onPress={() => {
-                    props.navigation.navigate({
-                      routeName: 'Directory',
-                      params: {
-                          userId: uid,
-                          userName: user.credentials.displayName
-                      }
-                    })
-                  }}
-                >
-                    <View>
-                    <MaterialCommunityIcons
-                      style={styles.icon}
-                      name='account-card-details-outline'
-                      size={23}
-                      color={Colors.primary}
-                    />
-                    <Text style={{...styles.text, ...{color:text}}}> Directory </Text>
+                        <Ionicons style={styles.icon} name='ios-calendar' size={20} color={Colors.disabled} />
+                        <Text style={{...styles.text, ...{color:Colors.socialdark}}}> Events </Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity

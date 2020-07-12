@@ -75,7 +75,6 @@ const AnnouncementsScreen = props => {
     const loadAnnouncements = useCallback(async () => {
         try {
             await dispatch(readAnnouncements())
-            console.log('blur')
         } catch (err) {
             console.log(err)
             setError(err.message)
