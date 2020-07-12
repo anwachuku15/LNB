@@ -115,12 +115,12 @@ const NotificationsScreen = props => {
         loadNotifications()
     }, [dispatch, loadNotifications])
 
-    const navToUserProfile = (id) => {
+    const navToUserProfile = (id, name) => {
         props.navigation.navigate({
             routeName: 'UserProfile',
             params: {
                 userId: id,
-
+                name: name
             }
         })
     }
@@ -170,7 +170,7 @@ const NotificationsScreen = props => {
                                     <View style={{width: '80%'}}>
                                         <TouchableCmp 
                                             style={{alignSelf:'flex-start'}}
-                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                            onPress={() => {navToUserProfile(item.senderId, item.senderName)}}
                                         >
                                             <Image 
                                                 source={{uri: item.senderImage}}
@@ -195,7 +195,7 @@ const NotificationsScreen = props => {
                                     <View style={{width: '80%'}}>
                                         <TouchableCmp 
                                             style={{alignSelf:'flex-start'}}
-                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                            onPress={() => {navToUserProfile(item.senderId, item.senderName)}}
                                         >
                                             <Image 
                                                 source={{uri: item.senderImage}}
@@ -221,7 +221,7 @@ const NotificationsScreen = props => {
                                     <View style={{width: '80%'}}>
                                         <TouchableCmp
                                             style={{alignSelf:'flex-start'}}
-                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                            onPress={() => {navToUserProfile(item.senderId, item.senderName)}}
                                         >
                                             <Image
                                                 source={{uri: item.senderImage}}
@@ -247,7 +247,7 @@ const NotificationsScreen = props => {
                                     <View style={{width: '80%'}}>
                                         <TouchableCmp
                                             style={{alignSelf:'flex-start'}}
-                                            onPress={() => {navToUserProfile(item.senderId)}}
+                                            onPress={() => {navToUserProfile(item.senderId, item.senderName)}}
                                         >
                                             <Image
                                                 source={{uri: item.senderImage}}
