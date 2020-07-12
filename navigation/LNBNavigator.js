@@ -623,7 +623,7 @@ const DirectoryStack = createStackNavigator({
 }, {
     defaultNavigationOptions: defaultNavOptions,
 })
-let isUserProfilePicture = false   
+  
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
         Home: {
@@ -905,7 +905,7 @@ const BottomTabStackContainer = createStackNavigator({
     
 })
 let navToPostModal, navToPostOption, navToEventsModal, navToNewMessageScreen, navToMessages, background, navScreen
-
+let isUserProfilePicture = false 
 let postButtonStyle = {
         alignItems: 'center', 
         bottom: 20, 
@@ -1100,6 +1100,7 @@ HomeStack.navigationOptions = ({navigation}) => {
             bottom: -500, 
             left: SCREEN_WIDTH*0.48
         }
+        isUserProfilePicture = true
     } else {
         postButtonStyle = {alignItems: 'center', bottom: 20, left: SCREEN_WIDTH*0.48}
         secondaryPostButtonStyle = {
@@ -1113,15 +1114,14 @@ HomeStack.navigationOptions = ({navigation}) => {
             left: SCREEN_WIDTH*0.48
         }
     }
-
     if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
         isUserProfilePicture = true
-        return {
-            isUserProfilePicture
-        }
     } else {
-        return isUserProfilePicture = false
+        isUserProfilePicture = false
     }
+    // if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
+    //     !isUserProfilePicture
+    // }
 }
 
 AnnouncementsStack.navigationOptions = ({navigation}) => {
@@ -1180,9 +1180,6 @@ NotificationsStack.navigationOptions = ({navigation}) => {
     if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
         isUserProfilePicture = true
     } 
-    return {
-        isUserProfilePicture
-    }
 }
 
 BottomTabStackContainer.navigationOptions = ({ navigation }) => {
