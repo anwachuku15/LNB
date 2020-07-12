@@ -350,7 +350,6 @@ const MainStack = createSharedElementStackNavigator({
     Home: HomeScreen,
     ...screens,
 }, {
-    // headerMode: 'float',
     defaultNavigationOptions: {
         headerTitleStyle: {
             fontFamily: 'open-sans-bold',
@@ -360,7 +359,6 @@ const MainStack = createSharedElementStackNavigator({
         },
         headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
         headerBackTitleVisible: false,
-        headerStyleInterpolator: HeaderStyleInterpolators.forFade,
     },
 }, {
     name: 'SharedStack',
@@ -385,9 +383,6 @@ const forFade = ({ current, next }) => {
 const HomeStack = createStackNavigator({
     MainStack: {
         screen: MainStack,
-        // navigationOptions: {
-        //     headerStyleInterpolator: forFade,
-        // }
     },
     Comment: {
         screen: CreateCommentScreen
@@ -397,20 +392,8 @@ const HomeStack = createStackNavigator({
     headerMode: 'none',
 })
 
-MainStack.navigationOptions = ({navigation}) => {
-    let headerMode = 'screen'
-    if (navigation.state.routes.filter(route => route.routeName === 'UserProfile') > 0) {
-        headerMode = 'screen'
-    }
 
-    return {
-        headerMode
-    }
-
-}
-
-
-const AnnouncementsStack = createStackNavigator({
+const AnnouncementsStack = createSharedElementStackNavigator({
     Announcements: {
         screen: AnnouncementsScreen,
         navigationOptions: {
@@ -425,7 +408,7 @@ const AnnouncementsStack = createStackNavigator({
 })
 
 
-const NotificationsStack = createStackNavigator({
+const NotificationsStack = createSharedElementStackNavigator({
     Notifications: {
         screen: NotificationsScreen,
     },
@@ -434,7 +417,7 @@ const NotificationsStack = createStackNavigator({
     defaultNavigationOptions: defaultNavOptions
 })
 
-const ShopStack = createStackNavigator({
+const ShopStack = createSharedElementStackNavigator({
     Shop: {
         screen: ShopScreen
     },
@@ -766,7 +749,7 @@ const BottomTabStackContainer = createStackNavigator({
         },
         
         Directory: {
-            screen: createStackNavigator({
+            screen: createSharedElementStackNavigator({
                 DirectoryTab: {
                     screen: DirectoryTabButton,
                 },
@@ -774,10 +757,11 @@ const BottomTabStackContainer = createStackNavigator({
             }, {
                 defaultNavigationOptions: defaultNavOptions,
                 navigationOptions: ({navigation}) => {
+                    const currentRouteName = navigation.state.routes[navigation.state.routes.length - 1].routeName
                     if (
                         navigation.isFocused() && (
                             navigation.state.index === 0 ||
-                            navigation.state.routes[navigation.state.routes.length - 1].routeName === 'PostDetail'
+                            currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture'
                         )
                     ) {
                         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
@@ -792,6 +776,13 @@ const BottomTabStackContainer = createStackNavigator({
                             left: SCREEN_WIDTH*0.48
                         }
                     }
+                    // let tabBarVisible = true
+                    // if (currentRouteName === 'UserProfilePicture') {
+                    //     tabBarVisible = false
+                    // }
+                    // return {
+                    //     tabBarVisible
+                    // }
                 }
             }),
             navigationOptions: {
@@ -1090,13 +1081,12 @@ const DrawerNav = createDrawerNavigator({
 
 HomeStack.navigationOptions = ({navigation}) => {
     let tabBarVisible = true
-    let headerMode = 'float'
     const routes = navigation.state.routes[0].routes
     const currentRouteName = routes[routes.length-1].routeName
     if (currentRouteName === 'UserProfilePicture') {
         tabBarVisible = false
     }
-    if (navigation.isFocused() && currentRouteName === 'PostDetail') {
+    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         secondaryPostButtonStyle = {
             position: 'absolute', 
@@ -1122,17 +1112,16 @@ HomeStack.navigationOptions = ({navigation}) => {
         }
     }
 
-    return {
-        tabBarVisible,
-        headerMode
-    }
+    // return {
+    //     tabBarVisible
+    // }
 }
 
 AnnouncementsStack.navigationOptions = ({navigation}) => {
     const routes = navigation.state.routes
     const currentRouteName = routes[routes.length-1].routeName
     
-    if (navigation.isFocused() && currentRouteName === 'PostDetail') {
+    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         secondaryPostButtonStyle = {
             position: 'absolute', 
@@ -1150,15 +1139,15 @@ AnnouncementsStack.navigationOptions = ({navigation}) => {
     if (currentRouteName === 'UserProfilePicture') {
         tabBarVisible = false
     }
-    return {
-        tabBarVisible
-    }
+    // return {
+    //     tabBarVisible
+    // }
 }
 
 NotificationsStack.navigationOptions = ({navigation}) => {
     const routes = navigation.state.routes
     const currentRouteName = routes[routes.length-1].routeName
-    if (navigation.isFocused() && currentRouteName === 'PostDetail') {
+    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         secondaryPostButtonStyle = {
             position: 'absolute', 
@@ -1171,6 +1160,14 @@ NotificationsStack.navigationOptions = ({navigation}) => {
             left: SCREEN_WIDTH*0.48
         }
     }
+
+    let tabBarVisible = true
+    if (currentRouteName === 'UserProfilePicture') {
+        tabBarVisible = false
+    }
+    // return {
+    //     tabBarVisible
+    // }
 }
 
 BottomTabStackContainer.navigationOptions = ({ navigation }) => {
