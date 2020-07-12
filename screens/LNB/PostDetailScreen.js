@@ -303,7 +303,7 @@ const PostDetailScreen = props => {
                         </View>
                     )}
                     ListHeaderComponent={() => (
-                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightHeader}}}>
+                        <View style={{...styles.feedItem, ...{backgroundColor: scheme==='dark' ? Colors.darkSearch : 'white'}}}>
                             <TouchableCmp 
                                 onPress={() => selectUserHandler(need.uid, need.userName)}
                                 style={{alignSelf:'flex-start'}}
