@@ -435,7 +435,10 @@ const ThemedBottomBar = props => {
         <BottomTabBar
             {...props}
             activeTintColor={Colors.primary}
-            style={{backgroundColor: theme}}
+            style={{
+                backgroundColor: isUserProfilePicture ? Colors.socialdark : theme,
+                borderTopColor: isUserProfilePicture ? Colors.socialdark : '#A7A7AA'
+            }}
             keyboardHidesTabBar={false}
             showLabel={false}
         />
@@ -620,7 +623,7 @@ const DirectoryStack = createStackNavigator({
 }, {
     defaultNavigationOptions: defaultNavOptions,
 })
-    
+let isUserProfilePicture = false   
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
         Home: {
@@ -776,13 +779,13 @@ const BottomTabStackContainer = createStackNavigator({
                             left: SCREEN_WIDTH*0.48
                         }
                     }
-                    // let tabBarVisible = true
-                    // if (currentRouteName === 'UserProfilePicture') {
-                    //     tabBarVisible = false
-                    // }
-                    // return {
-                    //     tabBarVisible
-                    // }
+                    if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
+                        isUserProfilePicture = true
+                        return {
+                            isUserProfilePicture
+                        }
+                    } 
+                    
                 }
             }),
             navigationOptions: {
@@ -902,6 +905,7 @@ const BottomTabStackContainer = createStackNavigator({
     
 })
 let navToPostModal, navToPostOption, navToEventsModal, navToNewMessageScreen, navToMessages, background, navScreen
+
 let postButtonStyle = {
         alignItems: 'center', 
         bottom: 20, 
@@ -1083,9 +1087,7 @@ HomeStack.navigationOptions = ({navigation}) => {
     let tabBarVisible = true
     const routes = navigation.state.routes[0].routes
     const currentRouteName = routes[routes.length-1].routeName
-    if (currentRouteName === 'UserProfilePicture') {
-        tabBarVisible = false
-    }
+   
     if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         secondaryPostButtonStyle = {
@@ -1112,9 +1114,14 @@ HomeStack.navigationOptions = ({navigation}) => {
         }
     }
 
-    // return {
-    //     tabBarVisible
-    // }
+    if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
+        isUserProfilePicture = true
+        return {
+            isUserProfilePicture
+        }
+    } else {
+        return isUserProfilePicture = false
+    }
 }
 
 AnnouncementsStack.navigationOptions = ({navigation}) => {
@@ -1139,9 +1146,14 @@ AnnouncementsStack.navigationOptions = ({navigation}) => {
     if (currentRouteName === 'UserProfilePicture') {
         tabBarVisible = false
     }
-    // return {
-    //     tabBarVisible
-    // }
+    if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
+        isUserProfilePicture = true
+        return {
+            isUserProfilePicture
+        }
+    } else {
+        return isUserProfilePicture = false
+    }
 }
 
 NotificationsStack.navigationOptions = ({navigation}) => {
@@ -1165,19 +1177,32 @@ NotificationsStack.navigationOptions = ({navigation}) => {
     if (currentRouteName === 'UserProfilePicture') {
         tabBarVisible = false
     }
-    // return {
-    //     tabBarVisible
-    // }
+    if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
+        isUserProfilePicture = true
+    } 
+    return {
+        isUserProfilePicture
+    }
 }
 
 BottomTabStackContainer.navigationOptions = ({ navigation }) => {
     let drawerLockMode = 'unlocked'
     let tabBarVisible = false
+    const homeStack = navigation.state.routes[0].routes[0].routes[0]
+    const announcementsStack = navigation.state.routes[0].routes[1]
+    const directoryStack = navigation.state.routes[0].routes[6]
+    const notificationsStack = navigation.state.routes[0].routes[7]
+    const shopStack = navigation.state.routes[0].routes[8]
     if (
         navigation.state.routes[0].routes[0]['index'] > 0 || 
         navigation.state.routes.length > 1 ||
         navigation.state.routes[0].routes[0].routes[0].routes.length > 1 ||
-        (navigation.state.routes[0].routes[6].index === 0 && navigation.state.routes[0].routes[6].routes[0].index === 1)
+        (navigation.state.routes[0].routes[6].index === 0 && navigation.state.routes[0].routes[6].routes[0].index === 1) ||
+        homeStack.routes[homeStack.routes.length - 1].routeName === 'UserProfilePicture' ||
+        announcementsStack.routes[announcementsStack.routes.length - 1].routeName === 'UserProfilePicture' ||
+        directoryStack.routes[directoryStack.routes.length - 1].routeName === 'UserProfilePicture' ||
+        notificationsStack.routes[notificationsStack.routes.length - 1].routeName === 'UserProfilePicture' ||
+        shopStack.routes[shopStack.routes.length - 1].routeName === 'UserProfilePicture'
     ) {
         drawerLockMode = 'locked-closed'
     }
