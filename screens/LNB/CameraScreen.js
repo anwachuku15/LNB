@@ -148,121 +148,123 @@ const CameraScreen = props => {
     const goBack = StackActions.replace({
         routeName: 'postModal'
     })
-    return (
-        <PinchGestureHandler onGestureEvent={handlePinch} >
-
-        <View style={styles.screen}>
-            {screenView === 'cameraReady' && 
-                <TouchableWithoutFeedback onPress={() => doubleTapFlip()}>
-                    <Camera 
-                        style={{ flex: 1 }} 
-                        type={cameraView} 
-                        flashMode={cameraFlashMode}
-                        ref={camera}
-                        zoom={zoom}
-                        onMountError={() => console.log('mount error')}
-                        autoFocus={true}
-                    >
-                        <View style={styles.cameraControls}>
-                            <TouchableOpacity
-                                style={{...styles.cameraControlButton}}
-                                onPress={() => props.navigation.dispatch(navToPostModal)}
-                            >
-                                <Ionicons 
-                                    name='ios-close'
-                                    size={36}
-                                    color='white'
-                                    style={{alignSelf:'center'}}
-                                />
-                            </TouchableOpacity>
-                            <View style={{flexDirection: 'row'}}>
-                                <View style={{flexDirection:'column', alignItems:'center'}}>
-                                    <TouchableOpacity
-                                        style={{...styles.cameraControlButton}}
-                                        onPress={() => {
-                                            setCameraFlashMode(
-                                                cameraFlashMode === Camera.Constants.FlashMode.off
-                                                ? Camera.Constants.FlashMode.on
-                                                : Camera.Constants.FlashMode.off
-                                            );
-                                        }}>
-                                            <Ionicons 
-                                                name={cameraFlashMode=== Camera.Constants.FlashMode.off ? 'ios-flash' : 'ios-flash-off'}
-                                                size={28}
-                                                color='white'
-                                            />
-                                    </TouchableOpacity>
-                                    {/* <View style={{alignItems: 'center', alignSelf:'center', margin: 5, padding: 3, borderRadius: 5, backgroundColor: 'rgba(180, 180, 180, 0.7)'}}>
-                                        <Text style={{fontSize: 13, color: 'white'}}>Turn flash {cameraFlashMode === Camera.Constants.FlashMode.off ? 'on' : 'off'}</Text>
-                                    </View> */}
-                                </View>
+    
+    if (screenView === 'cameraReady') {
+        return (
+            <PinchGestureHandler onGestureEvent={handlePinch}>
+                <View style={styles.screen}>
+                    <TouchableWithoutFeedback onPress={() => doubleTapFlip()}>
+                        <Camera 
+                            style={{ flex: 1 }} 
+                            type={cameraView} 
+                            flashMode={cameraFlashMode}
+                            ref={camera}
+                            zoom={zoom}
+                            onMountError={() => console.log('mount error')}
+                            autoFocus={true}
+                        >
+                            <View style={styles.cameraControls}>
                                 <TouchableOpacity
                                     style={{...styles.cameraControlButton}}
-                                    onPress={() => {
-                                        setCameraView(
-                                            cameraView === Camera.Constants.Type.back
-                                            ? Camera.Constants.Type.front
-                                            : Camera.Constants.Type.back
-                                        );
-                                    }}>
-                                    <Feather
-                                        name='rotate-ccw'
-                                        size={20}
-                                        color={'white'}
+                                    onPress={() => props.navigation.dispatch(navToPostModal)}
+                                >
+                                    <Ionicons 
+                                        name='ios-close'
+                                        size={36}
+                                        color='white'
                                         style={{alignSelf:'center'}}
                                     />
                                 </TouchableOpacity>
-                                
+                                <View style={{flexDirection: 'row'}}>
+                                    <View style={{flexDirection:'column', alignItems:'center'}}>
+                                        <TouchableOpacity
+                                            style={{...styles.cameraControlButton}}
+                                            onPress={() => {
+                                                setCameraFlashMode(
+                                                    cameraFlashMode === Camera.Constants.FlashMode.off
+                                                    ? Camera.Constants.FlashMode.on
+                                                    : Camera.Constants.FlashMode.off
+                                                );
+                                            }}>
+                                                <Ionicons 
+                                                    name={cameraFlashMode=== Camera.Constants.FlashMode.off ? 'ios-flash' : 'ios-flash-off'}
+                                                    size={28}
+                                                    color='white'
+                                                />
+                                        </TouchableOpacity>
+                                        {/* <View style={{alignItems: 'center', alignSelf:'center', margin: 5, padding: 3, borderRadius: 5, backgroundColor: 'rgba(180, 180, 180, 0.7)'}}>
+                                            <Text style={{fontSize: 13, color: 'white'}}>Turn flash {cameraFlashMode === Camera.Constants.FlashMode.off ? 'on' : 'off'}</Text>
+                                        </View> */}
+                                    </View>
+                                    <TouchableOpacity
+                                        style={{...styles.cameraControlButton}}
+                                        onPress={() => {
+                                            setCameraView(
+                                                cameraView === Camera.Constants.Type.back
+                                                ? Camera.Constants.Type.front
+                                                : Camera.Constants.Type.back
+                                            );
+                                        }}>
+                                        <Feather
+                                            name='rotate-ccw'
+                                            size={20}
+                                            color={'white'}
+                                            style={{alignSelf:'center'}}
+                                        />
+                                    </TouchableOpacity>
+                                    
+                                </View>
                             </View>
-                        </View>
 
-                        <View style={{marginBottom: 20, alignItems:'center'}}>
-                            <TouchableCmp 
-                                style={{...styles.captureControl, backgroundColor: captureMode==='picture' ? 'rgba(251, 188, 4, 0.8)' : Colors.redcrayola}}
-                                onPress={() => capturePicture()}
-                            >
-                                <SimpleLineIcons 
-                                    name='camera' 
-                                    size={40} 
-                                    color={'white'}
-                                    style={{alignSelf:'center', margin: 20}}
-                                />
-                            </TouchableCmp>
-                        </View>
-                    </Camera>
-                </TouchableWithoutFeedback>
-                
-            }
-            
-            {screenView === 'imageReady' && localUri &&
-                <View style={{flex: 1, justifyContent:'center', alignContent: 'center', }}>
-                    <TouchableWithoutFeedback onPress={() => {}} style={{justifyContent:'center'}}>
-                        <ImageBackground source={{uri: localUri}} style={styles.image}>
-                            <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: 20}}>
-                                <TouchableCmp
-                                    style={{...styles.imageReadyControlButton, backgroundColor: 'rgba(180, 180, 180, 0.7)', marginBottom: 60}}
-                                    onPress={() => {
-                                        setScreenView('cameraReady')
-                                        setLocalUri()
-                                    }}
+                            <View style={{marginBottom: 20, alignItems:'center'}}>
+                                <TouchableCmp 
+                                    style={{...styles.captureControl, backgroundColor: captureMode==='picture' ? 'rgba(251, 188, 4, 0.8)' : Colors.redcrayola}}
+                                    onPress={() => capturePicture()}
                                 >
-                                    <Text style={{color: 'white'}}>Retake</Text>
-                                </TouchableCmp>
-                                <TouchableCmp
-                                    style={{...styles.imageReadyControlButton, marginBottom: 60}}
-                                    onPress={() => {props.navigation.dispatch(navToPostModal)}}
-                                >
-                                    <Text style={{color: 'white'}}>Use Photo</Text>
+                                    <SimpleLineIcons 
+                                        name='camera' 
+                                        size={40} 
+                                        color={'white'}
+                                        style={{alignSelf:'center', margin: 20}}
+                                    />
                                 </TouchableCmp>
                             </View>
-                        </ImageBackground>
+                        </Camera>
                     </TouchableWithoutFeedback>
                 </View>
-            }
+            </PinchGestureHandler>
+        )
+    }
+    
+            
+    if (screenView === 'imageReady' && localUri) {
+        return (
+            <View style={{flex: 1, justifyContent:'center', alignContent: 'center', }}>
+                <TouchableWithoutFeedback onPress={() => {}} style={{justifyContent:'center'}}>
+                    <ImageBackground source={{uri: localUri}} style={styles.image}>
+                        <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: 20}}>
+                            <TouchableCmp
+                                style={{...styles.imageReadyControlButton, backgroundColor: 'rgba(180, 180, 180, 0.7)', marginBottom: 60}}
+                                onPress={() => {
+                                    setScreenView('cameraReady')
+                                    setLocalUri()
+                                }}
+                            >
+                                <Text style={{color: 'white'}}>Retake</Text>
+                            </TouchableCmp>
+                            <TouchableCmp
+                                style={{...styles.imageReadyControlButton, marginBottom: 60}}
+                                onPress={() => {props.navigation.dispatch(navToPostModal)}}
+                            >
+                                <Text style={{color: 'white'}}>Use Photo</Text>
+                            </TouchableCmp>
+                        </View>
+                    </ImageBackground>
+                </TouchableWithoutFeedback>
+            </View>
+        )
+    }
 
-        </View>
-        </PinchGestureHandler>
-    )
 }
 
 
