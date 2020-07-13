@@ -446,41 +446,7 @@ const ThemedBottomBar = props => {
 }
 
 
-const styles = StyleSheet.create({
-    button: {
-        alignItems: 'center',
-        bottom: 20,
-        left: SCREEN_WIDTH*0.48
-    },
-    createButton: {
-        // backgroundColor: Colors.primary,
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        position: 'absolute',
-        top: -60,
-        // top: -100,
-        // left: 130,
-        // shadowColor: Colors.primary,
-        // shadowRadius: 5,
-        // shadowOffset: {height: 10},
-        // shadowOpacity: 0.3,
-        // borderWidth: 3,
-        borderColor: 'white'
-    },
-    secondaryButton: {
-        position: 'absolute',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        bottom: 20,
-        left: SCREEN_WIDTH*0.48
-    }
-})
+
 
 
 const createButtonSize = new Animated.Value(1)
@@ -581,29 +547,29 @@ const rotation = {
 }
 const announcementX = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-24, -120]
+    outputRange: [SCREEN_WIDTH*0.415, SCREEN_WIDTH*0.1]
 })
-const announcementY = buttonMenuAnimation.interpolate({
+let announcementY = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-50, -50]
+    outputRange: [-70, -70]
 })
 
 const messageX = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-24, -100]
+    outputRange: [SCREEN_WIDTH*0.415, SCREEN_WIDTH*0.21]
 })
-const messageY = buttonMenuAnimation.interpolate({
+let messageY = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-50, -124]
+    outputRange: [-70, -144]
 })
 
 const needX = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-24, -24]
+    outputRange: [SCREEN_WIDTH*0.415, SCREEN_WIDTH*0.415]
 })
-const needY = buttonMenuAnimation.interpolate({
+let needY = buttonMenuAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-50, -150],
+    outputRange: [-70, -190],
 })
 
 const DirectoryTabButton = createMaterialTopTabNavigator({
@@ -615,15 +581,44 @@ const DirectoryTabButton = createMaterialTopTabNavigator({
     tabBarComponent: ThemedTopTabBar
 })
 
-const DirectoryStack = createStackNavigator({
-    DirectoryTab: {
-        screen: DirectoryTabButton,
-    },
-    ...screens
-}, {
-    defaultNavigationOptions: defaultNavOptions,
-})
+DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
+    const index = navigation.state.index
+    const userName = screenProps.authUser.displayName
+    const background = screenProps.theme
+    
+    let headerTitle, headerStyle
+    const headerLeft = () => (
+        <MenuAvatar toggleDrawer={() => navigation.toggleDrawer()} />
+    )
+    const headerRight = () => (
+        <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            <Item
+                ButtonElement={<MessageIcon/>}
+                title='Messages'
+                onPress={() => {
+                    navigation.navigate('Messages')
+                }}
+            />
+        </HeaderButtons>
+    )
+    headerStyle = {
+        backgroundColor: background === 'dark' ? 'black' : 'white',
+        borderBottomWidth: 0
+    }
+    if (index === 0) {
+        headerTitle = 'LNB Directory'
+    } else if (index === 1) {
+        headerTitle = userName
+    }
+    return {
+        headerStyle,
+        headerLeft,
+        headerRight,
+        headerTitle,
+    }
+}
   
+
 const BottomTabStackContainer = createStackNavigator({
     default: createBottomTabNavigator({
         Home: {
@@ -677,10 +672,8 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <View>
                             <TouchableWithoutFeedback onPress={navToEventsModal}>
-                                <Animated.View style={{position: 'relative', left: announcementX, top: announcementY}}>
-                                    <View style={{...secondaryPostButtonStyle, backgroundColor: 'rgba(237, 37, 78, 0.4)'}}>
-                                        <MaterialCommunityIcons name='calendar-edit' size={24} color='white' />
-                                    </View>
+                                <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: 'rgba(237, 37, 78, 0.4)', position: 'absolute', left: announcementX, top: announcementY}]}>
+                                    <MaterialCommunityIcons name='calendar-edit' size={24} color='white' />
                                 </Animated.View>
                             </TouchableWithoutFeedback>
                         </View>
@@ -695,10 +688,8 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <View>
                             <TouchableWithoutFeedback onPress={navToPostOption}>
-                                <Animated.View style={{position: 'relative', left: needX, top: needY}}>
-                                    <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: Colors.primary}]}>
-                                        <MaterialIcons name='create' size={24} color='white' />
-                                    </Animated.View>
+                                <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: Colors.primary, position: 'absolute', left: needX, top: needY}]}>
+                                    <MaterialIcons name='create' size={24} color='white' />
                                 </Animated.View>
                             </TouchableWithoutFeedback>
                         </View>
@@ -713,10 +704,8 @@ const BottomTabStackContainer = createStackNavigator({
                     return (
                         <View>
                             <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
-                                <Animated.View style={{position: 'relative', left: messageX, top: messageY}}>
-                                    <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: Colors.blue}]}>
+                                <Animated.View style={[secondaryButtonStyle, {...secondaryPostButtonStyle, backgroundColor: Colors.blue, position: 'absolute', left: messageX, top: messageY}]}>
                                         <MaterialCommunityIcons name='message-plus' size={24} color='white' />
-                                    </Animated.View>
                                 </Animated.View>
                             </TouchableWithoutFeedback>
                         </View>
@@ -729,14 +718,16 @@ const BottomTabStackContainer = createStackNavigator({
             navigationOptions: {
                 tabBarButtonComponent: ({style}) => {
                     return (
-                        <View style={postButtonStyle}>
+                        <View style={{shadowColor: 'black', shadowRadius: 5, shadowOffset: {height: 5}, shadowOpacity: 0.3, ...postButtonStyle}}>
                             <TouchableWithoutFeedback onPressIn={pressPost} onPressOut={navToPostModal} onLongPress={toggleCreateMenu}>
                                 <Animated.View style={[ createButtonStyle, {...styles.createButton, borderColor: Colors.primary, borderWidth: 2}]}>
                                     <Animated.View style={[rotation]}>
-                                        <FontAwesome
-                                            name='plus'
-                                            size={24}
+                                        {/* <FontAwesome name='plus' size={24} color={'white'}/> */}
+                                        <MaterialCommunityIcons
+                                            name='pencil-plus'
+                                            size={30}
                                             color={'white'}
+                                            style={{marginLeft: 5, marginTop: 3}}
                                         />
                                     </Animated.View>
                                 </Animated.View>
@@ -768,16 +759,9 @@ const BottomTabStackContainer = createStackNavigator({
                         )
                     ) {
                         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
-                        secondaryPostButtonStyle = {
-                            position: 'absolute', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            width: 48, 
-                            height: 48, 
-                            borderRadius: 24, 
-                            bottom: -500, 
-                            left: SCREEN_WIDTH*0.48
-                        }
+                        needY = 500
+                        messageY = 500
+                        announcementY = 500
                     }
                     if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
                         isUserProfilePicture = true
@@ -847,7 +831,9 @@ const BottomTabStackContainer = createStackNavigator({
         navigationOptions: ({navigation, theme, screenProps}) => {
             navToPostOption = () => {
                 selectOption()
-                navigation.navigate('postModal')
+                setTimeout(() => {
+                    navigation.navigate('postModal')
+                }, 250)
             }
             navToPostModal = () => {
                 if (buttonMenuAnimation._value === 0) {
@@ -875,7 +861,9 @@ const BottomTabStackContainer = createStackNavigator({
             }
             navToNewMessageScreen = () => {
                 selectOption()
-                navigation.navigate('newMessageModal')
+                setTimeout(() => {
+                    navigation.navigate('newMessageModal')
+                }, 250)
             }
             background = screenProps.theme === 'dark' ? 'black' : 'black'
         },
@@ -907,8 +895,8 @@ const BottomTabStackContainer = createStackNavigator({
 let navToPostModal, navToPostOption, navToEventsModal, navToNewMessageScreen, navToMessages, background, navScreen
 let isUserProfilePicture = false 
 let postButtonStyle = {
-        alignItems: 'center', 
-        bottom: 20, 
+        alignItems: 'center',
+        bottom: 80, 
         left: SCREEN_WIDTH * 0.48
     }
 let secondaryPostButtonStyle = {
@@ -921,46 +909,36 @@ let secondaryPostButtonStyle = {
     bottom: 0, 
     left: SCREEN_WIDTH*0.48
 }
-
-
-
-
-DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
-    const index = navigation.state.index
-    const userName = screenProps.authUser.displayName
-    const background = screenProps.theme
-    
-    let headerTitle, headerStyle
-    const headerLeft = () => (
-        <MenuAvatar toggleDrawer={() => navigation.toggleDrawer()} />
-    )
-    const headerRight = () => (
-        <HeaderButtons HeaderButtonComponent={HeaderButton}>
-            <Item
-                ButtonElement={<MessageIcon/>}
-                title='Messages'
-                onPress={() => {
-                    navigation.navigate('Messages')
-                }}
-            />
-        </HeaderButtons>
-    )
-    headerStyle = {
-        backgroundColor: background === 'dark' ? 'black' : 'white',
-        borderBottomWidth: 0
+const styles = StyleSheet.create({
+    button: {
+        alignItems: 'center',
+        bottom: 20,
+        left: SCREEN_WIDTH*0.48
+    },
+    createButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        position: 'absolute',
+        borderColor: 'white'
+    },
+    secondaryButton: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        bottom: 20,
+        left: SCREEN_WIDTH*0.48
     }
-    if (index === 0) {
-        headerTitle = 'LNB Directory'
-    } else if (index === 1) {
-        headerTitle = userName
-    }
-    return {
-        headerStyle,
-        headerLeft,
-        headerRight,
-        headerTitle,
-    }
-}
+})
+
+
+
+
 
 
 const MessagesStack = createStackNavigator({
@@ -1090,29 +1068,24 @@ HomeStack.navigationOptions = ({navigation}) => {
    
     if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
-        secondaryPostButtonStyle = {
-            position: 'absolute', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: 48, 
-            height: 48, 
-            borderRadius: 24, 
-            bottom: -500, 
-            left: SCREEN_WIDTH*0.48
-        }
+        needY = 500
+        announcementY = 500
+        messageY = 500
         isUserProfilePicture = true
     } else {
-        postButtonStyle = {alignItems: 'center', bottom: 20, left: SCREEN_WIDTH*0.48}
-        secondaryPostButtonStyle = {
-            position: 'absolute', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: 48, 
-            height: 48, 
-            borderRadius: 24, 
-            bottom: -30, 
-            left: SCREEN_WIDTH*0.48
-        }
+        postButtonStyle = {alignItems: 'center', bottom: 80, left: SCREEN_WIDTH*0.48}
+        needY = buttonMenuAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-70, -190],
+        })
+        announcementY = buttonMenuAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-70, -70]
+        })
+        messageY = buttonMenuAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-70, -144]
+        })
     }
     if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
         isUserProfilePicture = true
@@ -1130,16 +1103,9 @@ AnnouncementsStack.navigationOptions = ({navigation}) => {
     
     if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
-        secondaryPostButtonStyle = {
-            position: 'absolute', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: 48, 
-            height: 48, 
-            borderRadius: 24, 
-            bottom: -500, 
-            left: SCREEN_WIDTH*0.48
-        }
+        needY = 500
+        announcementY = 500
+        messageY = 500
     }
     
     let tabBarVisible = true
@@ -1161,16 +1127,9 @@ NotificationsStack.navigationOptions = ({navigation}) => {
     const currentRouteName = routes[routes.length-1].routeName
     if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
-        secondaryPostButtonStyle = {
-            position: 'absolute', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: 48, 
-            height: 48, 
-            borderRadius: 24, 
-            bottom: -500, 
-            left: SCREEN_WIDTH*0.48
-        }
+        needY = 500
+        announcementY = 500
+        messageY = 500
     }
 
     let tabBarVisible = true
