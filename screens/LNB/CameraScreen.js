@@ -15,9 +15,13 @@ import {
     SafeAreaView,
     Dimensions,
     KeyboardAvoidingView,
-    Modal
+    Modal,
+    Keyboard
 } from 'react-native'
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 
+import { StackActions, NavigationActions } from 'react-navigation'
+import ZoomView from '../../components/LNB/ZoomView'
 import { Ionicons, FontAwesome, SimpleLineIcons, Feather, } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -54,14 +58,17 @@ const CameraScreen = props => {
     const [lastTap, setLastTap] = useState()
     const [screenView, setScreenView] = useState('cameraReady')
     const [localUri, setLocalUri] = useState()
+    const body = props.navigation.getParam('body')
+    const [zoom, setZoom] = useState(0)
 
     const camera = useRef(null)
 
     // PERMISSIONS
     useEffect(() => {
-        console.log('camera mounted')
+        // console.log('camera mounted')
+        Keyboard.dismiss()
         return () => {
-            console.log('camera unmounted')
+            // console.log('camera unmounted')
         }
     }, [])
 
@@ -106,9 +113,44 @@ const CameraScreen = props => {
 
     
     // ZOOM
+    const handlePinch = ({nativeEvent}) => {
+        // const { scale, velocity } = nativeEvent
+        const scale = nativeEvent.scale
+        const velocity = nativeEvent.velocity
+        console.log(scale)
+        console.log('------\n')
+        let newZoom = 
+            velocity > 0 
+                ? zoom + scale * velocity * (Platform.OS === 'ios' ? 0.01 : 25)
+                : zoom - scale * Math.abs(velocity) * (Platform.OS === 'ios' ? 0.01 : 25)
+        if (newZoom < 0) newZoom = 0
+        else if (newZoom > 0.5) newZoom = 0.5
+        setZoom(newZoom)
+    }
+    const pinchStateHandler = (event) => {
+        const pinch_start = event.nativeEvent.state === State.END
+        const pinch_begin = event.nativeEvent.state === State.BEGAN
+        const pinch_active = event.nativeEvent.state === State.ACTIVE
+        // if (pinch_start) {
+        //     handlePinch()
+        // } else if (pinch_begin && pinch_active) {
+        //     handlePinch()
+        // }
+    }
 
-    
+    const navToPostModal = StackActions.replace({
+        routeName: 'postModal',
+        params: {
+            uri: localUri,
+            existingBody: body
+        }
+    })
+    const goBack = StackActions.replace({
+        routeName: 'postModal'
+    })
     return (
+        <PinchGestureHandler onGestureEvent={handlePinch} >
+
         <View style={styles.screen}>
             {screenView === 'cameraReady' && 
                 <TouchableWithoutFeedback onPress={() => doubleTapFlip()}>
@@ -117,13 +159,14 @@ const CameraScreen = props => {
                         type={cameraView} 
                         flashMode={cameraFlashMode}
                         ref={camera}
-                        onCameraReady={() => console.log('camera ready')}
+                        zoom={zoom}
                         onMountError={() => console.log('mount error')}
+                        autoFocus={true}
                     >
                         <View style={styles.cameraControls}>
                             <TouchableOpacity
                                 style={{...styles.cameraControlButton}}
-                                onPress={() => props.navigation.goBack()}
+                                onPress={() => props.navigation.dispatch(navToPostModal)}
                             >
                                 <Ionicons 
                                     name='ios-close'
@@ -188,31 +231,37 @@ const CameraScreen = props => {
                         </View>
                     </Camera>
                 </TouchableWithoutFeedback>
+                
             }
             
             {screenView === 'imageReady' && localUri &&
                 <View style={{flex: 1, justifyContent:'center', alignContent: 'center', }}>
                     <TouchableWithoutFeedback onPress={() => {}} style={{justifyContent:'center'}}>
                         <ImageBackground source={{uri: localUri}} style={styles.image}>
-                            <TouchableCmp
-                                style={{...styles.cameraControlButton, marginTop: 40}}
-                                onPress={() => {
-                                    setScreenView('cameraReady')
-                                    setLocalUri()
-                                }}
-                            >
-                                <Ionicons
-                                    name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
-                                    color='white'
-                                    size={24}
-                                />
-                            </TouchableCmp>
+                            <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: 20}}>
+                                <TouchableCmp
+                                    style={{...styles.imageReadyControlButton, backgroundColor: 'rgba(180, 180, 180, 0.7)', marginBottom: 60}}
+                                    onPress={() => {
+                                        setScreenView('cameraReady')
+                                        setLocalUri()
+                                    }}
+                                >
+                                    <Text style={{color: 'white'}}>Retake</Text>
+                                </TouchableCmp>
+                                <TouchableCmp
+                                    style={{...styles.imageReadyControlButton, marginBottom: 60}}
+                                    onPress={() => {props.navigation.dispatch(navToPostModal)}}
+                                >
+                                    <Text style={{color: 'white'}}>Use Photo</Text>
+                                </TouchableCmp>
+                            </View>
                         </ImageBackground>
                     </TouchableWithoutFeedback>
                 </View>
             }
 
         </View>
+        </PinchGestureHandler>
     )
 }
 
@@ -236,9 +285,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         height: '100%', 
         width: '100%',
+        justifyContent: 'flex-end',
         // width: SCREEN_WIDTH * 0.8,
         // height: SCREEN_HEIGHT * 0.8,
-        alignItems: 'flex-end',
+        // alignItems: 'flex-end',
     },
     modalView: {
         flex: 1,
@@ -257,8 +307,21 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(180, 180, 180, 0.7)',
         borderRadius: 20,
         marginHorizontal: 18,
+        paddingHorizontal: 10,
         height: 40,
         width: 40,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    imageReadyControlButton: {
+        color: 'white',
+        // backgroundColor: 'rgba(180, 180, 180, 0.7)',
+        backgroundColor: Colors.primary,
+        borderRadius: 20,
+        marginHorizontal: 18,
+        padding: 10,
+        // height: 40,
+        // width: 40,
         alignItems: 'center',
         justifyContent: 'center'
     },
