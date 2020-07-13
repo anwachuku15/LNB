@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { 
     Alert,
     Platform,
@@ -10,14 +10,16 @@ import {
     Button, 
     ScrollView,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     TextInput,
     SafeAreaView,
     Dimensions,
     KeyboardAvoidingView,
     Modal,
     FlatList,
-    SectionList
+    Keyboard,
 } from 'react-native'
+import { StackActions, NavigationActions } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 
 import { Ionicons, FontAwesome, SimpleLineIcons } from '@expo/vector-icons'
@@ -30,6 +32,7 @@ import HeaderButton from '../../components/UI/HeaderButton'
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
+import * as MediaLibrary from 'expo-media-library'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av'
 
@@ -52,6 +55,9 @@ const CreatePostScreen = props => {
     const userImage = useSelector(state => state.auth.credentials.imageUrl)
     const authId = useSelector(state => state.auth.userId)
 
+    const uri = props.navigation.getParam('uri')
+    const existingBody = props.navigation.getParam('existingBody')
+
     const allUsers = useSelector(state => state.auth.allUsers)
     
     const dispatch = useDispatch()
@@ -69,10 +75,12 @@ const CreatePostScreen = props => {
         postOptionsBorderTopColor = Colors.lightSearch
     }
 
-    
-    const [body, setBody] = useState('')
-    const [image, setImage] = useState()
+    const [isLoading, setIsLoading] = useState(false)
+    const [mediaScroll, setMediaScroll] = useState(true)
+    const [body, setBody] = useState(existingBody ? existingBody : '')
+    const [image, setImage] = useState(uri ? uri : null)
     const [video, setVideo] = useState()
+    const [mediaAssets, setMediaAssets] = useState()
     const [isCameraVisible, setIsCameraVisible] = useState(false)
     const [cameraView, setCameraView] = useState(Camera.Constants.Type.back)
     const [cameraFlashMode, setCameraFlashMode] = useState(Camera.Constants.FlashMode.off)
@@ -85,9 +93,53 @@ const CreatePostScreen = props => {
     const searchInput = useRef(null)
     const textInput = useRef(null)
 
+    const loadMediaAssets = useCallback(async () => {
+        try {
+            const data = await MediaLibrary.getAssetsAsync()
+            let assets = []
+            let i = 0
+            while (i < 10) {
+                assets.push({
+                    uri: data.assets[i].uri,
+                    mediaType: data.assets[i].mediaType,
+                    duration: data.assets[i].duration
+                })
+                i++
+            }
+            setMediaAssets(assets)
+        } catch (err) {
+            console.log(err)
+        }
+    }, [setMediaAssets])
+
+    useEffect(() => {
+        loadMediaAssets().catch(err => console.log(err))
+        if (image !== null) {
+            setMediaScroll(false)
+        }
+        return () => {
+            loadMediaAssets
+        }
+    }, [loadMediaAssets])
+
     useEffect(() => {
         getPhotoPermission()
     }, [getPhotoPermission])
+
+    // useEffect(() => {
+    //     const willFocusSub = props.navigation.addListener(
+    //         'willFocus', () => {
+    //             if (existingBody) {
+    //                 setBody(existingBody)
+    //             } else {
+    //                 setBody('')
+    //             }
+    //         }
+    //     )
+    //     return () => {
+    //         willFocusSub
+    //     }
+    // }, [setBody])
 
     const getPhotoPermission = async () => {
         if (Constants.platform.ios) {
@@ -98,7 +150,6 @@ const CreatePostScreen = props => {
             }
         }
     }
-
 
 
     const toggleCamera = async () => {
@@ -123,6 +174,7 @@ const CreatePostScreen = props => {
 
         if(!result.cancelled) {
             setImage(result.uri)
+            setMediaScroll(false)
         }
     }
     
@@ -210,6 +262,23 @@ const CreatePostScreen = props => {
         return renderItem
     }, [])
 
+    const navToCamera = StackActions.replace({
+        routeName: 'cameraModal',
+        params: {
+            body: body
+        }
+    })
+
+    const mediaItem = ({item}) => (
+        <TouchableCmp onPress={() => {
+            setImage(item.uri)
+            setMediaScroll(false)
+            Keyboard.dismiss()
+        }}>
+            <Image source={{uri: item.uri}} style={styles.mediaAssetContainer} />
+        </TouchableCmp>
+    )
+
 
     return (
         <View style={{...styles.screen, backgroundColor: background}}>
@@ -225,7 +294,7 @@ const CreatePostScreen = props => {
                 </View>
             </SafeAreaView>
             
-            <ScrollView contentContainerStyle={{flex: 1}}>
+            <ScrollView contentContainerStyle={{}}>
                 <View style={styles.inputContainer}>
                     <Image source={{uri: userImage}} style={styles.avatar}/>
                     <TextInput 
@@ -233,7 +302,7 @@ const CreatePostScreen = props => {
                         autoFocus={true} 
                         multiline={true} 
                         numberOfLines={4} 
-                        style={{flex:1, color:text}}
+                        style={{flex:1, color:text, fontSize: 18}}
                         placeholder={'What do you need?'}
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {
@@ -254,7 +323,7 @@ const CreatePostScreen = props => {
                     />
                 </View>
 
-                <View style={{marginHorizontal: 32, marginTop: 10, height: '80%', width: '80%', alignSelf:'center',}}>
+                <View style={{marginHorizontal: 32, marginTop: 10, marginBottom: 20, height: '80%', width: '80%', alignSelf:'center',}}>
                     {image ? (
                         <Lightbox
                             backgroundColor='rgba(0, 0, 0, 0.8)'
@@ -279,7 +348,11 @@ const CreatePostScreen = props => {
                         <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={styles.image}>
                             <TouchableCmp
                                 style={styles.removeImageButton}
-                                onPress={() => setImage()}
+                                onPress={() => {
+                                    setImage()
+                                    setMediaScroll(true)
+                                    textInput.current.focus()
+                                }}
                             >
                                 <Ionicons
                                     name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
@@ -306,19 +379,52 @@ const CreatePostScreen = props => {
                 />
             </View>} */}
 
+
             <KeyboardAvoidingView behavior='padding'>
+                {mediaAssets && mediaScroll &&
+                    <FlatList
+                        keyExtractor={(item, index) => index.toString()}
+                        data={mediaAssets}
+                        keyboardShouldPersistTaps='always'
+                        renderItem={mediaItem}
+                        horizontal
+                        ListHeaderComponent={() => (
+                            <TouchableCmp 
+                                onPress={() => props.navigation.dispatch(navToCamera)}
+                                style={{backgroundColor: background, justifyContent:'center', alignItems:'center', ...styles.mediaAssetContainer}}
+                            >
+                                <SimpleLineIcons 
+                                    name='camera' 
+                                    size={36} 
+                                    color={Colors.primary}
+                                />
+                            </TouchableCmp>
+                        )}
+                        ListFooterComponent={() => (
+                            <TouchableCmp 
+                                onPress={pickImage}
+                                style={{backgroundColor: background, justifyContent:'center', alignItems:'center', ...styles.mediaAssetContainer}}
+                            >
+                                <FontAwesome 
+                                    name='image' 
+                                    size={36} 
+                                    color={Colors.primary}
+                                />
+                            </TouchableCmp>
+                        )}
+                    />
+                }
                 <View style={{...styles.postOptions, backgroundColor: postOptionsBackground, borderTopColor: postOptionsBorderTopColor}}>
-                    <TouchableOpacity 
+                    {/* <TouchableOpacity 
                         style={styles.photo}
-                        // onPress={() => toggleCamera()}
-                        onPress={() => props.navigation.navigate('cameraModal')}
+                        onPress={() => props.navigation.dispatch(navToCamera)}
                     >
                         <SimpleLineIcons 
                             name='camera' 
                             size={26} 
                             color={Colors.primary}
                         />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <TouchableOpacity 
                         style={styles.photo}
                         onPress={pickImage}
@@ -357,6 +463,15 @@ CreatePostScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    mediaAssetContainer: {
+        marginBottom: 10,
+        marginLeft: 10,
+        width: 80, 
+        height: 80, 
+        borderRadius: 10, 
+        borderWidth: 1, 
+        borderColor: Colors.primary,
     },
     modalView: {
         // flex: 1,
@@ -450,7 +565,7 @@ const styles = StyleSheet.create({
         paddingTop: 9,
         flexDirection:'row', 
         alignItems:'center', 
-        paddingBottom: 30,
+        paddingBottom: 25,
     }
 })
 
