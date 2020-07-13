@@ -128,14 +128,12 @@ const CreatePostScreen = props => {
     
 
     const handlePost = async (userName, body, image) => {
-        console.log(taggedUsers)
-        taggedUsers.forEach(user => {
-            if (!body.includes(user.name)) {
-                taggedUsers.splice(taggedUsers.indexOf(taggedUsers.find(tagged => tagged.uid === user.uid)), 1)
-                setTaggedUsers(taggedUsers)
-            }
-        })
-        console.log(taggedUsers)
+        // taggedUsers.forEach(user => {
+        //     if (!body.includes(user.name)) {
+        //         taggedUsers.splice(taggedUsers.indexOf(taggedUsers.find(tagged => tagged.uid === user.uid)), 1)
+        //         setTaggedUsers(taggedUsers)
+        //     }
+        // })
         
         try {
             if (image) {
@@ -239,17 +237,17 @@ const CreatePostScreen = props => {
                         placeholder={'What do you need?'}
                         placeholderTextColor={Colors.placeholder}
                         onChangeText={text => {
-                            const index = text.lastIndexOf('@')
-                            const end = text.length
-                            if (!text.includes('@') || (text.charAt(index-1) !== ' ' && index !== 0)) {
-                                setIsMentioning(false)
-                            }
-                            if (text.length > 0 && index === text.length-1) {
-                                setIsMentioning(true)
-                            }
-                            if (isMentioning) {
-                                updateSearch(text.slice(index+1, end))
-                            }
+                            // const index = text.lastIndexOf('@')
+                            // const end = text.length
+                            // if (!text.includes('@') || (text.charAt(index-1) !== ' ' && index !== 0)) {
+                            //     setIsMentioning(false)
+                            // }
+                            // if (text.length > 0 && index === text.length-1) {
+                            //     setIsMentioning(true)
+                            // }
+                            // if (isMentioning) {
+                            //     updateSearch(text.slice(index+1, end))
+                            // }
                             setBody(text)
                         }}
                         value={body}
@@ -297,17 +295,16 @@ const CreatePostScreen = props => {
                 </View>
             </ScrollView>
             
-            {isMentioning && <View style={{flex: 2, borderWidth: 1, borderColor: Colors.placeholder}}>
+            {/* {isMentioning && <View style={{flex: 2, borderWidth: 1, borderColor: Colors.placeholder}}>
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
                     data={search.length === 0 ? allUsers : results}
-                    // renderItem={renderItem}
                     renderItem={memoizedItem}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     keyboardShouldPersistTaps='always'
                 />
-            </View>}
+            </View>} */}
 
             <KeyboardAvoidingView behavior='padding'>
                 <View style={{...styles.postOptions, backgroundColor: postOptionsBackground, borderTopColor: postOptionsBorderTopColor}}>
