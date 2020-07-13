@@ -294,7 +294,7 @@ const CreatePostScreen = props => {
                 </View>
             </SafeAreaView>
             
-            <ScrollView contentContainerStyle={{}}>
+            <ScrollView contentContainerStyle={{}} keyboardShouldPersistTaps={true}>
                 <View style={styles.inputContainer}>
                     <Image source={{uri: userImage}} style={styles.avatar}/>
                     <TextInput 
@@ -388,6 +388,7 @@ const CreatePostScreen = props => {
                         keyboardShouldPersistTaps='always'
                         renderItem={mediaItem}
                         horizontal
+                        showsHorizontalScrollIndicator={false}
                         ListHeaderComponent={() => (
                             <TouchableCmp 
                                 onPress={() => props.navigation.dispatch(navToCamera)}
@@ -403,7 +404,7 @@ const CreatePostScreen = props => {
                         ListFooterComponent={() => (
                             <TouchableCmp 
                                 onPress={pickImage}
-                                style={{backgroundColor: background, justifyContent:'center', alignItems:'center', ...styles.mediaAssetContainer}}
+                                style={{backgroundColor: background, justifyContent:'center', alignItems:'center', ...styles.mediaAssetContainer, marginRight: 10}}
                             >
                                 <FontAwesome 
                                     name='image' 
@@ -516,7 +517,8 @@ const styles = StyleSheet.create({
         width: 40,
         paddingTop: 2,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        alignSelf: 'flex-end'
     },
     removeImageButton: {
         alignItems: 'center',
@@ -537,7 +539,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth
     },
     inputContainer: {
-        marginHorizontal: 32,
+        marginRight: 32,
+        marginLeft: 20,
         marginTop: 20,
         marginBottom: 5,
         flexDirection: 'row',
@@ -552,13 +555,10 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         marginHorizontal: 15
     },
-    image: { 
-        // height: '100%', 
-        // width: '100%',
+    image: {
         width: SCREEN_WIDTH * 0.8,
         height: SCREEN_HEIGHT * 0.8,
         alignItems: 'flex-end',
-        // alignSelf: 'center'
     },
     postOptions: {
         borderTopWidth: 0.5,
