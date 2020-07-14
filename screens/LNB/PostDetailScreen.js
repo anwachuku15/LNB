@@ -280,7 +280,7 @@ const PostDetailScreen = props => {
 
     
     return (
-        <View style={styles.screen}>
+        <View style={{backgroundColor: background, ...styles.screen}}>
             {/* Comments */}
             {isLoading && (
                 <View style={styles.spinner}>
