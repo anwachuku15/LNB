@@ -741,7 +741,6 @@ const BottomTabStackContainer = createStackNavigator({
                                 : 'Post'
             },
         },
-        
         Directory: {
             screen: createSharedElementStackNavigator({
                 DirectoryTab: {
@@ -784,7 +783,6 @@ const BottomTabStackContainer = createStackNavigator({
                 },
             },
         },
-        
         Notifications: {
             screen: NotificationsStack,
             navigationOptions: {
@@ -890,7 +888,6 @@ const BottomTabStackContainer = createStackNavigator({
 }, {
     mode: 'modal',
     headerMode: 'none',
-    
 })
 let navToPostModal, navToPostOption, navToEventsModal, navToNewMessageScreen, navToMessages, background, navScreen
 let isUserProfilePicture = false 
