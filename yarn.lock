@@ -3531,6 +3531,14 @@ expo-sqlite@~8.1.0:
     "@types/websql" "^0.0.27"
     lodash "^4.17.15"
 
+expo-video-player@^1.5.8:
+  version "1.5.8"
+  resolved "https://registry.yarnpkg.com/expo-video-player/-/expo-video-player-1.5.8.tgz#857d8d3f625af4ca474d35bfa8b21467fdce5f5e"
+  integrity sha512-K08ImHnFxuMEyzNmfPuY3a36DFQnwWg6QEKg4MLRyQzB1KVbgGSLg6XQGhl3AjQnbws35Xd6WkdDVUUeSC8qzQ==
+  dependencies:
+    tslib "^1.11.2"
+    with-default-props "^0.2.1"
+
 expo-web-browser@~8.2.1:
   version "8.2.1"
   resolved "https://registry.yarnpkg.com/expo-web-browser/-/expo-web-browser-8.2.1.tgz#993ba53371862ed85cfd277ba59a7004ed412905"
@@ -7664,6 +7672,11 @@ tslib@1.11.1:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.1.tgz#eb15d128827fbee2841549e171f45ed338ac7e35"
   integrity sha512-aZW88SY8kQbU7gpV19lN24LtXh/yD4ZZg6qieAJDDg+YBsJcSmLGK9QpnUjAKVG/xefmvJGd1WUmfpT/g6AJGA==
 
+tslib@^1.11.2:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
+  integrity sha512-i/6DQjL8Xf3be4K/E6Wgpekn5Qasl1usyw++dAA35Ue5orEn65VIxOA+YvNNl9HV3qv70T7CNwjODHZrLwvd1Q==
+
 type-fest@^0.7.1:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.7.1.tgz#8dda65feaf03ed78f0a3f9678f1869147f7c5c48"
@@ -7997,6 +8010,11 @@ window-size@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/window-size/-/window-size-0.1.4.tgz#f8e1aa1ee5a53ec5bf151ffa09742a6ad7697876"
   integrity sha1-+OGqHuWlPsW/FR/6CXQqatdpeHY=
+
+with-default-props@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/with-default-props/-/with-default-props-0.2.1.tgz#41470545d2fa945308993c86a81c7481c298cb95"
+  integrity sha512-yTrBg7EGzFwpZLCN5M4ropSbZ/V+scx5DXBE6HZhKCevsRaYCRBBf/69UvfaWxu/zRaWX5j9Y/F4YFs1Q1yg4w==
 
 wordwrap@^1.0.0:
   version "1.0.0"
