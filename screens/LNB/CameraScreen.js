@@ -36,11 +36,7 @@ import * as MediaLibrary from 'expo-media-library'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av'
 
-import Fire from '../../Firebase/Firebase'
-import { createNeed } from '../../redux/actions/postsActions'
-import UserPermissions from '../../util/UserPermissions'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
-import Lightbox from 'react-native-lightbox'
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width
