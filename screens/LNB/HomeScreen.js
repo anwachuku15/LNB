@@ -247,11 +247,11 @@ const HomeScreen = props => {
     // NAV LISTENER
     useEffect(() => {
         const willFocusSub = props.navigation.addListener('willFocus', loadData)
-        const willBlurSub = props.navigation.addListener('willBlur', loadData)
+        // const willBlurSub = props.navigation.addListener('willBlur', loadData)
         // Clean up listener when function re-runs https://reactjs.org/docs/hooks-effect.html
         return () => {
-            willFocusSub
-            willBlurSub
+            willFocusSub.remove()
+            // willBlurSub
         }
     }, [loadData])
     
