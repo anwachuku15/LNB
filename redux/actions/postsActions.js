@@ -29,6 +29,7 @@ export const fetchNeeds = () => {
                     userImage: doc.data().userImage,
                     body: doc.data().body,
                     imageUrl: doc.data().imageUrl ? doc.data().imageUrl : null,
+                    media: doc.data().media ? doc.data().media : null,
                     likeCount: doc.data().likeCount,
                     commentCount: doc.data().commentCount,
                     isPinned: doc.data().isPinned,
@@ -47,15 +48,23 @@ export const fetchNeeds = () => {
 }
 
 // Consider drafts (published: false vs published: true, pubTimestamp)
-export const createNeed = (userName, body, localUri, taggedUsers) => {
+export const createNeed = (userName, body, media, taggedUsers) => {
     return async (dispatch, getState) => {
         const uid = getState().auth.userId
         const userImage = getState().auth.credentials.imageUrl
         let remoteUri, postId
 
         const timestamp = moment(Date.now()).toISOString()
-        if (localUri !== '') {
-            remoteUri = await uploadPhotoAsyn(localUri)
+        if (media !== '') {
+            if (media.uri) {
+                remoteUri = 
+                    media.type === 'video' 
+                    ? await uploadVideoAsyn(media.localUri) 
+                    : await uploadPhotoAsyn(media.uri) 
+            } else {
+                remoteUri = await uploadPhotoAsyn(media)
+            }
+
             db.collection('needs')
             .add({
                 userName,
@@ -63,7 +72,14 @@ export const createNeed = (userName, body, localUri, taggedUsers) => {
                 uid: uid,
                 userImage: userImage,
                 timestamp: timestamp,
-                imageUrl: remoteUri,
+                media: media.type && {
+                    type: media.type === 'video' ? 'video' : 'image',
+                    duration: media.type === 'video' ? media.duration : null,
+                    uri: remoteUri,
+                    height: media.height,
+                    width: media.width
+                },
+                imageUrl: !media.type ? remoteUri : null,
                 commentCount: 0,
                 likeCount: 0,
                 taggedUsers: taggedUsers
@@ -82,7 +98,14 @@ export const createNeed = (userName, body, localUri, taggedUsers) => {
                     userName: userName,
                     userImage: userImage,
                     body: body,
-                    imageUrl: remoteUri,
+                    media: media.type && {
+                        type: media.type === 'video' ? 'video' : 'image',
+                        duration: media.type === 'video' ? media.duration : null,
+                        uri: remoteUri,
+                        height: media.height,
+                        width: media.width
+                    },
+                    imageUrl: !media.type ? remoteUri : null,
                     commentCount: 0,
                     likeCount: 0,
                     taggedUsers: taggedUsers
@@ -316,7 +339,29 @@ const uploadPhotoAsyn = async uri => {
     return new Promise(async (res, rej) => {
         const response = await fetch(uri)
         const file = await response.blob()
+        
+        let upload = firebase.storage().ref(path).put(file)
+        
+        upload.on(
+            'state_changed', 
+            snapshot => {}, 
+            err => {
+                rej(err)
+                console.log(err)
+            },
+            async () => {
+                const url = await upload.snapshot.ref.getDownloadURL()
+                res(url)
+            }
+        )
+    })
+}
 
+const uploadVideoAsyn = async uri => {
+    const path = `videos/${firebase.auth().currentUser.uid}/${Date.now()}.mp4`
+    return new Promise(async (res, rej) => {
+        const response = await fetch(uri)
+        const file = await response.blob()
         let upload = firebase.storage().ref(path).put(file)
 
         upload.on(

@@ -22,7 +22,7 @@ import {
 import { StackActions, NavigationActions } from 'react-navigation'
 import { ListItem } from 'react-native-elements'
 
-import { Ionicons, FontAwesome, SimpleLineIcons } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, SimpleLineIcons, AntDesign } from '@expo/vector-icons'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import Colors from '../../constants/Colors'
@@ -35,6 +35,7 @@ import * as ImagePicker from 'expo-image-picker'
 import * as MediaLibrary from 'expo-media-library'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av'
+import VideoPlayer from 'expo-video-player'
 
 import Fire from '../../Firebase/Firebase'
 import { createNeed } from '../../redux/actions/postsActions'
@@ -76,11 +77,10 @@ const CreatePostScreen = props => {
     }
 
     const [isLoading, setIsLoading] = useState(false)
-    const [mediaScroll, setMediaScroll] = useState(true)
     const [body, setBody] = useState(existingBody ? existingBody : '')
-    const [image, setImage] = useState(uri ? uri : null)
-    const [video, setVideo] = useState()
+    const [media, setMedia] = useState(uri ? uri : null)
     const [mediaAssets, setMediaAssets] = useState()
+    const [mediaScroll, setMediaScroll] = useState(true)
     const [isCameraVisible, setIsCameraVisible] = useState(false)
     const [cameraView, setCameraView] = useState(Camera.Constants.Type.back)
     const [cameraFlashMode, setCameraFlashMode] = useState(Camera.Constants.FlashMode.off)
@@ -95,18 +95,46 @@ const CreatePostScreen = props => {
 
     const loadMediaAssets = useCallback(async () => {
         try {
-            const data = await MediaLibrary.getAssetsAsync()
-            let assets = []
-            let i = 0
-            while (i < 10) {
-                assets.push({
-                    uri: data.assets[i].uri,
-                    mediaType: data.assets[i].mediaType,
-                    duration: data.assets[i].duration
-                })
-                i++
+            const photos = await MediaLibrary.getAssetsAsync({mediaType: 'photo'})
+            const videos = await MediaLibrary.getAssetsAsync({mediaType: 'video'})
+            // const screenshots = await MediaLibrary.getAssetsAsync({mediaSubtypes: ['screenshot']})
+            
+            let mediaAssets = []
+            if (photos.assets.length > 0) {
+                let limit = photos.assets.length > 9 ? 10 : photos.assets.length
+                let i = 0
+                while (i < limit) {
+                    mediaAssets.push({
+                        uri: photos.assets[i].uri,
+                        mediaType: photos.assets[i].mediaType,
+                        height: photos.assets[i].height,
+                        width: photos.assets[i].width,
+                        creationTime: photos.assets[i].creationTime
+                    })
+                    i++ 
+                }
             }
-            setMediaAssets(assets)
+            if (videos.assets.length > 0) {
+                let limit = videos.assets.length > 9 ? 10 : videos.assets.length
+                let i = 0
+                while (i < limit) {
+                    mediaAssets.push({
+                        id: videos.assets[i].id,
+                        uri: videos.assets[i].uri,
+                        localUri: await MediaLibrary.getAssetInfoAsync(videos.assets[i].id).then(doc => {return doc.localUri}).catch(err=>console.log(err)),
+                        mediaType: videos.assets[i].mediaType,
+                        height: videos.assets[i].height,
+                        width: videos.assets[i].width,
+                        duration: videos.assets[i].duration,
+                        creationTime: videos.assets[i].creationTime
+                    })
+                    i++
+                }
+            }
+            
+            mediaAssets.sort((a,b) => a.creationTime > b.creationTime ? -1 : 1)
+            mediaAssets.splice(10)
+            setMediaAssets(mediaAssets)
         } catch (err) {
             console.log(err)
         }
@@ -114,7 +142,7 @@ const CreatePostScreen = props => {
 
     useEffect(() => {
         loadMediaAssets().catch(err => console.log(err))
-        if (image !== null) {
+        if (media !== null) {
             setMediaScroll(false)
         }
         return () => {
@@ -126,20 +154,6 @@ const CreatePostScreen = props => {
         getPhotoPermission()
     }, [getPhotoPermission])
 
-    // useEffect(() => {
-    //     const willFocusSub = props.navigation.addListener(
-    //         'willFocus', () => {
-    //             if (existingBody) {
-    //                 setBody(existingBody)
-    //             } else {
-    //                 setBody('')
-    //             }
-    //         }
-    //     )
-    //     return () => {
-    //         willFocusSub
-    //     }
-    // }, [setBody])
 
     const getPhotoPermission = async () => {
         if (Constants.platform.ios) {
@@ -163,23 +177,74 @@ const CreatePostScreen = props => {
         }
     }
 
-    const pickImage = async () => {
+    const pickMedia = async () => {
         UserPermissions.getCameraPermission()
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All, // ImagePicker.MediaTypeOptions.Images & ImagePicker.MediaTypeOptions.Videos for Android
             allowsEditing: false,
-            aspect: [4,3],
+            // aspect: [4,3],
+        })
+        
+        if(!result.cancelled) {
+            if (result.type === 'video') {
+                // MediaLibrary.getAssetInfoAsync()
+                console.log(result.uri)
+                setMedia({
+                    type: 'video', 
+                    uri: result.uri,
+                    localUri: result.uri, 
+                    duration: result.duration, 
+                    width: result.width, 
+                    height: result.height
+                })
+            }
+            else if (result.type === 'image') setMedia({type: 'image', uri: result.uri, width: result.width, height: result.height})
+            setMediaScroll(false)
+            // console.log(result)
+        }
+    }
+
+    // KEEP FOR EDITING (TRIM/CROP)
+    const pickImage = async () => {
+        UserPermissions.getCameraPermission()
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, // ImagePicker.MediaTypeOptions.Images & ImagePicker.MediaTypeOptions.Videos for Android
+            allowsEditing: false,
+            // aspect: [4,3],
+        })
+
+        if(!result.cancelled) {
+            setMedia({type: 'image', uri: result.uri, width: result.width, height: result.height})
+            setMediaScroll(false)
+        }
+    }
+    const pickVideo = async () => {
+        UserPermissions.getCameraPermission()
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Videos, // ImagePicker.MediaTypeOptions.Images & ImagePicker.MediaTypeOptions.Videos for Android
+            allowsEditing: true,
             // videoExportPreset: 0
         })
 
         if(!result.cancelled) {
-            setImage(result.uri)
+            setMedia({type: 'video', uri: result.uri, duration: result.duration, width: result.width, height: result.height})
             setMediaScroll(false)
+        }
+    }
+
+    const useCamera = async () => {
+        // UserPermissions.getCameraPermission()
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+        })
+        if (!result.cancelled) {
+            if (result.type === 'image') setMedia({type: 'image', uri: result.uri, width: result.width, height: result.height})
+            else if (result.type === 'video') setMedia({type: 'video', uri: result.uri, duration: result.duration, width: result.width, height: result.height})
         }
     }
     
 
-    const handlePost = async (userName, body, image) => {
+    const handlePost = async (userName, body, media) => {
         // taggedUsers.forEach(user => {
         //     if (!body.includes(user.name)) {
         //         taggedUsers.splice(taggedUsers.indexOf(taggedUsers.find(tagged => tagged.uid === user.uid)), 1)
@@ -188,13 +253,13 @@ const CreatePostScreen = props => {
         // })
         
         try {
-            if (image) {
-                await dispatch(createNeed(userName, body.trimEnd(), image, taggedUsers))
+            if (media) {
+                await dispatch(createNeed(userName, body.trimEnd(), media, taggedUsers))
             } else {
                 await dispatch(createNeed(userName, body.trimEnd(), '', taggedUsers))
             }
             setBody('')
-            setImage(null)
+            setMedia(null)
             props.navigation.goBack()
         } catch (err) {
             alert(err)
@@ -270,8 +335,9 @@ const CreatePostScreen = props => {
     })
 
     const mediaItem = ({item}) => (
-        <TouchableCmp onPress={() => {
-            setImage(item.uri)
+        <TouchableCmp onPress={async () => {
+            if (item.duration) setMedia({type: 'video', localUri: item.localUri, uri: item.uri, duration: item.duration, width: item.width, height: item.height})
+            else setMedia({type: 'image', uri: item.uri, width: item.width, height: item.height})
             setMediaScroll(false)
             Keyboard.dismiss()
         }}>
@@ -288,13 +354,13 @@ const CreatePostScreen = props => {
                         <Ionicons name='md-close' size={24} color={Colors.primary}/>
                     </TouchableOpacity>
                     <Text style={{color:text, fontFamily:'open-sans-bold'}}>Share a Need</Text>
-                    <TouchableOpacity onPress={() => handlePost(userName, body, image)} disabled={!body.trim().length && !image}>
-                        <Text style={{fontWeight:'500', color: (!body.trim().length && !image) ? Colors.disabled : Colors.primary}}>Post</Text>
+                    <TouchableOpacity onPress={() => handlePost(userName, body, media)} disabled={!body.trim().length && !media}>
+                        <Text style={{fontWeight:'500', color: (!body.trim().length && !media) ? Colors.disabled : Colors.primary}}>Post</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
             
-            <ScrollView contentContainerStyle={{}} keyboardShouldPersistTaps={true}>
+            <ScrollView contentContainerStyle={{}} keyboardShouldPersistTaps='always'>
                 <View style={styles.inputContainer}>
                     <Image source={{uri: userImage}} style={styles.avatar}/>
                     <TextInput 
@@ -324,44 +390,80 @@ const CreatePostScreen = props => {
                 </View>
 
                 <View style={{marginHorizontal: 32, marginTop: 10, marginBottom: 20, height: '80%', width: '80%', alignSelf:'center',}}>
-                    {image ? (
-                        <Lightbox
-                            backgroundColor='rgba(0, 0, 0, 0.8)'
-                            underlayColor={scheme==='dark' ? 'black' : 'white'}
-                            springConfig={{tension: 15, friction: 7}}
-                            renderHeader={(close) => (
-                                <TouchableCmp 
-                                    onPress={close}
-                                    style={styles.closeButton}
-                                >
-                                    <Ionicons 
-                                        name='ios-close'
-                                        size={36}
-                                        color='white'
-                                    />
-                                </TouchableCmp >
-                            )}
-                            renderContent={() => (
-                                <Image source={{uri: image}} style={styles.lightboxImage} />
-                            )}
-                        >
-                        <ImageBackground source={{uri: image}} imageStyle={{borderRadius:12}} style={styles.image}>
-                            <TouchableCmp
-                                style={styles.removeImageButton}
-                                onPress={() => {
-                                    setImage()
-                                    setMediaScroll(true)
-                                    textInput.current.focus()
-                                }}
+                    {media ? (
+                        media.type === 'image' ? (
+                            <Lightbox
+                                backgroundColor='rgba(0, 0, 0, 0.8)'
+                                underlayColor={scheme==='dark' ? 'black' : 'white'}
+                                springConfig={{tension: 15, friction: 7}}
+                                renderHeader={(close) => (
+                                    <TouchableCmp 
+                                        onPress={close}
+                                        style={styles.closeButton}
+                                    >
+                                        <Ionicons 
+                                            name='ios-close'
+                                            size={36}
+                                            color='white'
+                                        />
+                                    </TouchableCmp >
+                                )}
+                                renderContent={() => (
+                                    <Image source={{uri: media.uri}} style={styles.lightboxImage} />
+                                )}
                             >
-                                <Ionicons
-                                    name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
-                                    color='white'
-                                    size={24}
+                                <ImageBackground 
+                                    source={{uri: media.uri}} 
+                                    imageStyle={{borderRadius:12}}
+                                    resizeMethod='auto' 
+                                    style={{
+                                        alignItems: 'flex-end', 
+                                        aspectRatio: media.width / media.height
+                                    }}
+                                >
+                                    <TouchableCmp
+                                        style={styles.removeImageButton}
+                                        onPress={() => {
+                                            setMedia()
+                                            setMediaScroll(true)
+                                            textInput.current.focus()
+                                        }}
+                                    >
+                                        <Ionicons
+                                            name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
+                                            color='white'
+                                            size={24}
+                                        />
+                                    </TouchableCmp>
+                                </ImageBackground>
+                            </Lightbox>
+                        ) : (
+                            <View style={{flexDirection:'row'}}>
+                                <Video
+                                    source={{uri: media.localUri}}
+                                    useNativeControls
+                                    rate={1.0}
+                                    volume={1.0}
+                                    isMuted={true}
+                                    style={{aspectRatio: media.width/media.height, width: '90%', ...styles.video}}
                                 />
-                            </TouchableCmp>
-                        </ImageBackground>
-                    </Lightbox>
+                                <TouchableCmp 
+                                    style={styles.removeVideoButton}
+                                    onPress={() => {
+                                        setMedia()
+                                        setMediaScroll(true)
+                                        textInput.current.focus()
+                                    }}
+                                >
+                                    {/* <Text style={{color:'white'}}>Remove video</Text> */}
+                                    <Ionicons
+                                        name={Platform.OS==='android' ? 'md-close' : 'ios-close'}
+                                        color='white'
+                                        size={24}
+                                    />
+                                </TouchableCmp>
+                            </View>
+                        )
                     ) : (
                         null
                     )}
@@ -391,7 +493,8 @@ const CreatePostScreen = props => {
                         showsHorizontalScrollIndicator={false}
                         ListHeaderComponent={() => (
                             <TouchableCmp 
-                                onPress={() => props.navigation.dispatch(navToCamera)}
+                                // onPress={() => props.navigation.dispatch(navToCamera)}
+                                onPress={() => useCamera()}
                                 style={{backgroundColor: background, justifyContent:'center', alignItems:'center', ...styles.mediaAssetContainer}}
                             >
                                 <SimpleLineIcons 
@@ -403,7 +506,7 @@ const CreatePostScreen = props => {
                         )}
                         ListFooterComponent={() => (
                             <TouchableCmp 
-                                onPress={pickImage}
+                                onPress={pickMedia}
                                 style={{backgroundColor: background, justifyContent:'center', alignItems:'center', ...styles.mediaAssetContainer, marginRight: 10}}
                             >
                                 <FontAwesome 
@@ -428,7 +531,7 @@ const CreatePostScreen = props => {
                     </TouchableOpacity> */}
                     <TouchableOpacity 
                         style={styles.photo}
-                        onPress={pickImage}
+                        onPress={pickMedia}
                     >
                         <FontAwesome 
                             name='image' 
@@ -529,6 +632,18 @@ const styles = StyleSheet.create({
         width: 24,
         borderRadius: 12
     },
+    removeVideoButton: {
+        width: '10%',
+        marginLeft: 15,
+        alignSelf: 'flex-start',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 2,
+        paddingHorizontal: 5,
+        marginBottom: 3,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        borderRadius: 4
+    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -556,8 +671,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 15
     },
     image: {
-        width: SCREEN_WIDTH * 0.8,
-        height: SCREEN_HEIGHT * 0.8,
+        alignItems: 'flex-end',
+    },
+    video: {
+        borderRadius: 10,
         alignItems: 'flex-end',
     },
     postOptions: {

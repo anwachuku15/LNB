@@ -32,6 +32,7 @@ export default (state = initialState, action) => {
                 action.postData.userName,
                 action.postData.userImage,
                 action.postData.body,
+                action.postData.media,
                 action.postData.imageUrl,
                 action.postData.likeCount,
                 action.postData.commentCount,
