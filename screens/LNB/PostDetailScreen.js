@@ -19,8 +19,11 @@ import {
     Image, 
     SafeAreaView, 
     Dimensions,
-    KeyboardAvoidingView 
+    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
 } from 'react-native'
+import { Video } from 'expo-av'
+
 import { withNavigationFocus } from 'react-navigation'
 import Clipboard from '@react-native-community/clipboard'
 import { SharedElement } from 'react-navigation-shared-element'
@@ -36,6 +39,8 @@ import * as ImagePicker from 'expo-image-picker'
 import { createComment } from '../../redux/actions/postsActions'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
+
+const SCREEN_WIDTH = Dimensions.get('window').width
 
 
 const db = firebase.firestore()
@@ -340,6 +345,25 @@ const PostDetailScreen = props => {
                                 ) : (
                                     null
                                 )}
+                                {need.media ? (
+                                    need.media.type === 'image' ? (
+                                        <Image source={{uri: need.media.uri}} style={styles.postImage} resizeMode='cover'/>
+                                    ) : (
+                                        <TouchableWithoutFeedback>
+                                            <Video
+                                                source={{uri: need.media.uri}}
+                                                useNativeControls
+                                                rate={1.0}
+                                                volume={1.0}
+                                                isMuted={true}
+                                                style={{...styles.postVideo}}
+                                                resizeMode='cover'
+                                            />
+                                        </TouchableWithoutFeedback>
+                                    )
+                                ) : (
+                                    null
+                                )}
                                 <View style={{paddingTop: 15, width: '75%', flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
                                     <TouchableCmp onPress={() => {}}>
                                         <View style={{flexDirection:'row'}}>
@@ -559,6 +583,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         margin: 10,
         alignSelf: 'flex-start',
+    },
+    postVideo: {
+        borderRadius: 10,
+        alignItems: 'flex-end',
+        height: 400,
+        width: SCREEN_WIDTH * 0.75
     },
 })
 

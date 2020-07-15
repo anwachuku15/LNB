@@ -8,7 +8,10 @@ import {
     Modal,
     TouchableHighlight,
     Dimensions,
+    TouchableWithoutFeedback,
 } from 'react-native'
+import { Video } from 'expo-av'
+
 import * as Linking from 'expo-linking'
 import CustomModal from 'react-native-modal'
 import { useSelector, useDispatch } from 'react-redux'
@@ -25,7 +28,6 @@ import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 import ParsedText from 'react-native-parsed-text'
 import moment from 'moment'
-import { color } from 'react-native-reanimated'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height
@@ -459,6 +461,56 @@ const NeedPost = props => {
                     ) : (
                         null
                     )}
+
+                    {item.media ? (
+                        item.media.type === 'image' ? (
+                            <Lightbox
+                                backgroundColor='rgba(0, 0, 0, 0.8)'
+                                underlayColor={themeColor}
+                                springConfig={{tension: 15, friction: 7}}
+                                renderHeader={(close) => (
+                                    <TouchableCmp 
+                                        onPress={close}
+                                        style={styles.closeButton}
+                                    >
+                                        <Ionicons 
+                                            name='ios-close'
+                                            size={36}
+                                            color='white'
+                                        />
+                                    </TouchableCmp >
+                                )}
+                                renderContent={() => (
+                                    <Image source={{uri: item.media.uri}} style={styles.lightboxImage} resizeMode='contain'/>
+                                )}
+                            >
+                                <Image
+                                    source={{uri: item.media.uri}} 
+                                    // defaultSource
+                                    style={{...styles.postImage, borderColor: Colors.disabled}} 
+                                    resizeMethod='auto' 
+                                    resizeMode='cover'
+                                    height={300}
+                                    width={SCREEN_WIDTH * 0.75}
+                                    borderRadius={20}
+                                />
+                            </Lightbox>
+                        ) : (
+                            <TouchableWithoutFeedback>
+                                <Video
+                                    source={{uri: item.media.uri}}
+                                    useNativeControls
+                                    rate={1.0}
+                                    volume={1.0}
+                                    isMuted={true}
+                                    style={{...styles.postVideo}}
+                                    resizeMode='cover'
+                                />
+                            </TouchableWithoutFeedback>
+                        )
+                    ) : (
+                        null
+                    )}
                     {showNeedActions && item.id && (<NeedActions needId={item.id} leaveComment={() => commentButtonHandler(item.id, item.userName)}/>)}
                 </View>
                 </View>
@@ -619,6 +671,12 @@ const styles = StyleSheet.create({
         paddingTop: 2,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    postVideo: {
+        borderRadius: 10,
+        // alignItems: 'flex-end',
+        height: 400,
+        width: SCREEN_WIDTH * 0.75
     },
 })
 
