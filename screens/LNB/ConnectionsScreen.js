@@ -25,7 +25,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import { FontAwesome, Feather, MaterialIcons } from '@expo/vector-icons'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
-
+import ConnectionsListItem from '../../components/LNB/ConnectionsListItem'
 
 import algoliasearch from 'algoliasearch'
 import { appId, key, adminkey } from '../../secrets/algolia'
@@ -65,22 +65,22 @@ const ConnectionsScreen = props => {
 
     const searchInput = useRef(null)
     
-    const loadConnections = useCallback(async () => {
-        try {
-            await dispatch(fetchConnections(userId))
-        } catch (err) {
-            console.log(err)
-        }
-    }, [dispatch])
+    // const loadConnections = useCallback(async () => {
+    //     try {
+    //         await dispatch(fetchConnections(userId))
+    //     } catch (err) {
+    //         console.log(err)
+    //     }
+    // }, [dispatch])
 
-    useEffect(() => {
-        const willFocusSub = props.navigation.addListener(
-            'willFocus', loadConnections
-        )
-        return () => {
-            willFocusSub
-        }
-    }, [dispatch, loadConnections])
+    // useEffect(() => {
+    //     const willFocusSub = props.navigation.addListener(
+    //         'willFocus', loadConnections
+    //     )
+    //     return () => {
+    //         willFocusSub.remove()
+    //     }
+    // }, [dispatch, loadConnections])
 
 
     const updateSearch = (text) => {
@@ -112,72 +112,22 @@ const ConnectionsScreen = props => {
         setSearch('')
         
     }
-
     const renderItem = ({item}) => (
-        <TouchableCmp onPress={() => {navToUserProfile(item.uid, item.name)}}>
-            <ListItem
-                containerStyle={{
-                    backgroundColor:background,
-                    paddingHorizontal: 14,
-                    paddingVertical: 5,
-
-                }}
-                leftAvatar={{
-                    source: {uri: item.imageUrl},
-                    containerStyle: {
-                        height: 64,
-                        width: 64,
-                        borderRadius: 32
-                    },
-                    rounded: true
-                }}
-                title={
-                    <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
-                }
-                subtitle={
-                    <View style={{flexDirection:'column'}}>
-                        {item.headline.length > 0 && 
-                            <Text 
-                                numberOfLines={1}
-                                ellipsizeMode='tail'
-                                style={{color:Colors.disabled, fontSize: 14}}
-                            >
-                                {item.headline}
-                            </Text>
-                        }
-                        {item.location.length > 0 && <Text style={{color:Colors.disabled, fontSize:12}}>{item.location}</Text>}
-                    </View>
-                }
-                rightElement={
-                    <View style={styles.buttonContainer}>
-                        <TouchableCmp
-                            style={styles.messageButton}
-                            onPress={async () => {
-                                await dispatch(getUser(item.uid))
-                                props.navigation.push(
-                                    'ChatScreen', {
-                                        selectedUserId: item.uid,
-                                        userName: item.name,
-                                        userImage: item.imageUrl
-                                    }
-                                )
-                            }}
-                        >
-                            <Text style={styles.messageText}>Message </Text>
-                            <MaterialIcons
-                                name='mail-outline'
-                                color='white'
-                                size={20}
-                            />
-                        </TouchableCmp>
-                    </View>
-                }
-            />
-        </TouchableCmp>
+        <ConnectionsListItem
+            navigation={props.navigation}
+            item={item}
+            styles={styles}
+            navToUserProfile={navToUserProfile}
+            text={text}
+            background={background}
+            dispatch={dispatch}
+            getUser={getUser}
+        />
+        
     )
 
     return (
-        <View style={styles.screen}>
+        <View style={{backgroundColor: background, ...styles.screen}}>
             <View style={{flexDirection:'row', paddingHorizontal: 10, marginTop: 10}}>
                 <View style={{...styles.searchContainer, backgroundColor: searchBar, width: '100%', alignSelf: 'center'}}>
                     <View style={{justifyContent:'center'}}>
@@ -215,11 +165,6 @@ const ConnectionsScreen = props => {
                     )}
                 </View>
             </View>
-            {userConnections && userConnections.length === 0 && (
-                <Text style={{color:Colors.placeholder, alignSelf: 'center', marginTop: 10}}>
-                    {userId === auth.userId ? 'You have no connections' : `${userName} has no connections`}
-                </Text>
-            )}
             {userConnections && userConnections.length > 0 &&(
                 <FlatList
                     keyExtractor={(item, index) => index.toString()}
@@ -227,6 +172,11 @@ const ConnectionsScreen = props => {
                     renderItem={renderItem}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
+                    ListEmptyComponent={() => (
+                        <Text style={{color:Colors.placeholder, alignSelf: 'center', marginTop: 10}}>
+                            {userId === auth.userId ? 'You have no connections' : `${userName} has no connections`}
+                        </Text>
+                    )}
                 />
             )}
         </View>
