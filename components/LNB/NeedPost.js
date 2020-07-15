@@ -79,34 +79,34 @@ const NeedPost = props => {
         showNeedActions,
     } = props
 
-    useEffect(() => {
-        if (item.taggedUsers) {
-            console.log(item.taggedUsers)
-            const { taggedUsers } = item
-            let i = 0
-            taggedUsers.forEach(user => {
-                tagged.push(user)
-                setTagged(tagged)
-                taggedNames.push(user.name)
-                setTaggedNames(taggedNames)
-            })
-            const regex = new RegExp('#' + taggedNames[0] + '#', 'g')
-            setTaggedUser(taggedNames[0])
-        }
-    }, [setTagged, setTaggedNames])
+    // useEffect(() => {
+    //     if (item.taggedUsers) {
+    //         console.log(item.taggedUsers)
+    //         const { taggedUsers } = item
+    //         let i = 0
+    //         taggedUsers.forEach(user => {
+    //             tagged.push(user)
+    //             setTagged(tagged)
+    //             taggedNames.push(user.name)
+    //             setTaggedNames(taggedNames)
+    //         })
+    //         const regex = new RegExp('#' + taggedNames[0] + '#', 'g')
+    //         setTaggedUser(taggedNames[0])
+    //     }
+    // }, [setTagged, setTaggedNames])
 
-    const navToUserProfile = (uid, name) => {
-        props.navigation.push('UserProfile', {
-            userId: uid,
-            name: name
-        }
-    )
-    }
+    // const navToUserProfile = (uid, name) => {
+    //     props.navigation.push('UserProfile', {
+    //         userId: uid,
+    //         name: name
+    //     }
+    // )
+    // }
 
 
-    const handleOpenLink = (url, matchIndex) => {
-        Linking.openURL(url)
-    }
+    // const handleOpenLink = (url, matchIndex) => {
+    //     Linking.openURL(url)
+    // }
 
     const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
@@ -129,8 +129,7 @@ const NeedPost = props => {
         ])
     }
 
-    const [imageWidth, setImageWidth] = useState()
-    const [imageHeight, setImageHeight] = useState()
+    
     // useEffect(() => {
     
     //     if (item.imageUrl) {

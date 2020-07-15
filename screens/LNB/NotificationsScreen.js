@@ -90,6 +90,11 @@ const NotificationsScreen = props => {
         }
     }, [loadNotifications])
 
+     // UNMOUNT
+    //  useEffect(() => {
+    //     loadNotifications()
+    // }, [dispatch, loadNotifications])
+
     // useEffect(() => {
     //     const notificationsSub = Notifications.addListener(handleNotification)
     //     return () => {
@@ -110,10 +115,7 @@ const NotificationsScreen = props => {
     // }
 
 
-    // UNMOUNT
-    useEffect(() => {
-        loadNotifications()
-    }, [dispatch, loadNotifications])
+   
 
     const navToUserProfile = (id, name) => {
         props.navigation.navigate({

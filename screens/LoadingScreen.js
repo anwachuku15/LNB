@@ -52,6 +52,7 @@ const LoadingScreen = props => {
                             if (userDoc.exists) {
                                 const {userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements} = userDoc.data()
                                 dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
+                                
                                 props.navigation.navigate('App')
                             } else {
                                 props.navigation.navigate('Auth')
