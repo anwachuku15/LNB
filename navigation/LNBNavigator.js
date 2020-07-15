@@ -582,6 +582,7 @@ const DirectoryTabButton = createMaterialTopTabNavigator({
 })
 
 DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
+    console.log('DIRECTORY TAB FOCUSED')
     const index = navigation.state.index
     const userName = screenProps.authUser.displayName
     const background = screenProps.theme
@@ -816,6 +817,8 @@ const BottomTabStackContainer = createStackNavigator({
             }
         },
     }, {
+        tabBarComponent: ThemedBottomBar,
+        // lazy: false,
         defaultNavigationOptions: {
             tabBarOnPress: ({navigation, defaultHandler}) => {
                 if (navigation.state.key === 'Post') {
@@ -865,7 +868,7 @@ const BottomTabStackContainer = createStackNavigator({
             }
             background = screenProps.theme === 'dark' ? 'black' : 'black'
         },
-        tabBarComponent: ThemedBottomBar,
+        
     }),
     postModal: {
         screen: CreatePostScreen,
