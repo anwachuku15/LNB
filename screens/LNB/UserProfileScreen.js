@@ -796,7 +796,7 @@ const styles = StyleSheet.create({
     },
     editProfileButton: {
         paddingVertical: 10,
-        paddingHorizontal: 40,
+        paddingHorizontal: 30,
         width: '40%',
         marginVertical: 5,
         justifyContent: 'center',
