@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { likeNeed, unLikeNeed } from '../../redux/actions/postsActions'
 import { View, TouchableNativeFeedback, TouchableOpacity, Platform, Text } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-
+import * as Haptics from 'expo-haptics'
 
 import Colors from '../../constants/Colors'
 import firebase from 'firebase'
@@ -47,14 +47,19 @@ const NeedActions = props => {
             needDataListener()
             setLikeIcon()
         }
-    },[dispatch])
+    },[dispatch, setIsLiked, setCommentCount])
 
-    const likeHandler = () => {
+    const likeHandler = async () => {
+        await dispatch(likeNeed(props.needId))
+        setIsLiked(true)
         setLikeCount(likeCount+1)
-        dispatch(likeNeed(props.needId))
+        Haptics.impactAsync('medium')
     }
-    const unlikeHandler = () => {
-        dispatch(unLikeNeed(props.needId))
+    const unlikeHandler = async () => {
+        await dispatch(unLikeNeed(props.needId))
+        setIsLiked(false)
+        setLikeCount(likeCount-1)
+        Haptics.impactAsync('medium')
     }
 
     let TouchableCmp = TouchableOpacity
