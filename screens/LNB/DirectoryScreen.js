@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react'
 import { 
     Platform,
     View, 
     Text, 
     StyleSheet, 
     Image, 
-    Button, 
+    Button,
     ScrollView,
     Keyboard,
     TouchableWithoutFeedback,
@@ -13,6 +13,7 @@ import {
     FlatList,
     Alert
 } from 'react-native'
+import CachedImage from '../../components/LNB/CachedImage'
 import CustomModal from 'react-native-modal'
 import Clipboard from '@react-native-community/clipboard'
 import { withNavigationFocus } from 'react-navigation'
@@ -27,6 +28,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import { FontAwesome, Feather, MaterialIcons } from '@expo/vector-icons'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
+import UserListItem from '../../components/LNB/UserListItem'
 
 import * as firebase from 'firebase'
 
@@ -65,20 +67,31 @@ const DirectoryScreen = props => {
     
     const [requestedUsers, setRequestedUsers] = useState(outgoingRequests)
     const [connectedUsers, setConnectedUsers] = useState(userConnectionIds)
-    const [mounted, setMounted] = useState(true)
+    const [isMounted, setIsMounted] = useState(true)
 
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
 
     const searchInput = useRef(null)
 
-    const loadAllUsers = useCallback(async () => {
-        try {
-            await dispatch(fetchConnections(authId))
-        } catch (err) {
-            console.log(err)
-        }
-    }, [dispatch])
+    // const mount = props.navigation.isFocused() ? console.log('Directory Focused') : console.log('Directory not focused')
+
+    // const loadAllUsers = useCallback(async () => {
+    //     try {
+    //         await dispatch(fetchConnections(authId))
+    //         console.log('fetched connections')
+    //     } catch (err) {
+    //         console.log(err)
+    //     }
+    // }, [dispatch])
+    
+    // useEffect(() => {
+    //     const willFocusSub = props.navigation.addListener('willFocus', loadAllUsers)
+
+    //     return () => {
+    //         willFocusSub
+    //     }
+    // }, [loadAllUsers])
 
 
     const connectReqHandler = useCallback(async (item) => {
@@ -164,6 +177,25 @@ const DirectoryScreen = props => {
     
 
     const renderItem = ({item}) => (
+        // <UserListItem
+        //     navigation={props.navigation}
+        //     item={item}
+        //     authId={authId}
+        //     styles={styles}
+        //     navToUserProfile={navToUserProfile}
+        //     text={text}
+        //     background={background}
+        //     userConnectionIds={userConnectionIds}
+        //     outgoingRequests={outgoingRequests}
+        //     incomingRequests={incomingRequests}
+        //     requestedUsers={requestedUsers}
+        //     connectedUsers={connectedUsers}
+        //     connectReqHandler={connectReqHandler}
+        //     unrequestHandler={unrequestHandler}
+        //     disconnectHandler={disconnectHandler}
+        //     dispatch={dispatch}
+        //     getUser={getUser}
+        // />
         <TouchableCmp onPress={() => {
             navToUserProfile(item.uid, item.name)
         }}>
@@ -180,6 +212,12 @@ const DirectoryScreen = props => {
                         width: 64,
                         borderRadius: 32
                     },
+                    // ImageComponent: () => (
+                    //     <CachedImage
+                    //         source={{uri: item.imageUrl}}
+                    //         style={{height: 64, width: 64, borderRadius: 32}}
+                    //     />
+                    // ),
                     rounded: true
                 }}
                 title={
@@ -284,9 +322,9 @@ const DirectoryScreen = props => {
         </TouchableCmp>
     )
 
-    const memoizedItem = useMemo(() => {
-        return renderItem
-    }, [])
+    // const memoizedItem = useMemo(() => {
+    //     return renderItem
+    // }, [])
 
 
 
@@ -332,8 +370,8 @@ const DirectoryScreen = props => {
             <FlatList
                 keyExtractor={(item, index) => index.toString()}
                 data={search.length === 0 ? allUsers : results}
-                // renderItem={renderItem}
-                renderItem={memoizedItem}
+                renderItem={renderItem}
+                // renderItem={memoizedItem}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
             />
