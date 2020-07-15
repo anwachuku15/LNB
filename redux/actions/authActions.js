@@ -227,11 +227,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                 messageNotifications: [],
                 lastReadAnnouncements: lastReadAnnouncements
             })
-            dispatch(fetchConnections(userId))
-            dispatch(updateOutgoingRequests)
-            dispatch(updateIncomingRequests)
-            dispatch(setNotifications)
-            dispatch(setAnnouncements)
+            // dispatch(fetchConnections(userId))
 
             
             let lastReadMessages = []
@@ -262,9 +258,34 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
                 }
             })
 
-            
+            const newConnectionListener = db.collection('connections')
+                                            .where('requestedBy', '==', userId)
+                                            .onSnapshot(snapshot => {
+                                                dispatch(fetchConnections(userId))
+                                            })
+            newConnectionListener
 
-                    
+            const requestsListener = db.doc(`/users/${userId}`)
+                                        .get()
+                                        .then(doc => {
+                                            const requestListener = doc.ref.onSnapshot(snapshot => {
+                                                dispatch(updateOutgoingRequests(snapshot.data().outgoingRequests))
+                                                dispatch(updateIncomingRequests(snapshot.data().pendingConnections))
+                                            })
+                                        }).catch(err => console.log(err))
+
+            const unreadListener = db.collection('notifications')
+                                    .where('recipientId', '==', userId)
+                                    .onSnapshot(snapshot => {
+                                        dispatch(setNotifications())
+                                    })
+            unreadListener
+
+            const announcementListener = db.collection('announcements')
+                                        .onSnapshot(snapshot => {
+                                            dispatch(setAnnouncements())
+                                        })
+            announcementListener
             
         } catch (err) {
             console.log(err)
@@ -272,34 +293,7 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
     }
 }
 
-// const newConnectionListener = db.collection('connections')
-//                                             .where('requestedBy', '==', userId)
-//                                             .onSnapshot(snapshot => {
-//                                                 dispatch(fetchConnections(userId))
-//                                             })
-// newConnectionListener
 
-// const requestsListener = db.doc(`/users/${userId}`)
-//                             .get()
-//                             .then(doc => {
-//                                 const requestListener = doc.ref.onSnapshot(snapshot => {
-//                                     dispatch(updateOutgoingRequests(snapshot.data().outgoingRequests))
-//                                     dispatch(updateIncomingRequests(snapshot.data().pendingConnections))
-//                                 })
-//                             }).catch(err => console.log(err))
-
-// const unreadListener = db.collection('notifications')
-//                         .where('recipientId', '==', userId)
-//                         .onSnapshot(snapshot => {
-//                             dispatch(setNotifications())
-//                         })
-// unreadListener
-
-// const announcementListener = db.collection('announcements')
-//                             .onSnapshot(snapshot => {
-//                                 dispatch(setAnnouncements())
-//                             })
-// announcementListener
 
 
 
@@ -593,35 +587,14 @@ export const connectReq = (authId, authName, selectedUserId) => {
                     db.doc(`/users/${selectedUserId}`).get()
                         .then(doc => {
                             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, isOnline } = doc.data()
+
                             dispatch({
-                                type: SET_SELECTED_USER,
-                                selectedUser: {
-                                    credentials: {
-                                        isAdmin: isAdmin,
-                                        userId: userId,
-                                        email: email,
-                                        displayName: displayName,
-                                        headline: headline,
-                                        imageUrl: imageUrl,
-                                        location: location,
-                                        bio: bio,
-                                        website: website
-                                    },
-                                    isOnline: isOnline,
-                                    connections: connections,
-                                    pendingConnections: pendingConnections,
-                                    messages: messages,
-                                    // likes: likes
+                                type: SET_PENDING_CONNECTIONS,
+                                pendingConnections: {
+                                    recipientId: selectedUserId,
+                                    senderId: authId
                                 }
                             })
-
-                            // dispatch({
-                            //     type: SET_PENDING_CONNECTIONS,
-                            //     pendingConnections: {
-                            //         recipientId: selectedUserId,
-                            //         senderId: authId
-                            //     }
-                            // })
                             
                         })
                         .then(async () => {
@@ -1230,27 +1203,7 @@ export const disconnect = (authId, selectedUserId) => {
         })
         dispatch(setNotifications())
         // dispatch(setLikes())
-        dispatch({
-            type: SET_SELECTED_USER,
-            selectedUser: {
-                credentials: {
-                    isAdmin: selectedUserData.isAdmin,
-                    userId: selectedUserData.userId,
-                    email: selectedUserData.email,
-                    displayName: selectedUserData.displayName,
-                    headline: selectedUserData.headline,
-                    imageUrl: selectedUserData.imageUrl,
-                    location: selectedUserData.location,
-                    bio: selectedUserData.bio,
-                    website: selectedUserData.website
-                },
-                isOnline: selectedUserData.isOnline,
-                connections: selectedUserData.connections,
-                pendingConnections: selectedUserData.pendingConnections,
-                messages: selectedUserData.messages,
-                // likes: selectedUserData.likes
-            }
-        })
+        
         
     }
 }
