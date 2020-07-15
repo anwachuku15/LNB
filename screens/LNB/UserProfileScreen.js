@@ -90,7 +90,7 @@ const UserProfileScreen = props => {
     const dispatch = useDispatch()
 
     const userId = props.navigation.getParam('userId')
-    const user = useSelector(state => state.auth.selectedUser)
+    const user = useSelector(state => state.auth.allUsers.find(user => user.uid === userId))
     const authUser = useSelector(state => state.auth)
     const authId = useSelector(state => state.auth.userId)
     const authName = useSelector(state => state.auth.credentials.displayName)
@@ -111,7 +111,8 @@ const UserProfileScreen = props => {
         setError(null)
         setIsRefreshing(true)
         try {
-            await dispatch(getUser(userId))
+            // await dispatch(getUser(userId))
+            console.log(incomingRequests)
             await dispatch(fetchNeeds())
         } catch (err) {
             console.log(err)
@@ -119,91 +120,7 @@ const UserProfileScreen = props => {
         }
         setIsRefreshing(false)
     }, [dispatch, setIsLoading, setError])
-    
-    useEffect(() => {
-        const willFocusSub = props.navigation.addListener(
-            'willFocus', loadUser
-        )
-        return () => {
-            willFocusSub
-        }
-    }, [dispatch, loadUser])
 
-  
-    
-    useEffect(() => {
-        setIsLoading(true)
-        loadUser().then(() => {
-            setIsLoading(false)
-        })
-        // MOVE CONNECTIONS TO STATE
-        const connectionsSnapshot = db.doc(`/users/${userId}`).onSnapshot(snapshot => {
-            const currentConnections = snapshot.data().connections
-            setConnections(currentConnections)
-        })
-
-        const acceptButton = db.doc(`/users/${authUser.userId}`).onSnapshot(snapshot => {
-            const authPendings = snapshot.data().pendingConnections
-            if (authPendings.indexOf(userId) > -1) {
-                setAccept(true)
-            } else {
-                setAccept(false)
-            }
-        })
-        const requestedButton = db.doc(`/users/${authUser.userId}`).onSnapshot(snapshot => {
-            const outgoingRequests = snapshot.data().outgoingRequests
-            if(outgoingRequests.indexOf(userId) > -1) {
-                // setConnectButton(false)
-                setRequested(true)
-            } else {
-                setRequested(false)
-            }
-        })
-        const connectedButton = authUser.userId < userId ? db.doc(`/connections/${authUser.userId+userId}`)
-                                                            .onSnapshot(snapshot => {
-                                                                if (snapshot.exists) {
-                                                                    setConnected(true)
-                                                                    setAccept(false)
-                                                                    setRequested(false)
-                                                                } else {
-                                                                    setConnected(false)
-                                                                }
-                                                            })
-                                                        : db.doc(`/connections/${userId+authUser.userId}`)
-                                                            .onSnapshot(snapshot => {
-                                                                if (snapshot.exists) {
-                                                                    setConnected(true)
-                                                                    setAccept(false)
-                                                                    setRequested(false)
-                                                                } else {
-                                                                    setConnected(false)
-                                                                }
-                                                            })
-        
-        connectionsSnapshot
-        acceptButton
-        connectedButton
-        requestedButton
-
-        return () => {
-            loadUser
-        }
-    }, [dispatch, loadUser])
-    
-    const memoizedProfileAvatar = useMemo(() => {
-        if (user) {
-
-            return (
-                <View>
-                    <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
-                    {/* {user.isOnline && <Badge
-                        containerStyle={{position: 'absolute', bottom: 10, right: 30,}}
-                        Component={() => <View style={{borderRadius: 10, padding:10, backgroundColor:Colors.green}}/>}
-                    />} */}
-                </View>
-            )
-        }
-    }, [user])
 
     const navToPostDetail = (needId) => {
         props.navigation.push(
@@ -237,7 +154,7 @@ const UserProfileScreen = props => {
     }, [pinned, isRefreshing])
     
     const disconnectHandler = (authId, selectedUserId) => {
-        Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + user.credentials.displayName + '?', [
+        Alert.alert('Disconnect', 'Are you sure you want to disconnect from ' + user.displayName + '?', [
             {
                 text: 'No',
                 style: 'cancel'
@@ -259,7 +176,9 @@ const UserProfileScreen = props => {
             {
                 text: 'Remove',
                 style: 'destructive',
-                onPress: () => {dispatch(unrequest(authId, selectedUserId))}
+                onPress: () => {
+                    dispatch(unrequest(authId, selectedUserId))
+                }
             }
         ])
     }
@@ -291,7 +210,7 @@ const UserProfileScreen = props => {
 
 
     const selectUserHandler = (userId, userName) => {
-        if (userId !== user.credentials.userId) {
+        if (userId !== user.userId) {
             props.navigation.push('UserProfile', {
                     userId: userId,
                     name: userName,
@@ -360,15 +279,13 @@ const UserProfileScreen = props => {
                 style: 'default',
                 onPress: async () => {
                     
-                    setIsModalVisible(!isModalVisible)
                     pinNeed(needId, uid)
-                    setPinnedNeed(pinned)
-                    
-                    
-                    loadUser().catch(err => console.log(err))
+                    await setPinnedNeed(pinned)
+                    setIsModalVisible(!isModalVisible)
+                    setTimeout(() => {
+                        loadUser().catch(err => console.log(err))
+                    }, 500) 
                         
-                    
-
                 }
             }
         ])
@@ -391,10 +308,10 @@ const UserProfileScreen = props => {
                     try {
                         unpinNeed(needId)
                         setIsModalVisible(!isModalVisible)
-                        setIsRefreshing(true)
-                        loadUser().then(() => {
-                            setIsRefreshing(false)
-                        })
+                        await setPinnedNeed(pinned)
+                        setTimeout(() => {
+                            loadUser().catch(err => console.log(err))
+                        }, 500) 
                     } catch (err) {
                         alert(err)
                         console.log(err)
@@ -437,8 +354,8 @@ const UserProfileScreen = props => {
 
     const WebsiteIcon = () => (
         <View>
-            {user.credentials.website.includes('linkedin.com') && (
-                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{justifyContent: 'center'}}>
+            {user.website.includes('linkedin.com') && (
+                <TouchableCmp onPress={() => handleOpenLink(user.website)} style={{justifyContent: 'center'}}>
                     <MaterialCommunityIcons 
                         name='linkedin-box' 
                         size={24}
@@ -446,8 +363,8 @@ const UserProfileScreen = props => {
                     />
                 </TouchableCmp>
             )}
-            {user.credentials.website.includes('instagram.com') && (
-                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{justifyContent: 'center'}}>
+            {user.website.includes('instagram.com') && (
+                <TouchableCmp onPress={() => handleOpenLink(user.website)} style={{justifyContent: 'center'}}>
                     <MaterialCommunityIcons 
                         name='instagram' 
                         size={24}
@@ -455,8 +372,8 @@ const UserProfileScreen = props => {
                     />
                 </TouchableCmp>
             )}
-            {!user.credentials.website.includes('linkedin.com') && !user.credentials.website.includes('instagram.com') && (
-                <TouchableCmp onPress={() => handleOpenLink(user.credentials.website)} style={{justifyContent: 'center'}}>
+            {!user.website.includes('linkedin.com') && !user.website.includes('instagram.com') && (
+                <TouchableCmp onPress={() => handleOpenLink(user.website)} style={{justifyContent: 'center'}}>
                     <Ionicons 
                         name='md-link' 
                         size={24}
@@ -486,7 +403,7 @@ const UserProfileScreen = props => {
                     <Text style={{color:text, fontSize:12, fontWeight: 'bold', alignSelf:'center'}}>Edit Profile</Text>
                 </View>
             </TouchableCmp>
-            {((user.credentials.headline === '') || (user.credentials.location === '') || (user.credentials.website === '')) && 
+            {((user.headline === '') || (user.location === '') || (user.website === '')) && 
                 <Badge 
                     Component={() => (
                         <FontAwesome
@@ -498,7 +415,7 @@ const UserProfileScreen = props => {
                     containerStyle={{position: 'absolute', right: 0}}
                 />
             }
-            {/* {((user.credentials.headline === '') || (user.credentials.location === '') || (user.credentials.website === '')) && 
+            {/* {((user.headline === '') || (user.location === '') || (user.website === '')) && 
                 <Text style={{color:Colors.redcrayola, alignSelf:'center', fontSize: 12, marginBottom: 15}}>Your profile is incomplete!</Text>
             } */}
         </View>
@@ -511,11 +428,11 @@ const UserProfileScreen = props => {
     return (
         // isMounted &&
         <SafeAreaView style={styles.screen}>
-            {user && (
+            {user.imageUrl && (
                 <View style={styles.screen}>
                     
                         <ImageBackground
-                            source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
+                            source={{uri: user.imageUrl, cache: 'force-cache'}}
                             style={[
                                 StyleSheet.absoluteFill, {
                                     width: SCREEN_WIDTH,
@@ -536,12 +453,11 @@ const UserProfileScreen = props => {
                         data={userPosts}
                         onRefresh={loadUser}
                         refreshing={isRefreshing}
-                        style={{}}
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={() => (
                             <View style={{flex:1, justifyContent:'center', alignItems:'center', paddingTop: 10}}>
-                                <Text style={{color:Colors.placeholder}}>{user.credentials.displayName} hasn't posted any needs.</Text>
+                                <Text style={{color:Colors.placeholder}}>{user.name} hasn't posted any needs.</Text>
                             </View>
                         )}
                         renderItem={renderItem}
@@ -555,9 +471,9 @@ const UserProfileScreen = props => {
                                         {/* AVATAR, HEADER, LOCATION */}
                                         <View style={{alignItems: 'center', marginBottom: 10}}>
                                             <View style={styles.avatarContainer}>
-                                                <TouchableCmp onPress={() => props.navigation.push('UserProfilePicture', {uri: user.credentials.imageUrl})}>
-                                                    <SharedElement id={user.credentials.imageUrl}>
-                                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                                                <TouchableCmp onPress={() => props.navigation.push('UserProfilePicture', {uri: user.imageUrl})}>
+                                                    <SharedElement id={user.imageUrl}>
+                                                        <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
                                                     </SharedElement>
                                                 </TouchableCmp>
                                                 {/* <Lightbox
@@ -578,7 +494,7 @@ const UserProfileScreen = props => {
                                                     )}
                                                     renderContent={() => (
                                                         <Image 
-                                                            source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
+                                                            source={{uri: user.imageUrl, cache: 'force-cache'}}
                                                             style={{
                                                                 alignSelf: 'center',
                                                                 width: SCREEN_WIDTH - 20, 
@@ -593,13 +509,13 @@ const UserProfileScreen = props => {
 
                                                 {/* <View ref={ref => startAncestor = nodeFromRef(ref)}>
                                                     <SharedElement onNode={node => startNode = node}>
-                                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                                                        <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
                                                     </SharedElement>
                                                 </View>
 
                                                 <View ref={ref => endAncestor = nodeFromRef(ref)}>
                                                     <SharedElement onNode={node => endNode = node}>
-                                                        <Image style={styles.avatar} source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}/>
+                                                        <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
                                                     </SharedElement>
                                                 </View>
 
@@ -622,8 +538,8 @@ const UserProfileScreen = props => {
 
                                             </View>
                                             <View style={{flexDirection: 'row', marginTop: 5}}>
-                                                <Text style={{...styles.name, ...{color:text}}}>{user.credentials.displayName}</Text>
-                                                {user.credentials.website.length > 3 && (
+                                                <Text style={{...styles.name, ...{color:text}}}>{user.name}</Text>
+                                                {user.website.length > 3 && (
                                                     <View style={{flexDirection: 'row'}}>
                                                         <Text style={{alignSelf:'center', marginHorizontal: 5, color: Colors.placeholder}}>|</Text>
                                                         <WebsiteIcon />
@@ -631,15 +547,15 @@ const UserProfileScreen = props => {
                                                 )}
                                             </View>
                                             {/* {authUser.userId === userId && <EditProfileButton key={userId}/>} */}
-                                            <Text style={{...styles.infoTitle, marginTop: 5, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.credentials.headline}</Text>
-                                            {user.credentials.location !== '' && <View style={{flexDirection: 'row', justifyContent:'center', alignItems: 'center', marginTop: 5}}>
+                                            <Text style={{...styles.infoTitle, marginTop: 5, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.headline}</Text>
+                                            {user.location !== '' && <View style={{flexDirection: 'row', justifyContent:'center', alignItems: 'center', marginTop: 5}}>
                                                 <Entypo
                                                     name='location-pin'
                                                     size={12}
                                                     color={Colors.redcrayola}
                                                     style={{marginRight: 3, }}
                                                 />
-                                                <Text style={{...styles.infoTitle, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.credentials.location}</Text>
+                                                <Text style={{...styles.infoTitle, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.location}</Text>
                                             </View>}
                                         </View>
 
@@ -658,7 +574,7 @@ const UserProfileScreen = props => {
                                                         props.navigation.push(
                                                             'Connections', {
                                                                 userId: userId,
-                                                                userName: user.credentials.displayName
+                                                                userName: user.displayName
                                                             }
                                                         )
                                                     }}
@@ -674,46 +590,28 @@ const UserProfileScreen = props => {
                                         {userId !== authUser.userId && (
                                             <View>
                                                 <View style={{flexDirection:'row', justifyContent:'space-between', paddingTop: 8, paddingBottom: accept ? 0 : 15}}>
-                                                    {accept && (
-                                                        <View style={{flexDirection:'row', justifyContent:'space-between', width: '40%'}}>
-                                                            <TouchableCmp 
-                                                                onPress={() => {
-                                                                    dispatch(declineConnect(authUser.userId, userId, user.credentials.displayName))
-                                                                    setAccept(false)
-                                                                    setConnect(true)
-                                                                }} 
-                                                                style={{...styles.respondButton, borderColor: Colors.redcrayola}}>
-                                                                <Text style={{color:Colors.redcrayola, fontSize:14, alignSelf:'center'}}>Decline</Text>
-                                                            </TouchableCmp>
-                                                            <TouchableCmp 
-                                                                onPress={() => {
-                                                                    dispatch(confirmConnect(authUser.userId, authName, userId, user.credentials.displayName))
-                                                                    setAccept(false)
-                                                                    setConnected(true)
-                                                                }} 
-                                                                style={{...styles.respondButton, borderColor: Colors.green}}>
-                                                                <Text style={{color:Colors.green, fontSize:14, alignSelf:'center'}}>Accept</Text>
-                                                            </TouchableCmp>
-                                                        </View>
-                                                    )}
-                                                    {requested && (
+                                                    
+                                                    {outgoingRequests.includes(user.uid) && (
                                                         <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.placeholder, }}>
                                                             <Text style={{color:Colors.placeholder, fontSize:14, fontWeight:'bold', alignSelf:'center'}}>Requested</Text>
                                                         </TouchableCmp>
                                                     )}
                                                     {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}
-                                                    {!connected && !requested && !accept && ( 
+                                                    {userConnectionIds && outgoingRequests && incomingRequests &&
+                                                    !userConnectionIds.includes(user.uid) && 
+                                                    !incomingRequests.includes(user.uid) && 
+                                                    !outgoingRequests.includes(user.uid) && (
                                                         <TouchableCmp 
                                                             style={{...styles.connectButton,  backgroundColor: Colors.primary, borderColor: Colors.primary}}
-                                                            onPress={() => {
-                                                                dispatch(connectReq(authUser.userId, authName, userId))
+                                                            onPress={async () => {
+                                                                await dispatch(connectReq(authUser.userId, authName, userId))
                                                                 setRequested(true)
                                                             }} 
                                                         >
                                                             <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connect</Text>
                                                         </TouchableCmp>
                                                     )}
-                                                    {connected && (
+                                                    {userConnectionIds.includes(user.uid) && (
                                                         <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.primary, backgroundColor: 'white'}}>
                                                             <Text style={{color:Colors.primary, fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connected</Text>
                                                         </TouchableCmp>
@@ -725,8 +623,8 @@ const UserProfileScreen = props => {
                                                                 'ChatScreen',
                                                                 {
                                                                     selectedUserId: userId,
-                                                                    userName: user.credentials.displayName,
-                                                                    userImage: user.credentials.imageUrl
+                                                                    userName: user.displayName,
+                                                                    userImage: user.imageUrl
                                                                 }
                                                         )}}
                                                         style={{...styles.messageButton, backgroundColor: Colors.blue, borderColor: Colors.blue}}
@@ -734,9 +632,11 @@ const UserProfileScreen = props => {
                                                         <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Message</Text>
                                                     </TouchableCmp>
                                                 </View>
-                                                {accept && (
+                                                {incomingRequests.includes(user.uid) && (
+                                                    // dispatch(declineConnect(authUser.userId, userId, user.displayName))
+                                                    // dispatch(confirmConnect(authUser.userId, authName, userId, user.displayName))
                                                     <Text style={{width: '40%', paddingBottom: 15, fontSize: 12, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>
-                                                        {user.credentials.displayName} has requested to connect with you.
+                                                        {user.displayName} has requested to connect with you.
                                                     </Text>
                                                 )}
                                             </View>
@@ -754,7 +654,7 @@ const UserProfileScreen = props => {
                                                     linkDefault={true}
                                                     linkStyle={{color: scheme==='dark' ? Colors.bluesea : Colors.blue}}
                                                 >
-                                                    <Text style={{color:text}}>{user.credentials.bio}</Text>
+                                                    <Text style={{color:text}}>{user.bio}</Text>
                                                 </Hyperlink>
                                             </View>
                                             
