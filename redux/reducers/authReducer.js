@@ -7,7 +7,7 @@ import {
     SET_SELECTED_USER, 
     SET_PENDING_CONNECTIONS, 
     SET_NEW_CONNECTION, 
-    SET_LIKES, 
+    // SET_LIKES, 
     SET_NOTIFICATIONS, 
     SET_MESSAGE_NOTIFICATIONS,
     SET_CONNECT_NOTIFICATIONS,
@@ -98,12 +98,12 @@ export default (state = initialState, action) => {
                 outgoingRequests: action.outgoingRequests
             }
         }
-        case SET_LIKES: {
-            return {
-                ...state,
-                likes: action.likes
-            }
-        }
+        // case SET_LIKES: {
+        //     return {
+        //         ...state,
+        //         likes: action.likes
+        //     }
+        // }
         case SET_NOTIFICATIONS: {
             return {
                 ...state,

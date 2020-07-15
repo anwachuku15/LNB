@@ -25,7 +25,7 @@ import { SharedElement } from 'react-navigation-shared-element'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, setLikes } from '../../redux/actions/authActions'
+import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect } from '../../redux/actions/authActions'
 import { fetchNeeds, getNeed, deleteNeed } from '../../redux/actions/postsActions'
 
 import Colors from '../../constants/Colors'
@@ -108,7 +108,6 @@ const UserProfileScreen = props => {
         try {
             await dispatch(getUser(userId))
             await dispatch(fetchNeeds())
-            // await dispatch(setLikes())
         } catch (err) {
             console.log(err)
             setError(err.message)

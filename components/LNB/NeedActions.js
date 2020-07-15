@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { likeNeed, unLikeNeed } from '../../redux/actions/postsActions'
-import { setLikes } from '../../redux/actions/authActions'
 import { View, TouchableNativeFeedback, TouchableOpacity, Platform, Text } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 

@@ -38,7 +38,7 @@ import { useColorScheme } from 'react-native-appearance'
 // import '@firebase/firestore'
 import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 import NeedPost from '../../components/LNB/NeedPost'
-import { setLikes, getUser, pinNeed, unpinNeed } from '../../redux/actions/authActions';
+import { getUser, pinNeed, unpinNeed } from '../../redux/actions/authActions';
 import { deleteNeed } from '../../redux/actions/postsActions'
 import MessageIcon from '../../components/LNB/MessageIcon';
 import MenuAvatar from '../../components/LNB/MenuAvatar'
@@ -221,7 +221,6 @@ const HomeScreen = props => {
         setIsRefreshing(true)
         try {
             await dispatch(fetchNeeds())
-            dispatch(setLikes())
         } catch (err){
             console.log(err)
             setError(err.message)

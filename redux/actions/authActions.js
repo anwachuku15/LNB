@@ -14,7 +14,7 @@ export const SET_ALL_USERS = 'SET_ALL_USERS'
 export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
 export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
-export const SET_LIKES = 'SET_LIKES'
+// export const SET_LIKES = 'SET_LIKES'
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
 export const SET_MESSAGE_NOTIFICATIONS = 'SET_MESSAGE_NOTIFICATIONS'
 export const SET_CONNECT_NOTIFICATIONS = 'SET_CONNECT_NOTIFICATIONS'
@@ -203,99 +203,103 @@ export const login = (email, password) => {
 
 export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements) => {
     return async dispatch => {
-        dispatch({
-            type: SET_USER,
-            credentials: {
-                isAdmin: isAdmin,
-                userId: userId,
-                email: email,
-                displayName: displayName,
-                headline: headline,
-                imageUrl: imageUrl,
-                location: location,
-                bio: bio,
-                website: website
-            },
-            connections: connections,
-            pendingConnections: pendingConnections,
-            outgoingRequests: outgoingRequests,
-            messages: messages,
-            likes: [],
-            notifications: [],
-            connectNotifications: [],
-            messageNotifications: [],
-            lastReadAnnouncements: lastReadAnnouncements
-        })
+        try {
+            dispatch({
+                type: SET_USER,
+                credentials: {
+                    isAdmin: isAdmin,
+                    userId: userId,
+                    email: email,
+                    displayName: displayName,
+                    headline: headline,
+                    imageUrl: imageUrl,
+                    location: location,
+                    bio: bio,
+                    website: website
+                },
+                connections: connections,
+                pendingConnections: pendingConnections,
+                outgoingRequests: outgoingRequests,
+                messages: messages,
+                likes: [],
+                notifications: [],
+                connectNotifications: [],
+                messageNotifications: [],
+                lastReadAnnouncements: lastReadAnnouncements
+            })
+            dispatch(fetchConnections(userId))
+            dispatch(updateOutgoingRequests)
+            dispatch(updateIncomingRequests)
+            dispatch(setNotifications)
+            dispatch(setAnnouncements)
 
-        const requestsListener = db.doc(`/users/${userId}`)
-                                    .get()
-                                    .then(doc => {
-                                        const requestListener = doc.ref.onSnapshot(snapshot => {
-                                            dispatch(updateOutgoingRequests(snapshot.data().outgoingRequests))
-                                            dispatch(updateIncomingRequests(snapshot.data().pendingConnections))
-                                        })
-                                    }).catch(err => console.log(err))
-                                    
-        // const groupChatListener = db.doc(`/users/${userId}`)
-        //                             .get()
-        //                             .then(doc => {
-        //                                 const groupChats = doc.ref.onSnapshot(snapshot => {
-        //                                     dispatch(updateGroupChats(snapshot.data().groupChats))
-        //                                 })
-        //                             }).catch(err => console.log(err))
-        
-        const newConnectionListener = db.collection('connections')
-                                        .where('requestedBy', '==', userId)
-                                        .onSnapshot(snapshot => {
-                                            dispatch(fetchConnections(userId))
-                                        })
-        newConnectionListener
-
-        
-
-        const unreadListener = db.collection('notifications')
-                                .where('recipientId', '==', userId)
-                                .onSnapshot(snapshot => {
-                                    dispatch(setNotifications())
-                                })
-        unreadListener
-
-        const announcementListener = db.collection('announcements')
-                                      .onSnapshot(snapshot => {
-                                          dispatch(setAnnouncements())
-                                      })
-        announcementListener
-
-                
-        let lastReadMessages = []
-        await (await db.collection('chats').get()).docs
-        .forEach(doc => {
-            if (doc.id.includes(userId)) {
-                if (doc.data().lastRead.user1 && doc.data().lastRead.user1.uid === userId) {
-                    lastReadMessages.push({
-                        chatId: doc.id,
-                        uid: doc.data().lastRead.user1.uid,
-                        timestamp: doc.data().lastRead.user1.timestamp
-                    })
-                    dispatch({
-                        type: LAST_READ_TIMESTAMP,
-                        lastReadMessage: lastReadMessages
-                    })
-                } else if (doc.data().lastRead.user2 && doc.data().lastRead.user2.uid === userId) {
-                    lastReadMessages.push({
-                        chatId: doc.id,
-                        uid: doc.data().lastRead.user2.uid,
-                        timestamp: doc.data().lastRead.user2.timestamp
-                    })
-                    dispatch({
-                        type: LAST_READ_TIMESTAMP,
-                        lastReadMessage: lastReadMessages
-                    })
+            
+            let lastReadMessages = []
+            await (await db.collection('chats').get()).docs
+            .forEach(doc => {
+                if (doc.id.includes(userId)) {
+                    if (doc.data().lastRead.user1 && doc.data().lastRead.user1.uid === userId) {
+                        lastReadMessages.push({
+                            chatId: doc.id,
+                            uid: doc.data().lastRead.user1.uid,
+                            timestamp: doc.data().lastRead.user1.timestamp
+                        })
+                        dispatch({
+                            type: LAST_READ_TIMESTAMP,
+                            lastReadMessage: lastReadMessages
+                        })
+                    } else if (doc.data().lastRead.user2 && doc.data().lastRead.user2.uid === userId) {
+                        lastReadMessages.push({
+                            chatId: doc.id,
+                            uid: doc.data().lastRead.user2.uid,
+                            timestamp: doc.data().lastRead.user2.timestamp
+                        })
+                        dispatch({
+                            type: LAST_READ_TIMESTAMP,
+                            lastReadMessage: lastReadMessages
+                        })
+                    }
                 }
-            }
-        })
+            })
+
+            
+
+                    
+            
+        } catch (err) {
+            console.log(err)
+        }
     }
 }
+
+// const newConnectionListener = db.collection('connections')
+//                                             .where('requestedBy', '==', userId)
+//                                             .onSnapshot(snapshot => {
+//                                                 dispatch(fetchConnections(userId))
+//                                             })
+// newConnectionListener
+
+// const requestsListener = db.doc(`/users/${userId}`)
+//                             .get()
+//                             .then(doc => {
+//                                 const requestListener = doc.ref.onSnapshot(snapshot => {
+//                                     dispatch(updateOutgoingRequests(snapshot.data().outgoingRequests))
+//                                     dispatch(updateIncomingRequests(snapshot.data().pendingConnections))
+//                                 })
+//                             }).catch(err => console.log(err))
+
+// const unreadListener = db.collection('notifications')
+//                         .where('recipientId', '==', userId)
+//                         .onSnapshot(snapshot => {
+//                             dispatch(setNotifications())
+//                         })
+// unreadListener
+
+// const announcementListener = db.collection('announcements')
+//                             .onSnapshot(snapshot => {
+//                                 dispatch(setAnnouncements())
+//                             })
+// announcementListener
 
 
 
@@ -869,18 +873,18 @@ export const declineConnect = (authId, selectedUserId, selectedUserName) => {
     }
 }
 
-export const setLikes = () => {
-    return async (dispatch, getState) => {
-        const likes = []
-        await (await db.collection('likes').where('uid', '==', getState().auth.userId).get()).forEach(doc => {
-            likes.push(doc.data())
-        })
-        dispatch({
-            type: SET_LIKES,
-            likes: likes
-        })
-    }
-}
+// export const setLikes = () => {
+//     return async (dispatch, getState) => {
+//         const likes = []
+//         await (await db.collection('likes').where('uid', '==', getState().auth.userId).get()).forEach(doc => {
+//             likes.push(doc.data())
+//         })
+//         dispatch({
+//             type: SET_LIKES,
+//             likes: likes
+//         })
+//     }
+// }
 
 export const setAnnouncements = () => {
     return async (dispatch, getState) => {
@@ -1225,7 +1229,7 @@ export const disconnect = (authId, selectedUserId) => {
             lastReadAnnouncements: authData.lastReadAnnouncements
         })
         dispatch(setNotifications())
-        dispatch(setLikes())
+        // dispatch(setLikes())
         dispatch({
             type: SET_SELECTED_USER,
             selectedUser: {
