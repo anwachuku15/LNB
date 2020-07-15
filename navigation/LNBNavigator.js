@@ -606,11 +606,12 @@ DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
         backgroundColor: background === 'dark' ? 'black' : 'white',
         borderBottomWidth: 0
     }
-    if (index === 0) {
-        headerTitle = 'LNB Directory'
-    } else if (index === 1) {
-        headerTitle = userName
-    }
+    headerTitle = 'LNB Members'
+    // if (index === 0) {
+    //     headerTitle = 'LNB Directory'
+    // } else if (index === 1) {
+    //     headerTitle = userName
+    // }
     return {
         headerStyle,
         headerLeft,
