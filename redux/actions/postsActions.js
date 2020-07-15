@@ -380,6 +380,7 @@ const uploadVideoAsyn = async uri => {
 }
 
 export const likeNeed = (needId) => {
+    // UNHANDLED PROMISE REJECTION
     return async (dispatch, getState) => {
         const userId = getState().auth.userId
         const likeDocument = db
