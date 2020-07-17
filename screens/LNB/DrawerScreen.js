@@ -4,8 +4,10 @@ import {
   Text,
   View,
   Image,
+  ImageBackground,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Dimensions
 } from 'react-native'
 import { Badge, } from 'react-native-elements'
 import Clipboard from '@react-native-community/clipboard'
@@ -16,18 +18,21 @@ import { MaterialCommunityIcons, Ionicons, FontAwesome, AntDesign } from '@expo/
 import Colors from '../../constants/Colors'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotifications } from '../../redux/actions/authActions'
-
+import { LinearGradient } from 'expo-linear-gradient'
 import firebase from 'firebase'
 const db = firebase.firestore()
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_HEIGHT = Dimensions.get('window').height
 
-
-let text
+let text, themeColor
 const DrawerScreen = props => {
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         text = 'white'
+        themeColor = 'black'
     } else {
         text = 'black'
+        themeColor = 'white'
     }
     const uid = useSelector(state => state.auth.userId)
     const user = useSelector(state => state.auth)
@@ -54,24 +59,39 @@ const DrawerScreen = props => {
       (isMounted && 
         <View style={styles.container}>
             <View style={styles.top}>
-              <TouchableOpacity 
-                onPress={() => 
-                  props.navigation.navigate({
-                    routeName: 'UserProfile',
-                    params: {
-                      userId: uid,
-                      name: user.credentials.displayName
-                    }
-                  })
-                }
+              {/* <ImageBackground
+                  source={{uri: user.credentials.imageUrl, cache: 'force-cache'}}
+                  style={[
+                      StyleSheet.absoluteFill, {
+                          width: '100%',
+                          height: '100%',
+                          opacity: 0.4,
+                      },
+                  ]}
+                  blurRadius={10}
               >
-                <Image 
-                    source={{uri: user.credentials.imageUrl}}
-                    style={styles.photo}
-                />
-                <Text style={{...styles.userName, ...{color:text}}}>{user.credentials.displayName}</Text>
-                {/* <Text style={{...styles.userHandle, ...{color:text}}}>Andrew Nwachuku</Text> */}
-              </TouchableOpacity>
+                  <LinearGradient 
+                      colors={['transparent', themeColor,]} 
+                      style={{position: 'absolute', left: 0, right: 0, top: 0, height: '100%' }}
+                  />
+              </ImageBackground> */}
+                <TouchableOpacity 
+                  onPress={() => 
+                    props.navigation.navigate({
+                      routeName: 'UserProfile',
+                      params: {
+                        userId: uid,
+                        name: user.credentials.displayName
+                      }
+                    })
+                  }
+                >
+                  <Image 
+                      source={{uri: user.credentials.imageUrl}}
+                      style={{alignSelf: 'center', marginRight: 30, ...styles.photo}}
+                  />
+                  <Text style={{...styles.userName, color:text, alignSelf: 'center', marginRight: 30}}>{user.credentials.displayName}</Text>
+                </TouchableOpacity>
                 <View>
                     <TouchableOpacity 
                       onPress={() => 
@@ -86,8 +106,8 @@ const DrawerScreen = props => {
                     >
                       <Text style={{...styles.viewProfile, ...{color:Colors.blue}}}>View Profile</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('EditProfile')}>
-                      <Text style={{...styles.editProfile, ...{color:Colors.redcrayola}}}>
+                    <TouchableOpacity onPress={() => props.navigation.navigate('editProfileModal')}>
+                      <Text style={{...styles.editProfile, ...{color:Colors.green}}}>
                         {/* {(user.credentials.headline !== '') || (user.credentials.bio !== '') || (user.credentials.location !== '') ? 
                           'Complete Profile' : 'Edit Profile'
                         } */}
@@ -225,13 +245,14 @@ const styles = StyleSheet.create({
       marginBottom:10
     },
     photo: {
-      width: 50,
-      height: 50,
+      width: 100,
+      height: 100,
       borderRadius: 30,
       marginTop: 20
     },
     userName:{
       marginTop: 15,
+      marginBottom: 10,
       color: "white",
       fontWeight: "bold"
     },
