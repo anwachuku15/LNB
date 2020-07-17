@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { 
     Alert,
     View, 
@@ -10,7 +10,8 @@ import {
     Dimensions,
     TouchableWithoutFeedback,
 } from 'react-native'
-import { Video } from 'expo-av'
+import { Video,  } from 'expo-av'
+import VideoPlayer from 'expo-video-player'
 
 import * as Linking from 'expo-linking'
 import CustomModal from 'react-native-modal'
@@ -22,7 +23,7 @@ import NeedActions from './NeedActions'
 import TouchableCmp from './TouchableCmp'
 import TaggedUserText from './TaggedUserText'
 import Colors from '../../constants/Colors'
-import { Ionicons, AntDesign, FontAwesome, SimpleLineIcons, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons, AntDesign, FontAwesome, SimpleLineIcons, Entypo, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useColorScheme } from 'react-native-appearance'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
@@ -56,7 +57,7 @@ const NeedPost = props => {
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
 
     
-
+    
     const [isModalVisible, setIsModalVisible] = useState(false)
     const [selectedNeed, setSelectedNeed] = useState()
     // const [pinnedNeed, setPinnedNeed] = useState(pinned)
@@ -64,6 +65,8 @@ const NeedPost = props => {
     const [tagged, setTagged] = useState([])
     const [taggedNames, setTaggedNames] = useState([])
     const [taggedUser, setTaggedUser] = useState()
+
+    const videoRef = useRef(null)
 
     const dispatch = useDispatch()
 
@@ -186,6 +189,23 @@ const NeedPost = props => {
     //     }
     // }, [])
 
+    // const playFullscreen = async () => {
+    //     const isMuted = (await videoRef.current.getStatusAsync()).isMuted
+    //     if (isMuted === true) {
+    //         await videoRef.current.setIsMutedAsync(false)
+    //         await videoRef.current.presentFullscreenPlayer()
+    //     } else {
+    //         await videoRef.current.presentFullscreenPlayer()
+    //     }
+    // }
+    const playFullscreen = async () => {
+        console.log('helloasadf')
+    }
+    const logScreenUpdate = async () => {
+        // const isMuted = (await videoRef.current.getStatusAsync()).isMuted
+        // await videoRef.current.playbackObject.setIsMuted
+        // console.log(await video.getStatusAsync())
+    }
 
     return (
         screen === 'UserProfile' && pinned && pinned.id === item.id ? (
@@ -536,16 +556,20 @@ const NeedPost = props => {
                                 />
                             </Lightbox>
                         ) : (
-                            <TouchableWithoutFeedback>
-                                <Video
-                                    source={{uri: item.media.uri}}
-                                    useNativeControls
-                                    rate={1.0}
-                                    volume={1.0}
-                                    isMuted={true}
-                                    style={{...styles.postVideo}}
-                                    resizeMode='cover'
-                                />
+                            <TouchableWithoutFeedback onPress={() => {}}>
+                            <Video
+                                ref={videoRef}
+                                onFullscreenUpdate={() => logScreenUpdate()}
+                                source={{uri: item.media.uri}}
+                                useNativeControls={true}
+                                rate={1.0}
+                                volume={1.0}
+                                isMuted={true}
+                                style={{...styles.postVideo}}
+                                resizeMode='cover'
+                                isLooping
+                                // shouldPlay
+                            />
                             </TouchableWithoutFeedback>
                         )
                     ) : (
@@ -713,8 +737,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     postVideo: {
+        marginTop: 10,
         borderRadius: 10,
-        // alignItems: 'flex-end',
         height: 400,
         width: SCREEN_WIDTH * 0.75
     },
