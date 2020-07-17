@@ -316,19 +316,20 @@ export const fetchConnections = (uid) => {
 
             users.forEach(doc => {
                 allUsers.push({
-                    uid: doc.data().userId,
-                    name: doc.data().displayName,
+                    userId: doc.data().userId,
+                    displayName: doc.data().displayName,
+                    email: doc.data().email,
                     headline: doc.data().headline,
                     location: doc.data().location,
                     bio: doc.data().bio,
                     imageUrl: doc.data().imageUrl,
                     website: doc.data().website,
                     connections: doc.data().connections,
-                    isOnline: doc.data().isOnline,
+                    // isOnline: doc.data().isOnline,
                 })
-                if (doc.data().isOnline === true) {
-                    isOnline.push(doc.data().userId)
-                }
+                // if (doc.data().isOnline === true) {
+                //     isOnline.push(doc.data().userId)
+                // }
 
                 if (userConnectionIds.includes(doc.id)) {
                     userConnections.push({
@@ -340,7 +341,7 @@ export const fetchConnections = (uid) => {
                         imageUrl: doc.data().imageUrl,
                         website: doc.data().website,
                         connections: doc.data().connections,
-                        isOnline: doc.data().isOnline,
+                        // isOnline: doc.data().isOnline,
                     })
                 }
             })
@@ -348,7 +349,7 @@ export const fetchConnections = (uid) => {
             dispatch({
                 type: SET_ALL_USERS,
                 allUsers: allUsers,
-                isOnline: isOnline
+                // isOnline: isOnline
             })
             dispatch({
                 type: SET_CONNECTIONS,
@@ -392,7 +393,7 @@ export const getUser = (userId) => {
 
         if (userData.exists) {
             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, isOnline } = userData.data()
-            // console.log(isConnected)
+            console.log(displayName)
             dispatch({
                 type: SET_SELECTED_USER,
                 selectedUser: {
@@ -407,7 +408,7 @@ export const getUser = (userId) => {
                         bio: bio,
                         website: website
                     },
-                    isOnline: isOnline,
+                    // isOnline: isOnline,
                     connections: connections,
                     pendingConnections: pendingConnections,
                     messages: messages,
@@ -746,7 +747,7 @@ export const confirmConnect = (authId, authName, selectedUserId, selectedUserNam
                     bio: selectedUserData.bio,
                     website: selectedUserData.website
                 },
-                isOnline: selectedUserData.isOnline,
+                // isOnline: selectedUserData.isOnline,
                 connections: selectedUserData.connections + 1,
                 pendingConnections: selectedUserData.pendingConnections,
                 messages: selectedUserData.messages,
@@ -1253,7 +1254,7 @@ export const unrequest = (authId, selectedUserId) => {
                                         bio: bio,
                                         website: website
                                     },
-                                    isOnline: isOnline,
+                                    // isOnline: isOnline,
                                     connections: connections,
                                     pendingConnections: pendingConnections,
                                     messages: messages,
