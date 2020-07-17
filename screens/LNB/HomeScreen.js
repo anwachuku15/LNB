@@ -83,17 +83,17 @@ const HomeScreen = props => {
     const _handleAppStateChange = nextAppState => {
         if ((appState === 'inactive' || 'background') && nextAppState === 'active') {
             console.log('App has come to the foreground')
-            db.doc(`users/${authUser.userId}`).set(
-                {isOnline: true},
-                {merge: true}
-            ).catch(err => console.log(err))
+            // db.doc(`users/${authUser.userId}`).set(
+            //     {isOnline: true},
+            //     {merge: true}
+            // ).catch(err => console.log(err))
         }
         if ((appState === 'active' || 'foreground') && nextAppState === 'inactive') {
             console.log('App is in the background')
-            db.doc(`users/${authUser.userId}`).set(
-                {isOnline: false},
-                {merge: true}
-            ).catch(err => console.log(err))
+            // db.doc(`users/${authUser.userId}`).set(
+            //     {isOnline: false},
+            //     {merge: true}
+            // ).catch(err => console.log(err))
         }
         setAppState(nextAppState)
     }

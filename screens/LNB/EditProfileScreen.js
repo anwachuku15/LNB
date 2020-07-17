@@ -226,9 +226,11 @@ const EditProfileScreen = props => {
             <View style={styles.header}>
                 <HeaderButtons HeaderButtonComponent={HeaderButton}>
                     <Item
-                        title='Direct'
-                        iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
                         onPress={() => {props.navigation.goBack()}}
+                        title='Back'
+                        // iconName={Platform.OS==='android' ? 'md-arrow-back' : 'ios-arrow-back'}
+                        iconName='md-close'
+                        buttonStyle={{marginLeft: 15}}
                     />
                 </HeaderButtons>
                 <Text style={styles.headerTitle}>Edit Profile</Text>

@@ -79,7 +79,7 @@ const MessagesScreen = props => {
     const uid = useSelector(state => state.auth.userId)
     const authImg = useSelector(state => state.auth.credentials.imageUrl)
     const allUsers = useSelector(state => state.auth.allUsers)
-    const isOnline = useSelector(state => state.auth.isOnline)
+    // const isOnline = useSelector(state => state.auth.isOnline)
     const groupChats = useSelector(state => state.auth.groupChats)
     const [chats, setChats] = useState()
     const [isLoading, setIsLoading] = useState(false)

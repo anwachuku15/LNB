@@ -39,4 +39,5 @@ export default {
     lightSearch: '#D5D5D5',
     red: '#FF1D15',
     bluebutton: '#2196F3',
+    darkModal: '#141414'
 }

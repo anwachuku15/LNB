@@ -78,7 +78,7 @@ const NewMessageScreen = props => {
     const updateSearch = (text) => {
         setSearch(text)
         const newResults = allUsers.filter(result => {
-            const resultData = `${result.name.toUpperCase()}`
+            const resultData = `${result.displayName.toUpperCase()}`
             const query = text.toUpperCase()
 
             return resultData.includes(query)
@@ -123,13 +123,13 @@ const NewMessageScreen = props => {
     
 
     const renderItem = ({item}) => (
-        item.uid !== firebase.auth().currentUser.uid &&
+        item.userId !== firebase.auth().currentUser.uid &&
         <TouchableWithoutFeedback
             onPress={() => {
-                if (chatMembersIds.includes(item.uid)) {
-                    removeMember(item.uid, item.name, item.imageUrl)
+                if (chatMembersIds.includes(item.userId)) {
+                    removeMember(item.userId, item.displayName, item.imageUrl)
                 } else {
-                    addMember(item.uid, item.name, item.imageUrl)
+                    addMember(item.userId, item.displayName, item.imageUrl)
                 }
             }}
         >
@@ -149,7 +149,7 @@ const NewMessageScreen = props => {
                     rounded: true
                 }}
                 title={
-                    <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
+                    <Text style={{color:text, fontSize: 16}}>{item.displayName}</Text>
                 }
                 subtitle={
                     <View style={{flexDirection:'column'}}>
@@ -166,7 +166,7 @@ const NewMessageScreen = props => {
                     </View>
                 }
                 rightElement={
-                    chatMembersIds.includes(item.uid) ? (
+                    chatMembersIds.includes(item.userId) ? (
                         <MaterialIcons
                             name='radio-button-checked'
                             color={Colors.blue}
