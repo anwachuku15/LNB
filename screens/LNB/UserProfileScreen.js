@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react'
 import { 
     AppState,
     Platform,
@@ -17,7 +17,8 @@ import {
     TouchableWithoutFeedback,
     Animated,
     Dimensions,
-    MaskedViewIOS
+    MaskedViewIOS,
+    NavigatorIOS as Navigator,
 } from 'react-native'
 // import { SharedElement, SharedElementTransition, nodeFromRef } from 'react-native-shared-element'
 import { SharedElement } from 'react-navigation-shared-element';
@@ -38,6 +39,7 @@ import { Ionicons, MaterialIcons, AntDesign, FontAwesome, SimpleLineIcons, Mater
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
+import BioModal from '../../components/LNB/BioModal'
 import * as firebase from 'firebase'
 import moment from 'moment'
 import * as Linking from 'expo-linking'
@@ -46,6 +48,7 @@ import Hyperlink from 'react-native-hyperlink'
 import PinnedNeed from '../../components/LNB/PinnedNeed'
 
 import NeedPost from '../../components/LNB/NeedPost'
+import UserProfilePictureModal from '../../components/LNB/UserProfilePictureModal';
 
 const db = firebase.firestore()
 
@@ -86,11 +89,13 @@ const UserProfileScreen = props => {
     const [selectedNeed, setSelectedNeed] = useState()
     const [isModalVisible, setIsModalVisible] = useState(false)
     const [showNeedActions, setShowNeedActions] = useState(true)
+    const [isBioVisible, setIsBioVisible] = useState(false)
 
     const dispatch = useDispatch()
 
     const userId = props.navigation.getParam('userId')
-    const user = useSelector(state => state.auth.allUsers.find(user => user.uid === userId))
+    const user = useSelector(state => state.auth.allUsers.find(user => user.userId === userId))
+    // const user = useSelector(state => state.auth.selectedUser)
     const authUser = useSelector(state => state.auth)
     const authId = useSelector(state => state.auth.userId)
     const authName = useSelector(state => state.auth.credentials.displayName)
@@ -111,15 +116,22 @@ const UserProfileScreen = props => {
         setError(null)
         setIsRefreshing(true)
         try {
-            // await dispatch(getUser(userId))
-            console.log(incomingRequests)
-            await dispatch(fetchNeeds())
+            await dispatch(getUser(userId))
         } catch (err) {
             console.log(err)
             setError(err.message)
         }
         setIsRefreshing(false)
     }, [dispatch, setIsLoading, setError])
+
+    // useEffect(() => {
+    //     console.log(user)
+    //     const willFocusSub = props.navigation.addListener('willFocus', loadUser)
+
+    //     return () => {
+    //         willFocusSub.remove()
+    //     }
+    // }, [loadUser])
 
 
     const navToPostDetail = (needId) => {
@@ -139,14 +151,14 @@ const UserProfileScreen = props => {
             <PinnedNeed
                 navToPostDetail={navToPostDetail}
                 pinned={pinned}
-                pinHandler={pinHandler}
+                loadUser={loadUser}
                 unpinHandler={unpinHandler}
                 selectUserHandler={selectUserHandler}
                 selectedNeed={selectedNeed}
                 setSelectedNeed={setSelectedNeed}
                 isModalVisible={isModalVisible}
                 setIsModalVisible={setIsModalVisible}
-                deleteHandler={deleteHandler}
+                // deleteHandler={deleteHandler}
                 commentButtonHandler={commentButtonHandler}
                 showNeedActions={showNeedActions}
             />
@@ -220,36 +232,7 @@ const UserProfileScreen = props => {
         }
     }
 
-    const deleteHandler = (needId) => {
-        Alert.alert('Delete', 'Are you sure?', [
-            {
-                text: 'Cancel',
-                style: 'cancel',
-                onPress: () => {
-                    setIsModalVisible(!isModalVisible)
-                }
-            },
-            {
-                text: 'Delete',
-                style: 'destructive',
-                onPress: async () => {
-                    try {
-                        deleteNeed(needId)
-                        setIsModalVisible(!isModalVisible)
-                        dispatch(fetchNeeds())
-                        // setIsLoading(true)
-                        // loadUser().then(() => {
-                        //     setIsLoading(false)
-                        // })
-                    } catch (err) {
-                        alert(err)
-                        console.log(err)
-                    }
-                    
-                }
-            }
-        ])
-    }
+    
 
     const commentButtonHandler = (needId, userName) => {
         dispatch(getNeed(needId))
@@ -261,6 +244,8 @@ const UserProfileScreen = props => {
             }
         })
     }
+
+    
 
     
 
@@ -323,8 +308,6 @@ const UserProfileScreen = props => {
     }
 
     
-
-    
     
 
     const renderItem = ({item}) => (
@@ -335,6 +318,7 @@ const UserProfileScreen = props => {
                 from={from}
                 screen={screen}
                 pinned={pinned}
+                loadUser={loadUser}
                 pinHandler={pinHandler}
                 unpinHandler={unpinHandler}
                 selectUserHandler={selectUserHandler}
@@ -342,9 +326,9 @@ const UserProfileScreen = props => {
                 setIsDeletable={setIsDeletable}
                 selectedNeed={selectedNeed}
                 setSelectedNeed={setSelectedNeed}
-                isModalVisible={isModalVisible}
-                setIsModalVisible={setIsModalVisible}
-                deleteHandler={deleteHandler}
+                // isModalVisible={isModalVisible}
+                // setIsModalVisible={setIsModalVisible}
+                // deleteHandler={deleteHandler}
                 commentButtonHandler={commentButtonHandler}
                 showNeedActions={showNeedActions}
                 setShowNeedActions={setShowNeedActions}
@@ -391,7 +375,7 @@ const UserProfileScreen = props => {
     const EditProfileButton = () => (
         <View style={{alignSelf:'center'}}>
             <TouchableCmp 
-                onPress={() => {props.navigation.navigate('EditProfile')}} 
+                onPress={() => {props.navigation.navigate('editProfileModal')}} 
                 style={{
                     ...styles.editProfileButton, 
                     marginBottom: 15, 
@@ -421,16 +405,54 @@ const UserProfileScreen = props => {
         </View>
     )
     
-    // let startAncestor, startNode, endAncestor, endNode
-    // const position = new Animated.Value(0)
+    const toggleBioModal = () => {
+        setIsBioVisible(!isBioVisible)
+    }
+
     
+    
+    const LightboxView = ({navigator}) => (
+        <Lightbox
+            navigator={navigator}
+            backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
+            underlayColor='rgba(255, 255, 255, 0.1)'
+            springConfig={{tension: 10, friction: 7,}}
+            renderHeader={(close) => (
+                <TouchableCmp 
+                    onPress={close}
+                    style={styles.closeButton}
+                >
+                    <Ionicons 
+                        name='ios-close'
+                        size={36}
+                        color={Colors.placeholder}
+                    />
+                </TouchableCmp >
+            )}
+            renderContent={() => (
+                <Image 
+                    source={{uri: user.imageUrl, cache: 'force-cache'}}
+                    style={{
+                        alignSelf: 'center',
+                        width: SCREEN_WIDTH - 20, 
+                        height: SCREEN_WIDTH - 20,
+                        borderRadius: (SCREEN_WIDTH - 20) /2,
+                    }}
+                />
+            )}
+        >
+            <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
+        </Lightbox>
+    )
+
 
     return (
         // isMounted &&
         <SafeAreaView style={styles.screen}>
             {user.imageUrl && (
                 <View style={styles.screen}>
-                    
+
+                        
                         <ImageBackground
                             source={{uri: user.imageUrl, cache: 'force-cache'}}
                             style={[
@@ -457,7 +479,7 @@ const UserProfileScreen = props => {
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={() => (
                             <View style={{flex:1, justifyContent:'center', alignItems:'center', paddingTop: 10}}>
-                                <Text style={{color:Colors.placeholder}}>{user.name} hasn't posted any needs.</Text>
+                                <Text style={{color:Colors.placeholder}}>{user.displayName} hasn't posted any needs.</Text>
                             </View>
                         )}
                         renderItem={renderItem}
@@ -470,75 +492,16 @@ const UserProfileScreen = props => {
 
                                         {/* AVATAR, HEADER, LOCATION */}
                                         <View style={{alignItems: 'center', marginBottom: 10}}>
+                                            {/* <UserProfilePictureModal styles={styles} user={user} navigation={props.navigation} /> */}
                                             <View style={styles.avatarContainer}>
-                                                <TouchableCmp onPress={() => props.navigation.push('UserProfilePicture', {uri: user.imageUrl})}>
+                                                <TouchableWithoutFeedback onPress={() => props.navigation.push('UserProfilePicture', {uri: user.imageUrl, user: user})}>
                                                     <SharedElement id={user.imageUrl}>
                                                         <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
                                                     </SharedElement>
-                                                </TouchableCmp>
-                                                {/* <Lightbox
-                                                    backgroundColor={scheme==='dark' ? Colors.darkHeader : Colors.lightHeader}
-                                                    underlayColor='rgba(255, 255, 255, 0.1)'
-                                                    springConfig={{tension: 15, friction: 7}}
-                                                    renderHeader={(close) => (
-                                                        <TouchableCmp 
-                                                            onPress={close}
-                                                            style={styles.closeButton}
-                                                        >
-                                                            <Ionicons 
-                                                                name='ios-close'
-                                                                size={36}
-                                                                color={Colors.placeholder}
-                                                            />
-                                                        </TouchableCmp >
-                                                    )}
-                                                    renderContent={() => (
-                                                        <Image 
-                                                            source={{uri: user.imageUrl, cache: 'force-cache'}}
-                                                            style={{
-                                                                alignSelf: 'center',
-                                                                width: SCREEN_WIDTH - 20, 
-                                                                height: SCREEN_WIDTH - 20,
-                                                                borderRadius: (SCREEN_WIDTH - 20) /2,
-                                                            }}
-                                                        />
-                                                    )}
-                                                >
-                                                    {memoizedProfileAvatar}
-                                                </Lightbox> */}
-
-                                                {/* <View ref={ref => startAncestor = nodeFromRef(ref)}>
-                                                    <SharedElement onNode={node => startNode = node}>
-                                                        <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
-                                                    </SharedElement>
-                                                </View>
-
-                                                <View ref={ref => endAncestor = nodeFromRef(ref)}>
-                                                    <SharedElement onNode={node => endNode = node}>
-                                                        <Image style={styles.avatar} source={{uri: user.imageUrl, cache: 'force-cache'}}/>
-                                                    </SharedElement>
-                                                </View>
-
-                                                <View style={StyleSheet.absoluteFill}>
-                                                    <SharedElementTransition
-                                                        start={{
-                                                        node: startNode,
-                                                        ancestor: startAncestor
-                                                        }}
-                                                        end={{
-                                                        node: endNode,
-                                                        ancestor: endAncestor
-                                                        }}
-                                                        position={position}
-                                                        animation='move'
-                                                        resize='auto'
-                                                        align='auto'
-                                                    />
-                                                </View> */}
-
+                                                </TouchableWithoutFeedback>
                                             </View>
                                             <View style={{flexDirection: 'row', marginTop: 5}}>
-                                                <Text style={{...styles.name, ...{color:text}}}>{user.name}</Text>
+                                                <Text style={{...styles.name, ...{color:text}}}>{user.displayName}</Text>
                                                 {user.website.length > 3 && (
                                                     <View style={{flexDirection: 'row'}}>
                                                         <Text style={{alignSelf:'center', marginHorizontal: 5, color: Colors.placeholder}}>|</Text>
@@ -557,6 +520,8 @@ const UserProfileScreen = props => {
                                                 />
                                                 <Text style={{...styles.infoTitle, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.location}</Text>
                                             </View>}
+                                            
+                                            <BioModal user={user} styles={styles} navigation={props.navigation}/>
                                         </View>
 
 
@@ -579,8 +544,8 @@ const UserProfileScreen = props => {
                                                         )
                                                     }}
                                                 >
-                                                    <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{connections}</Text>
-                                                    <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{connections === 1 ? 'Connection' : 'Connections'}</Text>
+                                                    <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.connections}</Text>
+                                                    <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.connections === 1 ? 'Connection' : 'Connections'}</Text>
                                                 </TouchableCmp>
                                             </View>
                                         </View>
@@ -591,16 +556,16 @@ const UserProfileScreen = props => {
                                             <View>
                                                 <View style={{flexDirection:'row', justifyContent:'space-between', paddingTop: 8, paddingBottom: accept ? 0 : 15}}>
                                                     
-                                                    {outgoingRequests.includes(user.uid) && (
+                                                    {outgoingRequests.includes(user.userId) && (
                                                         <TouchableCmp onPress={() => {unrequestHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.placeholder, }}>
                                                             <Text style={{color:Colors.placeholder, fontSize:14, fontWeight:'bold', alignSelf:'center'}}>Requested</Text>
                                                         </TouchableCmp>
                                                     )}
                                                     {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}
                                                     {userConnectionIds && outgoingRequests && incomingRequests &&
-                                                    !userConnectionIds.includes(user.uid) && 
-                                                    !incomingRequests.includes(user.uid) && 
-                                                    !outgoingRequests.includes(user.uid) && (
+                                                    !userConnectionIds.includes(user.userId) && 
+                                                    !incomingRequests.includes(user.userId) && 
+                                                    !outgoingRequests.includes(user.userId) && (
                                                         <TouchableCmp 
                                                             style={{...styles.connectButton,  backgroundColor: Colors.primary, borderColor: Colors.primary}}
                                                             onPress={async () => {
@@ -611,28 +576,30 @@ const UserProfileScreen = props => {
                                                             <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connect</Text>
                                                         </TouchableCmp>
                                                     )}
-                                                    {userConnectionIds.includes(user.uid) && (
+                                                    {userConnectionIds.includes(user.userId) && (
                                                         <TouchableCmp onPress={() => {disconnectHandler(authUser.userId, userId)}} style={{...styles.connectButton, borderColor: Colors.primary, backgroundColor: 'white'}}>
                                                             <Text style={{color:Colors.primary, fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Connected</Text>
                                                         </TouchableCmp>
                                                     )}
 
                                                     <TouchableCmp
-                                                        onPress={() => {
+                                                        onPress={async () => {
+                                                            await dispatch(getUser(user.userId))
                                                             props.navigation.push(
                                                                 'ChatScreen',
                                                                 {
-                                                                    selectedUserId: userId,
+                                                                    selectedUserId: user.userId,
                                                                     userName: user.displayName,
                                                                     userImage: user.imageUrl
                                                                 }
-                                                        )}}
+                                                            )
+                                                        }}
                                                         style={{...styles.messageButton, backgroundColor: Colors.blue, borderColor: Colors.blue}}
                                                     >
                                                         <Text style={{color:'white', fontSize:14, fontWeight: 'bold', alignSelf:'center'}}>Message</Text>
                                                     </TouchableCmp>
                                                 </View>
-                                                {incomingRequests.includes(user.uid) && (
+                                                {incomingRequests.includes(user.userId) && (
                                                     // dispatch(declineConnect(authUser.userId, userId, user.displayName))
                                                     // dispatch(confirmConnect(authUser.userId, authName, userId, user.displayName))
                                                     <Text style={{width: '40%', paddingBottom: 15, fontSize: 12, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>
@@ -645,26 +612,25 @@ const UserProfileScreen = props => {
                                             <EditProfileButton />
                                         )}
                                         
-                                        {/* EDIT PROFILE, BIO, NEEDCOUNT, CONNECTIONS, LOCATION */}
-                                        {/* <View style={{width:'60%', alignSelf:'flex-start', flex: 1}}>
-                                            
-                                            <View style={{flex: 3}}>
-                                                <Text style={styles.infoTitle}>Bio</Text>
-                                                <Hyperlink
-                                                    linkDefault={true}
-                                                    linkStyle={{color: scheme==='dark' ? Colors.bluesea : Colors.blue}}
-                                                >
-                                                    <Text style={{color:text}}>{user.bio}</Text>
-                                                </Hyperlink>
-                                            </View>
-                                            
-                                        </View> */}
 
                                     </View>
                                 {/* PINNED NEED */}
                                     {pinned && (
                                         <View style={{}}>
-                                            {memoizedPinnedNeed}
+                                            <PinnedNeed
+                                                navToPostDetail={navToPostDetail}
+                                                pinned={pinned}
+                                                loadUser={loadUser}
+                                                unpinHandler={unpinHandler}
+                                                selectUserHandler={selectUserHandler}
+                                                selectedNeed={selectedNeed}
+                                                setSelectedNeed={setSelectedNeed}
+                                                isModalVisible={isModalVisible}
+                                                setIsModalVisible={setIsModalVisible}
+                                                // deleteHandler={deleteHandler}
+                                                commentButtonHandler={commentButtonHandler}
+                                                showNeedActions={showNeedActions}
+                                            />
                                             <View style={{borderWidth:StyleSheet.hairlineWidth, borderColor: Colors.placeholder, }}></View>
                                             <View style={{
                                                 borderBottomWidth: pinned ? 15 : StyleSheet.hairlineWidth, 
@@ -711,7 +677,8 @@ UserProfileScreen.navigationOptions = (navData) => {
         headerStyle: {
             backgroundColor: background === 'dark' ? 'black' : 'white',
         },
-        headerMode: 'screen'
+        // headerTintColor: background === 'dark' ? 'white' : 'black'
+        // headerMode: 'screen'
     }
 }
 
@@ -726,12 +693,34 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    pictureModalView: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: 22,
+        marginBottom: 0,
+        // backgroundColor: 'rgba(0,0,0,0.8)'
+    },
+    pictureModal: {
+        width: Dimensions.get('window').width,
+        borderRadius: 20,
+        paddingBottom: 50,
+        paddingHorizontal: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
     modalView: {
         flex: 1,
         justifyContent: 'flex-end',
         alignItems: 'center',
         marginTop: 22,
-        marginBottom: 0
+        marginBottom: 0,
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     modal: {
@@ -803,6 +792,19 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10, 
         alignSelf: 'center'
+    },
+    bioButton: {
+        alignSelf: 'center',
+        borderColor: Colors.green,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        width: '30%',
+        marginTop: 10,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 10
     },
     connectButton: {
         paddingVertical: 10,

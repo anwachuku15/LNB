@@ -17,7 +17,7 @@ import CustomModal from 'react-native-modal'
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
 import { deleteNeed } from '../../redux/actions/postsActions'
-import { connectReq, unrequest, confirmConnect, declineConnect, disconnect } from '../../redux/actions/authActions'
+import { getUser, connectReq, unrequest, confirmConnect, declineConnect, disconnect } from '../../redux/actions/authActions'
 import NeedActions from './NeedActions'
 import TouchableCmp from './TouchableCmp'
 import TaggedUserText from './TaggedUserText'
@@ -55,6 +55,12 @@ const NeedPost = props => {
     const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
 
+    
+
+    const [isModalVisible, setIsModalVisible] = useState(false)
+    const [selectedNeed, setSelectedNeed] = useState()
+    // const [pinnedNeed, setPinnedNeed] = useState(pinned)
+
     const [tagged, setTagged] = useState([])
     const [taggedNames, setTaggedNames] = useState([])
     const [taggedUser, setTaggedUser] = useState()
@@ -66,14 +72,15 @@ const NeedPost = props => {
         navigation,
         screen,
         pinned, 
+        loadUser,
         pinHandler,
         unpinHandler,
         selectUserHandler,
-        selectedNeed,
-        setSelectedNeed,
-        isModalVisible,
-        setIsModalVisible,
-        deleteHandler,
+        // selectedNeed,
+        // setSelectedNeed,
+        // isModalVisible,
+        // setIsModalVisible,
+        // deleteHandler,
         commentButtonHandler,
         navToPostDetail,
         showNeedActions,
@@ -108,6 +115,37 @@ const NeedPost = props => {
     //     Linking.openURL(url)
     // }
 
+    const deleteHandler = (needId) => {
+        Alert.alert('Delete', 'Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                }
+            },
+            {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        deleteNeed(needId)
+                        setIsModalVisible(!isModalVisible)
+                        dispatch(fetchNeeds())
+                        // setIsLoading(true)
+                        // loadUser().then(() => {
+                        //     setIsLoading(false)
+                        // })
+                    } catch (err) {
+                        alert(err)
+                        console.log(err)
+                    }
+                    
+                }
+            }
+        ])
+    }
+
     const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
             {
@@ -130,6 +168,7 @@ const NeedPost = props => {
     }
 
     
+    
     // useEffect(() => {
     
     //     if (item.imageUrl) {
@@ -146,6 +185,7 @@ const NeedPost = props => {
     //         })
     //     }
     // }, [])
+
 
     return (
         screen === 'UserProfile' && pinned && pinned.id === item.id ? (
@@ -203,7 +243,7 @@ const NeedPost = props => {
                             // animationType='slide' transparent={true} visible={isModalVisible}
                         >
                             <View style={styles.modalView}>
-                                <View style={{...styles.modal, backgroundColor: scheme==='dark' ? '#141414' : 'white'}}>
+                                <View style={{...styles.modal, backgroundColor: scheme==='dark' ? 'rgba(20,20,20,0.92)' : 'white'}}>
                                     <View style={{
                                         alignSelf: 'center',
                                         marginTop: 7,
@@ -213,6 +253,7 @@ const NeedPost = props => {
                                         height: 5,
                                         backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, 
                                     }}/>
+                                    {/* <View style={{backgroundColor: scheme==='dark' ? 'rgba(20,20,20,0.92)' : 'white', borderRadius: 10}}> */}
                                     {userConnectionIds && selectedNeed &&
                                         selectedNeed.uid !== authId &&
                                         !userConnectionIds.includes(selectedNeed.uid) && 
@@ -391,7 +432,7 @@ const NeedPost = props => {
                                             )}
                                         </View>
                                     }
-
+                                    {/* </View> */}
                                     <TouchableCmp
                                         style={{marginTop: 10, backgroundColor: scheme==='dark' ? Colors.darkSearch : Colors.lightSearch, borderRadius: 20, padding: 12}}
                                         onPress={() => {
@@ -543,7 +584,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
         marginTop: 22,
-        marginBottom: 0
+        marginBottom: 0,
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     modal: {

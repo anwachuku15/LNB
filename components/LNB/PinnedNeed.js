@@ -51,7 +51,9 @@ const PinnedNeed = props => {
     const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
 
-    // const [isModalVisible, setIsModalVisible] = useState(false)
+    const [isModalVisible, setIsModalVisible] = useState(false)
+    const [selectedNeed, setSelectedNeed] = useState()
+    // const [pinnedNeed, setPinnedNeed] = useState(pinned)
 
     const dispatch = useDispatch()
 
@@ -60,21 +62,50 @@ const PinnedNeed = props => {
         screen,
         navToPostDetail,
         pinned, 
-        pinHandler,
+        loadUser,
         unpinHandler,
         selectUserHandler,
-        selectedNeed,
-        setSelectedNeed,
-        isModalVisible,
-        setIsModalVisible,
-        deleteHandler,
+        // selectedNeed,
+        // setSelectedNeed,
+        // isModalVisible,
+        // setIsModalVisible,
+        // deleteHandler,
         commentButtonHandler,
         showNeedActions,
         // setShowNeedActions
     } = props
 
     
-
+    const deleteHandler = (needId) => {
+        Alert.alert('Delete', 'Are you sure?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    setIsModalVisible(!isModalVisible)
+                }
+            },
+            {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        deleteNeed(needId)
+                        setIsModalVisible(!isModalVisible)
+                        dispatch(fetchNeeds())
+                        // setIsLoading(true)
+                        // loadUser().then(() => {
+                        //     setIsLoading(false)
+                        // })
+                    } catch (err) {
+                        alert(err)
+                        console.log(err)
+                    }
+                    
+                }
+            }
+        ])
+    }
     const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
             {
@@ -95,6 +126,7 @@ const PinnedNeed = props => {
             }
         ])
     }
+    
 
     
 
@@ -154,6 +186,7 @@ const PinnedNeed = props => {
                             <TouchableCmp 
                                 style={{marginRight: 5}}
                                 onPress={() => {
+                                    console.log(pinned.id)
                                     setSelectedNeed({needId: pinned.id, uid: pinned.uid, userName: pinned.userName})
                                     setIsModalVisible(!isModalVisible)
                                 }}
@@ -171,7 +204,7 @@ const PinnedNeed = props => {
                                 // animationType='slide' transparent={true} visible={isModalVisible}
                             >
                                 <View style={styles.modalView}>
-                                    <View style={{...styles.modal, backgroundColor: scheme==='dark' ? '#141414' : 'white'}}>
+                                    <View style={{...styles.modal, backgroundColor: scheme==='dark' ? Colors.darkModal : 'white'}}>
                                         <View style={{
                                             alignSelf: 'center',
                                             marginTop: 7,
@@ -247,12 +280,8 @@ const PinnedNeed = props => {
                                             <TouchableCmp
                                                 style={{ ...styles.modalButton}}
                                                 onPress={() => {
-                                                    console.log('pin/unpin')
-                                                    if (pinned) {
-                                                        selectedNeed.needId !== pinned.needId ? pinHandler(selectedNeed.needId, selectedNeed.uid) : unpinHandler(selectedNeed.needId)
-                                                    } else {
-                                                        pinHandler(selectedNeed.needId, selectedNeed.uid)
-                                                    }
+                                                    console.log(selectedNeed)
+                                                    unpinHandler(pinned.id)
                                                 }}
                                             >
                                                 <View style={{flexDirection:'row', alignItems: 'center'}}>
@@ -271,7 +300,7 @@ const PinnedNeed = props => {
                                             <TouchableCmp
                                                 style={{ ...styles.modalButton, }}
                                                 onPress={() => {
-                                                    navToPostDetail(selectedNeed.id)
+                                                    navToPostDetail(pinned.id)
                                                     setIsModalVisible(!isModalVisible)
                                                     setSelectedNeed()
                                                 }}
