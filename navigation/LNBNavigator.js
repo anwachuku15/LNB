@@ -856,7 +856,7 @@ const BottomTabStackContainer = createStackNavigator({
         },
     }, {
         tabBarComponent: ThemedBottomBar,
-        // lazy: false,
+        // lazy: true,
         defaultNavigationOptions: {
             tabBarOnPress: ({navigation, defaultHandler}) => {
                 if (navigation.state.key === 'Post') {
