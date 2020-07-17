@@ -45,8 +45,8 @@ const DirectoryListItem = props => {
 
     return (
         <TouchableCmp onPress={async () => {
-            await getUser(item.uid)
-            navToUserProfile(item.uid, item.name)
+            await getUser(item.userId)
+            navToUserProfile(item.userId, item.displayName)
         }}>
             <ListItem
                 containerStyle={{
@@ -70,7 +70,7 @@ const DirectoryListItem = props => {
                     rounded: true
                 }}
                 title={
-                    <Text style={{color:text, fontSize: 16}}>{item.name}</Text>
+                    <Text style={{color:text, fontSize: 16}}>{item.displayName}</Text>
                 }
                 subtitle={
                     <View style={{flexDirection:'column'}}>
@@ -86,13 +86,13 @@ const DirectoryListItem = props => {
                         {item.location.length > 0 && <Text style={{color:Colors.disabled, fontSize:12}}>{item.location}</Text>}
                     </View>
                 }
-                rightElement={item.uid !== authId ? (
+                rightElement={item.userId !== authId ? (
                     <View style={styles.buttonContainer}>
                         {userConnectionIds && outgoingRequests && incomingRequests &&
-                        !userConnectionIds.includes(item.uid) && 
-                        !incomingRequests.includes(item.uid) && 
-                        !outgoingRequests.includes(item.uid) &&
-                        !requestedUsers.includes(item.uid) && (
+                        !userConnectionIds.includes(item.userId) && 
+                        !incomingRequests.includes(item.userId) && 
+                        !outgoingRequests.includes(item.userId) &&
+                        !requestedUsers.includes(item.userId) && (
                             <TouchableCmp
                                 style={styles.connectButton}
                                 onPress={() => {
@@ -102,17 +102,17 @@ const DirectoryListItem = props => {
                                 <Text style={styles.connectText}>Connect</Text>
                             </TouchableCmp>
                         )}
-                        {(outgoingRequests.includes(item.uid) || requestedUsers.includes(item.uid)) && (
+                        {(outgoingRequests.includes(item.userId) || requestedUsers.includes(item.userId)) && (
                             <TouchableCmp
                                 style={styles.requestedButton}
                                 onPress={() => {
-                                    unrequestHandler(authId, item.uid)
+                                    unrequestHandler(authId, item.userId)
                                 }}
                             >
                                 <Text style={styles.requestedText}>Requested</Text>
                             </TouchableCmp>
                         )}
-                        {incomingRequests.includes(item.uid) && (
+                        {incomingRequests.includes(item.userId) && (
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10}}>
                                 <TouchableCmp
                                     style={styles.declineButton}
@@ -139,11 +139,11 @@ const DirectoryListItem = props => {
                                 </TouchableCmp>
                             </View>
                         )}
-                        {(userConnectionIds.includes(item.uid) || connectedUsers.includes(item.uid)) && (
+                        {(userConnectionIds.includes(item.userId) || connectedUsers.includes(item.userId)) && (
                             <TouchableCmp
                                 style={styles.connectedButton}
                                 onPress={() => {
-                                    disconnectHandler(authId, item.uid, item.name)
+                                    disconnectHandler(authId, item.userId, item.displayName)
                                 }}
                             >
                                 <Text style={styles.connectedText}>Connected</Text>
@@ -152,11 +152,11 @@ const DirectoryListItem = props => {
                         <TouchableCmp
                             style={styles.messageButton}
                             onPress={async () => {
-                                await dispatch(getUser(item.uid))
+                                await dispatch(getUser(item.userId))
                                 props.navigation.push(
                                     'ChatScreen', {
-                                        selectedUserId: item.uid,
-                                        userName: item.name,
+                                        selectedUserId: item.userId,
+                                        userName: item.displayName,
                                         userImage: item.imageUrl
                                     }
                                 )
