@@ -33,10 +33,8 @@ let text
 const UserProfilePictureScreen = props => {
     const scheme = useColorScheme()
 
-    const authUser = useSelector(state => state.auth.credentials)
+    const user = props.navigation.getParam('user')
     const uri = props.navigation.getParam('uri')
-    const profilePic = props.navigation.getParam('profilePic')
-    const userId = props.navigation.getParam('userId')
     const dispatch = useDispatch()
     
     const colorScheme = useColorScheme()
@@ -48,7 +46,7 @@ const UserProfilePictureScreen = props => {
         themeColor = 'white'
         text = 'black'
     }
-    
+    console.log(user)
     return (
         <SafeAreaView style={styles.screen}>
             {/* <View style={styles.header}>
@@ -64,6 +62,7 @@ const UserProfilePictureScreen = props => {
                 <SharedElement id={uri}>
                     <Image style={styles.avatar} source={{uri: uri}}/>
                 </SharedElement>
+                {/* <Text style={styles.bio}>{user.bio}</Text> */}
             </View>
         </SafeAreaView>
     )
@@ -106,6 +105,13 @@ const styles = StyleSheet.create({
         width: SCREEN_WIDTH - 20, 
         height: SCREEN_WIDTH - 20,
         borderRadius: (SCREEN_WIDTH - 20) / 2,
+    },
+    bio: {
+        color: 'white', 
+        marginHorizontal: 20, 
+        alignSelf:'center', 
+        marginTop: 10, 
+        fontFamily: 'poppins'
     },
 })
 
