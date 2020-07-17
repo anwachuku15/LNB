@@ -36,6 +36,7 @@ import * as MediaLibrary from 'expo-media-library'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av'
 import VideoPlayer from 'expo-video-player'
+import prettyms from 'pretty-ms'
 
 
 import Fire from '../../Firebase/Firebase'
@@ -337,18 +338,9 @@ const CreatePostScreen = props => {
     })
 
     const mediaItem = ({item}) => {
+        let duration
         if (item.duration) {
-            const duration = moment.duration(3600, 'seconds').seconds()
-            const minutes = Math.floor(3655/60)
-            const formatMinutes = minutes
-            if (minutes >= 60) {
-                const hours = Math.floor(minutes/60)
-                console.log(hours)
-                
-            }
-            const secondsRemaining = Math.floor(3600) % 60
-            const videoDuration = `${formatMinutes}:${secondsRemaining}`
-            // console.log(videoDuration)
+            duration = prettyms(Math.round(item.duration) * 1000, {colonNotation: true,})
         }
         return (
             <TouchableCmp onPress={async () => {
@@ -358,9 +350,9 @@ const CreatePostScreen = props => {
                 Keyboard.dismiss()
             }}>
                 {item.duration ? (
-                    <ImageBackground source={{uri: item.uri}} imageStyle={styles.videoAssetContainer} style={styles.mediaAssetContainer}>
-                        <View style={{}}>
-                            <Text style={{color:'white'}}>{}</Text>
+                    <ImageBackground source={{uri: item.uri}} imageStyle={styles.videoImage} style={styles.videoAssetContainer}>
+                        <View style={{alignSelf: 'flex-end', backgroundColor: 'rgba(120, 120, 120, 0.5)', borderRadius: 5, padding: 2}}>
+                            <Text style={{color:'white', fontSize: 14}}>{duration}</Text>
                         </View>
                     </ImageBackground>
                 ) : (
@@ -593,7 +585,7 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
     },
-    videoAssetContainer: {
+    videoImage: {
         // marginBottom: 10,
         // marginLeft: 10,
         width: 78, 
@@ -602,6 +594,17 @@ const styles = StyleSheet.create({
         // borderWidth: 1, 
         // borderColor: Colors.primary,
         justifyContent: 'flex-end',
+    },
+    videoAssetContainer: {
+        padding: 5,
+        justifyContent: 'flex-end',
+        marginBottom: 10,
+        marginLeft: 10,
+        width: 80, 
+        height: 80, 
+        borderRadius: 10, 
+        borderWidth: 1, 
+        borderColor: Colors.primary,
     },
     mediaAssetContainer: {
         marginBottom: 10,
@@ -676,7 +679,7 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         paddingHorizontal: 5,
         marginBottom: 3,
-        backgroundColor: 'rgba(200, 200, 200, 0.5)',
+        backgroundColor: 'rgba(100, 100, 100, 0.5)',
         borderRadius: 4
     },
     header: {
