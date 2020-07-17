@@ -37,6 +37,7 @@ import { Camera } from 'expo-camera'
 import { Video } from 'expo-av'
 import VideoPlayer from 'expo-video-player'
 
+
 import Fire from '../../Firebase/Firebase'
 import { createNeed } from '../../redux/actions/postsActions'
 import UserPermissions from '../../util/UserPermissions'
@@ -44,6 +45,7 @@ import TouchableCmp from '../../components/LNB/TouchableCmp'
 import CameraModal from '../../components/LNB/CameraModal'
 import Lightbox from 'react-native-lightbox'
 
+import moment from 'moment'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height
@@ -334,16 +336,39 @@ const CreatePostScreen = props => {
         }
     })
 
-    const mediaItem = ({item}) => (
-        <TouchableCmp onPress={async () => {
-            if (item.duration) setMedia({type: 'video', localUri: item.localUri, uri: item.uri, duration: item.duration, width: item.width, height: item.height})
-            else setMedia({type: 'image', uri: item.uri, width: item.width, height: item.height})
-            setMediaScroll(false)
-            Keyboard.dismiss()
-        }}>
-            <Image source={{uri: item.uri}} style={styles.mediaAssetContainer} />
-        </TouchableCmp>
-    )
+    const mediaItem = ({item}) => {
+        if (item.duration) {
+            const duration = moment.duration(3600, 'seconds').seconds()
+            const minutes = Math.floor(3655/60)
+            const formatMinutes = minutes
+            if (minutes >= 60) {
+                const hours = Math.floor(minutes/60)
+                console.log(hours)
+                
+            }
+            const secondsRemaining = Math.floor(3600) % 60
+            const videoDuration = `${formatMinutes}:${secondsRemaining}`
+            // console.log(videoDuration)
+        }
+        return (
+            <TouchableCmp onPress={async () => {
+                if (item.duration) setMedia({type: 'video', localUri: item.localUri, uri: item.uri, duration: item.duration, width: item.width, height: item.height})
+                else setMedia({type: 'image', uri: item.uri, width: item.width, height: item.height})
+                setMediaScroll(false)
+                Keyboard.dismiss()
+            }}>
+                {item.duration ? (
+                    <ImageBackground source={{uri: item.uri}} imageStyle={styles.videoAssetContainer} style={styles.mediaAssetContainer}>
+                        <View style={{}}>
+                            <Text style={{color:'white'}}>{}</Text>
+                        </View>
+                    </ImageBackground>
+                ) : (
+                    <Image source={{uri: item.uri}} style={styles.mediaAssetContainer} />
+                )
+                }
+            </TouchableCmp>
+    )}
 
 
     return (
@@ -445,7 +470,7 @@ const CreatePostScreen = props => {
                                     rate={1.0}
                                     volume={1.0}
                                     isMuted={true}
-                                    style={{aspectRatio: media.width/media.height, width: '90%', ...styles.video}}
+                                    style={{aspectRatio: media.width/media.height, width: '90%', ...styles.video,}}
                                 />
                                 <TouchableCmp 
                                     style={styles.removeVideoButton}
@@ -568,6 +593,16 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
     },
+    videoAssetContainer: {
+        // marginBottom: 10,
+        // marginLeft: 10,
+        width: 78, 
+        height: 78, 
+        borderRadius: 10, 
+        // borderWidth: 1, 
+        // borderColor: Colors.primary,
+        justifyContent: 'flex-end',
+    },
     mediaAssetContainer: {
         marginBottom: 10,
         marginLeft: 10,
@@ -641,7 +676,7 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         paddingHorizontal: 5,
         marginBottom: 3,
-        backgroundColor: 'rgba(0,0,0,0.4)',
+        backgroundColor: 'rgba(200, 200, 200, 0.5)',
         borderRadius: 4
     },
     header: {
