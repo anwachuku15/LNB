@@ -435,9 +435,12 @@ const ThemedBottomBar = props => {
         <BottomTabBar
             {...props}
             activeTintColor={Colors.primary}
+            activeTintColor={isUserProfilePicture ? Colors.socialdark : Colors.primary}
+            inactiveTintColor={isUserProfilePicture ? Colors.socialdark : '#8e8e93'}
             style={{
                 backgroundColor: isUserProfilePicture ? Colors.socialdark : theme,
-                borderTopColor: isUserProfilePicture ? Colors.socialdark : '#A7A7AA'
+                borderTopColor: isUserProfilePicture ? Colors.socialdark : theme,
+                // bottom: isUserProfilePicture && -500
             }}
             keyboardHidesTabBar={false}
             showLabel={false}
@@ -582,7 +585,6 @@ const DirectoryTabButton = createMaterialTopTabNavigator({
 })
 
 DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
-    console.log('DIRECTORY TAB FOCUSED')
     const index = navigation.state.index
     const userName = screenProps.authUser.displayName
     const background = screenProps.theme
@@ -626,11 +628,18 @@ const BottomTabStackContainer = createStackNavigator({
         Home: {
             screen: HomeStack,
             navigationOptions: {
+                // tabBarOnPress: ({navigation, defaultHandler}) => {
+                //     if (navigation.state.routes[0].index > 0) {
+                //         navigation.dispatch(StackActions.popToTop())
+                //     }
+                //     defaultHandler()
+                // },
                 tabBarOnPress: ({navigation, defaultHandler}) => {
-                    if (navigation.state.routes[0].index > 0) {
-                        navigation.dispatch(StackActions.popToTop())
+                    if (isUserProfilePicture) {
+                        null
+                    } else {
+                        defaultHandler()
                     }
-                    defaultHandler()
                 },
                 tabBarIcon: (tabInfo) => {
                     return (
@@ -650,6 +659,13 @@ const BottomTabStackContainer = createStackNavigator({
         Announcements: {
             screen: AnnouncementsStack,
             navigationOptions: {
+                tabBarOnPress: ({navigation, defaultHandler}) => {
+                    if (isUserProfilePicture) {
+                        null
+                    } else {
+                        defaultHandler()
+                    }
+                },
                 tabBarLabel: 'Announcements',
                 tabBarIcon: (tabInfo) => {
                     return (
@@ -718,6 +734,13 @@ const BottomTabStackContainer = createStackNavigator({
         CreatePost: {
             screen: CreatePostScreen,
             navigationOptions: {
+                tabBarOnPress: ({navigation, defaultHandler}) => {
+                    if (isUserProfilePicture) {
+                        null
+                    } else {
+                        defaultHandler()
+                    }
+                },
                 tabBarButtonComponent: ({style}) => {
                     return (
                         <View style={{shadowColor: 'black', shadowRadius: 5, shadowOffset: {height: 5}, shadowOpacity: 0.3, ...postButtonStyle}}>
@@ -774,6 +797,13 @@ const BottomTabStackContainer = createStackNavigator({
                 }
             }),
             navigationOptions: {
+                tabBarOnPress: ({navigation, defaultHandler}) => {
+                    if (isUserProfilePicture) {
+                        null
+                    } else {
+                        defaultHandler()
+                    }
+                },
                 tabBarIcon: (tabInfo) => {
                     return (
                         <FontAwesome5
@@ -802,6 +832,13 @@ const BottomTabStackContainer = createStackNavigator({
         Shop: {
             screen: ShopStack,
             navigationOptions: {
+                tabBarOnPress: ({navigation, defaultHandler}) => {
+                    if (isUserProfilePicture) {
+                        null
+                    } else {
+                        defaultHandler()
+                    }
+                },
                 tabBarIcon: (tabInfo) => {
                     return (
                         <Feather 
@@ -888,6 +925,9 @@ const BottomTabStackContainer = createStackNavigator({
     },
     profilePicModal: {
         screen: UserProfilePictureScreen
+    },
+    editProfileModal: {
+        screen: EditProfileScreen
     }
 }, {
     mode: 'modal',
@@ -1061,13 +1101,24 @@ const DrawerNav = createDrawerNavigator({
     }
 })
 
+MainStack.navigationOptions = ({navigation}) => {
+    const routes = navigation.state.routes
+    const currentRouteName = routes[routes.length-1].routeName
+    
+    if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
+        // console.log(currentRouteName)
+        isUserProfilePicture = true
+    } else {
+        isUserProfilePicture = false
+    }
+}
 
 HomeStack.navigationOptions = ({navigation}) => {
     let tabBarVisible = true
     const routes = navigation.state.routes[0].routes
     const currentRouteName = routes[routes.length-1].routeName
    
-    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
+    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture' || currentRouteName === 'ChatScreen' || currentRouteName === 'GroupChatScreen')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         needY = 500
         announcementY = 500
@@ -1093,16 +1144,13 @@ HomeStack.navigationOptions = ({navigation}) => {
     } else {
         isUserProfilePicture = false
     }
-    // if (navigation.isFocused() && currentRouteName === 'UserProfilePicture') {
-    //     !isUserProfilePicture
-    // }
 }
 
 AnnouncementsStack.navigationOptions = ({navigation}) => {
     const routes = navigation.state.routes
     const currentRouteName = routes[routes.length-1].routeName
     
-    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
+    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture' || currentRouteName ===  'ChatScreen' || currentRouteName === 'GroupChatScreen')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         needY = 500
         announcementY = 500
@@ -1126,7 +1174,7 @@ AnnouncementsStack.navigationOptions = ({navigation}) => {
 NotificationsStack.navigationOptions = ({navigation}) => {
     const routes = navigation.state.routes
     const currentRouteName = routes[routes.length-1].routeName
-    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture')) {
+    if (navigation.isFocused() && (currentRouteName === 'PostDetail' || currentRouteName === 'UserProfilePicture' || currentRouteName === 'ChatScreen' || currentRouteName === 'GroupChatScreen')) {
         postButtonStyle = {alignItems: 'center', bottom: -500, left: SCREEN_WIDTH*0.48}
         needY = 500
         announcementY = 500
@@ -1206,7 +1254,7 @@ const SwipeTabNavigator = createMaterialTopTabNavigator({
 }, {
     tabBarOptions: {
         style: {height: 0},
-    }
+    },
 })
 
 
