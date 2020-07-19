@@ -6,14 +6,30 @@ import * as MediaLibrary from 'expo-media-library'
 class UserPermissions {
     getCameraPermission = async () => {
         if (Constants.platform.ios) {
-            const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-            
+            const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+
             if (status != 'granted') {
-                alert('We need permssion to access your cameral roll')
+                alert('We need permssion to access your camera roll')
             }
         }
     }
     
+    getUseCameraPermission = async () => {
+        if (Constants.platform.ios) {
+            const { status } = await Permissions.askAsync(Permissions.CAMERA)
+
+            if (status != 'granted') {
+                alert('We need permission to access your camera roll')
+            }
+        }
+    }
+
+    // getAudioPermission = async () => {
+    //     if (Constants.platform.ios) {
+    //         const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING)
+
+    //     }
+    // }
   
 
     getMediaLibraryPermission = async () => {
@@ -24,6 +40,8 @@ class UserPermissions {
             }
         }
     }
+
+
     // MEDIA LIBRARY METHODS FOR THE FUTURE...
     // saveToLibaryAsync(localUri)
 }
