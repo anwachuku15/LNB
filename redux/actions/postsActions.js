@@ -57,6 +57,7 @@ export const createNeed = (userName, body, media, taggedUsers) => {
         const timestamp = moment(Date.now()).toISOString()
         if (media !== '') {
             if (media.uri) {
+                // console.log('dispatch reached')
                 remoteUri = 
                     media.type === 'video' 
                     ? await uploadVideoAsyn(media.localUri) 
@@ -363,7 +364,8 @@ const uploadVideoAsyn = async uri => {
         const response = await fetch(uri)
         const file = await response.blob()
         let upload = firebase.storage().ref(path).put(file)
-
+        // console.log(uri)
+        // console.log(upload)
         upload.on(
             'state_changed', 
             snapshot => {}, 
