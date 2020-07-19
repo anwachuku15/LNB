@@ -58,6 +58,7 @@ const HomeScreen = props => {
     // let uid = firebase.auth().currentUser.uid
 
     
+// TODO: MEMOIZE IMAGES for create/delete post state updates
 
 
     const scheme = useColorScheme()
