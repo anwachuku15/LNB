@@ -59,7 +59,7 @@ const BASE_PADDING = 10
 let themeColor
 let text, pinnedMargin
 
-
+// TODO: MEMOIZE IMAGES for create/delete post state updates
 const UserProfileScreen = props => {
     const scheme = useColorScheme()
     if (scheme === 'dark') {
@@ -116,8 +116,7 @@ const UserProfileScreen = props => {
         setError(null)
         setIsRefreshing(true)
         try {
-            await dispatch(getUser(userId))
-            await dispatch(fetchNeeds())
+            dispatch(getUser(userId))
         } catch (err) {
             console.log(err)
             setError(err.message)
@@ -125,14 +124,25 @@ const UserProfileScreen = props => {
         setIsRefreshing(false)
     }, [dispatch, setIsLoading, setError])
 
-    // useEffect(() => {
-    //     console.log(user)
-    //     const willFocusSub = props.navigation.addListener('willFocus', loadUser)
+    const loadNeeds = useCallback(async () => {
+        setError(null)
+        setIsRefreshing(true)
+        try {
+            dispatch(fetchNeeds())
+        } catch (err) {
+            console.log(err)
+            setError(err.message)
+        }
+        setIsRefreshing(false)
+    }, [dispatch, setIsRefreshing, setError])
 
-    //     return () => {
-    //         willFocusSub.remove()
-    //     }
-    // }, [loadUser])
+    useEffect(() => {
+        const willFocusSub = props.navigation.addListener('willFocus', loadNeeds)
+
+        return () => {
+            willFocusSub.remove()
+        }
+    }, [loadNeeds])
 
 
     const navToPostDetail = (needId) => {
@@ -320,6 +330,7 @@ const UserProfileScreen = props => {
                 screen={screen}
                 pinned={pinned}
                 loadUser={loadUser}
+                loadNeeds={loadNeeds}
                 pinHandler={pinHandler}
                 unpinHandler={unpinHandler}
                 selectUserHandler={selectUserHandler}
