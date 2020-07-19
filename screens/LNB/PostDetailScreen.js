@@ -169,6 +169,14 @@ const PostDetailScreen = props => {
         )
     }
 
+    if (!need) {
+        return (
+            <View style={styles.spinner}>
+                <Text>This post might have been deleted</Text>
+            </View>
+        )
+    }
+
 
     const selectUserHandler = (userId, userName) => {
         if (from === 'HomeScreen' || from === 'NotificationsScreen') {
