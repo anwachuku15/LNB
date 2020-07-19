@@ -236,15 +236,17 @@ const CreatePostScreen = props => {
     }
 
     const useCamera = async () => {
-        // UserPermissions.getCameraPermission()
+        UserPermissions.getCameraPermission()
+        UserPermissions.getUseCameraPermission()
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
         })
         if (!result.cancelled) {
             if (result.type === 'image') setMedia({type: 'image', uri: result.uri, width: result.width, height: result.height})
-            else if (result.type === 'video') setMedia({type: 'video', uri: result.uri, duration: result.duration, width: result.width, height: result.height})
+            else if (result.type === 'video') setMedia({type: 'video', localUri: result.uri, uri: result.uri, duration: result.duration, width: result.width, height: result.height})
         }
     }
+    
     
 
     const handlePost = async (userName, body, media) => {
@@ -344,7 +346,9 @@ const CreatePostScreen = props => {
         }
         return (
             <TouchableCmp onPress={async () => {
-                if (item.duration) setMedia({type: 'video', localUri: item.localUri, uri: item.uri, duration: item.duration, width: item.width, height: item.height})
+                if (item.duration) {
+                    setMedia({type: 'video', localUri: item.localUri, uri: item.uri, duration: item.duration, width: item.width, height: item.height})
+                }
                 else setMedia({type: 'image', uri: item.uri, width: item.width, height: item.height})
                 setMediaScroll(false)
                 Keyboard.dismiss()
