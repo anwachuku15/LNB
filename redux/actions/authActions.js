@@ -393,7 +393,7 @@ export const getUser = (userId) => {
 
         if (userData.exists) {
             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, messages, isAdmin, isOnline } = userData.data()
-            console.log(displayName)
+            // console.log(displayName)
             dispatch({
                 type: SET_SELECTED_USER,
                 selectedUser: {
