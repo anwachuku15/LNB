@@ -76,6 +76,7 @@ const NeedPost = props => {
         screen,
         pinned, 
         loadUser,
+        loadNeeds,
         pinHandler,
         unpinHandler,
         selectUserHandler,
@@ -83,7 +84,7 @@ const NeedPost = props => {
         // setSelectedNeed,
         // isModalVisible,
         // setIsModalVisible,
-        // deleteHandler,
+        deleteHandler,
         commentButtonHandler,
         navToPostDetail,
         showNeedActions,
@@ -118,7 +119,8 @@ const NeedPost = props => {
     //     Linking.openURL(url)
     // }
 
-    const deleteHandler = (needId) => {
+    // ISSUE ON DELETE
+    const deletePostHandler = (needId) => {
         Alert.alert('Delete', 'Are you sure?', [
             {
                 text: 'Cancel',
@@ -134,11 +136,8 @@ const NeedPost = props => {
                     try {
                         deleteNeed(needId)
                         setIsModalVisible(!isModalVisible)
-                        dispatch(fetchNeeds())
-                        // setIsLoading(true)
-                        // loadUser().then(() => {
-                        //     setIsLoading(false)
-                        // })
+                        // dispatch(fetchNeeds())
+                        loadNeeds()
                     } catch (err) {
                         alert(err)
                         console.log(err)
@@ -148,6 +147,7 @@ const NeedPost = props => {
             }
         ])
     }
+    
 
     const disconnectHandler = (authId, selectedUserId, selectedUserName) => {
         Alert.alert('Disconnect', 'Are you sure you want to disconnect with ' + selectedUserName + '?', [
@@ -319,7 +319,7 @@ const NeedPost = props => {
                                         <TouchableCmp
                                             style={styles.modalButton}
                                             onPress={() => {
-                                                deleteHandler(selectedNeed.needId)
+                                                screen === 'UserProfile' ? deletePostHandler(selectedNeed.needId) : deleteHandler(selectedNeed.needId)
                                             }}
                                         >
                                             <View style={{flexDirection:'row', alignItems: 'center', marginLeft: 5}}>
