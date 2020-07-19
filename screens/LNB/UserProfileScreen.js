@@ -117,6 +117,7 @@ const UserProfileScreen = props => {
         setIsRefreshing(true)
         try {
             await dispatch(getUser(userId))
+            await dispatch(fetchNeeds())
         } catch (err) {
             console.log(err)
             setError(err.message)
@@ -267,10 +268,10 @@ const UserProfileScreen = props => {
                     pinNeed(needId, uid)
                     await setPinnedNeed(pinned)
                     setIsModalVisible(!isModalVisible)
-                    setTimeout(() => {
-                        loadUser().catch(err => console.log(err))
-                    }, 500) 
+                    loadUser().catch(err => console.log(err))
+                    // setTimeout(() => {
                         
+                    // }, 500) 
                 }
             }
         ])
