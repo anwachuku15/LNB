@@ -14,6 +14,7 @@ export const SET_ALL_USERS = 'SET_ALL_USERS'
 export const SET_SELECTED_USER = 'SET_SELECTED_USER'
 export const SET_PENDING_CONNECTIONS = 'SET_PENDING_CONNECTIONS'
 export const SET_NEW_CONNECTION = 'SET_NEW_CONNECTION'
+export const SET_USER_CONNECTIONS = 'SET_USER_CONNECTIONS'
 // export const SET_LIKES = 'SET_LIKES'
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS'
 export const SET_MESSAGE_NOTIFICATIONS = 'SET_MESSAGE_NOTIFICATIONS'
@@ -295,6 +296,43 @@ export const getAuthenticatedUser = (userId, email, displayName, headline, image
 
 
 
+export const fetchUserConnections = (uid) => {
+    return async (dispatch, getState) => {
+        try {
+            let selectedUserConnectionIds = []
+            let selectedUserConnections = []
+
+            const allConnections = await db.collection('connections').get()
+            const users = await db.collection('users').get()
+            allConnections.forEach(doc => {
+                if (doc.id.includes(uid)) {
+                    let userId = doc.id.replace(uid, '')
+                    selectedUserConnectionIds.push(userId)
+                }
+            })
+
+            users.forEach(doc => {
+                if (selectedUserConnectionIds.includes(doc.id)) {
+                    selectedUserConnections.push({
+                        uid: doc.id,
+                        name: doc.data().displayName,
+                        imageUrl: doc.data().imageUrl,
+                        headline: doc.data().headline,
+                        location: doc.data().location,
+                    })
+                }
+            })
+            
+            dispatch({
+                type: SET_USER_CONNECTIONS,
+                selectedUserConnections: selectedUserConnections
+            })
+
+        } catch (err) {
+            console.log(err)
+        }
+    }
+}
 
 
 

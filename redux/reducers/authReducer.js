@@ -7,6 +7,7 @@ import {
     SET_SELECTED_USER, 
     SET_PENDING_CONNECTIONS, 
     SET_NEW_CONNECTION, 
+    SET_USER_CONNECTIONS,
     // SET_LIKES, 
     SET_NOTIFICATIONS, 
     SET_MESSAGE_NOTIFICATIONS,
@@ -151,6 +152,12 @@ export default (state = initialState, action) => {
                 ...state,
                 userConnections: action.userConnections,
                 userConnectionIds: action.userConnectionIds
+            }
+        }
+        case SET_USER_CONNECTIONS: {
+            return {
+                ...state,
+                selectedUserConnections: action.selectedUserConnections
             }
         }
         case LAST_READ_TIMESTAMP: {

@@ -30,7 +30,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
-import { logout, getUser, connectReq, unrequest, disconnect, confirmConnect, declineConnect } from '../../redux/actions/authActions'
+import { logout, getUser, fetchUserConnections, connectReq, unrequest, disconnect, confirmConnect, declineConnect } from '../../redux/actions/authActions'
 import { fetchNeeds, getNeed, deleteNeed } from '../../redux/actions/postsActions'
 
 import Colors from '../../constants/Colors'
@@ -457,6 +457,20 @@ const UserProfileScreen = props => {
         </Lightbox>
     )
 
+    const navToConnections = async (userId) => {
+        if (authId === userId) {
+            props.navigatoin.push('Connections')
+        } else {
+            await dispatch(fetchUserConnections(userId))
+            props.navigation.push(
+                'Connections', {
+                    userId: userId,
+                    userName: user.displayName
+                }
+            )
+        }
+    }
+
 
     return (
         // isMounted &&
@@ -547,14 +561,7 @@ const UserProfileScreen = props => {
                                             <View style={{alignItems:'center'}}>
                                                 <TouchableCmp
                                                     style={{alignItems:'center'}} 
-                                                    onPress={() => {
-                                                        props.navigation.push(
-                                                            'Connections', {
-                                                                userId: userId,
-                                                                userName: user.displayName
-                                                            }
-                                                        )
-                                                    }}
+                                                    onPress={async () => navToConnections(userId)}
                                                 >
                                                     <Text style={{...styles.infoValue, color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.connections}</Text>
                                                     <Text style={{...styles.infoTitle, fontWeight: 'bold', color: scheme==='dark' ? Colors.disabled : Colors.darkSearch}}>{user.connections === 1 ? 'Connection' : 'Connections'}</Text>

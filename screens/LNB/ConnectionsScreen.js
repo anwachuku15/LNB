@@ -57,7 +57,10 @@ const ConnectionsScreen = props => {
     const auth = useSelector(state => state.auth)
     const userId = props.navigation.getParam('userId') ? props.navigation.getParam('userId') : auth.userId
     const userName = props.navigation.getParam('userName') ? props.navigation.getParam('userName') : auth.credentials.displayName
-    const userConnections = useSelector(state => state.auth.userConnections)
+    const userConnections = 
+            userId === auth.userId 
+            ? useSelector(state => state.auth.userConnections) 
+            : useSelector(state => state.auth.selectedUserConnections)
 
     
     const [search, setSearch] = useState('')
@@ -65,22 +68,7 @@ const ConnectionsScreen = props => {
 
     const searchInput = useRef(null)
     
-    // const loadConnections = useCallback(async () => {
-    //     try {
-    //         await dispatch(fetchConnections(userId))
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }, [dispatch])
-
-    // useEffect(() => {
-    //     const willFocusSub = props.navigation.addListener(
-    //         'willFocus', loadConnections
-    //     )
-    //     return () => {
-    //         willFocusSub.remove()
-    //     }
-    // }, [dispatch, loadConnections])
+    console.log(userConnections)
 
 
     const updateSearch = (text) => {
