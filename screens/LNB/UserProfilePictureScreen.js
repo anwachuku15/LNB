@@ -46,7 +46,6 @@ const UserProfilePictureScreen = props => {
         themeColor = 'white'
         text = 'black'
     }
-    console.log(user)
     return (
         <SafeAreaView style={styles.screen}>
             {/* <View style={styles.header}>
@@ -78,9 +77,6 @@ UserProfilePictureScreen.sharedElements = (navigation, otherNavigation, showing)
 }
 
 UserProfilePictureScreen.navigationOptions = (navData) => {
-    // console.log('-----')
-    // console.log(navData)
-    // console.log('-----\n')
     return {
         headerLeft: () => (
             <HeaderButtons HeaderButtonComponent={HeaderClose}>
