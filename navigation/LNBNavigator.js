@@ -608,7 +608,7 @@ DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
         backgroundColor: background === 'dark' ? 'black' : 'white',
         borderBottomWidth: 0
     }
-    headerTitle = 'LNB Members'
+    headerTitle = 'LNB Directory'
     // if (index === 0) {
     //     headerTitle = 'LNB Directory'
     // } else if (index === 1) {
