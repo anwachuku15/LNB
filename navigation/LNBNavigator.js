@@ -19,6 +19,7 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 import Colors from '../constants/Colors'
 import HomeScreen from '../screens/LNB/HomeScreen'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign, FontAwesome5 } from '@expo/vector-icons'
+import RegisterScreen from '../screens/user/RegisterScreen'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
 import AnnouncementsScreen from '../screens/LNB/AnnouncementsScreen'
@@ -1270,7 +1271,8 @@ MessagesStack.navigationOptions = ({navigation}) => {
 
 
 const AuthNavigator = createStackNavigator({
-    Auth: AuthScreen
+    // Auth: AuthScreen
+    Auth: RegisterScreen
 }, {
     defaultNavigationOptions: defaultNavOptions
 })
