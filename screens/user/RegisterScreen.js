@@ -12,13 +12,22 @@ import {
     KeyboardAvoidingView, 
     StyleSheet, 
     Button, 
-    ActivityIndicator
+    ActivityIndicator,
+    Dimensions,
 } from 'react-native'
+import { Formik, Form, Field, useFormik } from 'formik'
+import { handleTextInput, withNextInputAutoFocusInput, withNextInputAutoFocusForm } from 'react-native-formik'
+import { TextField, OutlinedTextField, FilledTextField } from 'react-native-material-textfield'
+import * as Yup from 'yup'
+import { compose } from 'recompose'
+import Hide from 'react-native-hide-with-keyboard'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
+
 
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { signup, login, logout } from '../../redux/actions/authActions'
+import { signup, login, logout, updateProfile } from '../../redux/actions/authActions'
 
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 
@@ -34,18 +43,93 @@ import * as ImagePicker from 'expo-image-picker'
 
 
 
+const validationSchema = Yup.object().shape({
+    email: Yup.string().required('Please enter a valid email').email('Please enter a valid email'),
+    password: Yup.string().required('Password must be at least 8 characters').min(8, 'Password must be at least 8 characters'),
+    firstName: Yup.string().required('Please enter your first name').min(2, 'Must be longer than 2 characters').max(30, 'This seems a little too long...'),
+    lastName: Yup.string().required('Please enter your last name').min(2, 'Must be longer than 2 characters').max(30, 'This seems a little too long...'),
+    headline: Yup.string().required('Please enter your headline or job title').min(3, 'Headline must be at least 3 characters').max(30, 'Try keeping your headline under 30 characters'),
+    location: Yup.string().required('Please enter your location').min(2, 'Location should be at least 2 characters').max(30, 'Try shortening your location to under 30 characters'),
+    bio: Yup.string().required('Please provide a short bio').min(6, 'Your bio should be at least 6 characters long').max(150, 'Try shortening your bio to 150 characters at most'),
+    link: Yup.string().notRequired(),
+})
 
-let text
+const initialValues = {
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    headline: '',
+    location: '',
+    bio: '',
+    link: '',
+}
+
+const SCREEN_WIDTH = Dimensions.get('screen').width
+let text, color
 const RegisterScreen = props => {
     
     const scheme = useColorScheme()
+    if (scheme === 'dark') {
+        color = 'white'
+    } else {
+        color = 'black'
+    }
+    
+
+    const MyInput = compose(
+        handleTextInput,
+        withNextInputAutoFocusInput
+    )(TextField)
+
+    const Form = withNextInputAutoFocusForm(View)
+
+    const authHandler = async (values) => {
+        
+    }  
 
     return (
         <View style={styles.screen}>
-            
+            <Formik
+                onSubmit={values => console.log(values)}
+                validationSchema={validationSchema}
+                initialValues={initialValues}
+            >
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => 
+                    <Form style={{width: SCREEN_WIDTH*0.5,}}>
+                        <MyInput 
+                            label='Location' 
+                            name='location' 
+                            type='location' 
+                            tintColor={Colors.primary} 
+                            containerStyle={{marginVertical: 10}} 
+                        />
+                        <MyInput 
+                            label='Bio' 
+                            name='bio' 
+                            type='name' tintColor={Colors.primary} 
+                            containerStyle={{marginVertical: 10}} 
+                            multiline
+                            characterRestriction={150}
+                            maxLength={150}
+                        />
+                        <MyInput 
+                            label='Link (optional)' 
+                            name='link' 
+                            type='name' 
+                            tintColor={Colors.primary} 
+                            containerStyle={{marginVertical: 10}}
+                            autoCapitalize='none'
+                        />
+                        
+                        <Button onPress={handleSubmit} title='Sign Up' />
+                    </Form>
+                }
+            </Formik>
         </View>
     )
 }
+
 
 RegisterScreen.navigationOptions = {
     headerTitle: 'Leave Normal Behind'
@@ -117,7 +201,10 @@ const styles2 = StyleSheet.create({
       borderBottomWidth: StyleSheet.hairlineWidth,
       height: 40,
       fontSize: 15,
-      color: text
+      width: 40,
+    },
+    textField: {
+        marginVertical: 30
     },
     button: {
         marginHorizontal: 30,
