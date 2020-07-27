@@ -1,50 +1,38 @@
-import React, { useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { 
-    AppState,
     Platform,
     SafeAreaView,
-    TouchableOpacity,
     View, 
     Text, 
     StyleSheet, 
     Image, 
     ImageBackground,
     Button, 
-    ScrollView,
     FlatList,
     ActivityIndicator,
     Alert,
     TouchableWithoutFeedback,
-    Animated,
     Dimensions,
-    MaskedViewIOS,
-    NavigatorIOS as Navigator,
 } from 'react-native'
-// import { SharedElement, SharedElementTransition, nodeFromRef } from 'react-native-shared-element'
 import { SharedElement } from 'react-navigation-shared-element';
 import { Badge, } from 'react-native-elements'
-import CustomModal from 'react-native-modal'
-import Clipboard from '@react-native-community/clipboard'
-import { withNavigationFocus } from 'react-navigation'
 import { LinearGradient } from 'expo-linear-gradient'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { pinNeed, unpinNeed } from '../../redux/actions/authActions'
 import { logout, getUser, fetchUserConnections, connectReq, unrequest, disconnect, confirmConnect, declineConnect } from '../../redux/actions/authActions'
-import { fetchNeeds, getNeed, deleteNeed } from '../../redux/actions/postsActions'
+import { fetchNeeds, getNeed } from '../../redux/actions/postsActions'
 
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import { Ionicons, MaterialIcons, AntDesign, FontAwesome, SimpleLineIcons, MaterialCommunityIcons, Entypo, } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, MaterialCommunityIcons, Entypo, } from '@expo/vector-icons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 import BioModal from '../../components/LNB/BioModal'
 import * as firebase from 'firebase'
-import moment from 'moment'
 import * as Linking from 'expo-linking'
 import Lightbox from 'react-native-lightbox'
-import Hyperlink from 'react-native-hyperlink'
 import PinnedNeed from '../../components/LNB/PinnedNeed'
 
 import NeedPost from '../../components/LNB/NeedPost'
@@ -77,13 +65,8 @@ const UserProfileScreen = props => {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [error, setError] = useState()
 
-    const [isMounted, setIsMounted] = useState(true)
-    
-    const [connect, setConnect] = useState(false)
     const [accept, setAccept] = useState(false)
     const [requested, setRequested] = useState(false)
-    const [connected, setConnected] = useState(false)
-    const [connections, setConnections] = useState(0)
 
     const [isDeletable, setIsDeletable] = useState(false)
     const [selectedNeed, setSelectedNeed] = useState()
@@ -95,7 +78,6 @@ const UserProfileScreen = props => {
 
     const userId = props.navigation.getParam('userId')
     const user = useSelector(state => state.auth.allUsers.find(user => user.userId === userId))
-    // const user = useSelector(state => state.auth.selectedUser)
     const authUser = useSelector(state => state.auth)
     const authId = useSelector(state => state.auth.userId)
     const authName = useSelector(state => state.auth.credentials.displayName)
@@ -106,11 +88,11 @@ const UserProfileScreen = props => {
     const userConnectionIds = useSelector(state => state.auth.userConnectionIds)
     const outgoingRequests = useSelector(state => state.auth.outgoingRequests)
     const incomingRequests = useSelector(state => state.auth.pendingConnections)
+    const pendingConnections = useSelector(state => state.auth.pendingConnections)
 
     const [pinnedNeed, setPinnedNeed] = useState(pinned)
     const screen = 'UserProfile'
 
-    const pendingConnections = useSelector(state => state.auth.pendingConnections)
     
     const loadUser = useCallback(async () => {
         setError(null)
@@ -580,7 +562,6 @@ const UserProfileScreen = props => {
                                                             <Text style={{color:Colors.placeholder, fontSize:14, fontWeight:'bold', alignSelf:'center'}}>Requested</Text>
                                                         </TouchableCmp>
                                                     )}
-                                                    {/* {user.pendingConnections.indexOf(authUser.userId) === -1 && !accept && ( */}
                                                     {userConnectionIds && outgoingRequests && incomingRequests &&
                                                     !userConnectionIds.includes(user.userId) && 
                                                     !incomingRequests.includes(user.userId) && 
