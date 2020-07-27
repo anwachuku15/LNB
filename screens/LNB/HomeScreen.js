@@ -55,12 +55,7 @@ let themeColor
 let text
 let flatListRef
 const HomeScreen = props => {
-    // let uid = firebase.auth().currentUser.uid
-
-    
 // TODO: MEMOIZE IMAGES for create/delete post state updates
-
-
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         themeColor = 'black'
@@ -72,6 +67,7 @@ const HomeScreen = props => {
     }
     // APP SETTINGS
     const [appState, setAppState] = useState(AppState.currentState)
+
     useEffect(() => {
         AppState.addEventListener('change', _handleAppStateChange)
         return () => {
@@ -248,27 +244,12 @@ const HomeScreen = props => {
     // NAV LISTENER
     useEffect(() => {
         const willFocusSub = props.navigation.addListener('willFocus', loadData)
-        // const willBlurSub = props.navigation.addListener('willBlur', loadData)
-        // Clean up listener when function re-runs https://reactjs.org/docs/hooks-effect.html
         return () => {
             willFocusSub.remove()
-            // willBlurSub
         }
     }, [loadData])
-    
-    
 
-
-    const selectUserHandler = (userId, userName) => {
-        props.navigation.navigate({
-            routeName: 'UserProfile',
-            params: {
-                userId: userId,
-                name: userName,
-                from: 'HomeScreen'
-            }
-        })
-    }
+    
 
 
     if (isMounted && error) {
@@ -299,40 +280,12 @@ const HomeScreen = props => {
         )
     }
 
-    const optionsModal = (item) => (
-        <Modal
-            animationType='slide'
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => console.log('modal closed')}
-        >
-            <View style={styles.modalView}>
-                <View style={styles.modal}>
-                    <Text style={styles.modalText}>{item.id}</Text>
-                    <TouchableHighlight
-                        style={{ ...styles.modalButton, backgroundColor: "#2196F3" }}
-                        onPress={() => {
-                            setIsModalVisible(!isModalVisible);
-                        }}
-                    >
-                        <Text style={styles.modalButtonText}>Hide Modal</Text>
-                    </TouchableHighlight>
-                    {item.uid === userId && (
-                        <TouchableHighlight
-                        style={{ ...styles.modalButton, backgroundColor: Colors.redcrayola }}
-                        onPress={() => {
-                            setIsModalVisible(!isModalVisible);
-                        }}
-                        >
-                            <Text style={styles.modalButtonText}>Delete</Text>
-                        </TouchableHighlight>
-                    )}
-
-                </View>
-            </View>
-        </Modal>
-    )
    
+    
+
+    
+
+    // POST HANDLERS
     const deleteHandler = (needId) => {
         Alert.alert('Delete Need', 'Are you sure?', [
             {
@@ -363,42 +316,29 @@ const HomeScreen = props => {
         ])
     }
 
-    let TouchableCmp = TouchableOpacity
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
-
-    const commentButtonHandler = (needId, userName) => {
-        dispatch(getNeed(needId))
-        props.navigation.navigate({
-            routeName: 'commentModal',
-            params: {
-                needId: needId,
-                userName: userName
-            }
-        })
-    }
-
     const pinHandler = (needId, uid) => {
-        Alert.alert('Pin Need', 'This will appear at the top of your profile and replace any previously pinned need. Are you sure?', [
-            {
-                text: 'Cancel',
-                style: 'cancel',
-                onPress: () => {
-                    setIsModalVisible(!isModalVisible)
-                    setSelectedNeed()
+        Alert.alert(
+            'Pin Need', 
+            'This will appear at the top of your profile and replace any previously pinned need. Are you sure?', [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                    onPress: () => {
+                        setIsModalVisible(!isModalVisible)
+                        setSelectedNeed()
+                    }
+                },
+                {
+                    text: 'Pin',
+                    style: 'default',
+                    onPress: async () => {
+                        
+                        setIsModalVisible(!isModalVisible)
+                        pinNeed(needId, uid)
+                    }
                 }
-            },
-            {
-                text: 'Pin',
-                style: 'default',
-                onPress: async () => {
-                    
-                    setIsModalVisible(!isModalVisible)
-                    pinNeed(needId, uid)
-                }
-            }
-        ])
+            ]
+        )
     }
 
     const unpinHandler = (needId) => {
@@ -428,6 +368,7 @@ const HomeScreen = props => {
         ])
     }
 
+    // NAVIGATION METHODS
     const navToPostDetail = (needId) => {
         props.navigation.push(
             'PostDetail',
@@ -438,9 +379,30 @@ const HomeScreen = props => {
         )
     }
 
+    const commentButtonHandler = (needId, userName) => {
+        dispatch(getNeed(needId))
+        props.navigation.navigate({
+            routeName: 'commentModal',
+            params: {
+                needId: needId,
+                userName: userName
+            }
+        })
+    }
+
+    const selectUserHandler = (userId, userName) => {
+        props.navigation.navigate({
+            routeName: 'UserProfile',
+            params: {
+                userId: userId,
+                name: userName,
+                from: 'HomeScreen'
+            }
+        })
+    }
+
+    // FLATLIST RENDER ITEM
     const from = 'HomeScreen'
-    
-    
     const renderItem = ({item}) => (
         <NeedPost 
             navigation={props.navigation}
@@ -464,18 +426,10 @@ const HomeScreen = props => {
         />
     )
     
-    
-    // if(Platform.OS === 'android') {
-    //     if (UIManager.setLayoutAnimationEnabledExperimental) {
-    //         UIManager.setLayoutAnimationEnabledExperimental(true)
-    //     }
-    // }
-    // LayoutAnimation.easeInEaseOut();
-    // LayoutAnimation.Types.easeIn
     return (
         isMounted && (
             <SafeAreaView style={styles.screen}>
-                {/* Large list, slow to update - make sure renderItem function follows best practices: PureComponent, shouldComponentUpdate, etc */}
+                {/* Make sure renderItem function follows best practices: PureComponent, shouldComponentUpdate, etc */}
                 <FlatList
                     ref={flatListRef}
                     keyExtractor={(item, index) => index.toString()}
