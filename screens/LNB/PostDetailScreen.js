@@ -1,12 +1,10 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import firebase from 'firebase'
-// import '@firebase/firestore'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 // REACT-NATIVE
 import { 
-    Platform,
-    ScrollView, 
+    Platform, 
     TouchableOpacity, 
     TouchableNativeFeedback, 
     Text, 
@@ -16,8 +14,7 @@ import {
     ActivityIndicator, 
     View, 
     StyleSheet, 
-    Image, 
-    SafeAreaView, 
+    Image,
     Dimensions,
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
