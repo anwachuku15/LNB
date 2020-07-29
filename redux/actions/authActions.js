@@ -1,6 +1,7 @@
 import * as firebase from 'firebase'
-// import '@firebase/firestore'
-import '@firebase/functions'
+import { db } from '../../Firebase/Fire'
+// import '@firebase/functions'
+
 import {config} from '../../Firebase/Fire'
 import {AsyncStorage} from 'react-native'
 import jwtDecode from 'jwt-decode'
@@ -34,7 +35,6 @@ export const SET_OUTGOING_REQUESTS = 'SET_OUTGOING_REQUESTS'
 export const SET_GROUP_CHATS = 'SET_GROUP_CHATS'
 
 
-const db = firebase.firestore()
 // AUTH UTILS
 export const authenticate = (token, userId) => {
     return dispatch => {

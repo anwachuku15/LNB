@@ -13,10 +13,9 @@ import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
-import * as firebase from 'firebase'
 import { logout } from '../../redux/actions/authActions'
 
-const db = firebase.firestore()
+import { db } from '../../Firebase/Fire'
 
 let themeColor
 let text

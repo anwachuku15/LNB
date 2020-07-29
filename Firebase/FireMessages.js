@@ -1,7 +1,6 @@
 import firebase from 'firebase'
+import { db } from './Firebase'
 
-
-const db = firebase.firestore()
 
 export const send = (messages, messagesId) => {
     messages.forEach(dm => {

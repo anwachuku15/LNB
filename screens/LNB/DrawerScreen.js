@@ -19,8 +19,9 @@ import Colors from '../../constants/Colors'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotifications } from '../../redux/actions/authActions'
 import { LinearGradient } from 'expo-linear-gradient'
-import firebase from 'firebase'
-const db = firebase.firestore()
+
+import { db } from '../../Firebase/Fire'
+
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height
 

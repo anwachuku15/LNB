@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import firebase from 'firebase'
+import { db } from '../../Firebase/Fire'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 // REACT-NATIVE
@@ -40,7 +40,7 @@ import Hyperlink from 'react-native-hyperlink'
 const SCREEN_WIDTH = Dimensions.get('window').width
 
 
-const db = firebase.firestore()
+
 
 const WINDOW_WIDTH = Dimensions.get('window').width
 const WINDOW_HEIGHT = Dimensions.get('window').height

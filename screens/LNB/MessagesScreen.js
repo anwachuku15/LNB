@@ -29,7 +29,6 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import NewMessageButton from '../../components/UI/NewMessageButton'
 import { Feather, MaterialIcons } from '@expo/vector-icons'
-import firebase from 'firebase'
 import moment from 'moment'
 import algoliasearch from 'algoliasearch/lite'
 import { appId, key } from '../../secrets/algolia'
@@ -39,8 +38,8 @@ import shorthash from 'shorthash'
 const client = algoliasearch(appId, key)
 const index = client.initIndex('LNBmembers')
 
+import { db } from '../../Firebase/Fire'
 
-const db = firebase.firestore()
 const messagesTimeConfig = {
     future: 'in %s',
     past: '%s',

@@ -34,7 +34,6 @@ import { Ionicons, MaterialIcons, AntDesign, FontAwesome, SimpleLineIcons, Mater
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
-import * as firebase from 'firebase'
 import moment from 'moment'
 import * as Linking from 'expo-linking'
 import Lightbox from 'react-native-lightbox'
@@ -43,7 +42,8 @@ import PinnedNeed from '../../components/LNB/PinnedNeed'
 
 import NeedPost from '../../components/LNB/NeedPost'
 
-const db = firebase.firestore()
+import * as firebase from 'firebase'
+import { db } from '../../Firebase/Fire'
 
 let SCREEN_WIDTH = Dimensions.get('window').width
 let SCREEN_HEIGHT = Dimensions.get('window').height

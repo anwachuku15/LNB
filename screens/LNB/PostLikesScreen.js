@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import firebase from 'firebase'
-// import '@firebase/firestore'
+
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { connectReq, unrequest, confirmConnect, disconnect, declineConnect } from '../../redux/actions/authActions'
@@ -39,8 +38,8 @@ import { createComment } from '../../redux/actions/postsActions'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 
+import { db } from '../../Firebase/Fire'
 
-const db = firebase.firestore()
 
 const WINDOW_WIDTH = Dimensions.get('window').width
 const WINDOW_HEIGHT = Dimensions.get('window').height

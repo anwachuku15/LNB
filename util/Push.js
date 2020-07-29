@@ -1,6 +1,4 @@
-import * as firebase from 'firebase'
-
-const db = firebase.firestore()
+import { db } from '../Firebase/Fire'
 
 // export const sendPushNotification = async () => {
 //   const message = {

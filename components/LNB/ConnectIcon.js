@@ -6,9 +6,9 @@
 // import { Ionicons, FontAwesome } from '@expo/vector-icons'
 // import firebase from 'firebase'
 // import Colors from '../../constants/Colors'
+// import { db } from '../../Firebase/Fire'
 
 
-// const db = firebase.firestore()
 
 
 // const ConnectIcon = props => {

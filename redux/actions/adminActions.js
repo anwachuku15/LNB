@@ -1,9 +1,7 @@
 import config from '../../Firebase/Fire'
-import firebase from 'firebase'
-// import '@firebase/firestore'
 import moment from 'moment'
 import { uploadPhotoAsyn } from '../actions/authActions'
-const db = firebase.firestore()
+import { db } from '../../Firebase/Fire'
 
 export const CREATE_ANNOUNCEMENT = 'CREATE_ANNOUNCEMENT'
 export const CREATE_ANNOUNCEMENT_NOIMG = 'CREATE_ANNOUNCEMENT_NOIMG'

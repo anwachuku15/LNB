@@ -30,7 +30,7 @@ import * as ImagePicker from 'expo-image-picker'
 import moment from 'moment'
 import Hyperlink from 'react-native-hyperlink'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
-const db = firebase.firestore()
+import { db } from '../../Firebase/Fire'
 
 let themeColor
 let text

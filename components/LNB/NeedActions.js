@@ -7,8 +7,8 @@ import * as Haptics from 'expo-haptics'
 
 import Colors from '../../constants/Colors'
 import firebase from 'firebase'
+import { db } from '../../Firebase/Fire'
 
-const db = firebase.firestore()
 
 
 const NeedActions = props => {

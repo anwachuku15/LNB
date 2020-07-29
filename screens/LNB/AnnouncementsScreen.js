@@ -37,8 +37,7 @@ import Hyperlink from 'react-native-hyperlink'
 import moment from 'moment'
 import PinnedAnnouncement from '../../components/LNB/PinnedAnnouncement'
 
-// import firebase from 'firebase'
-// const db = firebase.firestore()
+// import { db } from '../../Firebase/Fire'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height

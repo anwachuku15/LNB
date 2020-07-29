@@ -26,14 +26,14 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import MessageIcon from '../../components/LNB/MessageIcon'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import firebase from 'firebase'
+
 import moment from 'moment'
 import { LayoutAnimation } from 'react-native'
 import MenuAvatar from '../../components/LNB/MenuAvatar'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 
 
-const db = firebase.firestore()
+import { db } from '../../Firebase/Fire'
 
 let themeColor
 let text

@@ -30,7 +30,7 @@ import { FontAwesome, Feather, MaterialIcons } from '@expo/vector-icons'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 import DirectoryListItem from '../../components/LNB/DirectoryListItem'
 
-import * as firebase from 'firebase'
+
 
 import algoliasearch from 'algoliasearch'
 import { appId, key, adminkey } from '../../secrets/algolia'
@@ -40,7 +40,7 @@ const client = algoliasearch(appId, adminkey)
 const index = client.initIndex('LNBmembers')
 const connectionsIndex = client.initIndex('Connections')
 
-const db = firebase.firestore()
+// import { db } from '../../Firebase/Fire'
 
 
 const DirectoryScreen = props => {

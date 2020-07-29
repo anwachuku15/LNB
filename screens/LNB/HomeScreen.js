@@ -45,7 +45,7 @@ import MenuAvatar from '../../components/LNB/MenuAvatar'
 import Animated from 'react-native-reanimated';
 import TouchableCmp from '../../components/LNB/TouchableCmp';
 
-const db = firebase.firestore()
+import { db } from '../../Firebase/Fire'
 
 const WINDOW_WIDTH = Dimensions.get('window').width
 const WINDOW_HEIGHT = Dimensions.get('window').height

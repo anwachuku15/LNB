@@ -4,11 +4,11 @@ import { Badge, withBadge, Icon } from 'react-native-elements'
 import { useColorScheme } from 'react-native-appearance'
 import { useSelector, useDispatch } from 'react-redux'
 import { Ionicons } from '@expo/vector-icons'
-import firebase from 'firebase'
+import { db } from '../../Firebase/Fire'
 import Colors from '../../constants/Colors'
 
 
-const db = firebase.firestore()
+
 
 
 const NotificationIcon = props => {

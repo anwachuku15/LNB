@@ -24,13 +24,15 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import HeaderButton from '../../components/UI/HeaderButton'
 import { GiftedChat } from 'react-native-gifted-chat'
 import { InputToolbar, Actions, Composer, Send } from 'react-native-gifted-chat'
-import firebase, { firestore } from 'firebase'
+
+import { firestore } from 'firebase'
+import { db } from '../../Firebase/Fire'
+
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import moment from 'moment'
 import Hyperlink from 'react-native-hyperlink'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
-const db = firebase.firestore()
 
 let themeColor
 let text

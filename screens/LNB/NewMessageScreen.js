@@ -15,7 +15,6 @@ import {
 import CustomModal from 'react-native-modal'
 import Dialog from 'react-native-dialog'
 import { CheckBox, ListItem, Overlay } from 'react-native-elements'
-import firebase from 'firebase'
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
 import { getUser } from '../../redux/actions/authActions'
@@ -34,7 +33,8 @@ import { appId, key, adminkey } from '../../secrets/algolia'
 const client = algoliasearch(appId, adminkey)
 const index = client.initIndex('LNBmembers')
 
-const db = firebase.firestore()
+import firebase from 'firebase'
+import { db } from '../../Firebase/Fire'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height

@@ -3,7 +3,7 @@ import firebase from 'firebase'
 // import '@firebase/firestore'
 import moment from 'moment'
 import Need from '../../models/need-model'
-const db = firebase.firestore()
+import { db } from '../../Firebase/Fire'
 
 export const CREATE_NEED = 'CREATE_NEED'
 export const CREATE_NEED_NOIMG = 'CREATE_NEED_NOIMG'

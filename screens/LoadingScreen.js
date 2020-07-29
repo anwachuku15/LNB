@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { authenticate, getAuthenticatedUser } from '../redux/actions/authActions' 
 import { StyleSheet, View, Text, Image, ActivityIndicator, AsyncStorage, MaskedViewIOS, Animated  } from 'react-native'
 import Colors from '../constants/Colors'
-import * as firebase from 'firebase'
 import jwtDecode from 'jwt-decode'
 import { saveDataToStorage } from '../redux/actions/authActions'
 import { useColorScheme } from 'react-native-appearance'
 
-const db = firebase.firestore()
+import * as firebase from 'firebase'
+import { db } from '../Firebase/Fire'
 
 
 
