@@ -1,6 +1,7 @@
 import config from '../../Firebase/Fire'
 import firebase from 'firebase'
 // import '@firebase/firestore'
+import FirePostData from '../../Firebase/FireRedux'
 import moment from 'moment'
 import Need from '../../models/need-model'
 import { db } from '../../Firebase/Fire'
@@ -18,31 +19,15 @@ export const fetchNeeds = () => {
     return async (dispatch, getState) => {
         const userId = getState().auth.userId
         try {
-            const loadedNeeds = []
-            const needsData = await db.collection('needs').orderBy('timestamp', 'desc').get()
-            needsData.forEach(doc => {
-                loadedNeeds.push({
-                    id: doc.id,
-                    timestamp: doc.data().timestamp,
-                    uid: doc.data().uid,
-                    userName: doc.data().userName,
-                    userImage: doc.data().userImage,
-                    body: doc.data().body,
-                    imageUrl: doc.data().imageUrl ? doc.data().imageUrl : null,
-                    media: doc.data().media ? doc.data().media : null,
-                    likeCount: doc.data().likeCount,
-                    commentCount: doc.data().commentCount,
-                    isPinned: doc.data().isPinned,
-                    taggedUsers: doc.data().taggedUsers
-                })
-            })
+            const loadedNeeds = await FirePostData.fetchNeeds()
+            
             dispatch({
                 type: SET_NEEDS,
                 allNeeds: loadedNeeds,
                 userNeeds: loadedNeeds.filter(need => need.uid === userId)
             })
         } catch (err) {
-            throw err
+            console.log(err)
         }
     }
 }
@@ -57,39 +42,16 @@ export const createNeed = (userName, body, media, taggedUsers) => {
         const timestamp = moment(Date.now()).toISOString()
         if (media !== '') {
             if (media.uri) {
-                // console.log('dispatch reached')
                 remoteUri = 
                     media.type === 'video' 
-                    ? await uploadVideoAsyn(media.localUri) 
-                    : await uploadPhotoAsyn(media.uri) 
+                    ? await FirePostData.uploadVideoAsyn(media.localUri)
+                    : await FirePostData.uploadPhotoAsyn(media.uri)
             } else {
-                remoteUri = await uploadPhotoAsyn(media)
+                remoteUri = await FirePostData.uploadPhotoAsyn(media)
             }
 
-            db.collection('needs')
-            .add({
-                userName,
-                body,
-                uid: uid,
-                userImage: userImage,
-                timestamp: timestamp,
-                media: media.type && {
-                    type: media.type === 'video' ? 'video' : 'image',
-                    duration: media.type === 'video' ? media.duration : null,
-                    uri: remoteUri,
-                    height: media.height,
-                    width: media.width
-                },
-                imageUrl: !media.type ? remoteUri : null,
-                commentCount: 0,
-                likeCount: 0,
-                taggedUsers: taggedUsers
-            })
-            .then(doc => {
-                postId = doc.id
-            })
-            .catch(err => console.log(err))
-
+            FirePostData.createNeedMedia(timestamp, postId, uid, userImage, userName, body, media, remoteUri, taggedUsers)
+    
             dispatch({
                 type: CREATE_NEED,
                 postData: {
@@ -113,21 +75,8 @@ export const createNeed = (userName, body, media, taggedUsers) => {
                 }
             })
         } else {
-            db.collection('needs')
-            .add({
-                userName,
-                body,
-                uid,
-                userImage,
-                timestamp: timestamp,
-                commentCount: 0,
-                likeCount: 0,
-                taggedUsers: taggedUsers
-            })
-            .then(doc => {
-                postId = doc.id
-            })
-            .catch(err => console.log(err))
+            FirePostData.createNeed(timestamp, postId, uid, userImage, userName, body, taggedUsers)
+            
             dispatch({
                 type: CREATE_NEED,
                 postData: {
@@ -166,7 +115,7 @@ export const createComment = (postId, body, localUri) => {
         let imageUrl, commentId, needUserId
         if (localUri !== undefined) {
             
-            imageUrl = await uploadPhotoAsyn(localUri)
+            imageUrl = await FirePostData.uploadPhotoAsyn(localUri)
         } else {
             imageUrl = null
         }
@@ -186,7 +135,6 @@ export const createComment = (postId, body, localUri) => {
         }
         let needData
         
-        
         needDocument.get()
             .then(doc => {
                 if (doc.exists) {
@@ -198,42 +146,8 @@ export const createComment = (postId, body, localUri) => {
                 console.log(err)
             })
         
-        db.collection('comments')
-        .add(newComment)
-        .then(doc => {
-            commentId = doc.id
-            needData.commentCount++
-            return db.doc(`/needs/${postId}`).update({ commentCount: needData.commentCount })
-        })
-        .then(() => {
-            db.doc(`/needs/${postId}`).get()
-            .then(async (doc) => {
-                needUserId = doc.data().uid
-                if (needUserId !== authUserId) {
-                    const pushToken = (await db.doc(`/users/${needUserId}`).get()).data().pushToken
-                    sendCommentNeedNotification(postId, needUserId, pushToken, authUserId, authUserName, authUserImage)
-                }
-            })
-            return db.collection('comments').where('postId', '==', postId).get()
-        })
-        .then(data => {
-            const commenters = []
-            data.forEach(doc => {
-                if (!commenters.includes(doc.data().uid)) {
-                    commenters.push(doc.data().uid)
-                }
-            })
-            commenters.forEach(async uid => {
-                if ((uid !== needUserId) && (uid !== authUserId)) {
-                    const pushToken = (await db.doc(`/users/${uid}`).get()).data().pushToken
-                    sendCommentNotificationBatch(postId, needData.userName, uid, pushToken, authUserId, authUserName, authUserImage)
-                }
-            })
-        })
-        .catch(err => {
-            console.error(err)
-            
-        })
+        FirePostData.addComment(newComment, commentId, needData, postId, needUserId, authUserId, authUserName, authUserImage)
+        
         dispatch({
             type: CREATE_COMMENT,
             commentData: {
@@ -253,73 +167,6 @@ export const createComment = (postId, body, localUri) => {
     } 
 }
 
-const sendCommentNeedNotification = (needId, recipientId, pushToken, authId, authName, authImage) => {
-    db.collection('notifications').add({
-        timestamp: new Date().toISOString(),
-        type: 'commentNeed',
-        needId,
-        recipientId,
-        senderId: authId,
-        senderName: authName,
-        senderImage: authImage,
-        read: false
-    })
-    if (pushToken) {
-        let res = fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                to: pushToken,
-                sound: 'default',
-                title: 'New Comment',
-                body: authName + ' commented on one of your needs.',
-                data: {
-                    type: 'commentNeed',
-                    needId: needId,
-                    senderName: authName
-                }
-            })
-        }) 
-    }
-}
-
-const sendCommentNotificationBatch = (needId, needUserName, recipientId, pushToken, authId, authName, authImage) => {
-    db.collection('notifications').add({
-        timestamp: new Date().toISOString(),
-        type: 'commentThread',
-        needId,
-        needUserName,
-        recipientId,
-        senderId: authId,
-        senderName: authName,
-        senderImage: authImage,
-        read: false
-    })
-    if (pushToken) {
-        let res = fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                to: pushToken,
-                sound: 'default',
-                title: 'New Comment',
-                body: authName + ' replied to a need you commented on.',
-                data: {
-                    type: 'commentThread',
-                    needId: needId,
-                    senderName: authName
-                }
-            })
-        }) 
-    }
-}
-
 export const getNeed = (needId) => {
     return async dispatch => {
         try {
@@ -334,52 +181,7 @@ export const getNeed = (needId) => {
     }
 }
 
-const uploadPhotoAsyn = async uri => {
-    const path = `photos/${firebase.auth().currentUser.uid}/${Date.now()}.jpg`
-    // const path = `photos/${getState().auth.userId}/${Date.now()}.jpg`
-    return new Promise(async (res, rej) => {
-        const response = await fetch(uri)
-        const file = await response.blob()
-        
-        let upload = firebase.storage().ref(path).put(file)
-        
-        upload.on(
-            'state_changed', 
-            snapshot => {}, 
-            err => {
-                rej(err)
-                console.log(err)
-            },
-            async () => {
-                const url = await upload.snapshot.ref.getDownloadURL()
-                res(url)
-            }
-        )
-    })
-}
 
-const uploadVideoAsyn = async uri => {
-    const path = `videos/${firebase.auth().currentUser.uid}/${Date.now()}.mp4`
-    return new Promise(async (res, rej) => {
-        const response = await fetch(uri)
-        const file = await response.blob()
-        let upload = firebase.storage().ref(path).put(file)
-        // console.log(uri)
-        // console.log(upload)
-        upload.on(
-            'state_changed', 
-            snapshot => {}, 
-            err => {
-                rej(err)
-                console.log(err)
-            },
-            async () => {
-                const url = await upload.snapshot.ref.getDownloadURL()
-                res(url)
-            }
-        )
-    })
-}
 
 export const likeNeed = (needId) => {
     // UNHANDLED PROMISE REJECTION
