@@ -67,9 +67,6 @@ const ConnectionsScreen = props => {
     const [results, setResults] = useState([])
 
     const searchInput = useRef(null)
-    
-    console.log(userConnections)
-
 
     const updateSearch = (text) => {
         setSearch(text)
