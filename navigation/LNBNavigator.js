@@ -1277,10 +1277,17 @@ const AuthNavigator = createStackNavigator({
     defaultNavigationOptions: defaultNavOptions
 })
 
+const OnboardingNavigator = createStackNavigator({
+    Register: RegisterScreen
+}, {
+    defaultNavigationOptions: defaultNavOptions
+})
+
 // ----- SWITCH ----- //
 const AppNavigator = createSwitchNavigator({
     Loading: LoadingScreen,
     Auth: AuthNavigator,
+    Onboarding: OnboardingNavigator,
     App: SwipeTabNavigator
 })
 
