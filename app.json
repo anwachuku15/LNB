@@ -4,7 +4,6 @@
     "description": "Members-Only networking platform for those who want to leave normal behind.",
     "slug": "leave-normal-behind",
     "privacy": "unlisted",
-    "sdkVersion": "37.0.0",
     "platforms": [
       "ios",
       "android"
