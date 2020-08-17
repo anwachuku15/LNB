@@ -14,21 +14,24 @@ import {
     Button, 
     ActivityIndicator
 } from 'react-native'
-import Clipboard from '@react-native-community/clipboard'
 import { LinearGradient } from 'expo-linear-gradient'
 
-import { useDispatch, useSelector } from 'react-redux'
-import { signup, login, logout } from '../../redux/actions/authActions'
+import { useDispatch } from 'react-redux'
+import { signup, login } from '../../redux/actions/authActions'
 
 import Input from '../../components/UI/Input'
 import Card from '../../components/UI/Card'
 import Colors from '../../constants/Colors'
 import { useColorScheme } from 'react-native-appearance'
-import * as firebase from 'firebase'
 import { Ionicons } from '@expo/vector-icons'
 
 import UserPermissions from '../../util/UserPermissions'
 import * as ImagePicker from 'expo-image-picker'
+
+import * as firebase from 'firebase'
+import * as WebBrowser from 'expo-web-browser'
+import { makeRedirectUri, ResponseType, useAuthRequest, useAutoDiscovery, generateHexStringAsync } from 'expo-auth-session'
+
 
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
 // FORM VALIDATION REDUCER
@@ -62,6 +65,12 @@ const formReducer = (state, action) => {
     }
     return state
 }
+
+WebBrowser.maybeCompleteAuthSession();
+
+const useProxy = Platform.select({ web: false, default: true });
+
+// Generate a random hex string for the nonce parameter
 
 
 let text
@@ -121,7 +130,11 @@ const AuthScreen = props => {
         setIsLoading(true)
         try {
             await dispatch(action)
-            props.navigation.navigate('App')
+            if (isSignup) {
+                props.navigation.navigate('Onboarding')
+            } else {
+                props.navigation.navigate('App')
+            }
         } catch (err) {
             setError(err.message)
             setIsLoading(false)
