@@ -66,21 +66,23 @@ const initialValues = {
 }
 
 const SCREEN_WIDTH = Dimensions.get('screen').width
-let text, color
+let text, color, background
 const RegisterScreen = props => {
     
     const scheme = useColorScheme()
     if (scheme === 'dark') {
         color = 'white'
+        background = '#1B1B1B'
     } else {
         color = 'black'
+        background = 'white'
     }
     
 
     const MyInput = compose(
         handleTextInput,
         withNextInputAutoFocusInput
-    )(TextField)
+    )(OutlinedTextField)
 
     const Form = withNextInputAutoFocusForm(View)
 
@@ -89,7 +91,7 @@ const RegisterScreen = props => {
     }  
 
     return (
-        <View style={styles.screen}>
+        <View style={{backgroundColor: background, ...styles.screen}}>
             <Formik
                 onSubmit={values => console.log(values)}
                 validationSchema={validationSchema}
@@ -102,7 +104,7 @@ const RegisterScreen = props => {
                             name='location' 
                             type='location' 
                             tintColor={Colors.primary} 
-                            containerStyle={{marginVertical: 10}} 
+                            containerStyle={{marginVertical: 10,}} 
                         />
                         <MyInput 
                             label='Bio' 
@@ -132,7 +134,7 @@ const RegisterScreen = props => {
 
 
 RegisterScreen.navigationOptions = {
-    headerTitle: 'Leave Normal Behind'
+    headerTransparent: true
 }
 
 const styles = StyleSheet.create({
