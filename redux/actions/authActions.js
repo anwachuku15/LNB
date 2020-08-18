@@ -67,7 +67,7 @@ export const authenticate = (token, userId) => {
 export const logout = () => {
     // clearLogoutTimer()
     AsyncStorage.removeItem('authData')
-    return {type: LOGOUT }
+    return { type: LOGOUT }
 }
 
 export const saveDataToStorage = (token, userId, expDate) => {
@@ -88,7 +88,7 @@ const updateStorageData = (newToken, userId, newDate) => {
 
 
 firebase.auth().onIdTokenChanged(async user => {
-    
+    console.log('TOKEN CHANGED!')
     if (user == null) return AsyncStorage.removeItem('authData')
     if (user !== null) {
         const uid = user.uid
@@ -99,7 +99,7 @@ firebase.auth().onIdTokenChanged(async user => {
         if (authData) {
             const transformedData = JSON.parse(authData)
             const {token, userId, expDate} = transformedData
-            if (token != newToken) {
+            if (token !== newToken) {
                 updateStorageData(newToken, uid, newDate)
                 authenticate(newToken, uid)
             }
@@ -130,11 +130,9 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         // expiresIn = expTime - ((new Date()).getTime())
         displayName = fname + ' ' + lname
 
-        console.log('setting imageUrl...')
         imageUrl = localUri === undefined 
                     ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
                     : await uploadPhotoAsyn(localUri)
-        console.log('imageUrl set')
 
 
         db.doc(`/users/${userId}`).set({
@@ -194,6 +192,47 @@ export const login = (email, password) => {
             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
             
             dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
+        }
+    }
+}
+
+export const googleSignIn = (data, googleUser) => {
+    return async dispatch => {
+        let userId, idToken, expTime, expDate
+
+        
+        userId = data.user.uid
+        idToken = googleUser.idToken
+        expTime = jwtDecode(idToken).exp * 1000
+        expDate = new Date(expTime)
+
+        saveDataToStorage(idToken, userId, expDate)
+        dispatch(authenticate(idToken, userId))
+        const userDoc = await db.doc(`/users/${userId}`).get()
+        if (userDoc.exists) {
+            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
+            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
+        } else if (data.additionalUserInfo.isNewUser) {
+            db.doc(`/users/${userId}`).set({
+                userId: userId,
+                createdAt: new Date().toISOString(),
+                email: data.user.email,
+                displayName: data.user.displayName,
+                headline: '',
+                imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
+                connections: 0,
+                pendingConnections: [],
+                outgoingRequests: [],
+                location: '',
+                bio: '',
+                website: '',
+                messages: {},
+                isAdmin: isAdmin,
+                lastReadAnnouncements: null
+            })
+            .catch(err => {
+                console.log(err)
+            })
         }
     }
 }
