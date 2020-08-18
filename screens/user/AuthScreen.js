@@ -14,10 +14,13 @@ import {
     Button, 
     ActivityIndicator
 } from 'react-native'
+import { Divider, SocialIcon } from 'react-native-elements'
+import { FontAwesome5 } from '@expo/vector-icons'
+import TouchableCmp from '../../components/LNB/TouchableCmp'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { useDispatch } from 'react-redux'
-import { signup, login } from '../../redux/actions/authActions'
+import { signup, login, googleSignIn } from '../../redux/actions/authActions'
 
 import Input from '../../components/UI/Input'
 import Card from '../../components/UI/Card'
@@ -29,10 +32,11 @@ import UserPermissions from '../../util/UserPermissions'
 import * as ImagePicker from 'expo-image-picker'
 
 import * as firebase from 'firebase'
+import * as Google from 'expo-google-app-auth';
 import * as WebBrowser from 'expo-web-browser'
-import { makeRedirectUri, ResponseType, useAuthRequest, useAutoDiscovery, generateHexStringAsync } from 'expo-auth-session'
-
-
+import { makeRedirectUri, ResponseType, useAuthRequest, useAutoDiscovery } from 'expo-auth-session'
+import useNonce from '../../hooks/useNonce'
+import { client_id, ios_client } from '../../secrets/googleAuth'
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
 // FORM VALIDATION REDUCER
 const formReducer = (state, action) => {
@@ -70,13 +74,11 @@ WebBrowser.maybeCompleteAuthSession();
 
 const useProxy = Platform.select({ web: false, default: true });
 
-// Generate a random hex string for the nonce parameter
-
-
 let text
 
 const AuthScreen = props => {
     
+
     const [isSignup, setIsSignup] = useState(false)
     const [error, setError] = useState()
     const [isLoading, setIsLoading] = useState(false)
@@ -102,6 +104,37 @@ const AuthScreen = props => {
         formIsValid: false,
     })
 
+    const nonce = useNonce()
+    // Endpoint
+    const discovery = useAutoDiscovery('https://accounts.google.com');
+    // Request
+    const [request, response, promptAsync] = useAuthRequest(
+        {
+            responseType: ResponseType.IdToken,
+            clientId: client_id,
+            redirectUri: makeRedirectUri({
+                // For usage in bare and standalone
+                native: 'com.googleusercontent.apps.GOOGLE_GUID:/oauthredirect',
+                useProxy,
+            }),
+            scopes: ['openid', 'profile', 'email'],
+            extraParams: {
+                nonce,
+            }
+        },
+        discovery
+    );
+
+    useEffect(() => {
+        if (response?.type === 'success') {
+          const { id_token } = response.params;
+          
+          const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
+          firebase.auth().signInWithCredential(credential);
+        }
+      }, [response]);
+
+
     useEffect(() => {
         if (error) {
             Alert.alert(
@@ -111,6 +144,72 @@ const AuthScreen = props => {
             )
         }
     }, [error])
+
+    const isUserEqual = (googleUser, firebaseUser) => {
+        if (firebaseUser) {
+          const providerData = firebaseUser.providerData;
+          for (let i = 0; i < providerData.length; i++) {
+            if (providerData[i].providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+                providerData[i].uid === googleUser.getBasicProfile().getId()) {
+              // We don't need to reauth the Firebase connection.
+              return true;
+            }
+          }
+        }
+        return false;
+    }
+
+    const onSignIn = (googleUser) => {
+        console.log('Google Auth Response', googleUser);
+        // We need to register an Observer on Firebase Auth to make sure auth is initialized.
+        const unsubscribe = firebase.auth().onAuthStateChanged( async firebaseUser => {
+          unsubscribe();
+          // Check if we are already signed-in Firebase with the correct user.
+          if (!isUserEqual(googleUser, firebaseUser)) {
+            // Build Firebase credential with the Google ID token.
+            const credential = firebase.auth.GoogleAuthProvider.credential(
+                googleUser.idToken,
+                googleUser.accessToken
+            )
+            // Sign in with credential from the Google user.
+            let data
+            try {
+                data = await firebase.auth().signInWithCredential(credential)
+                dispatch(googleSignIn(data, googleUser))
+            } catch (err) {
+                // console.log(err.code)
+                console.log(err.message)
+                // console.log(err.email)
+                // console.log(err.credential)
+            }
+          } else {
+            console.log('User already signed-in Firebase.');
+          }
+        });
+    }
+
+
+    const signInWithGoogleAsync = async () => {
+        try {
+            const result = await Google.logInAsync({
+                // androidClientId: YOUR_CLIENT_ID_HERE,
+                behavior: 'web',
+                iosClientId: ios_client,
+                scopes: ['profile', 'email'],
+            });
+        
+        if (result.type === 'success') {
+            onSignIn(result)
+            return result.accessToken;
+        } else {
+            return { cancelled: true };
+        }
+        } catch (e) {
+            return { error: true };
+        }
+    }
+
+      
 
     const authHandler = async () => {
         let action
@@ -166,24 +265,23 @@ const AuthScreen = props => {
     }
     
     const scheme = useColorScheme()
-    let switchButton
+    let switchButton, background
     
     if(scheme === 'dark') {
         text = 'white'
         switchButton = Colors.tan
+        background = '#1B1B1B'
     } else {
         text = 'black'
         switchButton = '#414959'
+        background = 'white'
     }
 
-    let TouchableCmp = TouchableOpacity
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
+   
 
     return (
-        <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.OS === 'android' ? -200 : 50} style={styles.screen}>
-            {isSignup ? (
+        <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.OS === 'android' ? -200 : 50} style={{backgroundColor: background, ...styles.screen}}>
+            {isSignup && (
                 <TouchableCmp 
                     onPress={chooseProfilePicture}
                     style={styles.avatarContainer} 
@@ -196,12 +294,6 @@ const AuthScreen = props => {
                         style={{marginTop: 6, marginLeft: 2}}
                     />
                 </TouchableCmp>
-            ) : (
-                <Image 
-                    source={require('../../assets/lnb.png')} 
-                    resizeMode='contain' 
-                    style={{maxWidth: '35%', maxHeight: '15%', marginBottom:20, marginTop: -100 }}
-                /> 
             )}
             <Card style={styles.authContainer}>
                 <ScrollView>
@@ -278,7 +370,8 @@ const AuthScreen = props => {
                         ) : ( 
                             <TouchableCmp 
                                 onPress={() => {
-                                    setIsSignup(!isSignup)
+                                    // setIsSignup(!isSignup)
+                                    props.navigation.navigate('Register')
                                     // logout()
                                 }} 
                                 style={{alignSelf: 'center', marginTop: 10}}>
@@ -296,19 +389,92 @@ const AuthScreen = props => {
                     </View>
                 </ScrollView>
             </Card>
+
+            <View style={{flexDirection: 'row', alignItems:'center'}}>
+                <Divider style={{ backgroundColor: Colors.placeholder, width: 145, marginVertical: 30 }} />
+                <Text style={{color:Colors.placeholder, marginHorizontal: 5}}>OR</Text>
+                <Divider style={{ backgroundColor: Colors.placeholder, width: 145, marginVertical: 30 }} />
+            </View>
+
+            <TouchableCmp
+                disabled={!request || !nonce}
+                onPress={() => {
+                    // promptAsync({ useProxy })
+                    signInWithGoogleAsync()
+                }}
+                style={{...styles.socialButton, marginTop: 0, backgroundColor: '#4885ed',}}
+            >
+                <View style={{backgroundColor:'white', padding: 8, borderRadius: 50,}}>
+                    <Image 
+                        source={require('../../assets/googleicon.png')} 
+                        resizeMode='contain' 
+                        style={{width: 30, height: 30 }}
+                    /> 
+                </View>
+                <Text style={{color: 'white', fontWeight:'bold', marginRight: 90}}>Sign in with Google</Text>
+            </TouchableCmp>
+
+            <TouchableCmp
+                // disabled={!request || !nonce}
+                onPress={() => {
+                    // promptAsync({ useProxy })
+                }}
+                style={{...styles.socialButton, backgroundColor: '#3b5998'}}
+            >
+                <View style={{marginLeft: 14}}>
+                    <FontAwesome5
+                        name='facebook-f'
+                        size={30}
+                        color='white'
+                    />
+                </View>
+                <Text style={{color: 'white', fontWeight:'bold', marginRight: 80}}>Sign in with Facebook</Text>
+            </TouchableCmp>
+
+            <TouchableCmp
+                // disabled={!request || !nonce}
+                onPress={() => {
+                    // promptAsync({ useProxy })
+                }}
+                style={{...styles.socialButton, backgroundColor: 'black'}}
+            >
+                <View style={{marginLeft: 10}}>
+                    <FontAwesome5
+                        name='apple'
+                        size={30}
+                        color='white'
+                    />
+                </View>
+                <Text style={{color: 'white', fontWeight:'bold', marginRight: 97}}>Sign in with Apple</Text>
+            </TouchableCmp>
+
         </KeyboardAvoidingView>
     )
 }
 
 AuthScreen.navigationOptions = {
-    headerTitle: 'Leave Normal Behind'
+    headerTransparent: true
 }
 
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+    },
+    socialButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: 55,
+        borderRadius: 50,
+        marginTop: 15,
+        paddingHorizontal: 5,
+        width: 330,
+        shadowColor: 'black',
+        shadowOpacity: 0.5,
+        shadowOffset: {width: 0, height: 2},
+        elevation: 5,
     },
     avatarContainer: {
         // flex: 1,
