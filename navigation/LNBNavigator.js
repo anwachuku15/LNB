@@ -1271,8 +1271,25 @@ MessagesStack.navigationOptions = ({navigation}) => {
 
 
 const AuthNavigator = createStackNavigator({
-    Auth: AuthScreen
-    // Auth: RegisterScreen
+    Auth: {
+        screen: AuthScreen,
+        navigationOptions: {
+            headerTitle: '',
+            headerStyle: {
+                borderBottomWidth: 0
+            },
+            
+        }
+    },
+    Register: {
+        screen: RegisterScreen,
+        navigationOptions: {
+            headerTitle: '',
+            headerStyle: {
+                borderBottomWidth: 0
+            }
+        }
+    }
 }, {
     defaultNavigationOptions: defaultNavOptions
 })
