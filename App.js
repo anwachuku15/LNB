@@ -18,9 +18,6 @@ enableScreens()
 
 export default function App() {
   
-  
-
-
 
   const colorScheme = useColorScheme()
   if(colorScheme === 'dark') {
