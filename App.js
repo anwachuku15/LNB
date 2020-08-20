@@ -12,6 +12,8 @@ import Colors from './constants/Colors'
 
 import NavContainer from './navigation/NavContainer'
 
+console.disableYellowBox = true
+
 
 enableScreens()
 
