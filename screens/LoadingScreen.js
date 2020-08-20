@@ -23,7 +23,6 @@ const LoadingScreen = props => {
     //     background = 'white'
     //     text = 'black'
     // }
-
     // const [loadingProgress, setLoadingProgress] = useState(new Animated.Value(0))
     // const [animationDone, setAnimationDone] = useState(false)
 
@@ -50,10 +49,13 @@ const LoadingScreen = props => {
                         .get()
                         .then(userDoc => {
                             if (userDoc.exists) {
-                                const {userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements} = userDoc.data()
-                                dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
-                                
-                                props.navigation.navigate('App')
+                                const {isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements} = userDoc.data()
+                                dispatch(getAuthenticatedUser(isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
+                                if (isNewUser) {
+                                    props.navigation.navigate('Onboarding')
+                                } else {
+                                    props.navigation.navigate('App')
+                                }
                             } else {
                                 props.navigation.navigate('Auth')
                             }

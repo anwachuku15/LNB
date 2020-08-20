@@ -20,7 +20,7 @@ import TouchableCmp from '../../components/LNB/TouchableCmp'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { useDispatch } from 'react-redux'
-import { signup, login, googleSignIn } from '../../redux/actions/authActions'
+import { signup, login, googleSignIn, logout} from '../../redux/actions/authActions'
 
 import Input from '../../components/UI/Input'
 import Card from '../../components/UI/Card'
@@ -33,10 +33,11 @@ import * as ImagePicker from 'expo-image-picker'
 
 import * as firebase from 'firebase'
 import * as Google from 'expo-google-app-auth';
+
 import * as WebBrowser from 'expo-web-browser'
 import { makeRedirectUri, ResponseType, useAuthRequest, useAutoDiscovery } from 'expo-auth-session'
 import useNonce from '../../hooks/useNonce'
-import { client_id, ios_client } from '../../secrets/googleAuth'
+import { client_id, ios_expo_client, ios_app_client } from '../../secrets/googleAuth'
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
 // FORM VALIDATION REDUCER
 const formReducer = (state, action) => {
@@ -70,9 +71,9 @@ const formReducer = (state, action) => {
     return state
 }
 
-WebBrowser.maybeCompleteAuthSession();
+// WebBrowser.maybeCompleteAuthSession();
 
-const useProxy = Platform.select({ web: false, default: true });
+// const useProxy = Platform.select({ web: false, default: true });
 
 let text
 
@@ -104,35 +105,35 @@ const AuthScreen = props => {
         formIsValid: false,
     })
 
-    const nonce = useNonce()
-    // Endpoint
-    const discovery = useAutoDiscovery('https://accounts.google.com');
-    // Request
-    const [request, response, promptAsync] = useAuthRequest(
-        {
-            responseType: ResponseType.IdToken,
-            clientId: client_id,
-            redirectUri: makeRedirectUri({
-                // For usage in bare and standalone
-                native: 'com.googleusercontent.apps.GOOGLE_GUID:/oauthredirect',
-                useProxy,
-            }),
-            scopes: ['openid', 'profile', 'email'],
-            extraParams: {
-                nonce,
-            }
-        },
-        discovery
-    );
+    // const nonce = useNonce()
+    // // Endpoint
+    // const discovery = useAutoDiscovery('https://accounts.google.com');
+    // // Request
+    // const [request, response, promptAsync] = useAuthRequest(
+    //     {
+    //         responseType: ResponseType.IdToken,
+    //         clientId: client_id,
+    //         redirectUri: makeRedirectUri({
+    //             // For usage in bare and standalone
+    //             native: 'com.googleusercontent.apps.GOOGLE_GUID:/oauthredirect',
+    //             useProxy,
+    //         }),
+    //         scopes: ['openid', 'profile', 'email'],
+    //         extraParams: {
+    //             nonce,
+    //         }
+    //     },
+    //     discovery
+    // );
 
-    useEffect(() => {
-        if (response?.type === 'success') {
-          const { id_token } = response.params;
+    // useEffect(() => {
+    //     if (response?.type === 'success') {
+    //       const { id_token } = response.params;
           
-          const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
-          firebase.auth().signInWithCredential(credential);
-        }
-      }, [response]);
+    //       const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
+    //       firebase.auth().signInWithCredential(credential);
+    //     }
+    //   }, [response]);
 
 
     useEffect(() => {
@@ -160,7 +161,7 @@ const AuthScreen = props => {
     }
 
     const onSignIn = (googleUser) => {
-        console.log('Google Auth Response', googleUser);
+        // console.log('Google Auth Response', googleUser);
         // We need to register an Observer on Firebase Auth to make sure auth is initialized.
         const unsubscribe = firebase.auth().onAuthStateChanged( async firebaseUser => {
           unsubscribe();
@@ -176,11 +177,11 @@ const AuthScreen = props => {
             try {
                 data = await firebase.auth().signInWithCredential(credential)
                 dispatch(googleSignIn(data, googleUser))
+                if (data.additionalUserInfo.isNewUser) {
+                    props.navigation.navigate('Onboarding')
+                }
             } catch (err) {
-                // console.log(err.code)
-                console.log(err.message)
-                // console.log(err.email)
-                // console.log(err.credential)
+                // console.log(err.message)
             }
           } else {
             console.log('User already signed-in Firebase.');
@@ -194,12 +195,14 @@ const AuthScreen = props => {
             const result = await Google.logInAsync({
                 // androidClientId: YOUR_CLIENT_ID_HERE,
                 behavior: 'web',
-                iosClientId: ios_client,
+                iosClientId: ios_expo_client,
+                iosStandaloneAppClientId: ios_app_client,
                 scopes: ['profile', 'email'],
             });
         
         if (result.type === 'success') {
             onSignIn(result)
+            
             return result.accessToken;
         } else {
             return { cancelled: true };
@@ -229,6 +232,7 @@ const AuthScreen = props => {
         setIsLoading(true)
         try {
             await dispatch(action)
+            // props.navigation.navigate('App')
             if (isSignup) {
                 props.navigation.navigate('Onboarding')
             } else {
@@ -295,6 +299,8 @@ const AuthScreen = props => {
                     />
                 </TouchableCmp>
             )}
+
+            {/* EMAIL/PASSWORD AUTH */}
             <Card style={styles.authContainer}>
                 <ScrollView>
                     {isSignup ? (
@@ -365,13 +371,18 @@ const AuthScreen = props => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={{...styles2.button, backgroundColor: 'red', ...{marginTop: 10}}} onPress={() => dispatch(logout())}>
+                            <Text style={{color:'white', fontWeight:'500'}}>Logout</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.buttonContainer}>
                         {isLoading ? (
                             <ActivityIndicator size='small' color={Colors.primary} />
                         ) : ( 
                             <TouchableCmp 
                                 onPress={() => {
-                                    // setIsSignup(!isSignup)
-                                    props.navigation.navigate('Register')
+                                    setIsSignup(!isSignup)
+                                    // props.navigation.navigate('Register')
                                     // logout()
                                 }} 
                                 style={{alignSelf: 'center', marginTop: 10}}>
@@ -396,8 +407,9 @@ const AuthScreen = props => {
                 <Divider style={{ backgroundColor: Colors.placeholder, width: 145, marginVertical: 30 }} />
             </View>
 
+            {/* SOCIAL AUTH */}
             <TouchableCmp
-                disabled={!request || !nonce}
+                // disabled={!request || !nonce}
                 onPress={() => {
                     // promptAsync({ useProxy })
                     signInWithGoogleAsync()
