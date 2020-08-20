@@ -47,6 +47,9 @@ import PostLikesScreen from '../screens/LNB/PostLikesScreen'
 import NewMessageScreen from '../screens/LNB/NewMessageScreen'
 import GroupChatScreen from '../screens/LNB/GroupChatScreen'
 import CameraScreen from '../screens/LNB/CameraScreen'
+
+import WelcomeScreen from '../screens/Onboarding/WelcomeScreen'
+
 import PostButtonTab from '../components/UI/PostTabButton'
 import MenuAvatar from '../components/LNB/MenuAvatar'
 import MessageIcon from '../components/LNB/MessageIcon'
@@ -587,7 +590,7 @@ const DirectoryTabButton = createMaterialTopTabNavigator({
 
 DirectoryTabButton.navigationOptions = ({navigation, screenProps}) => {
     const index = navigation.state.index
-    const userName = screenProps.authUser.displayName
+    // const userName = screenProps.authUser.displayName
     const background = screenProps.theme
     
     let headerTitle, headerStyle
@@ -1295,7 +1298,7 @@ const AuthNavigator = createStackNavigator({
 })
 
 const OnboardingNavigator = createStackNavigator({
-    Register: RegisterScreen
+    Welcome: WelcomeScreen
 }, {
     defaultNavigationOptions: defaultNavOptions
 })
