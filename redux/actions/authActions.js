@@ -87,25 +87,25 @@ const updateStorageData = (newToken, userId, newDate) => {
 }
 
 
-firebase.auth().onIdTokenChanged(async user => {
-    console.log('TOKEN CHANGED!')
-    if (user == null) return AsyncStorage.removeItem('authData')
-    if (user !== null) {
-        const uid = user.uid
-        const newToken = await user.getIdToken()
-        const newDate = new Date(jwtDecode(newToken).exp * 1000)
+// firebase.auth().onIdTokenChanged(async user => {
+//     // console.log('TOKEN CHANGED!')
+//     if (user == null) return AsyncStorage.removeItem('authData')
+//     if (user !== null) {
+//         const uid = user.uid
+//         const newToken = await user.getIdToken()
+//         const newDate = new Date(jwtDecode(newToken).exp * 1000)
 
-        const authData = await AsyncStorage.getItem('authData')
-        if (authData) {
-            const transformedData = JSON.parse(authData)
-            const {token, userId, expDate} = transformedData
-            if (token !== newToken) {
-                updateStorageData(newToken, uid, newDate)
-                authenticate(newToken, uid)
-            }
-        }
-    }
-})
+//         const authData = await AsyncStorage.getItem('authData')
+//         if (authData) {
+//             const transformedData = JSON.parse(authData)
+//             const {token, userId, expDate} = transformedData
+//             if (token !== newToken) {
+//                 updateStorageData(newToken, uid, newDate)
+//                 authenticate(newToken, uid)
+//             }
+//         }
+//     }
+// })
 
 
 // SIGNUP + LOGIN + LOGOUT
@@ -136,6 +136,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
 
 
         db.doc(`/users/${userId}`).set({
+            isNewUser: true,
             userId: userId,
             createdAt: new Date().toISOString(),
             email: email,
@@ -158,7 +159,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
-        dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, null))
+        dispatch(getAuthenticatedUser(true, userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, null))
 
         //ONBOARDING - SEND NOTIFICATION TO ANDREW & ROB
         // data.additionalUserInfo.isNewUser for onboarding
@@ -167,6 +168,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
 
     }
 }
+
 export const login = (email, password) => {
     return async dispatch => {
         let data, userId, idToken, expTime, expDate, expiresIn, displayName, noImg, imageUrl
@@ -190,8 +192,8 @@ export const login = (email, password) => {
         const userDoc = await db.doc(`/users/${userId}`).get()
         if (userDoc.exists) {
             const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
-            
-            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
+            // userDoc.ref.update({isNewUser: false})
+            dispatch(getAuthenticatedUser(false, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
         }
     }
 }
@@ -208,18 +210,18 @@ export const googleSignIn = (data, googleUser) => {
 
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
-        const userDoc = await db.doc(`/users/${userId}`).get()
-        if (userDoc.exists) {
-            const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
-            dispatch(getAuthenticatedUser(userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
-        } else if (data.additionalUserInfo.isNewUser) {
+
+        if (data.additionalUserInfo.isNewUser) {
+            const noImg = 'no-img.png'
+            const imgUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
             db.doc(`/users/${userId}`).set({
+                isNewUser: true,
                 userId: userId,
                 createdAt: new Date().toISOString(),
                 email: data.user.email,
                 displayName: data.user.displayName,
                 headline: '',
-                imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
+                imageUrl: imgUrl,
                 connections: 0,
                 pendingConnections: [],
                 outgoingRequests: [],
@@ -227,13 +229,23 @@ export const googleSignIn = (data, googleUser) => {
                 bio: '',
                 website: '',
                 messages: {},
-                isAdmin: isAdmin,
+                isAdmin: false,
                 lastReadAnnouncements: null
             })
             .catch(err => {
                 console.log(err)
             })
+            dispatch(getAuthenticatedUser(true, userId, data.user.email, data.user.displayName, '', imgUrl, '', '', '', 0, [], [], {}, false, null))
+        } else {
+            db.doc(`/users/${userId}`).get()
+                .then(userDoc => {
+                    if (userDoc.exists) {
+                        const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
+                        dispatch(getAuthenticatedUser(false, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))            
+                    }
+                })
         }
+
     }
 }
 
@@ -241,12 +253,13 @@ export const googleSignIn = (data, googleUser) => {
 // SET USER ACTIONS
 
 
-export const getAuthenticatedUser = (userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements) => {
+export const getAuthenticatedUser = (isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements) => {
     return async dispatch => {
         try {
             dispatch({
                 type: SET_USER,
                 credentials: {
+                    isNewUser: isNewUser,
                     isAdmin: isAdmin,
                     userId: userId,
                     email: email,
@@ -553,6 +566,7 @@ export const updateProfile = (headline, location, bio, link, uri) => {
         }) 
 
         dispatch(getAuthenticatedUser(
+            false,
             auth.userId,
             auth.credentials.email,
             auth.credentials.displayName,
@@ -581,6 +595,7 @@ export const readAnnouncements = () => {
                 lastReadAnnouncements: justRead
             })
             dispatch(getAuthenticatedUser(
+                false,
                 auth.userId,
                 auth.credentials.email,
                 auth.credentials.displayName,
