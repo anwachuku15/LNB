@@ -125,6 +125,7 @@ const RegisterScreen = props => {
                         />
                         
                         <Button onPress={handleSubmit} title='Sign Up' />
+                        <Button onPress={() => props.navigation.navigate('App')} title='Go To LNB' />
                     </Form>
                 }
             </Formik>
