@@ -8,7 +8,7 @@
       "ios",
       "android"
     ],
-    "version": "1.2.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/LNB-iOSicon.png",
     "splash": {
@@ -24,13 +24,17 @@
     ],
     "ios": {
       "bundleIdentifier": "com.andrewnwachuku.lnbapp",
-      "buildNumber": "1.2.0",
+      "buildNumber": "1.3.0",
       "supportsTablet": true,
-      "userInterfaceStyle": "automatic"
+      "userInterfaceStyle": "automatic",
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.andrewnwachuku.lnbapp",
-      "versionCode": 4
-    }
+      "versionCode": 5
+    },
+    "facebookScheme": "fb2741975835904636",
+    "facebookAppId": "2741975835904636",
+    "facebookDisplayName": "LNB"
   }
 }
