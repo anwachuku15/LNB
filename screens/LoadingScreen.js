@@ -45,21 +45,33 @@ const LoadingScreen = props => {
                         const expDate = new Date(jwtDecode(token).exp * 1000)
                         saveDataToStorage(token, userId, expDate)
                     }
-                    db.doc(`/users/${user.uid}`)
-                        .get()
-                        .then(userDoc => {
-                            if (userDoc.exists) {
-                                const {isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements} = userDoc.data()
-                                dispatch(getAuthenticatedUser(isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
-                                if (isNewUser) {
-                                    props.navigation.navigate('Onboarding')
+                    setTimeout(() => {
+                        db.doc(`/users/${user.uid}`)
+                            .get()
+                            .then(userDoc => {
+                                if (userDoc.exists) {
+                                    const {isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements} = userDoc.data()
+                                    dispatch(getAuthenticatedUser(isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
+                                    if (isNewUser) {
+                                        props.navigation.navigate('Onboarding')
+                                    } else {
+                                        props.navigation.navigate('App')
+                                    }
                                 } else {
-                                    props.navigation.navigate('App')
+                                    console.log('userDoc DOES NOT EXIST YET')
+                                    props.navigation.navigate('Auth')
                                 }
-                            } else {
-                                props.navigation.navigate('Auth')
-                            }
-                        })
+                            })
+                    }, 1000)
+                    
+                    /* 
+                        THIS CHECKS IF USER IS IN APP DATABASE. 
+                        TEMPORARILY COMMENTED OUT FOR NOW 
+                        SO NAVIGATION DOESN'T INTERFERE WITH 
+                        SOCIAL AUTH IN AuthScreen.js
+                        
+                        
+                    */
                 } else {
                     props.navigation.navigate('Auth')
                 }
