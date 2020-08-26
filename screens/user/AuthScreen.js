@@ -20,7 +20,7 @@ import TouchableCmp from '../../components/LNB/TouchableCmp'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { useDispatch } from 'react-redux'
-import { signup, login, googleSignIn, logout} from '../../redux/actions/authActions'
+import { signup, login, googleSignIn, appleLogin, logout} from '../../redux/actions/authActions'
 
 import Input from '../../components/UI/Input'
 import Card from '../../components/UI/Card'
@@ -32,12 +32,16 @@ import UserPermissions from '../../util/UserPermissions'
 import * as ImagePicker from 'expo-image-picker'
 
 import * as firebase from 'firebase'
-import * as Google from 'expo-google-app-auth';
 
-import * as WebBrowser from 'expo-web-browser'
-import { makeRedirectUri, ResponseType, useAuthRequest, useAutoDiscovery } from 'expo-auth-session'
-import useNonce from '../../hooks/useNonce'
-import { client_id, ios_expo_client, ios_app_client } from '../../secrets/googleAuth'
+import ENV from '../../env'
+import * as Google from 'expo-google-app-auth';
+import * as AppleAuthentication from 'expo-apple-authentication'
+import * as Crypto from 'expo-crypto'
+// import * as Facebook from 'expo-facebook'
+
+// import * as WebBrowser from 'expo-web-browser'
+// import { makeRedirectUri, ResponseType, useAuthRequest, useAutoDiscovery } from 'expo-auth-session'
+// import useNonce from '../../hooks/useNonce'
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE'
 // FORM VALIDATION REDUCER
 const formReducer = (state, action) => {
@@ -73,10 +77,8 @@ const formReducer = (state, action) => {
 
 // WebBrowser.maybeCompleteAuthSession();
 
-// const useProxy = Platform.select({ web: false, default: true });
 
 let text
-
 const AuthScreen = props => {
     
 
@@ -105,37 +107,6 @@ const AuthScreen = props => {
         formIsValid: false,
     })
 
-    // const nonce = useNonce()
-    // // Endpoint
-    // const discovery = useAutoDiscovery('https://accounts.google.com');
-    // // Request
-    // const [request, response, promptAsync] = useAuthRequest(
-    //     {
-    //         responseType: ResponseType.IdToken,
-    //         clientId: client_id,
-    //         redirectUri: makeRedirectUri({
-    //             // For usage in bare and standalone
-    //             native: 'com.googleusercontent.apps.GOOGLE_GUID:/oauthredirect',
-    //             useProxy,
-    //         }),
-    //         scopes: ['openid', 'profile', 'email'],
-    //         extraParams: {
-    //             nonce,
-    //         }
-    //     },
-    //     discovery
-    // );
-
-    // useEffect(() => {
-    //     if (response?.type === 'success') {
-    //       const { id_token } = response.params;
-          
-    //       const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
-    //       firebase.auth().signInWithCredential(credential);
-    //     }
-    //   }, [response]);
-
-
     useEffect(() => {
         if (error) {
             Alert.alert(
@@ -146,6 +117,7 @@ const AuthScreen = props => {
         }
     }, [error])
 
+    // GOOGLE SIGN IN
     const isUserEqual = (googleUser, firebaseUser) => {
         if (firebaseUser) {
           const providerData = firebaseUser.providerData;
@@ -163,7 +135,7 @@ const AuthScreen = props => {
     const onSignIn = (googleUser) => {
         // console.log('Google Auth Response', googleUser);
         // We need to register an Observer on Firebase Auth to make sure auth is initialized.
-        const unsubscribe = firebase.auth().onAuthStateChanged( async firebaseUser => {
+        const unsubscribe = firebase.auth().onAuthStateChanged(async firebaseUser => {
           unsubscribe();
           // Check if we are already signed-in Firebase with the correct user.
           if (!isUserEqual(googleUser, firebaseUser)) {
@@ -173,9 +145,10 @@ const AuthScreen = props => {
                 googleUser.accessToken
             )
             // Sign in with credential from the Google user.
-            let data
+            // let data
             try {
-                data = await firebase.auth().signInWithCredential(credential)
+                const data = await firebase.auth().signInWithCredential(credential)
+                
                 dispatch(googleSignIn(data, googleUser))
                 if (data.additionalUserInfo.isNewUser) {
                     props.navigation.navigate('Onboarding')
@@ -189,20 +162,18 @@ const AuthScreen = props => {
         });
     }
 
-
     const signInWithGoogleAsync = async () => {
         try {
             const result = await Google.logInAsync({
                 // androidClientId: YOUR_CLIENT_ID_HERE,
                 behavior: 'web',
-                iosClientId: ios_expo_client,
-                iosStandaloneAppClientId: ios_app_client,
+                iosClientId: ENV.google_ios_expo_client,
+                iosStandaloneAppClientId: ENV.google_ios_app_client,
                 scopes: ['profile', 'email'],
             });
         
         if (result.type === 'success') {
             onSignIn(result)
-            
             return result.accessToken;
         } else {
             return { cancelled: true };
@@ -212,7 +183,49 @@ const AuthScreen = props => {
         }
     }
 
-      
+    // APPLE SIGN IN
+    const [isLoginAvailable, setIsLoginAvailable] = useState(null)
+
+    const loadAppleAuth = useCallback(async () => {
+        const loginAvailable = await AppleAuthentication.isAvailableAsync()
+        setIsLoginAvailable(loginAvailable)
+    },[])
+
+    useEffect(() => {
+        loadAppleAuth()
+    }, [loadAppleAuth])
+    
+    const loginWithApple = async () => {
+        const csrf = Math.random().toString(36).substring(2, 15)
+        const nonce = Math.random().toString(36).substring(2, 10)
+        const hashedNonce = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, nonce)
+        const appleCredential = await AppleAuthentication.signInAsync({
+            requestedScopes: [
+                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                AppleAuthentication.AppleAuthenticationScope.EMAIL
+            ],
+            state: csrf,
+            nonce: hashedNonce
+        })
+        const { identityToken, email, state, fullName } = appleCredential
+
+        if (identityToken) {
+            const provider = new firebase.auth.OAuthProvider('apple.com')
+            const credential = provider.credential({
+                idToken: identityToken,
+                rawNonce: nonce
+            })
+            const data = await firebase.auth().signInWithCredential(credential)
+            const displayName = fullName.givenName + ' ' + fullName.familyName
+            dispatch(appleLogin(data, displayName))
+            if (data.additionalUserInfo.isNewUser) {
+                props.navigation.navigate('Onboarding')
+            }
+
+
+        }
+    }
+    
 
     const authHandler = async () => {
         let action
@@ -426,11 +439,8 @@ const AuthScreen = props => {
                 <Text style={{color: 'white', fontWeight:'bold', marginRight: 90}}>Sign in with Google</Text>
             </TouchableCmp>
 
-            <TouchableCmp
-                // disabled={!request || !nonce}
-                onPress={() => {
-                    // promptAsync({ useProxy })
-                }}
+            {/* <TouchableCmp
+                onPress={() => {}}
                 style={{...styles.socialButton, backgroundColor: '#3b5998'}}
             >
                 <View style={{marginLeft: 14}}>
@@ -441,24 +451,33 @@ const AuthScreen = props => {
                     />
                 </View>
                 <Text style={{color: 'white', fontWeight:'bold', marginRight: 80}}>Sign in with Facebook</Text>
-            </TouchableCmp>
+            </TouchableCmp> */}
 
-            <TouchableCmp
-                // disabled={!request || !nonce}
-                onPress={() => {
-                    // promptAsync({ useProxy })
-                }}
-                style={{...styles.socialButton, backgroundColor: 'black'}}
-            >
-                <View style={{marginLeft: 10}}>
-                    <FontAwesome5
-                        name='apple'
-                        size={30}
-                        color='white'
-                    />
-                </View>
-                <Text style={{color: 'white', fontWeight:'bold', marginRight: 97}}>Sign in with Apple</Text>
-            </TouchableCmp>
+            {isLoginAvailable && 
+                <TouchableCmp
+                    onPress={loginWithApple}
+                    style={{...styles.socialButton, backgroundColor: 'black'}}
+                >
+                    <View style={{marginLeft: 10}}>
+                        <FontAwesome5
+                            name='apple'
+                            size={30}
+                            color='white'
+                        />
+                    </View>
+                    <Text style={{color: 'white', fontWeight:'bold', marginRight: 97}}>Sign in with Apple</Text>
+                </TouchableCmp>
+
+                // <View style={{alignItems: 'center'}}>
+                //     <AppleAuthentication.AppleAuthenticationButton
+                //         buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}  
+                //         buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
+                //         cornerRadius={5}
+                //         style={{width: 250, height: 50, marginTop: 15}}
+                //         onPress={loginWithApple}              
+                //     />
+                // </View>
+            }
 
         </KeyboardAvoidingView>
     )

@@ -201,10 +201,9 @@ export const login = (email, password) => {
 export const googleSignIn = (data, googleUser) => {
     return async dispatch => {
         let userId, idToken, expTime, expDate
-
         
         userId = data.user.uid
-        idToken = googleUser.idToken
+        idToken = googleUser ? googleUser.idToken : await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000
         expDate = new Date(expTime)
 
@@ -213,7 +212,7 @@ export const googleSignIn = (data, googleUser) => {
 
         if (data.additionalUserInfo.isNewUser) {
             const noImg = 'no-img.png'
-            const imgUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+            const imgUrl = data.user.photoURL ? data.user.photoURL : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
             db.doc(`/users/${userId}`).set({
                 isNewUser: true,
                 userId: userId,
@@ -248,6 +247,57 @@ export const googleSignIn = (data, googleUser) => {
 
     }
 }
+
+export const appleLogin = (data, displayName) => {
+    return async dispatch => {
+        let userId, idToken, expTime, expDate
+        
+        userId = data.user.uid
+        idToken = await data.user.getIdToken()
+        expTime = jwtDecode(idToken).exp * 1000
+        expDate = new Date(expTime)
+
+        saveDataToStorage(idToken, userId, expDate)
+        dispatch(authenticate(idToken, userId))
+
+        if (data.additionalUserInfo.isNewUser) {
+            const noImg = 'no-img.png'
+            const imgUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+            db.doc(`/users/${userId}`).set({
+                isNewUser: true,
+                userId: userId,
+                createdAt: new Date().toISOString(),
+                email: data.user.email,
+                displayName: displayName,
+                headline: '',
+                imageUrl: imgUrl,
+                connections: 0,
+                pendingConnections: [],
+                outgoingRequests: [],
+                location: '',
+                bio: '',
+                website: '',
+                messages: {},
+                isAdmin: false,
+                lastReadAnnouncements: null
+            })
+            .catch(err => {
+                console.log(err)
+            })
+            dispatch(getAuthenticatedUser(true, userId, data.user.email, displayName, '', imgUrl, '', '', '', 0, [], [], {}, false, null))
+        } else {
+            db.doc(`/users/${userId}`).get()
+                .then(userDoc => {
+                    if (userDoc.exists) {
+                        const { userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements } = userDoc.data()
+                        dispatch(getAuthenticatedUser(false, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))            
+                    }
+                })
+        }
+    }
+}
+
+
 
 
 // SET USER ACTIONS
