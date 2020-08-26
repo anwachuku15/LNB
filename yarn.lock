@@ -3772,6 +3772,11 @@ expo-app-auth@~9.1.1:
     fbjs "1.0.0"
     invariant "^2.2.4"
 
+expo-apple-authentication@~2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/expo-apple-authentication/-/expo-apple-authentication-2.2.1.tgz#4f515183a385bb2681d8f7bf1064251016d05b97"
+  integrity sha512-BD4tKhoUWm99RTbFjf8IZo/CIOKFhjUej54mci1djOao770TVXl4Eq8IYDgwHEqK5v8UAySVwxAzgJBmQl9XIw==
+
 expo-asset@~8.1.7:
   version "8.1.7"
   resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-8.1.7.tgz#32618e51f85df56f1d7dd54c71eb486ae7f7674e"
@@ -3828,7 +3833,7 @@ expo-constants@~9.0.0:
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-9.0.0.tgz#35c600079ee91d38fe4f56375caae6e90f122fdd"
   integrity sha512-1kqZMM8Ez5JT3sTEx8I69fP6NYFLOJjeM6Z63dD/m2NiwvzSADiO5+BhghnWNGN1L3bxbgOjXS6EHtS7CdSfxA==
 
-expo-crypto@^8.2.1:
+expo-crypto@^8.2.1, expo-crypto@~8.2.1:
   version "8.2.1"
   resolved "https://registry.yarnpkg.com/expo-crypto/-/expo-crypto-8.2.1.tgz#307eb857912e231d26babba3aa87963e686f4cac"
   integrity sha512-P7/gmPEb1mRhEHyhJI4qNKZuW4jq6dkbxG3q6Meo4pbJHsH2xQz/3gokOcZwB4OMd0IJ+5yfRd2gXoqU8D9Xmw==
@@ -3844,6 +3849,11 @@ expo-error-recovery@~1.2.1:
   integrity sha512-QywpoDYfUCEJ62wv6xywY7JsLiMG31h22hjQ3HuBfj+cJNko5zSyJ7YKeXKGF2WiSVrSfA0HhqzNmsen9LMZrA==
   dependencies:
     fbjs "1.0.0"
+
+expo-facebook@~8.2.1:
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/expo-facebook/-/expo-facebook-8.2.1.tgz#3932ba061567e9ac2d897848f121275bd44a34fb"
+  integrity sha512-lCCRmhoI9gLfF5v/leSZiVjQxEb0O9/Wf9viHdOfFZFYufPspVqTjDhCpIXMdpQX0dLhWdRRV1dkKOwE8g+kIg==
 
 expo-file-system@~8.0.0:
   version "8.0.0"
