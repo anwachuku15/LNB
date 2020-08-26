@@ -24,3 +24,4 @@ screens/LNB/CameraImageView.js
 components/LNB/ZoomView.js
 Documents/LNB
 functions/index.js
+env.js
