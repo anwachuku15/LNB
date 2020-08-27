@@ -36,8 +36,8 @@ const index = client.initIndex('LNBmembers')
 import firebase from 'firebase'
 import { db } from '../../Firebase/Fire'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
-const SCREEN_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 
 const NewMessageScreen = props => {
     const scheme = useColorScheme()

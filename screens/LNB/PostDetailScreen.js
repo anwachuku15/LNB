@@ -37,13 +37,13 @@ import { createComment } from '../../redux/actions/postsActions'
 import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_WIDTH = Dimensions.get('screen').width
 
 
 
 
-const WINDOW_WIDTH = Dimensions.get('window').width
-const WINDOW_HEIGHT = Dimensions.get('window').height
+const WINDOW_WIDTH = Dimensions.get('screen').width
+const WINDOW_HEIGHT = Dimensions.get('screen').height
 const BASE_PADDING = 10
 
 let themeColor

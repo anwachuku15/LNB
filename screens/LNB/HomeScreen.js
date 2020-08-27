@@ -47,8 +47,8 @@ import TouchableCmp from '../../components/LNB/TouchableCmp';
 
 import { db } from '../../Firebase/Fire'
 
-const WINDOW_WIDTH = Dimensions.get('window').width
-const WINDOW_HEIGHT = Dimensions.get('window').height
+const WINDOW_WIDTH = Dimensions.get('screen').width
+const WINDOW_HEIGHT = Dimensions.get('screen').height
 const BASE_PADDING = 10
 
 let themeColor

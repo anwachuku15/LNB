@@ -35,8 +35,8 @@ import Lightbox from 'react-native-lightbox'
 import Hyperlink from 'react-native-hyperlink'
 import moment from 'moment'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
-const SCREEN_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 const BASE_PADDING = 10
 
 let themeColor, text, background
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     modal: {
-        width: Dimensions.get('window').width,
+        width: Dimensions.get('screen').width,
         borderRadius: 20,
         paddingVertical: 35,
         paddingHorizontal: 20,

@@ -24,8 +24,8 @@ import { EvilIcons } from '@expo/vector-icons'
 import MenuAvatar from '../../components/LNB/MenuAvatar'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
-const SCREEN_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 
 
 let themeColor

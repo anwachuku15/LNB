@@ -40,8 +40,8 @@ import UserProfilePictureModal from '../../components/LNB/UserProfilePictureModa
 import * as firebase from 'firebase'
 import { db } from '../../Firebase/Fire'
 
-let SCREEN_WIDTH = Dimensions.get('window').width
-let SCREEN_HEIGHT = Dimensions.get('window').height
+let SCREEN_WIDTH = Dimensions.get('screen').width
+let SCREEN_HEIGHT = Dimensions.get('screen').height
 const BASE_PADDING = 10
 
 let themeColor
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     pictureModal: {
-        width: Dimensions.get('window').width,
+        width: Dimensions.get('screen').width,
         borderRadius: 20,
         paddingBottom: 50,
         paddingHorizontal: 20,
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     modal: {
-        width: Dimensions.get('window').width,
+        width: Dimensions.get('screen').width,
         borderRadius: 20,
         paddingBottom: 50,
         paddingHorizontal: 20,

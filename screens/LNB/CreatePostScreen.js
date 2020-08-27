@@ -48,8 +48,8 @@ import Lightbox from 'react-native-lightbox'
 
 import moment from 'moment'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
-const SCREEN_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 const BASE_PADDING = 10
 
 const CreatePostScreen = props => {

@@ -39,8 +39,8 @@ import PinnedAnnouncement from '../../components/LNB/PinnedAnnouncement'
 
 // import { db } from '../../Firebase/Fire'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
-const SCREEN_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 const BASE_PADDING = 10
 
 let themeColor
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
         // backgroundColor: 'rgba(0,0,0,0.8)'
     },
     modal: {
-        width: Dimensions.get('window').width,
+        width: Dimensions.get('screen').width,
         borderRadius: 20,
         paddingTop: 30,
         paddingBottom: 50,
