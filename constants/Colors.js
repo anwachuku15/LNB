@@ -37,6 +37,8 @@ export default {
     drawericon: 'rgb(136, 153, 166)',
     darkSearch: '#2B2B2B',
     lightSearch: '#D5D5D5',
+    lightInput: '#F2F2F2',
+    darkInput: '#616161',
     red: '#FF1D15',
     bluebutton: '#2196F3',
     darkModal: '#141414'
