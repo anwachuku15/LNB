@@ -109,11 +109,10 @@ const updateStorageData = (newToken, userId, newDate) => {
 
 
 // SIGNUP + LOGIN + LOGOUT
-export const signup = (email, password, fname, lname, headline, localUri) => {
+export const signup = (email, password, displayName) => {
     return async dispatch => {
-        let data, userId, idToken, expTime, expiresIn, expDate, displayName, imageUrl
+        let data, userId, idToken, expTime, expiresIn, expDate, imageUrl
         let isAdmin = false
-        const noImg = 'no-img.png'
         // ---- ADD NEW USER TO FIREBASE ---- //
         try {
             data = await firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -123,25 +122,28 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         }
         
         userId = data.user.uid
-
+        
         idToken = await data.user.getIdToken()
         expTime = jwtDecode(idToken).exp * 1000
         expDate = new Date(expTime)
         // expiresIn = expTime - ((new Date()).getTime())
-        displayName = fname + ' ' + lname
+        // displayName = fname + ' ' + lname
+        
+        const noImg = 'no-img.png'
+        imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+        
+        // imageUrl = localUri === undefined 
+        //             ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+        //             : await uploadPhotoAsyn(localUri)
 
-        imageUrl = localUri === undefined 
-                    ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
-                    : await uploadPhotoAsyn(localUri)
-
-
+        const isNewUser = data.additionalUserInfo.isNewUser
         db.doc(`/users/${userId}`).set({
-            isNewUser: true,
+            isNewUser: isNewUser,
             userId: userId,
             createdAt: new Date().toISOString(),
             email: email,
             displayName: displayName,
-            headline: headline,
+            headline: '',
             imageUrl: imageUrl,
             connections: 0,
             pendingConnections: [],
@@ -159,7 +161,7 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
         
         saveDataToStorage(idToken, userId, expDate)
         dispatch(authenticate(idToken, userId))
-        dispatch(getAuthenticatedUser(true, userId, email, displayName, headline, imageUrl, '', '', '', 0, [], [], {}, isAdmin, null))
+        dispatch(getAuthenticatedUser(isNewUser, userId, email, displayName, '', imageUrl, '', '', '', 0, [], [], {}, isAdmin, null))
 
         //ONBOARDING - SEND NOTIFICATION TO ANDREW & ROB
         // data.additionalUserInfo.isNewUser for onboarding
@@ -168,6 +170,94 @@ export const signup = (email, password, fname, lname, headline, localUri) => {
 
     }
 }
+
+export const createProfile = (uri, headline, bio) => {
+    return async (dispatch, getState) => {
+        console.log(`update: ${headline}`)
+        const auth = getState().auth
+        const uid = firebase.auth().currentUser.uid
+        let imageUrl
+        const noImg = 'no-img.png'
+        
+        if (uri === 'none') {
+            imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+        } else {
+            imageUrl = await uploadPhotoAsyn(uri)
+        }
+
+        const isNewUser = false
+        await db.doc(`/users/${auth.userId}`).update({
+            isNewUser: false,
+            imageUrl: imageUrl,
+            headline: headline,
+            bio: bio
+        }).catch(err => console.log(err))
+
+        dispatch(getAuthenticatedUser(
+            isNewUser,
+            auth.userId,
+            auth.credentials.email,
+            auth.credentials.displayName,
+            headline,
+            imageUrl,
+            '',
+            bio,
+            '',
+            auth.connections,
+            auth.pendingConnections,
+            auth.outgoingRequests,
+            auth.messages,
+            auth.credentials.isAdmin,
+            auth.lastReadAnnouncements
+        ))
+
+    }
+}
+
+export const updateProfile = (headline, location, bio, link, uri) => {
+    return async (dispatch, getState) => {
+        
+        let imageUrl
+        const auth = getState().auth
+        if (uri !== getState().auth.credentials.imageUrl) {
+            imageUrl = await uploadPhotoAsyn(uri)
+        } else {
+            imageUrl = uri
+        }
+        const website = link.trim() !== '' && link.trim().substring(0,4) !== 'http'
+                        ? `https://${link.trim()}`
+                        : link
+        await db.doc(`/users/${auth.userId}`).update({
+            headline: headline,
+            location: location,
+            bio: bio,
+            website: website,
+            imageUrl: imageUrl
+        })
+        .catch(err => {
+            console.log(err)
+        }) 
+
+        dispatch(getAuthenticatedUser(
+            false,
+            auth.userId,
+            auth.credentials.email,
+            auth.credentials.displayName,
+            headline,
+            imageUrl,
+            location,
+            bio,
+            website,
+            auth.connections,
+            auth.pendingConnections,
+            auth.outgoingRequests,
+            auth.messages,
+            auth.credentials.isAdmin,
+            auth.lastReadAnnouncements
+        ))
+    }
+}
+
 
 export const login = (email, password) => {
     return async dispatch => {
@@ -591,49 +681,6 @@ export const unpinNeed = (needId) => {
 }
 
 
-export const updateProfile = (headline, location, bio, link, uri) => {
-    return async (dispatch, getState) => {
-        
-        let imageUrl
-        const auth = getState().auth
-        if (uri !== getState().auth.credentials.imageUrl) {
-            imageUrl = await uploadPhotoAsyn(uri)
-        } else {
-            imageUrl = uri
-        }
-        const website = link.trim() !== '' && link.trim().substring(0,4) !== 'http'
-                        ? `https://${link.trim()}`
-                        : link
-        await db.doc(`/users/${auth.userId}`).update({
-            headline: headline,
-            location: location,
-            bio: bio,
-            website: website,
-            imageUrl: imageUrl
-        })
-        .catch(err => {
-            console.log(err)
-        }) 
-
-        dispatch(getAuthenticatedUser(
-            false,
-            auth.userId,
-            auth.credentials.email,
-            auth.credentials.displayName,
-            headline,
-            imageUrl,
-            location,
-            bio,
-            website,
-            auth.connections,
-            auth.pendingConnections,
-            auth.outgoingRequests,
-            auth.messages,
-            auth.credentials.isAdmin,
-            auth.lastReadAnnouncements
-        ))
-    }
-}
 
 export const readAnnouncements = () => {
     return async (dispatch, getState) => {
