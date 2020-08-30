@@ -1221,6 +1221,26 @@
   resolved "https://registry.yarnpkg.com/@eva-design/processor/-/processor-2.0.0-alpha.1.tgz#65643f914ba2b242408b4b08530582cdfe07856d"
   integrity sha512-mvCZfLhU2J+nraKRt1rV2GtRrMEKGVZtFJq6yt+LAQh1tCPJnGzjS6v3ANuYjp4ljfO30JUcsc8iFCduEPhwng==
 
+"@expo-google-fonts/inter@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/inter/-/inter-0.1.0.tgz#399f068437824fcbf6aa3da5fcf490dba2af85a3"
+  integrity sha512-Y6GCqsUX6JwexQ2wmBkMiJBY6M2GpNQRTczzIGbBGhXWQxqGmP5awRcf0ZJV+OlLeJcKAzas/TW45ZLdpG3yzA==
+
+"@expo-google-fonts/m-plus-rounded-1c@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/m-plus-rounded-1c/-/m-plus-rounded-1c-0.1.0.tgz#863cce032741c35d93a86265b22f0952b551065c"
+  integrity sha512-tYjbWWYtjLwTqHzM6M0XQdDKFN9zMUQ/t4/ZHTxTMTudsw7HSjIT8j7q4EX5NBlnpIdm4bIqXkFk6LM430rJ1Q==
+
+"@expo-google-fonts/montserrat@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/montserrat/-/montserrat-0.1.0.tgz#745361cf6c7414749161930e94ccc962ed8ee7d3"
+  integrity sha512-jSGVtgapN4Ahxf/p978TWIPV+Ax2cc60671BzkewLG/zGNIyRreE3eXsVJudotpRl2fRJQC5Q98DARfPh917Jg==
+
+"@expo-google-fonts/noto-sans-jp@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/noto-sans-jp/-/noto-sans-jp-0.1.0.tgz#9625f37bdffe5a025f434ebaf5d369cb529809d1"
+  integrity sha512-jbfLMq/eTGFDooa8EjsFyvY5vX0YXeUX93HIQCCEcnoW4CulVqXrNA+SdwyPrfj1MuAEW15Sfyji0ocde2CqxA==
+
 "@expo/configure-splash-screen@0.1.13":
   version "0.1.13"
   resolved "https://registry.yarnpkg.com/@expo/configure-splash-screen/-/configure-splash-screen-0.1.13.tgz#9f974146d716ffc03461e4d2deb7bfb22826e56a"
