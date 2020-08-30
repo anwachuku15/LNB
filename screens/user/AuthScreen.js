@@ -1,5 +1,6 @@
 import React, { useState, useReducer, useCallback, useEffect } from 'react'
 import { 
+    Dimensions,
     ScrollView, 
     Alert, 
     Platform, 
@@ -33,7 +34,7 @@ import * as ImagePicker from 'expo-image-picker'
 
 import * as firebase from 'firebase'
 
-import ENV from '../../env'
+import ENV from '../../secrets/env'
 import * as Google from 'expo-google-app-auth';
 import * as AppleAuthentication from 'expo-apple-authentication'
 import * as Crypto from 'expo-crypto'
@@ -77,7 +78,8 @@ const formReducer = (state, action) => {
 
 // WebBrowser.maybeCompleteAuthSession();
 
-
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 let text
 const AuthScreen = props => {
     
@@ -282,13 +284,17 @@ const AuthScreen = props => {
     }
     
     const scheme = useColorScheme()
-    let switchButton, background
+    let switchButton, background, inputColor, placeholder
     
     if(scheme === 'dark') {
+        inputColor = Colors.darkInput
+        placeholder = '#AFAFAF'
         text = 'white'
         switchButton = Colors.tan
         background = '#1B1B1B'
     } else {
+        inputColor = Colors.lightInput
+        placeholder = Colors.placeholder
         text = 'black'
         switchButton = '#414959'
         background = 'white'
@@ -297,8 +303,9 @@ const AuthScreen = props => {
    
 
     return (
-        <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.OS === 'android' ? -200 : 50} style={{backgroundColor: background, ...styles.screen}}>
-            {isSignup && (
+        // <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={Platform.OS === 'android' ? -200 : 50} style={{backgroundColor: background, ...styles.screen}}>
+            <View style={{...styles.screen, backgroundColor: background}}>
+            {/* {isSignup && (
                 <TouchableCmp 
                     onPress={chooseProfilePicture}
                     style={styles.avatarContainer} 
@@ -311,10 +318,17 @@ const AuthScreen = props => {
                         style={{marginTop: 6, marginLeft: 2}}
                     />
                 </TouchableCmp>
-            )}
+            )} */}
+            {/* <View style={{width: SCREEN_WIDTH * 0.60, alignItems: 'center', top: -50}}>
+                <Image 
+                    source={require('../../assets/lnb.png')} 
+                    resizeMode='contain' 
+                    style={{width:100, height:100}}
+                />
+            </View> */}
 
             {/* EMAIL/PASSWORD AUTH */}
-            <Card style={styles.authContainer}>
+            <View style={styles.authContainer}>
                 <ScrollView>
                     {isSignup ? (
                         <Input
@@ -356,6 +370,7 @@ const AuthScreen = props => {
                     <Input 
                         id='email' 
                         placeholder='Email' 
+                        placeholderTextColor={placeholder}
                         keyboardType='email-address'
                         email 
                         required 
@@ -367,6 +382,7 @@ const AuthScreen = props => {
                     <Input 
                         id='password' 
                         placeholder='Password' 
+                        placeholderTextColor={placeholder}
                         keyboardType='default'
                         secureTextEntry
                         required
@@ -376,43 +392,28 @@ const AuthScreen = props => {
                         onInputChange={inputChangeHandler}
                         initialValue=''
                     />
+                    <TouchableCmp onPress={() => {}}>
+                        <Text style={{fontFamily: 'NotoSansJP_500Medium', fontSize: 12, color: Colors.primary}}>Forgot Password</Text>
+                    </TouchableCmp>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={{...styles2.button, ...{marginTop: 10}}} onPress={authHandler}>
                             {isSignup ? (<Text style={{color:text, fontWeight:'500'}}>Sign Up</Text>)
-                                        : (<Text style={{color:text, fontWeight:'500'}}>Login</Text>)
+                                        : (<Text style={{color:'white', fontWeight:'500'}}>Sign In</Text>)
                             }
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.buttonContainer}>
+                    {/* <View style={styles.buttonContainer}>
                         <TouchableOpacity style={{...styles2.button, backgroundColor: 'red', ...{marginTop: 10}}} onPress={() => dispatch(logout())}>
                             <Text style={{color:'white', fontWeight:'500'}}>Logout</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                     <View style={styles.buttonContainer}>
                         {isLoading ? (
                             <ActivityIndicator size='small' color={Colors.primary} />
-                        ) : ( 
-                            <TouchableCmp 
-                                onPress={() => {
-                                    setIsSignup(!isSignup)
-                                    // props.navigation.navigate('Register')
-                                    // logout()
-                                }} 
-                                style={{alignSelf: 'center', marginTop: 10}}>
-                                {isSignup ? (
-                                    <Text style={{color: switchButton, fontSize: 13}}>
-                                        Returning LNB Member? <Text style={{fontWeight:'500', color:Colors.primary}}>Log In</Text>
-                                    </Text>
-                                ) : (
-                                    <Text style={{color: switchButton, fontSize: 13}}>
-                                        New LNB Member? <Text style={{fontWeight:'500', color:Colors.primary}}>Sign Up</Text>
-                                    </Text>
-                                )}
-                            </TouchableCmp>
-                        )}
+                        ) : (null)}
                     </View>
                 </ScrollView>
-            </Card>
+            </View>
 
             <View style={{flexDirection: 'row', alignItems:'center'}}>
                 <Divider style={{ backgroundColor: Colors.placeholder, width: 145, marginVertical: 30 }} />
@@ -478,19 +479,18 @@ const AuthScreen = props => {
                 //     />
                 // </View>
             }
-
-        </KeyboardAvoidingView>
+            </View>
+        // </KeyboardAvoidingView>
     )
 }
 
-AuthScreen.navigationOptions = {
-    headerTransparent: true
-}
+
 
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        justifyContent: 'center',
+        // justifyContent: 'center',
+        paddingTop: SCREEN_HEIGHT*0.05,
         alignItems: 'center',
     },
     socialButton: {
@@ -525,11 +525,12 @@ const styles = StyleSheet.create({
         borderRadius: 50,
     },
     authContainer: {
+        marginTop: SCREEN_HEIGHT*0.1,
         width: '80%',
         maxWidth: 400,
         // height: '50%',
-        maxHeight: 500,
-        padding: 30
+        // maxHeight: 500,
+        paddingHorizontal: 30
     },
     buttonContainer: {
         marginTop: 10
