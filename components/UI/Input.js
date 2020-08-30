@@ -1,5 +1,5 @@
-import React, { useReducer, useEffect } from 'react'
-import { View, Text, TextInput, StyleSheet } from 'react-native'
+import React, { useReducer, useEffect, useRef } from 'react'
+import { View, Text, TextInput, StyleSheet, Dimensions } from 'react-native'
 import Colors from '../../constants/Colors'
 
 import { Appearance, useColorScheme } from 'react-native-appearance'
@@ -9,7 +9,7 @@ let text
 
 const INPUT_CHANGE = 'INPUT_CHANGE'
 const INPUT_BLUR = 'INPUT_BLUR'
-
+const SCREEN_WIDTH = Dimensions.get('screen').width
 
 const inputReducer = (state, action) => {
     switch (action.type) {
@@ -57,7 +57,10 @@ const Input = props => {
         })
     }
     
+
+
     const textChangeHandler = text => {
+        
         const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         let isValid = true;
         let enteredpassword
@@ -91,23 +94,28 @@ const Input = props => {
     }
 
     const colorScheme = useColorScheme()
-    let text
+    let text, inputColor
     if(colorScheme === 'dark') {
+        inputColor = Colors.darkInput,
         text = 'white'
     } else {
+        inputColor = Colors.lightInput
         text = 'black'
     }
+
+    const inputRef = useRef(null)
 
     return (
         <View style={props.label ? styles.formControl : styles.formControl2}>
             {props.label && <Text style={styles.label}>{props.label}</Text>}
             <TextInput
                 {...props}
-                style={{ ...styles.input, ...{color: text}}}
+                style={{...styles.input, color: text, backgroundColor: inputColor}}
                 value={inputState.value}
                 onChangeText={textChangeHandler}
                 onBlur={lostFocusHandler}
                 maxLength={150}
+                ref={inputRef}
             />
             {!inputState.isValid && inputState.touched && (
                 <View style={styles.errorContainer}>
@@ -137,12 +145,14 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase'
     },
     input: {
-        paddingHorizontal: 2,
-        paddingVertical: 5,
+        paddingHorizontal: 13,
+        paddingVertical: 13,
+        borderRadius: 10,
         borderBottomColor: Colors.primary,
         color: 'red',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        // marginTop: 10
+        // borderWidth: StyleSheet.hairlineWidth,
+        
+        // width: SCREEN_WIDTH * 0.75
     },
     errorContainer:{
         marginVertical: 5
