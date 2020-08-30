@@ -13,27 +13,29 @@ import { db } from '../Firebase/Fire'
 
 
 const LoadingScreen = props => {
-    // const scheme = useColorScheme()
-    // let background, text
-    // if (scheme === 'dark') {
-    //     background = 'black'
-    //     text = 'white'
-    // } 
-    // else {
-    //     background = 'white'
-    //     text = 'black'
-    // }
+    const scheme = useColorScheme()
+    let background, text
+    if (scheme === 'dark') {
+        background = '#1B1B1B'
+        text = 'white'
+    } 
+    else {
+        background = 'white'
+        text = 'black'
+    }
     // const [loadingProgress, setLoadingProgress] = useState(new Animated.Value(0))
     // const [animationDone, setAnimationDone] = useState(false)
 
     const dispatch = useDispatch()
     
     useEffect(() => {
+        // console.log('LOADING')
         const tryLogin = async () => {
             
             firebase.auth().onAuthStateChanged(async user => {
                 if (user) {
                     // let token, userId, expDate
+                    console.log(user.uid)
                     const authData = await AsyncStorage.getItem('authData')
                     if (authData) {
                         const transformedData = JSON.parse(authData)
@@ -59,7 +61,7 @@ const LoadingScreen = props => {
                                     }
                                 } else {
                                     console.log('userDoc DOES NOT EXIST YET')
-                                    props.navigation.navigate('Auth')
+                                    props.navigation.navigate('Intro')
                                 }
                             })
                     }, 1000)
@@ -73,7 +75,7 @@ const LoadingScreen = props => {
                         
                     */
                 } else {
-                    props.navigation.navigate('Auth')
+                    props.navigation.navigate('Intro')
                 }
                 return
             })
@@ -86,7 +88,7 @@ const LoadingScreen = props => {
     
 
     return (
-        <View style={styles.screen}>
+        <View style={{...styles.screen, backgroundColor: background}}>
             <ActivityIndicator size='large' color={Colors.primary} />
             
         </View>
