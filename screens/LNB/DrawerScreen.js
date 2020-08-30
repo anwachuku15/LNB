@@ -22,8 +22,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 
 import { db } from '../../Firebase/Fire'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
-const SCREEN_HEIGHT = Dimensions.get('window').height
+const SCREEN_WIDTH = Dimensions.get('screen').width
+const SCREEN_HEIGHT = Dimensions.get('screen').height
 
 let text, themeColor
 const DrawerScreen = props => {
