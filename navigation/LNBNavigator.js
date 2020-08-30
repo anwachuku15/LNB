@@ -2,7 +2,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../redux/actions/authActions'
 
-import { Platform, Dimensions, Vibration, StyleSheet, View, Button, SafeAreaView, Text, Animated, TouchableWithoutFeedback } from 'react-native'
+import { Platform, Dimensions, Image, Vibration, StyleSheet, View, Button, SafeAreaView, Text, Animated, TouchableWithoutFeedback } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import TouchableCmp from '../components/LNB/TouchableCmp'
 import { createAppContainer, createSwitchNavigator, StackActions, SwitchActions, NavigationActions, getActiveChildNavigationOptions } from 'react-navigation'
@@ -19,6 +19,13 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 import Colors from '../constants/Colors'
 import HomeScreen from '../screens/LNB/HomeScreen'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome, SimpleLineIcons, Feather, Entypo, AntDesign, FontAwesome5 } from '@expo/vector-icons'
+import IntroScreen from '../screens/user/IntroScreen'
+import EmailScreen from '../screens/user/EmailScreen'
+import DisplayNameScreen from '../screens/user/DisplayNameScreen'
+import PasswordScreen from '../screens/user/PasswordScreen'
+import CreateHeadlineScreen from '../screens/user/CreateHeadlineScreen'
+import CreateBioScreen from '../screens/user/CreateBioScreen'
+import ChooseProfilePictureScreen from '../screens/Onboarding/ChooseProfilePictureScreen'
 import RegisterScreen from '../screens/user/RegisterScreen'
 import AuthScreen from '../screens/user/AuthScreen'
 import LoadingScreen from '../screens/LoadingScreen'
@@ -55,9 +62,10 @@ import MenuAvatar from '../components/LNB/MenuAvatar'
 import MessageIcon from '../components/LNB/MessageIcon'
 import { useColorScheme } from 'react-native-appearance'
 import { Alert } from 'react-native'
+import EnterLocationScreen from '../screens/user/EnterLocationScreen'
 // import Animated, { Easing } from 'react-native-reanimated'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_WIDTH = Dimensions.get('screen').width
 
 export const defaultNavOptions = {
     headerTitleStyle: {
@@ -1272,35 +1280,67 @@ MessagesStack.navigationOptions = ({navigation}) => {
     }
 }
 
-
+export const authOnboardingNavOptions = {
+    headerTitleStyle: {
+        fontFamily: 'open-sans-bold',
+    },
+    headerBackTitleStyle: {
+        fontFamily: 'open-sans',
+    },
+    headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+    headerBackTitleVisible: false,
+    headerTransparent: true,
+    headerStyle: {
+        borderBottomWidth: 20,
+        borderBottomColor: 'transparent',
+        // backgroundColor: '#1B1B1B',
+    },
+    headerTitle: '',
+    // headerTitle: () => (
+    //     <TouchableCmp 
+    //         onPress={() => {}} 
+    //         activeOpacity={Platform.OS === 'ios' ? 0.6 : null}
+    //     >
+    //         <View style={{width: SCREEN_WIDTH * 0.60, alignItems: 'center'}}>
+    //             <Image 
+    //                 source={require('../assets/lnb.png')} 
+    //                 resizeMode='contain' 
+    //                 style={{width:38, height:38}}
+    //             />
+    //         </View>
+    //     </TouchableCmp>
+    // )
+}
 const AuthNavigator = createStackNavigator({
+    Intro: {
+        screen: IntroScreen,
+    },
     Auth: {
         screen: AuthScreen,
         navigationOptions: {
-            headerTitle: '',
-            headerStyle: {
-                borderBottomWidth: 0
-            },
-            
+            // gestureResponseDistance: 400
         }
     },
-    Register: {
-        screen: RegisterScreen,
-        navigationOptions: {
-            headerTitle: '',
-            headerStyle: {
-                borderBottomWidth: 0
-            }
-        }
-    }
+    SignUp: {
+        screen: EmailScreen,
+    },
+    DisplayName: {
+        screen: DisplayNameScreen,
+    },
+    Password: {
+        screen: PasswordScreen,
+    },
 }, {
-    defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: authOnboardingNavOptions
 })
 
 const OnboardingNavigator = createStackNavigator({
-    Welcome: WelcomeScreen
+    ChooseProfilePicture: ChooseProfilePictureScreen,
+    CreateHeadline: CreateHeadlineScreen,
+    CreateBio: CreateBioScreen,
+    EnterLocation: EnterLocationScreen
 }, {
-    defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: authOnboardingNavOptions
 })
 
 // ----- SWITCH ----- //
