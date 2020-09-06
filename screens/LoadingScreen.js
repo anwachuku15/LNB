@@ -35,7 +35,7 @@ const LoadingScreen = props => {
             firebase.auth().onAuthStateChanged(async user => {
                 if (user) {
                     // let token, userId, expDate
-                    console.log(user.uid)
+                    // console.log(user.uid)
                     const authData = await AsyncStorage.getItem('authData')
                     if (authData) {
                         const transformedData = JSON.parse(authData)
@@ -55,7 +55,12 @@ const LoadingScreen = props => {
                                     const {isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements} = userDoc.data()
                                     dispatch(getAuthenticatedUser(isNewUser, userId, email, displayName, headline, imageUrl, location, bio, website, connections, pendingConnections, outgoingRequests, messages, isAdmin, lastReadAnnouncements))
                                     if (isNewUser) {
-                                        props.navigation.navigate('Onboarding')
+                                        props.navigation.navigate({
+                                            routeName: 'ChooseProfilePicture',
+                                            params: {
+                                                authPic: imageUrl
+                                            }
+                                        })
                                     } else {
                                         props.navigation.navigate('App')
                                     }
