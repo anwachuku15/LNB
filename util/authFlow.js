@@ -4,6 +4,10 @@ import ENV from '../secrets/env'
 import * as AppleAuthentication from 'expo-apple-authentication'
 import * as Crypto from 'expo-crypto'
 
+import { useDispatch } from 'react-redux'
+import { googleSignIn, appleLogin } from '../redux/actions/authActions'
+
+
 const isUserEqual = (googleUser, firebaseUser) => {
     if (firebaseUser) {
         const providerData = firebaseUser.providerData;
@@ -35,7 +39,7 @@ const onSignIn = (googleUser, props) => {
         try {
             const data = await firebase.auth().signInWithCredential(credential)
             
-            dispatch(googleSignIn(data, googleUser))
+            await dispatch(googleSignIn(data, googleUser))
             if (data.additionalUserInfo.isNewUser) {
                 props.navigation.navigate('Onboarding')
             }
@@ -95,7 +99,5 @@ export const loginWithApple = async (props) => {
         if (data.additionalUserInfo.isNewUser) {
             props.navigation.navigate('Onboarding')
         }
-
-
     }
 }
