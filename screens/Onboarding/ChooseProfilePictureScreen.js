@@ -17,13 +17,14 @@ import {
     ActivityIndicator,
     Animated,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+
 import * as Haptics from 'expo-haptics'
 import { Divider, SocialIcon } from 'react-native-elements'
 import { FontAwesome5 } from '@expo/vector-icons'
 import TouchableCmp from '../../components/LNB/TouchableCmp'
 import { LinearGradient } from 'expo-linear-gradient'
 
-import { useDispatch } from 'react-redux'
 import { signup, login, googleSignIn, appleLogin, logout} from '../../redux/actions/authActions'
 
 import Input from '../../components/UI/Input'
@@ -37,7 +38,7 @@ import * as ImagePicker from 'expo-image-picker'
 
 import * as firebase from 'firebase'
 
-
+import {config} from '../../Firebase/Fire'
 
 const SCREEN_WIDTH = Dimensions.get('screen').width
 const SCREEN_HEIGHT = Dimensions.get('screen').height
@@ -50,9 +51,11 @@ const ChooseProfilePictureScreen = props => {
     const [profilePic, setProfilePic] = useState()
     const dispatch = useDispatch()
     
-  
+    const authPic = props.navigation.getParam('authPic')
+    const noImg = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
 
     useEffect(() => {
+        console.log(authPic !== noImg)
         if (error) {
             Alert.alert(
                 'Error', 
@@ -122,7 +125,12 @@ const ChooseProfilePictureScreen = props => {
                     <Text style={{color: Colors.placeholder, marginTop: 15}}>Upload a profile picture</Text>
 
                     <View style={{alignItems: 'center', marginTop: 100}}>
-                        <Image source={require('../../assets/no-img.png')} style={styles.avatar} />
+                        {authPic !== noImg ? (
+                            <Image source={{ uri: authPic }} style={styles.avatar} />
+                        ) : (
+                            <Image source={require('../../assets/no-img.png')} style={styles.avatar} />
+                        )}
+
                         <TouchableWithoutFeedback onPressIn={pressAddPhoto} onPressOut={chooseProfilePicture}>
                             <Animated.View style={[addPhotoStyle, {...styles.addPhotoContainer, backgroundColor: background}]}>
                                 <MaterialIcons
@@ -137,15 +145,15 @@ const ChooseProfilePictureScreen = props => {
 
                 <View style={{
                         ...styles.buttonContainer,
-                        opacity: !profilePic ? 0.4 : 1
+                        opacity: (authPic === noImg && !profilePic) ? 0.4 : 1
                 }}>
                     <TouchableCmp 
-                        disabled={!profilePic}
+                        disabled={(authPic === noImg) && !profilePic}
                         style={{...styles2.button, ...{marginTop: 10}}} 
                         onPress={() => props.navigation.navigate({
                             routeName: 'CreateHeadline',
                             params: {
-                                profilePic: profilePic
+                                profilePic: profilePic ? profilePic : 'authPic'
                             }
                         })}
                     >

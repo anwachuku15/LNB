@@ -86,7 +86,6 @@ const CreateProfileScreen = props => {
     const [isSignup, setIsSignup] = useState(false)
     const [error, setError] = useState()
     const [isLoading, setIsLoading] = useState(false)
-    const [profilePic, setProfilePic] = useState()
     const dispatch = useDispatch()
     
      // FORM REDUCER - INITIAL STATE
@@ -108,7 +107,10 @@ const CreateProfileScreen = props => {
         formIsValid: false,
     })
 
+    const profilePic = props.navigation.getParam('profilePic')
+
     useEffect(() => {
+        console.log(profilePic)
         if (error) {
             Alert.alert(
                 'Error', 
@@ -229,7 +231,7 @@ const CreateProfileScreen = props => {
                         onPress={() => props.navigation.navigate({
                             routeName: 'CreateBio',
                             params: {
-                                profilePic: props.navigation.getParam('profilePic'),
+                                profilePic: profilePic,
                                 headline: headline
                             }
                         })}
@@ -243,7 +245,7 @@ const CreateProfileScreen = props => {
                     onPress={() => props.navigation.navigate({
                         routeName: 'CreateBio',
                         params: {
-                            profilePic: props.navigation.getParam('profilePic'),
+                            profilePic: profilePic,
                             headline: ''
                         }
                     })}
