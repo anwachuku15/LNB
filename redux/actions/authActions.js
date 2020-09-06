@@ -179,19 +179,29 @@ export const createProfile = (uri, headline, bio) => {
         let imageUrl
         const noImg = 'no-img.png'
         
-        if (uri === 'none') {
-            imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+        if (uri === 'none' || uri === 'authPic') {
+            imageUrl = "don't update"
         } else {
             imageUrl = await uploadPhotoAsyn(uri)
         }
 
+        if (imageUrl === "don't update") {
+            await db.doc(`/users/${auth.userId}`).update({
+                isNewUser: false,
+                headline: headline,
+                bio: bio
+            }).catch(err => console.log(err))
+        } else {
+            await db.doc(`/users/${auth.userId}`).update({
+                isNewUser: false,
+                imageUrl: imageUrl,
+                headline: headline,
+                bio: bio
+            }).catch(err => console.log(err))
+        }
+        
         const isNewUser = false
-        await db.doc(`/users/${auth.userId}`).update({
-            isNewUser: false,
-            imageUrl: imageUrl,
-            headline: headline,
-            bio: bio
-        }).catch(err => console.log(err))
+        const imgUrl = imageUrl === "don't update" ? auth.credentials.imageUrl : imageUrl
 
         dispatch(getAuthenticatedUser(
             isNewUser,
@@ -199,7 +209,7 @@ export const createProfile = (uri, headline, bio) => {
             auth.credentials.email,
             auth.credentials.displayName,
             headline,
-            imageUrl,
+            imgUrl,
             '',
             bio,
             '',
