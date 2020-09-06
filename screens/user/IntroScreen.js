@@ -81,9 +81,9 @@ const IntroScreen = props => {
                     />
                 </View> */}
                 <View style={{alignItems: 'flex-start', marginTop: SCREEN_HEIGHT*0.2}}>
-                    <Text style={{color: text, ...styles.lnb}}>LEAVE</Text>
-                    <Text style={{color: text, ...styles.lnb}}>NORMAL</Text>
-                    <Text style={{color: text, ...styles.lnb}}>BEHIND</Text>
+                    <Text style={{color: text, ...styles.lnb}}><Text style={{color: Colors.primary}}>L</Text>EAVE</Text>
+                    <Text style={{color: text, ...styles.lnb}}><Text style={{color: Colors.primary}}>N</Text>ORMAL</Text>
+                    <Text style={{color: text, ...styles.lnb}}><Text style={{color: Colors.primary}}>B</Text>EHIND</Text>
                     <Text style={{color: text, ...styles.lnbCaption}}>The Modern Day Renaissance Movement</Text>
                     <TouchableCmp 
                         onPress={() => props.navigation.navigate('SignUp')}
