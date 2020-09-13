@@ -113,7 +113,7 @@ const EmailScreen = props => {
                 // console.log(err.message)
             }
             } else {
-            console.log('User already signed-in Firebase.');
+                console.log('User already signed-in Firebase.');
             }
         });
     }

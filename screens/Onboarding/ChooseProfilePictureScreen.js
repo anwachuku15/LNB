@@ -55,7 +55,7 @@ const ChooseProfilePictureScreen = props => {
     const noImg = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
 
     useEffect(() => {
-        console.log(authPic !== noImg)
+        // console.log(authPic !== noImg)
         if (error) {
             Alert.alert(
                 'Error', 
@@ -109,8 +109,8 @@ const ChooseProfilePictureScreen = props => {
 
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4,3]
+            allowsEditing: false,
+            // aspect: [4,3]
         })
         if(!result.cancelled) {
             setProfilePic(result.uri)
@@ -125,17 +125,24 @@ const ChooseProfilePictureScreen = props => {
                     <Text style={{color: Colors.placeholder, marginTop: 15}}>Upload a profile picture</Text>
 
                     <View style={{alignItems: 'center', marginTop: 100}}>
-                        {authPic !== noImg ? (
-                            <Image source={{ uri: authPic }} style={styles.avatar} />
+
+                        {profilePic ? (
+                            <Image source={{ uri: profilePic }} style={styles.avatar} />
                         ) : (
-                            <Image source={require('../../assets/no-img.png')} style={styles.avatar} />
+                            authPic === noImg ? (
+                                <Image source={require('../../assets/no-img.png')} style={styles.avatar} />
+                            ) : (
+                                <Image source={{ uri: authPic }} style={styles.avatar} />
+                            )
                         )}
+                        
 
                         <TouchableWithoutFeedback onPressIn={pressAddPhoto} onPressOut={chooseProfilePicture}>
-                            <Animated.View style={[addPhotoStyle, {...styles.addPhotoContainer, backgroundColor: background}]}>
+                            <Animated.View style={[addPhotoStyle, {...styles.addPhotoContainer, borderColor: Colors.primary, backgroundColor: Colors.primary}]}>
                                 <MaterialIcons
                                     name='add-a-photo'
-                                    color={Colors.primary}
+                                    // color={Colors.primary}
+                                    color={background}
                                     size={40}
                                 />
                             </Animated.View>
@@ -223,7 +230,7 @@ const styles = StyleSheet.create({
         bottom: -SCREEN_WIDTH*0.01,
         right: SCREEN_WIDTH*0.04,
         borderWidth: 2,
-        borderColor: Colors.primaryDark,
+        // borderColor: Colors.primaryDark,
         padding: 24,
         borderRadius: 50
     },
