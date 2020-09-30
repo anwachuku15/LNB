@@ -43,7 +43,7 @@ const BioModal = (props) => {
         style={styles.bioButton}
         onPress={() => setIsBioVisible(!isBioVisible)}
       >
-        <Text style={{ color: Colors.green }}>About Me</Text>
+        <Text style={{ color: "white", fontWeight: "600" }}>About Me</Text>
       </TouchableCmp>
 
       {isBioVisible && (
