@@ -33,7 +33,7 @@ const NavContainer = (props) => {
     if (isAuth === null) {
       navRef.current.dispatch(
         NavigationActions.navigate({
-          routeName: "Auth",
+          routeName: "AuthNav",
         })
       );
     }
