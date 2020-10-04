@@ -132,9 +132,6 @@ const LoadingScreen = (props) => {
     tryLogin();
   }, [dispatch]);
 
-  // TODO: ADD FIREBASE LISTENERS FROM AUTH ACTIONS (authActions.js:464)
-  //   useEffect(() => {}, []);
-
   return (
     <View style={{ ...styles.screen, backgroundColor: background }}>
       <ActivityIndicator size="large" color={Colors.primary} />
