@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import firebase from "firebase";
 // EXPO
-import { Notifications } from "expo";
+import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import Constants from "expo-constants";
 // REDUX
@@ -100,7 +100,9 @@ const HomeScreen = (props) => {
   // PUSH NOTIFICATIONS
   useEffect(() => {
     registerForPushNotificationsAsync();
-    const notificationsSub = Notifications.addListener(handleNotification);
+    const notificationsSub = Notifications.addNotificationReceivedListener(
+      handleNotification
+    );
     return () => {
       // registerForPushNotificationsAsync.remove()
       notificationsSub; // && Notifications.removeListener()
@@ -192,14 +194,15 @@ const HomeScreen = (props) => {
     }
 
     // ANDROID --> FIREBASE?
-    if (Platform.OS === "android") {
-      Notifications.createChannelAndroidAsync("default", {
-        name: "default",
-        sound: true,
-        priority: "max",
-        vibrate: [0, 250, 250, 250],
-      });
-    }
+    // TODO: DEPRECATED: createChannelAndroidAsync
+    // if (Platform.OS === "android") {
+    //   Notifications.createChannelAndroidAsync("default", {
+    //     name: "default",
+    //     sound: true,
+    //     priority: "max",
+    //     vibrate: [0, 250, 250, 250],
+    //   });
+    // }
   };
 
   // SCREEN SETTINGS/UI/FUNCTIONS
