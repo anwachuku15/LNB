@@ -19,6 +19,10 @@ import Colors from "./constants/Colors";
 
 import NavContainer from "./navigation/NavContainer";
 
+import { LogBox } from "react-native";
+
+LogBox.ignoreAllLogs();
+
 enableScreens();
 
 export default function App() {
