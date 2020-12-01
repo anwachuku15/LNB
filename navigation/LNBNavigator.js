@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/actions/authActions";
 
@@ -15,6 +15,7 @@ import {
   Animated,
   TouchableWithoutFeedback,
 } from "react-native";
+import CustomModal from "react-native-modal";
 import * as Haptics from "expo-haptics";
 import TouchableCmp from "../components/LNB/TouchableCmp";
 import {
@@ -107,7 +108,7 @@ import EnterLocationScreen from "../screens/user/EnterLocationScreen";
 // import Animated, { Easing } from 'react-native-reanimated'
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
-
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
 export const defaultNavOptions = {
   headerTitleStyle: {
     fontFamily: "open-sans-bold",
@@ -506,11 +507,14 @@ const ShopStack = createSharedElementStackNavigator(
 );
 
 const ThemedBottomBar = (props) => {
+  console.log(props.navigation._childrenNavigation.CreatePost);
   const scheme = useColorScheme();
   let theme;
   if (scheme === "dark") {
     theme = Colors.darkHeader;
   } else theme = Colors.lightHeader;
+
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <BottomTabBar
       {...props}
@@ -535,15 +539,16 @@ const secondaryButtonSize = new Animated.Value(1);
 const buttonMenuAnimation = new Animated.Value(0);
 const buttonColorAnimation = new Animated.Value(0);
 
+let isMenuOpen = false;
 const toggleCreateMenu = () => {
   Animated.parallel([
     Animated.sequence([
       Animated.timing(createButtonSize, {
-        toValue: 0.95,
-        duration: 50,
+        toValue: createButtonSize._value === 1 ? 0 : 1,
+        duration: 10,
       }),
       Animated.timing(createButtonSize, {
-        toValue: 1,
+        toValue: createButtonSize._value === 0 ? 1 : 0,
       }),
     ]),
     Animated.spring(buttonMenuAnimation, {
@@ -642,6 +647,15 @@ const messageX = buttonMenuAnimation.interpolate({
 let messageY = buttonMenuAnimation.interpolate({
   inputRange: [0, 1],
   outputRange: [-70, -144],
+});
+
+const exitX = buttonMenuAnimation.interpolate({
+  inputRange: [0, 1],
+  outputRange: [SCREEN_WIDTH * 0.415, SCREEN_WIDTH * 0.415],
+});
+let exitY = buttonMenuAnimation.interpolate({
+  inputRange: [0, 1],
+  outputRange: [-70, -70],
 });
 
 const needX = buttonMenuAnimation.interpolate({
@@ -773,30 +787,29 @@ const BottomTabStackContainer = createStackNavigator(
           screen: CreateAnnouncementScreen,
           navigationOptions: {
             tabBarButtonComponent: () => {
-              return (
-                <View>
-                  <TouchableWithoutFeedback onPress={navToEventsModal}>
-                    <Animated.View
-                      style={[
-                        secondaryButtonStyle,
-                        {
-                          ...secondaryPostButtonStyle,
-                          backgroundColor: "rgba(237, 37, 78, 0.4)",
-                          position: "absolute",
-                          left: announcementX,
-                          top: announcementY,
-                        },
-                      ]}
-                    >
-                      <MaterialCommunityIcons
-                        name="calendar-edit"
-                        size={24}
-                        color="white"
-                      />
-                    </Animated.View>
-                  </TouchableWithoutFeedback>
-                </View>
-              );
+              return null;
+              // <View>
+              //   <TouchableWithoutFeedback onPress={navToEventsModal}>
+              //     <Animated.View
+              //       style={[
+              //         secondaryButtonStyle,
+              //         {
+              //           ...secondaryPostButtonStyle,
+              //           backgroundColor: "rgba(237, 37, 78, 0.4)",
+              //           position: "absolute",
+              //           left: announcementX,
+              //           top: announcementY,
+              //         },
+              //       ]}
+              //     >
+              //       <MaterialCommunityIcons
+              //         name="calendar-edit"
+              //         size={24}
+              //         color="white"
+              //       />
+              //     </Animated.View>
+              //   </TouchableWithoutFeedback>
+              // </View>
             },
           },
         },
@@ -804,26 +817,25 @@ const BottomTabStackContainer = createStackNavigator(
           screen: CreatePostScreen,
           navigationOptions: {
             tabBarButtonComponent: () => {
-              return (
-                <View>
-                  <TouchableWithoutFeedback onPress={navToPostOption}>
-                    <Animated.View
-                      style={[
-                        secondaryButtonStyle,
-                        {
-                          ...secondaryPostButtonStyle,
-                          backgroundColor: Colors.primary,
-                          position: "absolute",
-                          left: needX,
-                          top: needY,
-                        },
-                      ]}
-                    >
-                      <MaterialIcons name="create" size={24} color="white" />
-                    </Animated.View>
-                  </TouchableWithoutFeedback>
-                </View>
-              );
+              return null;
+              // <View>
+              //   <TouchableWithoutFeedback onPress={navToPostOption}>
+              //     <Animated.View
+              //       style={[
+              //         secondaryButtonStyle,
+              //         {
+              //           ...secondaryPostButtonStyle,
+              //           backgroundColor: Colors.primary,
+              //           position: "absolute",
+              //           left: needX,
+              //           top: needY,
+              //         },
+              //       ]}
+              //     >
+              //       <MaterialIcons name="create" size={24} color="white" />
+              //     </Animated.View>
+              //   </TouchableWithoutFeedback>
+              // </View>
             },
           },
         },
@@ -831,30 +843,29 @@ const BottomTabStackContainer = createStackNavigator(
           screen: NewMessageScreen,
           navigationOptions: {
             tabBarButtonComponent: () => {
-              return (
-                <View>
-                  <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
-                    <Animated.View
-                      style={[
-                        secondaryButtonStyle,
-                        {
-                          ...secondaryPostButtonStyle,
-                          backgroundColor: Colors.blue,
-                          position: "absolute",
-                          left: messageX,
-                          top: messageY,
-                        },
-                      ]}
-                    >
-                      <MaterialCommunityIcons
-                        name="message-plus"
-                        size={24}
-                        color="white"
-                      />
-                    </Animated.View>
-                  </TouchableWithoutFeedback>
-                </View>
-              );
+              return null;
+              // <View>
+              //   <TouchableWithoutFeedback onPress={navToNewMessageScreen}>
+              //     <Animated.View
+              //       style={[
+              //         secondaryButtonStyle,
+              //         {
+              //           ...secondaryPostButtonStyle,
+              //           backgroundColor: Colors.blue,
+              //           position: "absolute",
+              //           left: messageX,
+              //           top: messageY,
+              //         },
+              //       ]}
+              //     >
+              //       <MaterialCommunityIcons
+              //         name="message-plus"
+              //         size={24}
+              //         color="white"
+              //       />
+              //     </Animated.View>
+              //   </TouchableWithoutFeedback>
+              // </View>
             },
           },
         },
@@ -869,43 +880,214 @@ const BottomTabStackContainer = createStackNavigator(
               }
             },
             tabBarButtonComponent: ({ style }) => {
+              const [isMenuOpen, setIsMenuOpen] = useState(false);
               return (
-                <View
-                  style={{
-                    shadowColor: "black",
-                    shadowRadius: 5,
-                    shadowOffset: { height: 5 },
-                    shadowOpacity: 0.3,
-                    ...postButtonStyle,
-                  }}
-                >
-                  <TouchableWithoutFeedback
-                    onPressIn={pressPost}
-                    onPressOut={navToPostModal}
-                    onLongPress={toggleCreateMenu}
+                <>
+                  <View
+                    style={{
+                      shadowColor: "black",
+                      shadowRadius: 5,
+                      shadowOffset: { height: 5 },
+                      shadowOpacity: 0.3,
+                      ...postButtonStyle,
+                    }}
                   >
-                    <Animated.View
-                      style={[
-                        createButtonStyle,
-                        {
-                          ...styles.createButton,
-                          borderColor: Colors.primary,
-                          borderWidth: 2,
-                        },
-                      ]}
+                    <TouchableWithoutFeedback
+                      onPressIn={pressPost}
+                      onPressOut={navToPostModal}
+                      onLongPress={() => {
+                        setIsMenuOpen(!isMenuOpen);
+                        toggleCreateMenu();
+                      }}
                     >
-                      <Animated.View style={[rotation]}>
-                        {/* <FontAwesome name='plus' size={24} color={'white'}/> */}
-                        <MaterialCommunityIcons
-                          name="pencil-plus"
-                          size={30}
-                          color={"white"}
-                          style={{ marginLeft: 5, marginTop: 3 }}
-                        />
+                      <Animated.View
+                        style={[
+                          createButtonStyle,
+                          {
+                            ...styles.createButton,
+                            borderColor: Colors.primary,
+                            borderWidth: 2,
+                          },
+                        ]}
+                      >
+                        <Animated.View style={[rotation]}>
+                          {/* <FontAwesome name='plus' size={24} color={'white'}/> */}
+                          <MaterialCommunityIcons
+                            name="pencil-plus"
+                            size={30}
+                            color={"white"}
+                            style={{ marginLeft: 5, marginTop: 3 }}
+                          />
+                        </Animated.View>
                       </Animated.View>
-                    </Animated.View>
-                  </TouchableWithoutFeedback>
-                </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                  <CustomModal
+                    isVisible={isMenuOpen}
+                    backdropColor="black"
+                    backdropOpacity={0.8}
+                    backdropTransitionInTiming={100}
+                    backdropTransitionOutTiming={100}
+                    onBackdropPress={() => {
+                      setIsMenuOpen(!isMenuOpen);
+                      toggleCreateMenu();
+                    }}
+                    animationIn="fadeIn"
+                    animationOut="fadeOut"
+                    style={{ marginBottom: 0 }}
+                    // presentationStyle
+                  >
+                    <View
+                      style={{
+                        // flex: 1,
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        marginTop: 22,
+                        marginBottom: 0,
+                        backgroundColor: "transparent",
+                        width: SCREEN_WIDTH * 0.4,
+                        height: 200,
+                        position: "absolute",
+                        bottom: 80,
+                        right: SCREEN_WIDTH * 0.01,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: SCREEN_WIDTH / 1.5,
+                        }}
+                      >
+                        {/* <TouchableWithoutFeedback
+                          onPress={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="pencil-plus"
+                            size={30}
+                            color={"white"}
+                            style={{ marginLeft: 5, marginTop: 3 }}
+                          />
+                        </TouchableWithoutFeedback> */}
+                        <TouchableWithoutFeedback
+                          onPress={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                            toggleCreateMenu();
+                            navToPostOption();
+                          }}
+                          style={{ backgroundColor: "blue" }}
+                        >
+                          <Animated.View
+                            style={[
+                              secondaryButtonStyle,
+                              {
+                                ...secondaryPostButtonStyle,
+                                backgroundColor: Colors.primary,
+                                position: "absolute",
+                                left: needX,
+                                top: needY,
+                              },
+                            ]}
+                          >
+                            <MaterialIcons
+                              name="create"
+                              size={24}
+                              color="white"
+                            />
+                          </Animated.View>
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback
+                          onPress={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                            toggleCreateMenu();
+                          }}
+                        >
+                          <Animated.View
+                            style={[
+                              secondaryButtonStyle,
+                              {
+                                ...secondaryPostButtonStyle,
+                                backgroundColor: Colors.primaryDark,
+                                position: "absolute",
+                                left: exitX,
+                                top: exitY,
+                              },
+                            ]}
+                          >
+                            <MaterialCommunityIcons
+                              name="close"
+                              size={24}
+                              color="white"
+                            />
+                          </Animated.View>
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback
+                          onPress={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                            toggleCreateMenu();
+                            navToNewMessageScreen();
+                          }}
+                        >
+                          <Animated.View
+                            style={[
+                              secondaryButtonStyle,
+                              {
+                                ...secondaryPostButtonStyle,
+                                backgroundColor: Colors.blue,
+                                position: "absolute",
+                                left: messageX,
+                                top: messageY,
+                              },
+                            ]}
+                          >
+                            <MaterialCommunityIcons
+                              name="message-plus"
+                              size={24}
+                              color="white"
+                            />
+                          </Animated.View>
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback
+                          onPress={() => {
+                            Alert.alert(
+                              "Coming Soon",
+                              "Event planning coming soon...",
+                              [
+                                {
+                                  text: "Okay",
+                                  style: "cancel",
+                                  onPress: () => {
+                                    setIsMenuOpen(!isMenuOpen);
+                                    toggleCreateMenu();
+                                  },
+                                },
+                              ]
+                            );
+                          }}
+                        >
+                          <Animated.View
+                            style={[
+                              secondaryButtonStyle,
+                              {
+                                ...secondaryPostButtonStyle,
+                                backgroundColor: "rgba(237, 37, 78, 0.4)",
+                                position: "absolute",
+                                left: announcementX,
+                                top: announcementY,
+                              },
+                            ]}
+                          >
+                            <MaterialCommunityIcons
+                              name="calendar-edit"
+                              size={24}
+                              color="white"
+                            />
+                          </Animated.View>
+                        </TouchableWithoutFeedback>
+                      </View>
+                    </View>
+                  </CustomModal>
+                </>
               );
             },
             tabBarColor: Colors.primaryColor,
@@ -1052,6 +1234,8 @@ const BottomTabStackContainer = createStackNavigator(
                 navigation.navigate("postModal");
               }, 250);
             } else if (buttonMenuAnimation._value === 1) {
+              isMenuOpen = !isMenuOpen;
+              console.log(isMenuOpen);
               toggleCreateMenu();
             }
           };
@@ -1116,6 +1300,17 @@ let postButtonStyle = {
   left: SCREEN_WIDTH * 0.48,
 };
 let secondaryPostButtonStyle = {
+  position: "relative",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  // bottom: 0,
+  // left: SCREEN_WIDTH * 0.48,
+};
+
+let secondaryPostButtonStyle1 = {
   position: "absolute",
   alignItems: "center",
   justifyContent: "center",
