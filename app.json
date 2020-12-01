@@ -4,10 +4,7 @@
     "description": "Members-Only networking platform for those who want to leave normal behind.",
     "slug": "leave-normal-behind",
     "privacy": "unlisted",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/LNB-iOSicon.png",
@@ -19,12 +16,10 @@
     "updates": {
       "fallbackToCacheTimeout": 5000
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.andrewnwachuku.lnbapp",
-      "buildNumber": "1.3.0",
+      "buildNumber": "1.3.1",
       "supportsTablet": true,
       "userInterfaceStyle": "automatic",
       "usesAppleSignIn": true
