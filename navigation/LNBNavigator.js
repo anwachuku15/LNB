@@ -96,6 +96,11 @@ import PostLikesScreen from "../screens/LNB/PostLikesScreen";
 import NewMessageScreen from "../screens/LNB/NewMessageScreen";
 import GroupChatScreen from "../screens/LNB/GroupChatScreen";
 import CameraScreen from "../screens/LNB/CameraScreen";
+import EventTypeScreen from "../screens/LNB/EventTypeScreen";
+import EventDetailsScreen from "../screens/LNB/EventDetailsScreen";
+import EventLocationScreen from "../screens/LNB/EventLocationScreen";
+import EventDescriptionScreen from "../screens/LNB/EventDescriptionScreen";
+import EventReviewScreen from "../screens/LNB/EventReviewScreen";
 
 import WelcomeScreen from "../screens/Onboarding/WelcomeScreen";
 
@@ -717,6 +722,24 @@ DirectoryTabButton.navigationOptions = ({ navigation, screenProps }) => {
   };
 };
 
+const CreateEventStack = createStackNavigator({
+  EventType: {
+    screen: EventTypeScreen,
+  },
+  EventDetails: {
+    screen: EventDetailsScreen,
+  },
+  EventLocation: {
+    screen: EventLocationScreen,
+  },
+  EventDescription: {
+    screen: EventDescriptionScreen,
+  },
+  EventReview: {
+    screen: EventReviewScreen,
+  },
+});
+
 const BottomTabStackContainer = createStackNavigator(
   {
     default: createBottomTabNavigator(
@@ -1064,13 +1087,18 @@ const BottomTabStackContainer = createStackNavigator(
                               ]
                             );
                           }}
+                          onPress={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                            toggleCreateMenu();
+                            navToCreateEventStack();
+                          }}
                         >
                           <Animated.View
                             style={[
                               secondaryButtonStyle,
                               {
                                 ...secondaryPostButtonStyle,
-                                backgroundColor: "rgba(237, 37, 78, 0.4)",
+                                backgroundColor: "rgb(237, 37, 78)",
                                 position: "absolute",
                                 left: announcementX,
                                 top: announcementY,
@@ -1239,15 +1267,18 @@ const BottomTabStackContainer = createStackNavigator(
               toggleCreateMenu();
             }
           };
-          navToEventsModal = () => {
-            // navigation.navigate('announcementModal')
-            Alert.alert("Coming Soon", "Event planning coming soon...", [
-              {
-                text: "Okay",
-                style: "cancel",
-                onPress: () => toggleCreateMenu(),
-              },
-            ]);
+          navToCreateEventStack = () => {
+            selectOption();
+            setTimeout(() => {
+              navigation.navigate("eventModal");
+            }, 250);
+            // Alert.alert("Coming Soon", "Event planning coming soon...", [
+            //   {
+            //     text: "Okay",
+            //     style: "cancel",
+            //     onPress: () => toggleCreateMenu(),
+            //   },
+            // ]);
           };
           navToNewMessageScreen = () => {
             selectOption();
@@ -1268,6 +1299,7 @@ const BottomTabStackContainer = createStackNavigator(
     announcementModal: {
       screen: CreateAnnouncementScreen,
     },
+    eventModal: CreateEventStack,
     cameraModal: {
       screen: CameraScreen,
     },
@@ -1289,6 +1321,7 @@ const BottomTabStackContainer = createStackNavigator(
 let navToPostModal,
   navToPostOption,
   navToEventsModal,
+  navToCreateEventStack,
   navToNewMessageScreen,
   navToMessages,
   background,
