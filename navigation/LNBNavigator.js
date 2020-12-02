@@ -507,7 +507,7 @@ const ShopStack = createSharedElementStackNavigator(
 );
 
 const ThemedBottomBar = (props) => {
-  console.log(props.navigation._childrenNavigation.CreatePost);
+  // console.log(props.navigation._childrenNavigation.CreatePost);
   const scheme = useColorScheme();
   let theme;
   if (scheme === "dark") {
@@ -1235,7 +1235,7 @@ const BottomTabStackContainer = createStackNavigator(
               }, 250);
             } else if (buttonMenuAnimation._value === 1) {
               isMenuOpen = !isMenuOpen;
-              console.log(isMenuOpen);
+              // console.log(isMenuOpen);
               toggleCreateMenu();
             }
           };
