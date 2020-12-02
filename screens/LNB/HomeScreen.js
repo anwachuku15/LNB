@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   feed: {
-    // marginHorizontal: 16
+    marginTop: 5,
   },
   feedItem: {
     backgroundColor: "#FFF",
