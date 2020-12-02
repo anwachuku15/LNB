@@ -228,8 +228,13 @@ const NeedPost = (props) => {
       style={{
         ...styles.feedItem,
         flexDirection: "row",
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: Colors.placeholder,
+        // borderBottomWidth: StyleSheet.hairlineWidth,
+        // borderBottomColor: Colors.placeholder,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: Colors.placeholder,
+        borderRadius: 10,
+        marginBottom: 5,
+        marginHorizontal: 5,
         flexDirection: "column",
         backgroundColor: themeColor,
       }}
