@@ -12,6 +12,10 @@ export const DELETE_NEED = "DELETE_NEED";
 export const SET_NEEDS = "SET_NEEDS";
 export const SET_NEED = "SET_NEED";
 export const SET_EVENT_POSTS = "SET_EVENT_POSTS";
+export const CREATE_EVENT = "CREATE_EVENT";
+export const DELETE_EVENT = "DELETE_EVENT";
+export const SET_EVENT = "SET_EVENT";
+export const SET_EVENTS = "SET_EVENTS";
 export const LIKE_NEED = "LIKE_NEED";
 export const UNLIKE_NEED = "UNLIKE_NEED";
 export const CREATE_COMMENT = "CREATE_COMMENT";
@@ -139,6 +143,22 @@ export const deleteNeed = (needId) => {
     .delete()
     .catch((err) => console.log(err));
 };
+
+export const createEvent = (
+  name,
+  coverPhoto,
+  month,
+  day,
+  year,
+  startTime,
+  endTime,
+  location,
+  description,
+  host,
+  cohosts
+) => {};
+
+export const deleteEvent = (eventId) => {};
 
 export const createComment = (postId, body, localUri) => {
   return async (dispatch, getState) => {
