@@ -11,6 +11,7 @@ export const CREATE_NEED_NOIMG = "CREATE_NEED_NOIMG";
 export const DELETE_NEED = "DELETE_NEED";
 export const SET_NEEDS = "SET_NEEDS";
 export const SET_NEED = "SET_NEED";
+export const SET_EVENT_POSTS = "SET_EVENT_POSTS";
 export const LIKE_NEED = "LIKE_NEED";
 export const UNLIKE_NEED = "UNLIKE_NEED";
 export const CREATE_COMMENT = "CREATE_COMMENT";
@@ -32,8 +33,24 @@ export const fetchNeeds = () => {
   };
 };
 
+export const fetchEventPosts = () => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
+    try {
+      const loadedEventPosts = await FirePostData.fetchEventPosts();
+
+      dispatch({
+        type: SET_EVENT_POSTS,
+        eventPosts: loadedEventPosts,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+};
+
 // Consider drafts (published: false vs published: true, pubTimestamp)
-export const createNeed = (userName, body, media, taggedUsers) => {
+export const createNeed = (userName, body, media, postType, taggedUsers) => {
   return async (dispatch, getState) => {
     const uid = getState().auth.userId;
     const userImage = getState().auth.credentials.imageUrl;
@@ -53,6 +70,7 @@ export const createNeed = (userName, body, media, taggedUsers) => {
       FirePostData.createNeedMedia(
         timestamp,
         postId,
+        postType,
         uid,
         userImage,
         userName,
@@ -68,6 +86,7 @@ export const createNeed = (userName, body, media, taggedUsers) => {
           id: postId,
           uid: uid,
           timestamp: timestamp,
+          postType: postType,
           userName: userName,
           userImage: userImage,
           body: body,
@@ -88,6 +107,7 @@ export const createNeed = (userName, body, media, taggedUsers) => {
       FirePostData.createNeed(
         timestamp,
         postId,
+        postType,
         uid,
         userImage,
         userName,
@@ -101,6 +121,7 @@ export const createNeed = (userName, body, media, taggedUsers) => {
           id: postId,
           uid: uid,
           timestamp: timestamp,
+          postType: postType,
           userName: userName,
           userImage: userImage,
           body: body,
