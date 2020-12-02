@@ -430,12 +430,13 @@ const UserProfileScreen = props => {
 
     
 
-    const navToPostDetail = (needId) => {
+    const navToPostDetail = (needId, postType) => {
         props.navigation.navigate({
             routeName: 'PostDetail',
             params: {
                 needId: needId,
-                from: 'UserProfile'
+                from: 'UserProfile',
+                postType: postType
             }
         })
     }

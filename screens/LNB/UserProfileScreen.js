@@ -149,10 +149,11 @@ const UserProfileScreen = (props) => {
     };
   }, [loadNeeds]);
 
-  const navToPostDetail = (needId) => {
+  const navToPostDetail = (needId, postType) => {
     props.navigation.push("PostDetail", {
       needId: needId,
       from: "UserProfile",
+      postType: postType,
     });
   };
 
