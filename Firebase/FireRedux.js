@@ -23,6 +23,49 @@ class FirePostData {
         loadedNeeds.push({
           id: doc.id,
           timestamp: doc.data().timestamp,
+          postType: doc.data().postType,
+          uid: doc.data().uid,
+          userName: doc.data().userName,
+          userImage: doc.data().userImage,
+          body: doc.data().body,
+          imageUrl: doc.data().imageUrl ? doc.data().imageUrl : null,
+          media: doc.data().media ? doc.data().media : null,
+          likeCount: doc.data().likeCount,
+          //   commentCount: doc.data().commentCount,
+          commentCount: fetchCommentCount,
+          isPinned: doc.data().isPinned,
+          taggedUsers: doc.data().taggedUsers,
+        });
+      });
+
+      return loadedNeeds;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchEventPosts = async () => {
+    try {
+      let loadedNeeds = [];
+      const needsData = await db
+        .collection("needs")
+        .where("postType", "==", "event")
+        .orderBy("timestamp", "desc")
+        .get();
+      const comments = await db.collection("comments").get();
+      let postComments = [];
+      comments.forEach((doc) => {
+        postComments.push(doc.data().postId);
+      });
+      needsData.forEach(async (doc) => {
+        const fetchCommentCount = postComments.filter(
+          (postId) => postId === doc.id
+        ).length;
+        db.doc(`/needs/${doc.id}`).update({ commentCount: fetchCommentCount });
+        loadedNeeds.push({
+          id: doc.id,
+          timestamp: doc.data().timestamp,
+          postType: doc.data().postType,
           uid: doc.data().uid,
           userName: doc.data().userName,
           userImage: doc.data().userImage,
@@ -93,6 +136,7 @@ class FirePostData {
   createNeedMedia = (
     timestamp,
     postId,
+    postType,
     uid,
     userImage,
     userName,
@@ -108,6 +152,7 @@ class FirePostData {
         uid: uid,
         userImage: userImage,
         timestamp: timestamp,
+        postType: postType,
         media: media.type && {
           type: media.type === "video" ? "video" : "image",
           duration: media.type === "video" ? media.duration : null,
@@ -129,6 +174,7 @@ class FirePostData {
   createNeed = (
     timestamp,
     postId,
+    postType,
     uid,
     userImage,
     userName,
@@ -142,6 +188,7 @@ class FirePostData {
         uid,
         userImage,
         timestamp: timestamp,
+        postType: postType,
         commentCount: 0,
         likeCount: 0,
         taggedUsers: taggedUsers,
