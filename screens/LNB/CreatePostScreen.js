@@ -31,9 +31,12 @@ import { ListItem } from "react-native-elements";
 import {
   Ionicons,
   FontAwesome,
+  FontAwesome5,
   SimpleLineIcons,
   AntDesign,
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import CustomModal from "react-native-modal";
 // REDUX
 import { useSelector, useDispatch } from "react-redux";
 import Colors from "../../constants/Colors";
@@ -99,6 +102,10 @@ const CreatePostScreen = (props) => {
   const [cameraFlashMode, setCameraFlashMode] = useState(
     Camera.Constants.FlashMode.off
   );
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [postType, setPostType] = useState("need");
+  const [placeholder, setPlaceholder] = useState("What do you need?");
 
   const [isMentioning, setIsMentioning] = useState(false);
   const [search, setSearch] = useState("");
@@ -302,10 +309,12 @@ const CreatePostScreen = (props) => {
     try {
       if (media) {
         await dispatch(
-          createNeed(userName, body.trimEnd(), media, taggedUsers)
+          createNeed(userName, body.trimEnd(), media, postType, taggedUsers)
         );
       } else {
-        await dispatch(createNeed(userName, body.trimEnd(), "", taggedUsers));
+        await dispatch(
+          createNeed(userName, body.trimEnd(), "", postType, taggedUsers)
+        );
       }
       setBody("");
       setMedia(null);
@@ -440,14 +449,48 @@ const CreatePostScreen = (props) => {
 
   return (
     <View style={{ ...styles.screen, backgroundColor: background }}>
+      {/* HEADER */}
       <SafeAreaView>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => props.navigation.goBack()}>
             <Ionicons name="md-close" size={24} color={Colors.primary} />
           </TouchableOpacity>
-          <Text style={{ color: text, fontFamily: "open-sans-bold" }}>
-            Share a Need
-          </Text>
+          <TouchableCmp
+            onPress={() => setIsModalVisible(!isModalVisible)}
+            style={{ flexDirection: "row", alignItems: "center" }}
+          >
+            {postType === "need" && (
+              <Text style={{ color: text, fontFamily: "open-sans-bold" }}>
+                Need
+              </Text>
+            )}
+            {postType === "post" && (
+              <Text style={{ color: text, fontFamily: "open-sans-bold" }}>
+                Post
+              </Text>
+            )}
+            {postType === "opportunity" && (
+              <Text style={{ color: text, fontFamily: "open-sans-bold" }}>
+                Opportunity
+              </Text>
+            )}
+            {postType === "idea" && (
+              <Text style={{ color: text, fontFamily: "open-sans-bold" }}>
+                Idea
+              </Text>
+            )}
+            {postType === "event" && (
+              <Text style={{ color: text, fontFamily: "open-sans-bold" }}>
+                Event
+              </Text>
+            )}
+            <FontAwesome5
+              name="chevron-down"
+              size={12}
+              color={"black"}
+              style={{ marginLeft: 5 }}
+            />
+          </TouchableCmp>
           <TouchableOpacity
             onPress={() => handlePost(userName, body, media)}
             disabled={!body.trim().length && !media}
@@ -467,6 +510,199 @@ const CreatePostScreen = (props) => {
         </View>
       </SafeAreaView>
 
+      {/* POST TYPE MODAL */}
+      <CustomModal
+        isVisible={isModalVisible}
+        swipeDirection="down"
+        onSwipeCancel={() => setIsModalVisible(!isModalVisible)}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        style={{ marginBottom: 0 }}
+        isVisible={isModalVisible}
+      >
+        <View style={styles.modalView}>
+          <View
+            style={{
+              ...styles.modal,
+              backgroundColor:
+                scheme === "dark" ? "rgba(20,20,20,0.92" : "white",
+            }}
+          >
+            <View
+              style={{
+                alignSelf: "center",
+                marginTop: 7,
+                marginBottom: 10,
+                width: "10%",
+                borderRadius: 50,
+                height: 5,
+                backgroundColor:
+                  scheme === "dark" ? Colors.darkSearch : Colors.lightSearch,
+              }}
+            />
+
+            <TouchableCmp
+              style={styles.modalButton}
+              onPress={() => {
+                setIsModalVisible(!isModalVisible);
+                setPostType("need");
+                setPlaceholder("What do you need?");
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 5,
+                }}
+              >
+                <FontAwesome
+                  name="hand-paper-o"
+                  color={Colors.primary}
+                  size={28}
+                  style={{ marginRight: 26 }}
+                />
+                <Text
+                  style={{
+                    ...styles.modalButtonText,
+                    color: Colors.primary,
+                  }}
+                >
+                  Share a Need
+                </Text>
+              </View>
+            </TouchableCmp>
+
+            <TouchableCmp
+              style={styles.modalButton}
+              onPress={() => {
+                setIsModalVisible(!isModalVisible);
+                setPostType("post");
+                setPlaceholder("What's on your mind?");
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 5,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="pencil-plus"
+                  color={Colors.blue}
+                  size={28}
+                  style={{ marginRight: 26 }}
+                />
+                <Text
+                  style={{
+                    ...styles.modalButtonText,
+                    color: Colors.blue,
+                  }}
+                >
+                  Share what's on your mind
+                </Text>
+              </View>
+            </TouchableCmp>
+
+            <TouchableCmp
+              style={styles.modalButton}
+              onPress={() => {
+                setIsModalVisible(!isModalVisible);
+                setPostType("opportunity");
+                setPlaceholder("What's the opportunity?");
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 5,
+                }}
+              >
+                <FontAwesome5
+                  name="hands"
+                  color={Colors.opportunityGreen}
+                  size={28}
+                  style={{ marginRight: 26 }}
+                />
+                <Text
+                  style={{
+                    ...styles.modalButtonText,
+                    color: Colors.opportunityGreen,
+                  }}
+                >
+                  Share an Opportunity
+                </Text>
+              </View>
+            </TouchableCmp>
+            <TouchableCmp
+              style={styles.modalButton}
+              onPress={() => {
+                setIsModalVisible(!isModalVisible);
+                setPostType("idea");
+                setPlaceholder("What's your idea?");
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 5,
+                }}
+              >
+                <FontAwesome5
+                  name="lightbulb"
+                  color={Colors.orange}
+                  size={28}
+                  style={{ marginRight: 26 }}
+                />
+                <Text
+                  style={{
+                    ...styles.modalButtonText,
+                    color: Colors.orange,
+                  }}
+                >
+                  Share an Idea
+                </Text>
+              </View>
+            </TouchableCmp>
+            <TouchableCmp
+              style={styles.modalButton}
+              onPress={() => {
+                setIsModalVisible(!isModalVisible);
+                setPostType("event");
+                setPlaceholder("Share the event details.");
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 5,
+                }}
+              >
+                <FontAwesome
+                  name="calendar-plus-o"
+                  color={Colors.eventRed}
+                  size={28}
+                  style={{ marginRight: 26 }}
+                />
+                <Text
+                  style={{
+                    ...styles.modalButtonText,
+                    color: Colors.eventRed,
+                  }}
+                >
+                  Share an Event
+                </Text>
+              </View>
+            </TouchableCmp>
+          </View>
+        </View>
+      </CustomModal>
+
+      {/* POST AREA */}
       <ScrollView contentContainerStyle={{}} keyboardShouldPersistTaps="always">
         <View style={styles.inputContainer}>
           <Image source={{ uri: userImage }} style={styles.avatar} />
@@ -476,7 +712,7 @@ const CreatePostScreen = (props) => {
             multiline={true}
             numberOfLines={4}
             style={{ flex: 1, color: text, fontSize: 18 }}
-            placeholder={"What do you need?"}
+            placeholder={placeholder}
             placeholderTextColor={Colors.placeholder}
             onChangeText={(text) => {
               // const index = text.lastIndexOf('@')
@@ -597,6 +833,7 @@ const CreatePostScreen = (props) => {
                 />
             </View>} */}
 
+      {/* POST OPTIONS */}
       <KeyboardAvoidingView behavior="padding">
         {mediaAssets && mediaScroll && (
           <FlatList
@@ -821,6 +1058,45 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingBottom: 25,
+  },
+
+  modalView: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 22,
+    marginBottom: 0,
+    // backgroundColor: 'rgba(0,0,0,0.8)'
+  },
+
+  modal: {
+    width: Dimensions.get("screen").width,
+    borderRadius: 20,
+    paddingBottom: 50,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalButton: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginBottom: 5,
+  },
+  modalButtonText: {
+    // fontWeight: "bold",
+    fontSize: 18,
+    // textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
   },
 });
 
