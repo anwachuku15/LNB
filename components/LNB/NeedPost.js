@@ -240,7 +240,7 @@ const NeedPost = (props) => {
       }}
       key={item.id}
     >
-      <TouchableCmp onPress={() => navToPostDetail(item.id)}>
+      <TouchableCmp onPress={() => navToPostDetail(item.id, item.postType)}>
         <View style={{ flexDirection: "row" }}>
           <TouchableCmp
             onPress={() => selectUserHandler(item.uid, item.userName)}
@@ -558,6 +558,7 @@ const NeedPost = (props) => {
                                   params: {
                                     needId: selectedNeed.needId,
                                     from: "HomeScreen",
+                                    postType: selectedNeed.postType,
                                   },
                                 });
                                 setIsModalVisible(!isModalVisible);
@@ -669,6 +670,70 @@ const NeedPost = (props) => {
               </CustomModal>
             </View>
 
+            {item.postType && (
+              <View style={{ marginBottom: 5 }}>
+                {item.postType === "need" && (
+                  <Text
+                    style={{
+                      color: Colors.primary,
+                      ...styles.postTypeText,
+                    }}
+                  >
+                    NEED
+                  </Text>
+                )}
+                {item.postType === "post" && (
+                  <Text
+                    style={{
+                      color: Colors.blue,
+                      ...styles.postTypeText,
+                    }}
+                  >
+                    POST
+                  </Text>
+                )}
+                {item.postType === "opportunity" && (
+                  <Text
+                    style={{
+                      color: Colors.opportunityGreen,
+                      ...styles.postTypeText,
+                    }}
+                  >
+                    OPPORTUNITY
+                  </Text>
+                )}
+                {item.postType === "idea" && (
+                  <Text
+                    style={{
+                      color: Colors.orange,
+                      ...styles.postTypeText,
+                    }}
+                  >
+                    IDEA
+                  </Text>
+                )}
+                {item.postType === "event" && (
+                  <Text
+                    style={{
+                      color: Colors.eventRed,
+                      ...styles.postTypeText,
+                    }}
+                  >
+                    EVENT
+                  </Text>
+                )}
+              </View>
+            )}
+            {/* <View style={{ marginBottom: 5 }}>
+              <Text
+                style={{
+                  color: Colors.primary,
+                  ...styles.postTypeText,
+                }}
+              >
+                NEED
+              </Text>
+            </View> */}
             <Hyperlink linkDefault={true} linkStyle={{ color: Colors.bluesea }}>
               {item.userName === "Andrew Nwachuku1" ? (
                 <TaggedUserText item={item}>{item.body}</TaggedUserText>
@@ -874,6 +939,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#C4C6CE",
     marginTop: 4,
+  },
+  postTypeText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   post: {
     marginTop: 5,
