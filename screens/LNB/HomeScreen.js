@@ -369,10 +369,11 @@ const HomeScreen = (props) => {
   };
 
   // NAVIGATION METHODS
-  const navToPostDetail = (needId) => {
+  const navToPostDetail = (needId, postType) => {
     props.navigation.push("PostDetail", {
       needId: needId,
       from: "HomeScreen",
+      postType: postType,
     });
   };
 
