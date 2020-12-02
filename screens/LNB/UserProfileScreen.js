@@ -530,10 +530,11 @@ const UserProfileScreen = (props) => {
                 {/* #C3C5CD */}
                 <View
                   style={
-                    !pinned && {
-                      borderBottomColor: Colors.placeholder,
-                      borderBottomWidth: StyleSheet.hairlineWidth,
-                      paddingVertical: 5,
+                    !pinned &&
+                    {
+                      // borderBottomColor: Colors.placeholder,
+                      // borderBottomWidth: StyleSheet.hairlineWidth,
+                      // paddingVertical: 5,
                     }
                   }
                 >
@@ -870,19 +871,22 @@ const UserProfileScreen = (props) => {
                       ></View>
                       <View
                         style={{
-                          borderBottomWidth: pinned
-                            ? 15
-                            : StyleSheet.hairlineWidth,
-                          borderBottomColor: pinned
-                            ? pinnedMargin
-                            : Colors.placeholder,
+                          marginBottom: 15,
+                          // borderBottomWidth: pinned
+                          //   ? 15
+                          //   : StyleSheet.hairlineWidth,
+                          // borderBottomColor: pinned
+                          //   ? pinnedMargin
+                          //   : Colors.placeholder,
                         }}
                       ></View>
                       <View
-                        style={{
-                          borderWidth: StyleSheet.hairlineWidth,
-                          borderColor: Colors.placeholder,
-                        }}
+                        style={
+                          {
+                            // borderWidth: StyleSheet.hairlineWidth,
+                            // borderColor: Colors.placeholder,
+                          }
+                        }
                       ></View>
                     </View>
                   )}
