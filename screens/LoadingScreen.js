@@ -55,12 +55,30 @@ const LoadingScreen = (props) => {
             const expDate = new Date(jwtDecode(token).exp * 1000);
             saveDataToStorage(token, userId, expDate);
           }
-          setTimeout(() => {
-            db.doc(`/users/${user.uid}`)
-              .get()
-              .then((userDoc) => {
-                if (userDoc.exists) {
-                  const {
+          // setTimeout(() => {
+          db.doc(`/users/${user.uid}`)
+            .get()
+            .then((userDoc) => {
+              if (userDoc.exists) {
+                const {
+                  isNewUser,
+                  userId,
+                  email,
+                  displayName,
+                  headline,
+                  imageUrl,
+                  location,
+                  bio,
+                  website,
+                  connections,
+                  pendingConnections,
+                  outgoingRequests,
+                  messages,
+                  isAdmin,
+                  lastReadAnnouncements,
+                } = userDoc.data();
+                dispatch(
+                  getAuthenticatedUser(
                     isNewUser,
                     userId,
                     email,
@@ -75,44 +93,26 @@ const LoadingScreen = (props) => {
                     outgoingRequests,
                     messages,
                     isAdmin,
-                    lastReadAnnouncements,
-                  } = userDoc.data();
-                  dispatch(
-                    getAuthenticatedUser(
-                      isNewUser,
-                      userId,
-                      email,
-                      displayName,
-                      headline,
-                      imageUrl,
-                      location,
-                      bio,
-                      website,
-                      connections,
-                      pendingConnections,
-                      outgoingRequests,
-                      messages,
-                      isAdmin,
-                      lastReadAnnouncements
-                    )
-                  );
-                  if (isNewUser) {
-                    props.navigation.navigate({
-                      routeName: "ChooseProfilePicture",
-                      params: {
-                        authPic: imageUrl,
-                      },
-                    });
-                  } else {
-                    // TODO: CONSIDER FETCHING NECESSARY DATA HERE BEFORE NAVIGATING TO THE APP
-                    props.navigation.navigate("App");
-                  }
+                    lastReadAnnouncements
+                  )
+                );
+                if (isNewUser) {
+                  props.navigation.navigate({
+                    routeName: "ChooseProfilePicture",
+                    params: {
+                      authPic: imageUrl,
+                    },
+                  });
                 } else {
-                  console.log("userDoc DOES NOT EXIST YET");
-                  props.navigation.navigate("Intro");
+                  // TODO: CONSIDER FETCHING NECESSARY DATA HERE BEFORE NAVIGATING TO THE APP
+                  props.navigation.navigate("App");
                 }
-              });
-          }, 1000);
+              } else {
+                console.log("userDoc DOES NOT EXIST YET");
+                props.navigation.navigate("Intro");
+              }
+            });
+          // }, 1000);
 
           /* 
                         THIS CHECKS IF USER IS IN APP DATABASE. 
