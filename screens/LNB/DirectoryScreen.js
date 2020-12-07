@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   connectText: {
     alignSelf: "center",
     color: "white",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "bold",
   },
   connectedButton: {
