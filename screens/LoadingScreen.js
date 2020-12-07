@@ -108,7 +108,6 @@ const LoadingScreen = (props) => {
                   props.navigation.navigate("App");
                 }
               } else {
-                console.log("userDoc DOES NOT EXIST YET");
                 props.navigation.navigate("Intro");
               }
             });
