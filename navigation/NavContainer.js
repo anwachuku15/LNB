@@ -31,11 +31,11 @@ const NavContainer = (props) => {
   useEffect(() => {
     setMounted(true);
     if (isAuth === null) {
-      navRef.current.dispatch(
-        NavigationActions.navigate({
-          routeName: "AuthNav",
-        })
-      );
+      // navRef.current.dispatch(
+      //   NavigationActions.navigate({
+      //     routeName: "AuthNav",
+      //   })
+      // );
     }
     return () => {
       setMounted(false);
