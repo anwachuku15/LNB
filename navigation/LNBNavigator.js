@@ -114,6 +114,7 @@ import EnterLocationScreen from "../screens/user/EnterLocationScreen";
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
+
 export const defaultNavOptions = {
   headerTitleStyle: {
     fontFamily: "open-sans-bold",
@@ -457,6 +458,7 @@ const forFade = ({ current, next }) => {
     backgroundStyle: { opacity },
   };
 };
+
 const HomeStack = createStackNavigator(
   {
     MainStack: {
