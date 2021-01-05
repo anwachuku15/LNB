@@ -55,12 +55,14 @@ let themeColor, pinnedMargin;
 const NeedPost = (props) => {
   const scheme = useColorScheme();
   if (scheme === "dark") {
-    themeColor = "black";
+    // themeColor = "black";
+    themeColor = Colors.olive;
     text = "white";
     pinnedMargin = Colors.darkHeader;
   }
   if (scheme === "light") {
     themeColor = "white";
+    // themeColor = Colors.soap;
     text = "black";
     pinnedMargin = Colors.lightHeader;
   }
