@@ -50,7 +50,7 @@
     "firebase-functions": "^3.6.1",
     "formik": "^2.1.5",
     "install": "^0.13.0",
-    "jsrsasign": "^8.0.15",
+    "jsrsasign": "^10.5.25",
     "jwt-decode": "^2.2.0",
     "lottie-react-native": "~2.6.1",
     "moment": "^2.24.0",
